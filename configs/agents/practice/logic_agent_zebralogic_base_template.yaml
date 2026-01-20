@@ -1,0 +1,36 @@
+# @package _global_
+# Base template for ZebraLogic reasoning - without experience library
+# This is a clean baseline template that can be used for training
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 600
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic_base
+  instructions: |
+    Solve the following logic puzzle step by step using pure reasoning.
+    
+    Think through the problem carefully:
+    1. Identify all the clues and constraints
+    2. Set up the logical relationships
+    3. Use deductive reasoning to eliminate impossibilities
+    4. Work systematically through the possibilities
+    5. Verify your solution against all constraints
+    
+    The last part of your final response should be in the following format:
+    <answer>
+    \boxed{'The final answer goes here.'}
+    </answer>
+toolkits: {}
+

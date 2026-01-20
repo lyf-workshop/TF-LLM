@@ -1,0 +1,135 @@
+# KORGym Game Evaluation Configuration Template
+# ============================================
+# 
+# 用途：为任何KORGym游戏创建评估配置
+# 
+# 使用方法：
+# 1. 复制此文件并重命名（例如：my_game_eval.yaml）
+# 2. 修改下面带 [MODIFY] 标记的部分
+# 3. 根据游戏类型选择合适的参数
+# 4. 运行评估：uv run python scripts/run_eval.py --config_name korgym/my_game_eval
+
+# @package _global_
+defaults:
+  - /agents/practice/YOUR_AGENT_NAME@agent  # [MODIFY] 修改为你的Agent配置名
+  - _self_
+
+# [MODIFY] 实验ID（唯一标识符）
+exp_id: "your_game_baseline_eval"
+
+# Evaluation dataset configuration
+data:
+  dataset: "KORGym-YourGame-Eval-50"  # [MODIFY] 数据集名称（需与prepare_korgym_data.py生成的一致）
+  type: "single"  # 固定为 "single"
+
+# Evaluation settings
+concurrency: 32  # 并发数（单轮游戏用32，多轮游戏建议用4-8避免速率限制）
+pass_k: 1  # Pass@K评估指标（通常为1）
+
+# Verification function settings
+verify_filename: "korgym.py"  # 验证函数文件名（通常固定）
+verify_func_name: "verify_func"  # 验证函数名（通常固定）
+
+# KORGym specific settings
+korgym:
+  enabled: true  # 必须为true
+  
+  # [MODIFY] 游戏设置
+  game_name: "X-your_game"  # 游戏ID（例如："8-word_puzzle", "33-wordle"）
+  game_host: "localhost"  # 游戏服务器地址（通常固定）
+  game_port: 8775  # [MODIFY] 游戏服务器端口（每个游戏不同）
+  
+  # [MODIFY] 游戏参数
+  level: 3  # 游戏难度/参数（1-5，或其他游戏特定含义）
+            # - Word Puzzle: 难度等级（1-5）
+            # - Wordle: 单词长度（4-12）
+            # - 其他游戏: 查看game_lib.py中的定义
+  
+  max_rounds: 1  # [MODIFY] 最大回合数
+                 # - 单轮游戏（Word Puzzle, Alphabetical Sorting）: 1
+                 # - 多轮游戏（Wordle, 2048, Minesweeper）: 查看game_lib.py中的attempts
+                 # 例如：Wordle的attempts=10，所以max_rounds=10
+  
+  timeout_per_game: 600  # 每个游戏的超时时间（秒）
+                         # - 简单游戏: 300秒
+                         # - 复杂游戏: 600-1200秒
+                         # - 多轮游戏: 600-1200秒
+
+# ============================================
+# 常见游戏配置参考
+# ============================================
+
+# 单轮游戏示例：Word Puzzle (8-word_puzzle)
+# game_name: "8-word_puzzle"
+# game_port: 8775
+# level: 3  # 难度1-5
+# max_rounds: 1
+# timeout_per_game: 600
+
+# 单轮游戏示例：Alphabetical Sorting (22-alphabetical_sorting)
+# game_name: "22-alphabetical_sorting"
+# game_port: 8776
+# level: 3  # 难度1-5
+# max_rounds: 1
+# timeout_per_game: 300
+
+# 多轮游戏示例：Wordle (33-wordle)
+# game_name: "33-wordle"
+# game_port: 8777
+# level: 5  # 单词长度（4-12）
+# max_rounds: 10  # ✅ 必须与game_lib.py中的attempts一致
+# timeout_per_game: 600
+
+# 多轮游戏示例：2048 (3-2048)
+# game_name: "3-2048"
+# game_port: 8778
+# level: 4  # 网格大小
+# max_rounds: 100  # 最大移动次数
+# timeout_per_game: 1200
+
+# ============================================
+# 配置说明
+# ============================================
+
+# 1. 数据集命名规则：
+#    - 格式：KORGym-{GameName}-Eval-{Count}
+#    - GameName：游戏名的驼峰命名（由prepare_korgym_data.py自动生成）
+#    - 例如："8-word_puzzle" → "WordPuzzle" → "KORGym-WordPuzzle-Eval-50"
+
+# 2. Agent配置：
+#    - 需要先在 configs/agents/practice/ 下创建Agent配置
+#    - 例如：word_puzzle_agent.yaml, wordle_agent.yaml
+
+# 3. 游戏端口：
+#    - 每个游戏使用不同端口避免冲突
+#    - 常见端口：8775, 8776, 8777, 8778...
+
+# 4. Level参数：
+#    - 不同游戏有不同含义，查看game_lib.py中的generate()函数
+#    - 通常是难度等级（1-5）或游戏特定参数
+
+# 5. Max_rounds参数：
+#    - 单轮游戏：固定为1
+#    - 多轮游戏：必须与game_lib.py中的attempts/max_attempts一致
+#    - 查看方法：grep "attempts\|max_attempts" KORGym/game_lib/X-game/game_lib.py
+
+# 6. 并发数建议：
+#    - 单轮游戏：32（快速完成）
+#    - 多轮游戏：4-8（避免API速率限制）
+#    - 使用大模型（72B）：4
+#    - 使用小模型（7B）：8-16
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

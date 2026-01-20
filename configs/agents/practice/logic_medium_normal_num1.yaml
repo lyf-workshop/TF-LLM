@@ -1,0 +1,51 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 600
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\
+    \ \n\nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\nThe last part of your final response should be in the following\
+    \ format:\n<answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n\
+    When solving problems, you MUST first carefully read and understand the helpful\
+    \ instructions and experiences:\n[G0]. Clue prioritization: Begin with explicit\
+    \ positional clues (e.g., house numbers) to anchor assignments in logic puzzles,\
+    \ then use a table-based tracking method to systematically assign remaining attributes,\
+    \ reducing ambiguity, preventing omissions, reinforcing traceability, verifying\
+    \ consistency in reasoning, and minimizing iterations/contradictions via real-time\
+    \ interdependency validation.\n[G1]. Tabular structure: Use a table early on to\
+    \ systematically track names, foods, and house numbers when solving logic puzzles\
+    \ with multiple attributes, enhancing clarity, traceability, and reducing cognitive\
+    \ load during multi-step deductions and constraint satisfaction.\n[G2]. Clue Reference:\
+    \ Explicitly reference and apply each relevant clue during deduction to maintain\
+    \ traceability and accuracy.\n[G3]. Clue Prioritization: When solving logic puzzles\
+    \ with multiple constraints, prioritize explicit positional clues first (e.g.,\
+    \ house numbers) and use a tabular format to track interrelations, reducing iterations,\
+    \ contradictions, and reinforcing structured deduction.\n[G4]. Relational Clues:\
+    \ Restate relational clues in numerical terms (e.g., 'Eric's house number > bird\
+    \ keeper's house number') and explicitly verify their implications against all\
+    \ clues to avoid misassignments, ensure consistency, and integrate with positional\
+    \ constraints.\n[G5]. Real-time validation: Verify each assignment against all\
+    \ clues in real-time during reasoning to catch contradictions early and reinforce\
+    \ systematic validation as a core strategy.\n[G6]. Tabular Initialization: Initialize\
+    \ a structured table at the beginning of puzzles with interdependent constraints\
+    \ to systematically track attributes and validate deductions.\n[G7]. Tabular method:\
+    \ Formally adopt a tabular tracking method from the earliest stages when solving\
+    \ logic puzzles with positional and relational constraints to enforce visibility\
+    \ of all attributes and reduce reliance on mental computation."
+toolkits: {}

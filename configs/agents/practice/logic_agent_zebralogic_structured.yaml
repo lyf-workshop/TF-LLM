@@ -1,0 +1,114 @@
+# @package _global_
+# Logic reasoning agent for ZebraLogic with structured reasoning format
+# Designed to enable error extraction by logic_error_extractor.py
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic_structured
+  instructions: |-
+    Solve the following logic puzzle step by step using pure reasoning.
+    
+    Think through the problem carefully:
+    1. Identify all the clues and constraints
+    2. Set up the logical relationships
+    3. Use deductive reasoning to eliminate impossibilities
+    4. Work systematically through the possibilities
+    5. Verify your solution against all constraints
+    
+    ## IMPORTANT: Structured Reasoning Format
+    
+    To enable error detection and learning, you MUST follow this standardized format:
+    
+    ### Step Numbering
+    - Use clear step numbering: "1.", "2.", "3." (required)
+    - Each step should be on a new line
+    - Example:
+      1. From clue 1, Peter is in house 1.
+      2. From clue 2, Alice is in house 2.
+    
+    ### Clue Reference (CRITICAL)
+    - ALWAYS explicitly reference clues when using them
+    - Use formats: "From clue 1", "According to clue 2", "Based on clue 3"
+    - Do not make deductions without citing the source clue
+    - Example:
+      1. From clue 1, Peter is in house 1.
+      2. From clue 3, the person in house 1 has a bird.
+      3. Therefore, Peter has a bird (combining clues 1 and 3).
+    
+    ### Assertion Format (CRITICAL)
+    - Use explicit, consistent formats for assignments:
+      - "X is in house Y" (for person assignments)
+      - "House X has Y" (for house attributes)
+      - "X has Y" (for entity attributes)
+    - Be consistent with entity and attribute names
+    - Example:
+      1. Peter is in house 1.
+      2. House 1 has color red.
+      3. Peter has pet bird.
+    
+    ### Logical Connections
+    - Use explicit logical connectors: "Therefore", "Thus", "Hence", "So"
+    - Show the logical flow between steps
+    - Example:
+      1. From clue 1, Peter is in house 1.
+      2. From clue 2, Alice is in house 2.
+      3. Therefore, Peter and Alice are in different houses.
+    
+    ### Elimination and Constraints
+    - When eliminating possibilities, state it explicitly:
+      - "We can eliminate X because..."
+      - "X cannot be Y because..."
+    - Track uniqueness constraints
+    - Example:
+      1. From clue 4, the person in house 1 has color red.
+      2. Therefore, Peter has color red.
+      3. We can eliminate red for other houses (uniqueness constraint).
+    
+    ### Verification Step (REQUIRED)
+    - ALWAYS include a verification step before the final answer
+    - Check each clue/constraint explicitly
+    - Example:
+      Verification:
+      - Clue 1: Peter is in house 1. ✓
+      - Clue 2: Alice is in house 2. ✓
+      - All constraints satisfied.
+    
+    ## Answer Format
+    
+    The last part of your final response should be in the following format:
+    <answer>
+    \\boxed{{'The final answer goes here.'}}
+    </answer>
+    
+    ## Format Summary
+    
+    Your response should look like:
+    
+    1. From clue X, [make assertion in standard format].
+    2. From clue Y, [make assertion in standard format].
+    3. Therefore, [logical conclusion].
+    ...
+    
+    Verification:
+    - Clue 1: [check] ✓
+    - Clue 2: [check] ✓
+    ...
+    
+    <answer>
+    \\boxed{{'answer here'}}
+    </answer>
+toolkits: {}
+

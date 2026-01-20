@@ -1,0 +1,19 @@
+# @package _global_
+# Evaluation configuration for paper experiment - AIME 2024
+# Uses pure text reasoning agent (no tools)
+# Temperature 0.3 as per paper
+defaults:
+  - /agents/practice/math_agent_paper_exp@agent
+  - _self_
+
+exp_id: "math_paper_exp_AIME24_eval"
+
+data:
+  dataset: "AIME24"
+
+concurrency: 128
+pass_k: 32
+
+verify_filename: "math.py"
+verify_func_name: "verify_func"
+

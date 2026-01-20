@@ -1,0 +1,76 @@
+# @package _global_
+# Training-Free GRPO Config for Alphabetical Sorting
+# 使用简洁prompt版本，100局训练
+
+defaults:
+  - _self_
+
+type: training_free_grpo
+
+# Agent 配置
+agent_config: practice/alphabetical_sorting_qwen_simple
+
+# KORGym 游戏配置
+korgym:
+  game_name: "22-alphabetical_sorting"
+  game_port: 8775
+  game_host: "localhost"
+
+# 数据集配置
+data:
+  practice_dataset_name: "KORGym-AlphabeticalSorting-Train-100"
+  eval_dataset_name: "KORGym-AlphabeticalSorting-Eval-120"
+
+# 训练配置
+training:
+  num_epochs: 2  # 2轮
+  samples_per_epoch: 50  # 每轮50局
+  # num_epochs * samples_per_epoch = 100局训练
+
+# 处理器配置
+processer:
+  type: KORGymProcesser
+  force_reprocess: true
+
+# 评估配置
+evaluator:
+  eval_after_each_epoch: true
+  eval_sample_size: 30  # 每轮后快速评估30局
+
+# GRPO 参数
+grpo:
+  batch_size: 8  # 批量处理
+  grpo_n: 4  # 每个sample生成4个回答
+  beta: 0.1
+  filter_threshold: 0.5  # 只保留得分>0.5的经验
+  rollout_concurrency: 2  # 并发度
+
+# 分层经验学习配置
+hierarchical:
+  use_hierarchical_experience: true
+  L0_top_k: 3  # 保留3个最佳完整解
+  L1_min_score: 0.6  # 中等步骤得分阈值
+  L2_min_score: 0.4  # 基础步骤得分阈值
+  max_L0: 5  # L0最多5条
+  max_L1: 8  # L1最多8条
+  max_L2: 10  # L2最多10条
+
+# 输出配置
+output:
+  save_dir: workspace/hierarchical_experiences
+  save_format: json
+  save_agent_config: true
+  agent_output_dir: configs/agents/practice
+  agent_output_name: alphabetical_sorting_simple_100_agent.yaml
+
+# 日志配置
+logging:
+  level: INFO
+  log_rollout_details: true
+
+
+
+
+
+
+

@@ -1,0 +1,115 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic_structured
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\n\
+    \nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\n## IMPORTANT: Structured Reasoning Format\n\nTo enable error\
+    \ detection and learning, you MUST follow this standardized format:\n\n### Step\
+    \ Numbering\n- Use clear step numbering: \"1.\", \"2.\", \"3.\" (required)\n-\
+    \ Each step should be on a new line\n- Example:\n  1. From clue 1, Peter is in\
+    \ house 1.\n  2. From clue 2, Alice is in house 2.\n\n### Clue Reference (CRITICAL)\n\
+    - ALWAYS explicitly reference clues when using them\n- Use formats: \"From clue\
+    \ 1\", \"According to clue 2\", \"Based on clue 3\"\n- Do not make deductions\
+    \ without citing the source clue\n- Example:\n  1. From clue 1, Peter is in house\
+    \ 1.\n  2. From clue 3, the person in house 1 has a bird.\n  3. Therefore, Peter\
+    \ has a bird (combining clues 1 and 3).\n\n### Assertion Format (CRITICAL)\n-\
+    \ Use explicit, consistent formats for assignments:\n  - \"X is in house Y\" (for\
+    \ person assignments)\n  - \"House X has Y\" (for house attributes)\n  - \"X has\
+    \ Y\" (for entity attributes)\n- Be consistent with entity and attribute names\n\
+    - Example:\n  1. Peter is in house 1.\n  2. House 1 has color red.\n  3. Peter\
+    \ has pet bird.\n\n### Logical Connections\n- Use explicit logical connectors:\
+    \ \"Therefore\", \"Thus\", \"Hence\", \"So\"\n- Show the logical flow between\
+    \ steps\n- Example:\n  1. From clue 1, Peter is in house 1.\n  2. From clue 2,\
+    \ Alice is in house 2.\n  3. Therefore, Peter and Alice are in different houses.\n\
+    \n### Elimination and Constraints\n- When eliminating possibilities, state it\
+    \ explicitly:\n  - \"We can eliminate X because...\"\n  - \"X cannot be Y because...\"\
+    \n- Track uniqueness constraints\n- Example:\n  1. From clue 4, the person in\
+    \ house 1 has color red.\n  2. Therefore, Peter has color red.\n  3. We can eliminate\
+    \ red for other houses (uniqueness constraint).\n\n### Verification Step (REQUIRED)\n\
+    - ALWAYS include a verification step before the final answer\n- Check each clue/constraint\
+    \ explicitly\n- Example:\n  Verification:\n  - Clue 1: Peter is in house 1. ✓\n\
+    \  - Clue 2: Alice is in house 2. ✓\n  - All constraints satisfied.\n\n## Answer\
+    \ Format\n\nThe last part of your final response should be in the following format:\n\
+    <answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n## Format Summary\n\
+    \nYour response should look like:\n\n1. From clue X, [make assertion in standard\
+    \ format].\n2. From clue Y, [make assertion in standard format].\n3. Therefore,\
+    \ [logical conclusion].\n...\n\nVerification:\n- Clue 1: [check] ✓\n- Clue 2:\
+    \ [check] ✓\n...\n\n<answer>\n\\\\boxed{{'answer here'}}\n</answer>\n\nWhen solving\
+    \ problems, you MUST first carefully read and understand the helpful instructions\
+    \ and experiences:\n[G0]. Constraint mapping: When solving logic puzzles, prioritize\
+    \ mapping interdependent clues early to eliminate invalid configurations.\n[G1].\
+    \ Uniqueness Validation: When managing uniqueness constraints (e.g., names/hobbies),\
+    \ perform incremental validation after every assignment by explicitly referencing\
+    \ all applicable clues (e.g., clue 6 for Eric’s painting hobby) to avoid conflicts.\n\
+    [G2]. Contradiction Check: Explicitly re-check all clues and constraints through\
+    \ structured re-evaluation when contradictions arise to identify root causes and\
+    \ refine reasoning.\n[G3]. Positional Grid Use: For puzzles with positional dependencies\
+    \ (e.g., “directly left of”), immediately deploy a grid/table to track assignments,\
+    \ ensuring real-time constraint satisfaction and preventing contradictions through\
+    \ dynamic mapping.\n[G4]. Clue verification: During solution validation, explicitly\
+    \ cross-reference all original clues with assignments to ensure completeness and\
+    \ avoid reasoning gaps.\n[G5]. Structured Deduction Framework: Maintain a deductive\
+    \ table to track attribute assignments and validate uniqueness across categories\
+    \ systematically.\n[G6]. Early Constraint Satisfaction: Apply interdependent clues\
+    \ (e.g., person-role and location-attribute links) immediately to eliminate invalid\
+    \ possibilities and prevent contradictions.\n[G7]. Assumption Validation: Always\
+    \ test assumptions against all relevant constraints (e.g., clue 9, clue 7) to\
+    \ avoid hidden conflicts in logic puzzles.\n[G8]. Constraint Cross-Verification:\
+    \ Systematically apply and reference all applicable clues at every deduction step\
+    \ to reinforce constraint-based reasoning.\n[G9]. Conflict documentation: Explicitly\
+    \ track how assumptions about positions conflict with other clues to reinforce\
+    \ logical traceability.\n[G10]. Incremental verification: After each major assignment,\
+    \ validate sequentially against all affected clues, including uniqueness and directionality\
+    \ checks, to detect early violations and ensure traceable deductions.\n[G11].\
+    \ Clue Ordering: Prioritize clues with strict sequences or interdependencies first\
+    \ to narrow invalid possibilities.\n[G12]. Clue Application: At the point of direct\
+    \ attribute assignment, cross-reference with all other constraints (e.g., Eric\
+    \ → bird with clue 7) to ensure consistency and prevent contradictions.\n[G13].\
+    \ Constraint validation: Immediately verify all constraints after each assignment\
+    \ to prevent violations of uniqueness or positional rules (e.g., recheck clue\
+    \ 7 when placing Arnold in House 2).\n[G14]. Dependency structuring: Formally\
+    \ document and visualize positional ordering dependencies (e.g., 'Arnold < Peter\
+    \ < Alice') with all clues, preemptively testing scenarios to prevent conflicts.\n\
+    [G15]. Constraint tandem verification: Explicitly confirm all positional and interdependent\
+    \ clues are satisfied simultaneously to prevent later contradictions.\n[G16].\
+    \ Grid Framework: Use a structured grid/table from the start to track attributes,\
+    \ validate uniqueness, and cross-reference constraints systematically, especially\
+    \ for positional relationships like 'directly left.'\n[G17]. Positional Anchoring:\
+    \ Anchor positional clues in the grid before making other assumptions to maintain\
+    \ spatial consistency and prevent backtracking.\n[G18]. Grid Verification: Combine\
+    \ grid/table tracking with incremental constraint checks after assignments to\
+    \ ensure no uniqueness violations or misaligned clues are overlooked.\n[G19].\
+    \ Interdependent Grid: Prioritize mapping interdependent clues to a grid/table\
+    \ immediately to enforce uniqueness and positional accuracy, using examples like\
+    \ linking 'January ↔ Teacher ↔ Cooking ↔ Doctor' (Clues 1, 6, 7) to ensure cohesive\
+    \ dependency resolution.\n[G20]. Interdependent Mapping: Explicitly map and cross-verify\
+    \ interdependent clues early to simplify reasoning and prevent contradictions.\n\
+    [G21]. Positional Anchoring: Prioritize positional clues with anchoring to reduce\
+    \ ambiguity and avoid misinterpretation of constraints.\n[G22]. Grid Priority:\
+    \ Overlapping constraints demand early grid/table creation to enforce uniqueness\
+    \ and cross-verify attributes incrementally.\n[G23]. Interdependent Mapping: Use\
+    \ a structured grid/table from the start to dynamically enforce uniqueness and\
+    \ positional constraints for interdependent clues.\n[G24]. Adjacency Grid: Use\
+    \ grid-based cross-referencing during attribute assignment for positional constraints\
+    \ (e.g., adjacency) to validate sequences like 'Jan → Sept → Arnold → Eric' (Clues\
+    \ 2, 6, 8, 12) dynamically, reducing reliance on trial-and-error.\n[G25]. Interdependent\
+    \ Mapping: Explicitly map positional and attribute clues tied to the same entity\
+    \ in a grid/table early to ensure cross-verification and prevent misinterpretations."
+toolkits: {}

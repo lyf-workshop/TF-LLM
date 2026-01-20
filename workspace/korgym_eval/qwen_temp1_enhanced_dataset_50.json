@@ -1,0 +1,363 @@
+{
+  "num_games": 50,
+  "average_score": 0.060209956709956707,
+  "std_score": 0.06826477331730503,
+  "min_score": 0.0,
+  "max_score": 0.25,
+  "success_rate": 0.5,
+  "detailed_results": [
+    {
+      "seed": 10000,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"SADLY\", \"FRANCIS\", \"GO_TO_BED\", \"MOMERTY\", \"ANDRESLIN\", \"ROUTE\", \"PHWAWH\", \"BEFORE\", \"SHOES\"]",
+      "response": "Answer: [\"CENSUS\", \"SADLY\", \"FRANCIS\", \"GO_TO_BED\", \"MOMERTY\", \"ANDRESLIN\", \"ROUTE\", \"PHWAWH\", \"BEFORE\", \"SHOES\"]"
+    },
+    {
+      "seed": 10001,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"SCREAMS\", \"VIEWERS\", \"SARAHDESERT\", \"FREZZ\", \"BBQ\", \"RAPIDLY\"]",
+      "response": "Answer: [\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"SCREAMS\", \"VIEWERS\", \"SARAHDESERT\", \"FREZZ\", \"BBQ\", \"RAPIDLY\"]"
+    },
+    {
+      "seed": 10002,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FRIZZED\", \"SODAS\", \"DEFENDER\", \"NEVER\", \"REMOMET\", \"BB\", \"DAUGHTER\", \"STAGING\", \"STARS\"]",
+      "response": "Answer: [\"FRIZZED\", \"SODAS\", \"DEFENDER\", \"NEVER\", \"REMOMET\", \"BB\", \"DAUGHTER\", \"STAGING\", \"STARS\"]"
+    },
+    {
+      "seed": 10003,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"SUFFERS\", \"FERN\", \"GO_TO_BED\", \"MORSE\", \"MICHELLE\", \"TUTU\", \"AAAAAH\", \"PAST\", \"SHOES\", \"BRUSH\"]",
+      "response": "Answer: [\"CENSUS\", \"SUFFERS\", \"FERN\", \"GO_TO_BED\", \"MORSE\", \"MICHELLE\", \"TUTU\", \"AAAAAH\", \"PAST\", \"SHOES\", \"BRUSH\"]"
+    },
+    {
+      "seed": 10004,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"ADVERSARY\", \"ROSIE\", \"GO_TO_BED\", \"MENDELEEV\", \"MASSERT\", \"BEWILDER\", \"ALLENDEDGE\", \"BEHIND\", \"SHOES\", \"BRACELET\", \"NELSON\"]",
+      "response": "Answer: [\"CENSUS\", \"ADVERSARY\", \"ROSIE\", \"GO_TO_BED\", \"MENDELEEV\", \"MASSERT\", \"BEWILDER\", \"ALLENDEDGE\", \"BEHIND\", \"SHOES\", \"BRACELET\", \"NELSON\"]"
+    },
+    {
+      "seed": 10005,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"SUITS\", \"FANNY\", \"GO_TO_BED\", \"GALTON\", \"TV_NEWS\", \"DIG\", \"ALARM\"]",
+      "response": "Answer: [\"CENSUS\", \"SUITS\", \"FANNY\", \"GO_TO_BED\", \"GALTON\", \"TV_NEWS\", \"DIG\", \"ALARM\"]"
+    },
+    {
+      "seed": 10006,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"SUFFER\", \"FANNY\", \"GO_TO_BED\", \"GREGOR_MAYER\", \"EXTREMIS\", \"THORN\", \"PHWOW\", \"PRIOR\", \"SHOES\"]",
+      "response": "Answer: [\"CENSUS\", \"SUFFER\", \"FANNY\", \"GO_TO_BED\", \"GREGOR_MAYER\", \"EXTREMIS\", \"THORN\", \"PHWOW\", \"PRIOR\", \"SHOES\"]"
+    },
+    {
+      "seed": 10007,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"Census\", \"Disadvantage\", \"Sophia\", \"Sleep\", \"Mendel\", \"Matterhorn\", \"Thistle\", \"Tired\", \"Formally\", \"Shoes\"]",
+      "response": "Based on the clues provided and the typical structure of a crossword puzzle, let's break down the clues and fill in the grid.\n\n1. **Agency that conducts a decennial count** - This refers to the Census"
+    },
+    {
+      "seed": 10008,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"CENSUS\", \"SUFFERS\", \"SOPHIA\", \"GO_TO_BED\", \"GALTON\"]",
+      "response": "Answer: [\"CENSUS\", \"SUFFERS\", \"SOPHIA\", \"GO_TO_BED\", \"GALTON\"]"
+    },
+    {
+      "seed": 10009,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BUREAU\", \"SUFFERS\", \"ROSENY\", \"GO_TO_BED\", \"DECAY\", \"CORBIN\", \"FLOWER_BOTS\", \"WHOOPIE\", \"THEN\", \"SHOES\", \"COMB\", \"CULLEN\"]",
+      "response": "Based on the provided clues and a typical crossword puzzle structure, here are the words that fit the clues:\n\n1. Agency that conducts a decennial count (BUREAU)\n2. Suffers a disadvantage (SUFFERS)\n3. "
+    },
+    {
+      "seed": 10010,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"SAIYUD\", \"ROSIE\", \"GO_TO_BED\", \"GALTON\", \"FRANCE\", \"ABRACADABRA\", \"ALAS\", \"PRIEST\", \"SHOES\", \"BRUSH\", \"CROOK\"]",
+      "response": "Answer: [\"CENSUS\", \"SAIYUD\", \"ROSIE\", \"GO_TO_BED\", \"GALTON\", \"FRANCE\", \"ABRACADABRA\", \"ALAS\", \"PRIEST\", \"SHOES\", \"BRUSH\", \"CROOK\"]"
+    },
+    {
+      "seed": 10011,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FIDE\", \"ESQ\", \"WWE\", \"TOILET\", \"GPG\"]",
+      "response": "Answer: [\"FIDE\", \"ESQ\", \"WWE\", \"TOILET\", \"GPG\"]"
+    },
+    {
+      "seed": 10012,
+      "score": 0.25,
+      "success": true,
+      "action": "[\"ZENON\", \"URL\", \"RIPS\", \"GADZUK\", \"Pancreas\", \"Betray\", \"NOURISH\", \"REPEAT\"]",
+      "response": "Answer: [\"ZENON\", \"URL\", \"RIPS\", \"GADZUK\", \"Pancreas\", \"Betray\", \"NOURISH\", \"REPEAT\"]"
+    },
+    {
+      "seed": 10013,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LASZLO\", \"REPLIANT\", \"WWE\", \"TOILET\", \"WHOAS\", \"SUBLET\", \"RENEGE\"]",
+      "response": "Answer: [\"LASZLO\", \"REPLIANT\", \"WWE\", \"TOILET\", \"WHOAS\", \"SUBLET\", \"RENEGE\"]"
+    },
+    {
+      "seed": 10014,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"VASILESY\",\"LEGALIZE\",\"WWE\",\"TOILET\",\"GEER\",\"SUBLET\",\"RENEGE\",\"LINEUP\",\"ANCES\",\"MELODMY\",\"PINACLE\",\"COCHRANE\",\"OFTEN\"]",
+      "response": "Answer: [\"VASILESY\",\"LEGALIZE\",\"WWE\",\"TOILET\",\"GEER\",\"SUBLET\",\"RENEGE\",\"LINEUP\",\"ANCES\",\"MELODMY\",\"PINACLE\",\"COCHRANE\",\"OFTEN\"]"
+    },
+    {
+      "seed": 10015,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LASZLO\", \"INTERP\", \"HEATH\", \"TOILET\", \"<fieldset>\", \"SUBLET\", \"RENOUN\", \"EPG\", \"ANANNES\", \"MEANDER\", \"NAIL\"]",
+      "response": "Answer: [\"LASZLO\", \"INTERP\", \"HEATH\", \"TOILET\", \"<fieldset>\", \"SUBLET\", \"RENOUN\", \"EPG\", \"ANANNES\", \"MEANDER\", \"NAIL\"]"
+    },
+    {
+      "seed": 10016,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"continuous\", \"flying\", \"brief\", \"henna\", \"accused\", \"comments\"]",
+      "response": "Answer: [\"continuous\", \"flying\", \"brief\", \"henna\", \"accused\", \"comments\"]"
+    },
+    {
+      "seed": 10017,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"SAHARA\", \"BLACKOUT\", \"GRILL\", \"RAPIDLY\"]",
+      "response": "Answer: [\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"SAHARA\", \"BLACKOUT\", \"GRILL\", \"RAPIDLY\"]"
+    },
+    {
+      "seed": 10018,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"DEPRESSORS\", \"CALMER\", \"BRESILIAN\", \"DREADNOUGHTS\", \"HURRAHS\", \"SHERRY\"]",
+      "response": "Clue 1: Dainty eaters - \"DEPRESSORS\"\nClue 2: More tranquil - \"CALMER\"\nClue 3: Native to Rio de Janeiro - \"BRESILIAN\" (Note: The correct word is \"BRESILIAN\", but the correct spelling is \"BRASILIAN\". Gi"
+    },
+    {
+      "seed": 10019,
+      "score": 0.09090909090909091,
+      "success": true,
+      "action": "[\"GIRRS\", \"CALMER\", \"BRASILEIROS\", \"MYRIAD\", \"ACCLAMATIONS\", \"VINO\", \"SUMMARY\", \"AS\", \"LANGUAGE\", \"ALICE\", \"LITERS\"]",
+      "response": "Answer: [\"GIRRS\", \"CALMER\", \"BRASILEIROS\", \"MYRIAD\", \"ACCLAMATIONS\", \"VID供给不了所需的全部单词，但我将根据给出的线索进行尽可能准确的猜测。根据 clues 和提供的上下文，我的猜测如下：\n\n1. Dainty eaters -> 贵族或精细的食用者，可能指的是“girrs”（错误，应该是“girrs”对应“dainty ea"
+    },
+    {
+      "seed": 10020,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"DESSERTS\", \"CALMER\", \"BRASILEIRO\", \"HOSTILITIES\", \"CHEERS\", \"SAHRAWI\", \"RESUME\", \"AORLD\", \"LANGUAGES\", \"KATE\", \"CASES\", \"HEAT\"]",
+      "response": "Answer: [\"DESSERTS\", \"CALMER\", \"BRASILEIRO\", \"HOSTILITIES\", \"CHEERS\", \"SAHRAWI\", \"RESUME\", \"AORLD\", \"LANGUAGES\", \"KATE\", \"CASES\", \"HEAT\"]"
+    },
+    {
+      "seed": 10021,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"EASY\", \"AIRBUS\", \"SIREN\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"KORDOFAN\"]",
+      "response": "Answer: [\"EASY\", \"AIRBUS\", \"SIREN\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"KORDOFAN\"]"
+    },
+    {
+      "seed": 10022,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"EASY\", \"AIRLINES\", \"Singers\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"SAND\"]",
+      "response": "Answer: [\"EASY\", \"AIRLINES\", \"Singers\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"SAND\"]"
+    },
+    {
+      "seed": 10023,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"LOUD\", \"AUDIENCE\", \"SAND\", \"BLIND\", \"BBQ\", \"RAPID\", \"EMOTICONS\", \"KEITH\", \"COMPANION\", \"BILBERRY\"]",
+      "response": "Answer: [\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"LOUD\", \"AUDIENCE\", \"SAND\", \"BLIND\", \"BBQ\", \"RAPID\", \"EMOTICONS\", \"KEITH\", \"COMPANION\", \"BILBERRY\"]"
+    },
+    {
+      "seed": 10024,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"HID=\", \"COColA\", \"SAyER\", \"NEV+=\", \"REMOV\", \"BBQ+\", \"BORN\", \"MAKEUP\", \"D Bart\", \"OFT=\", \"REF+=\", \"Pouch\"]",
+      "response": "Answer: [\"HID=\", \"COColA\", \"SAyER\", \"NEV+=\", \"REMOV\", \"BBQ+\", \"BORN\", \"MAKEUP\", \"D Bart\", \"OFT=\", \"REF+=\", \"Pouch\"]"
+    },
+    {
+      "seed": 10025,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MULLET\", \"SODAS\", \"DEFEND\", \"NEVER\", \"EXCISE\", \"GRILLS\", \"DE_н\", \"STAGING\", \"ROLE\"]",
+      "response": "Based on the given clues and the structure of a typical crossword puzzle, I'll provide guesses for the words corresponding to each clue. Here is my analysis and answers:\n\n1. Spiky two-tone men's hairs"
+    },
+    {
+      "seed": 10026,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SCAMS\", \"FUREY\", \"TWNHS\", \"BASKET\", \"CORPS\", \"GOOSE\"]",
+      "response": "Answer: [\"SCAMS\", \"FUREY\", \"TWNHS\", \"BASKET\", \"CORPS\", \"GOOSE\"]"
+    },
+    {
+      "seed": 10027,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"MYSTIC\", \"USEFUL\", \"DROPS\", \"GOOSE\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\", \"TABLES\", \"CHESS\", \"ANTLER\", \"FOOTBALL\", \"PEACEFULLY\", \"SILENTLY\"]",
+      "response": "Answer: [\"MYSTIC\", \"USEFUL\", \"DROPS\", \"GOOSE\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\", \"TABLES\", \"CHESS\", \"ANTLER\", \"FOOTBALL\", \"PEACEFULLY\", \"SILENTLY\"]"
+    },
+    {
+      "seed": 10028,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FRIZZLE\", \"SODAS\", \"PROPOUNDS\", \"NEVER\", \"EXTRACT\", \"SKIDDS\", \"DEORY\", \"TRUSS\", \"OSTER\", \"SOMETIMES\", \"REFILLS\", \"POCKET\"]",
+      "response": "Answer: [\"FRIZZLE\", \"SODAS\", \"PROPOUNDS\", \"NEVER\", \"EXTRACT\", \"SKIDDS\", \"DEORY\", \"TRUSS\", \"OSTER\", \"SOMETIMES\", \"REFILLS\", \"POCKET\"]"
+    },
+    {
+      "seed": 10029,
+      "score": 0.09090909090909091,
+      "success": true,
+      "action": "[\"OLI OV\", \"HELPFUL\", \"DROPS\", \"GIANT\", \"Pancreas\", \"TRAITOR\", \"NURSE\", \"RE TESTING\", \"PING PONG\", \"CHESS\", \"HORN\"]",
+      "response": "Answer: [\"OLI OV\", \"HELPFUL\", \"DROPS\", \"GIANT\", \"Pancreas\", \"TRAITOR\", \"NURSE\", \"RE TESTING\", \"PING PONG\", \"CHESS\", \"HORN\"]"
+    },
+    {
+      "seed": 10030,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SAUCY\", \"USEFUL\", \"DRY\", \"GOOSE\", \"LIVER\", \"TRAITOR\", \"FEED\", \"REPEAT\", \"TABLE\", \"CHESS\", \"HORN\", \"TAG\", \"CALM\", \"ANTI\", \"POTLUCK\"]",
+      "response": "Answer: [\"SAUCY\", \"USEFUL\", \"DRY\", \"GOOSE\", \"LIVER\", \"TRAITOR\", \"FEED\", \"REPEAT\", \"TABLE\", \"CHESS\", \"HORN\", \"TAG\", \"CALM\", \"ANTI\", \"POTLUCK\"]"
+    },
+    {
+      "seed": 10031,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"ZEN\", \"URL\", \"DROPS\", \"WHOA\", \"Pancreas\", \"TRAHA\", \"FEED\", \"AGAIN\", \"TABLE\", \"LUDO\", \"HORN\", \"GAMES\", \"PEACEFULLY\", \"ANTI\"]",
+      "response": "Answer: [\"ZEN\", \"URL\", \"DROPS\", \"WHOA\", \"Pancreas\", \"TRAHA\", \"FEED\", \"AGAIN\", \"TABLE\", \"LUDO\", \"HORN\", \"GAMES\", \"PEACEFULLY\", \"ANTI\"]"
+    },
+    {
+      "seed": 10032,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"HEDGEHOG\", \"SODAS\", \"粑粑\", \"NEVER\", \"REMOVAL\", \"BBQ\", \"DEBU\", \"FACE\"]",
+      "response": "Answer: [\"HEDGEHOG\", \"SODAS\", \"粑粑\", \"NEVER\", \"REMOVAL\", \"BBQ\", \"DEBU\", \"FACE\"]"
+    },
+    {
+      "seed": 10033,
+      "score": 0.09090909090909091,
+      "success": true,
+      "action": "[\"OLIVE\", \"URL\", \"DRY\", \"GULF\", \"Pancreas\", \"Betray\", \"FEED\", \"Repeating\", \"Table Tennis\", \"CHESS\", \"Horn\"]",
+      "response": "Answer: [\"OLIVE\", \"URL\", \"DRY\", \"GULF\", \"Pancreas\", \"Betray\", \"FEED\", \"Repeating\", \"Table Tennis\", \"CHESS\", \"Horn\"]"
+    },
+    {
+      "seed": 10034,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"WASH\", \"SPY\", \"EPISODES\", \"WAVES\", \"HI\", \"ROLLING\", \"GAIN\"]",
+      "response": "Answer: [\"WASH\", \"SPY\", \"EPISODES\", \"WAVES\", \"HI\", \"ROLLING\", \"GAIN\"]"
+    },
+    {
+      "seed": 10035,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"HEDGEHOG\", \"POP\", \"BACKER\", \"NEVER\", \"REMOVE\", \"TOASTERS\", \"ROUD\", \"PALEVY\", \"BATOR\", \"ARROWS\", \"REFUNDS\", \"POMMET\"]",
+      "response": "Answer: [\"HEDGEHOG\", \"POP\", \"BACKER\", \"NEVER\", \"REMOVE\", \"TOASTERS\", \"ROUD\", \"PALEVY\", \"BATOR\", \"ARROWS\", \"REFUNDS\", \"POMMET\"]"
+    },
+    {
+      "seed": 10036,
+      "score": 0.09090909090909091,
+      "success": true,
+      "action": "[\"CELEBI\", \".Url\", \"DROUGHT\", \"GSE_VMAC\", \"Pancreas\", \"VELLEL\", \"FEED\", \"REPEAT\", \"Table Tennis\", \"CHESS\", \"Hornea\"]",
+      "response": "Answer: [\"CELEBI\", \".Url\", \"DROUGHT\", \"GSE_VMAC\", \"Pancreas\", \"VELLEL\", \"FEED\", \"REPEAT\", \"Table Tennis\", \"CHESS\", \"Hornea\"]"
+    },
+    {
+      "seed": 10037,
+      "score": 0.13333333333333333,
+      "success": true,
+      "action": "[\"MAPO\", \"COOKIE\", \"DROUGHTS\", \"JANTINE\", \"PANCREAS\", \"BETRAYER\", \"FEED\", \"REDO\", \"TABLE TENNIS\", \"SNAKES\", \"HORN\", \"ULTIMATE\", \"AT PEACE\", \"CHANT\", \"PANDAN\"]",
+      "response": "Clue 1: Salad dressing that sounds mythical =>入り乱れる ( MAPO )\nClue 2: Useful part of a website (6 to 2) => cookie\nClue 3: Dry spells => droughts\nClue 4: Goose vis-à-vis Maverick, in \"Top Gun\" => jantin"
+    },
+    {
+      "seed": 10038,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"MYTH\", \"USEFUL\", \"DRY\", \"GOOSE\", \"Pancreas\", \"MO WHISTLE\", \"FEED\", \"REPEAT\", \"POLO\", \"Ludo\", \"HORN\", \"FRISBEE\", \"PEACEFULLY\", \"NONVIOLENT\", \"HULA\"]",
+      "response": "Answer: [\"MYTH\", \"USEFUL\", \"DRY\", \"GOOSE\", \"Pancreas\", \"MO WHISTLE\", \"FEED\", \"REPEAT\", \"POLO\", \"Ludo\", \"HORN\", \"FRISBEE\", \"PEACEFULLY\", \"NONVIOLENT\", \"HULA\"]"
+    },
+    {
+      "seed": 10039,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"SPIRIT\", \"USEFUL\", \"DRY\", \"GOOSE\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\"]",
+      "response": "Answer: [\"SPIRIT\", \"USEFUL\", \"DRY\", \"GOOSE\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\"]"
+    },
+    {
+      "seed": 10040,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"SANITIZE\", \"SPYs\", \"EPISODEs\", \"WETSENSE\", \"HAYDAY\", \"HOTSPOT\", \"GAINWEIGHT\"]",
+      "response": "Answer: [\"SANITIZE\", \"SPYs\", \"EPISODEs\", \"WETSENSE\", \"HAYDAY\", \"HOTSPOT\", \"GAINWEIGHT\"]"
+    },
+    {
+      "seed": 10041,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"AZTEC\", \"URL\", \"HEMOPS\", \"GEORGE\", \"Pancreas\", \"TRAHD\", \"NOURISH\", \"REPEAT\", \"TABLE TENNIS\", \"CHESS\", \"HORN\", \"FRISBEE\"]",
+      "response": "Answer: [\"AZTEC\", \"URL\", \"HEMOPS\", \"GEORGE\", \"Pancreas\", \"TRAHD\", \"NOURISH\", \"REPEAT\", \"TABLE TENNIS\", \"CHESS\", \"HORN\", \"FRISBEE\"]"
+    },
+    {
+      "seed": 10042,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"AD办公厅\", \"BONANE><?=type, \"C NATIONAL\", \"MJ ALL- предприятия\", \"P LEARY\", \"TAN\", \"EMBLEM\", \"G D_volney\", \"SPLOUTS\", \"WRESTS\", \"SCOUT\", \"SOUR\"]",
+      "response": "Answer: [\"AD办公厅\", \"BONANE><?=$type, \"C NATIONAL\", \"MJ ALL- предприятия\", \"P LEARY\", \"TAN$\", \"EMBLEM\", \"G D_volney\", \"SPLOUTS\", \"WRESTS\", \"SCOUT\", \"SOUR\"]"
+    },
+    {
+      "seed": 10043,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"SANITIZE\", \"SPY\", \"EPISODES\", \"LAKE_LUZIA\", \"HOORAY\", \"HOT\", \"GAIN_WEIGHT\", \"UNIVERSITY\", \"MONTAIN\", \"RAMEN_BURGER\", \"THEIR_OR_THY_STRTYSYTN\", \"FLASHY\", \"TRMS\", \"CAUTION\", \"TURBINE\"]",
+      "response": "Answer: [\"SANITIZE\", \"SPY\", \"EPISODES\", \"LAKE_LUZIA\", \"HOORAY\", \"HOT\", \"GAIN_WEIGHT\", \"UNIVERSITY\", \"MONTAIN\", \"RAMEN_BURGER\", \"THEIR_OR_THY_STRTYSYTN\", \"FLASHY\", \"TRMS\", \"CAUTION\", \"TURBINE\"]"
+    },
+    {
+      "seed": 10044,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"CLEAN\", \"SPY\", \"EPISODES\", \"SYMPHONY\", \"WHO\"]",
+      "response": "Answer: [\"CLEAN\", \"SPY\", \"EPISODES\", \"SYMPHONY\", \"WHO\"]"
+    },
+    {
+      "seed": 10045,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ADVERT\", \"ENRICHES\", \"NATION\", \"PR Chevrolet\", \"PANTS\", \"EMBLEM\", \"STEPH\", \"ASSERT\", \"ERUPTS\", \"FIGHT\", \"LAWN\", \"BRINE\"]",
+      "response": "Answer: [\"ADVERT\", \"ENRICHES\", \"NATION\", \"PR Chevrolet\", \"PANTS\", \"EMBLEM\", \"STEPH\", \"ASSERT\", \"ERUPTS\", \"FIGHT\", \"LAWN\", \"BRINE\"]"
+    },
+    {
+      "seed": 10046,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"STERILIZE\", \"SPY\", \"EPISODES\", \"WET\", \"GO!\", \"ROLLING\", \"FAT\", \"UNIVERSITY\", \"MOUNT\", \"WH\\widgets\"]",
+      "response": "Answer: [\"STERILIZE\", \"SPY\", \"EPISODES\", \"WET\", \"GO!\", \"ROLLING\", \"FAT\", \"UNIVERSITY\", \"MOUNT\", \"WH\\widgets\"]"
+    },
+    {
+      "seed": 10047,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SAYS\", \"BARE\", \"FLAP\", \"TUTT\", \"PURE\", \"SALERNO\", \"DISOBEY\", \"BASKET\"]",
+      "response": "Based on the given clues and the traditional pattern of crossword puzzles, let's fill in the words:\n\n1. Loses it - This could be a synonym for loses, potentially a homophone or something related. A go"
+    },
+    {
+      "seed": 10048,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"路上游戏\", \"报纸\", \"子宫\", \"简略\", \"卢布\", \"赠品\", \"威利斯\", \"打蚊子\", \"发表独白\", \"高中毕业要求\", \"欧文斯\", \"申请表\", \"升级\"]",
+      "response": "Answer: [\"路上游戏\", \"报纸\", \"子宫\", \"简略\", \"卢布\", \"赠品\", \"威利斯\", \"打蚊子\", \"发表独白\", \"高中毕业要求\", \"欧文斯\", \"申请表\", \"升级\"]"
+    },
+    {
+      "seed": 10049,
+      "score": 0.09090909090909091,
+      "success": true,
+      "action": "[\"SHelters\", \"MANDARIN\", \"SLEAZY\", \"DROPPING\", \"DOZEN\", \"TRAPPED\", \"PRIVACY\", \"SYNTH\", \"WARMING\", \"LEFF\", \"MICE\"]",
+      "response": "Answer: [\"SHelters\", \"MANDARIN\", \"SLEAZY\", \"DROPPING\", \"DOZEN\", \"TRAPPED\", \"PRIVACY\", \"SYNTH\", \"WARMING\", \"LEFF\", \"MICE\"]"
+    }
+  ],
+  "experiment_id": "qwen_temp1_enhanced_dataset_50",
+  "agent_config": "practice/word_puzzle_qwen_temp1_hierarchical_agent",
+  "dataset_name": "KORGym-WordPuzzle-Eval-50"
+}

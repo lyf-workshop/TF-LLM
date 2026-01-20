@@ -1,0 +1,325 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Constraint validation: Validate interdependent positional clues immediately during assignment to avoid logical contradictions.",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_1",
+      "content": "Grid initialization: Use a grid/table to track attributes (name, animal, birthday) per house from the beginning for better uniqueness enforcement and cross-checking.",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_2",
+      "content": "Grid cross-referencing: Validate clue relationships proactively during assignment using a grid-based method, not just during final verification.",
+      "original_id": "G2",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_3",
+      "content": "Track alternatives: Explicitly document alternative placements for positional constraints and eliminate them based on prior assignments to avoid reasoning gaps.",
+      "original_id": "G3",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_4",
+      "content": "Positional constraints: Explicitly reference all clues related to relative positions (e.g., 'left of', 'right of') simultaneously to maintain consistency.",
+      "original_id": "G4",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_5",
+      "content": "Interdependency handling: Integrate interdependent clues early in deduction processes to proactively eliminate invalid attribute placements.",
+      "original_id": "G5",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_6",
+      "content": "Structure-First Principle: When solving logic puzzles with interdependent constraints, build a formal grid/table to track all attributes (name, cigar, education, flower, hobby) per house from the start. This ensures systematic enforcement of uniqueness and positional relationships, reduces assumption-based errors, and enables cross-clue verification.",
+      "original_id": "G6",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_7",
+      "content": "Uniqueness tracking: Use centralized tracking to enforce uniqueness constraints explicitly.",
+      "original_id": "G7",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_8",
+      "content": "Assumption logging: Document assumptions immediately and test them against all constraints to prevent reasoning gaps.",
+      "original_id": "G8",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_9",
+      "content": "Constraint validation: Validate interdependent positional clues immediately during assignment to avoid logical contradictions.",
+      "original_id": "G0",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_10",
+      "content": "Grid initialization: Use a grid/table to track attributes per house from the beginning, starting with deterministic clues to enforce constraints during deduction and avoid contradictions.",
+      "original_id": "G1",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_11",
+      "content": "Grid cross-referencing: Proactively validate clue relationships (e.g., verifying clue 12 against Blue Master’s placement) during assignment using a grid-based method. This ensures systematic exclusion of duplicates and prevents reasoning gaps caused by delayed verification.",
+      "original_id": "G2",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_12",
+      "content": "Track alternatives: Explicitly document alternative placements for adjacency-based positional constraints (e.g., 'next to') and eliminate them based on prior assignments to reinforce systematic validation and reduce guesswork.",
+      "original_id": "G3",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_13",
+      "content": "Positional constraints: Explicitly reference all clues related to relative positions (e.g., 'left of', 'right of') simultaneously to maintain consistency.",
+      "original_id": "G4",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_14",
+      "content": "Interdependency handling: When multiple clues define the same entity, explicitly document and cross-check these interdependencies in the grid. This aligns with constraint validation strategies and prevents conflicts during deductions.",
+      "original_id": "G5",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_15",
+      "content": "Structure-First Principle: When solving logic puzzles with interdependent constraints, build a formal grid/table dynamically from the start to track all attributes per house, enforce uniqueness, track interdependencies, and enable real-time L1-level constraint validation.",
+      "original_id": "G6",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_16",
+      "content": "Uniqueness Tracking: Centrally monitor unassigned values for attributes like names, education, and genres to prevent duplicates, while linking to L2 meta-strategies for methodical constraint enforcement.",
+      "original_id": "G7",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_17",
+      "content": "Assumption logging: When inferring positional relationships (e.g., 'Peter left of Arnold' from Clues 6 and 7), document assumptions in the grid and reference the specific clues being applied. This transparency prevents unverified deductions and aligns with L1 pattern-level strategies for constraint tracking.",
+      "original_id": "G8",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_18",
+      "content": "Proactive Validation: Enforce positional constraints like 'cat not in House 1' (clue 10) during assignment to prevent backtracking and contradictions.",
+      "original_id": "G9",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_19",
+      "content": "Constraint-Driven Reasoning: Systematically validate all clues at each deduction step, integrating interdependent clues (e.g., clue 6 and 7) and cross-referencing assignments with all constraints in real time to prevent future errors.",
+      "original_id": "G10",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_20",
+      "content": "Proactive Cross-Referencing: Standardize real-time cross-checking of all constraints (e.g., G2 and G5) during assignments to eliminate invalid configurations early, minimizing backtracking in complex puzzles.",
+      "original_id": "G11",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_21",
+      "content": "Clue 12 validation: Explicitly check positional relationships in clue 12 (e.g., master’s degree placement) during the step where the attribute is applied, not just in final verification, to avoid conflicts with prior constraints.",
+      "original_id": "G12",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_22",
+      "content": "Constraint Validation as a Meta-Strategy: Explicitly map interdependent clues (e.g., spaghetti to city vacations) to the grid during assignment rather than deferring to post-hoc checks. This enhances L1 grid cross-referencing and reduces reasoning gaps in complex puzzles by systematizing real-time validation.",
+      "original_id": "G13",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_23",
+      "content": "Constraint validation: Validate interdependent positional clues immediately during assignment to avoid logical contradictions.",
+      "original_id": "G0",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_24",
+      "content": "Grid initialization: Use a grid/table to track attributes per house from the beginning, starting with deterministic clues to enforce constraints during deduction and avoid contradictions.",
+      "original_id": "G1",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_25",
+      "content": "Grid cross-referencing: Proactively validate clue relationships (e.g., verifying clue 12 against Blue Master’s placement) during assignment using a grid-based method. This ensures systematic exclusion of duplicates and prevents reasoning gaps caused by delayed verification.",
+      "original_id": "G2",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_26",
+      "content": "Track alternatives: Explicitly document alternative placements for adjacency-based positional constraints (e.g., 'next to') and eliminate them based on prior assignments to reinforce systematic validation and reduce guesswork.",
+      "original_id": "G3",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_27",
+      "content": "Positional constraints: Explicitly reference all clues related to relative positions (e.g., 'left of', 'right of') simultaneously to maintain consistency.",
+      "original_id": "G4",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_28",
+      "content": "Interdependency handling: When multiple clues define the same entity, explicitly document and cross-check these interdependencies in the grid. This aligns with constraint validation strategies and prevents conflicts during deductions.",
+      "original_id": "G5",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_29",
+      "content": "Structure-First Principle: When solving complex logic puzzles with positional and interdependent constraints, initialize and maintain a grid/table structure upfront to enforce uniqueness, map interdependencies, and validate constraints dynamically at each reasoning step. This ensures transparency of assumptions, prevents backtracking, and avoids uneven constraint distribution or overlooked connections.",
+      "original_id": "G6",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_30",
+      "content": "Uniqueness Tracking: Centrally monitor unassigned values for attributes like names, education, and genres to prevent duplicates, while linking to L2 meta-strategies for methodical constraint enforcement.",
+      "original_id": "G7",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_31",
+      "content": "Assumption logging: When inferring positional relationships (e.g., 'Peter left of Arnold' from Clues 6 and 7), document assumptions in the grid and reference the specific clues being applied. This transparency prevents unverified deductions and aligns with L1 pattern-level strategies for constraint tracking.",
+      "original_id": "G8",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_32",
+      "content": "Proactive Validation: Enforce positional constraints like 'cat not in House 1' (clue 10) during assignment to prevent backtracking and contradictions.",
+      "original_id": "G9",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_33",
+      "content": "Constraint-Driven Reasoning: Systematically validate all clues at each deduction step, integrating interdependent clues (e.g., clue 6 and 7) and cross-referencing assignments with all constraints in real time to prevent future errors.",
+      "original_id": "G10",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_34",
+      "content": "Proactive Cross-Referencing: Standardize real-time cross-checking of all constraints (e.g., G2 and G5) during assignments to eliminate invalid configurations early, minimizing backtracking in complex puzzles.",
+      "original_id": "G11",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_35",
+      "content": "Clue 12 validation: Explicitly check positional relationships in clue 12 (e.g., master’s degree placement) during the step where the attribute is applied, not just in final verification, to avoid conflicts with prior constraints.",
+      "original_id": "G12",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_36",
+      "content": "Constraint Validation as a Meta-Strategy: Explicitly map interdependent clues (e.g., spaghetti to city vacations) to the grid during assignment rather than deferring to post-hoc checks. This enhances L1 grid cross-referencing and reduces reasoning gaps in complex puzzles by systematizing real-time validation.",
+      "original_id": "G13",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_37",
+      "content": "Chain Tracking: Systematically represent interdependent attribute chains (e.g., name → drink → food) in the grid from the start to build structured relationships and improve future deduction accuracy in complex puzzles.",
+      "original_id": "G14",
+      "step": 2,
+      "problem_count": 28
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "Use a structured tracking method, such as a grid, to enforce and validate constraints in real-time during assignment, ensuring consistency by cross-referencing interdependent clues and eliminating conflicting possibilities early.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "Apply systematic constraint enforcement by immediately validating assignments and interdependencies, using structured tracking methods like grids or tables to maintain consistency and avoid contradictions across all attributes.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_2",
+      "content": "Use a grid to systematically track and cross-check all constraints and interdependencies during assignments, ensuring consistency and preventing contradictions by validating relationships and exclusions in real time.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "Principle: Prioritize constraint validation through structured, real-time tracking to maintain logical coherence. Formalizing interdependencies early enhances clarity, reduces error propagation, and supports systematic elimination of infeasible solutions.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 2
+    }
+  ],
+  "stats": {
+    "total_l0": 38,
+    "total_l1": 3,
+    "total_l2": 1
+  }
+}

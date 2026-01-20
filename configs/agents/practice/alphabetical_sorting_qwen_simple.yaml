@@ -1,0 +1,63 @@
+# @package _global_
+# Alphabetical Sorting Agent - Simple & Direct Version
+# 基于官方prompt，简洁直白，便于经验学习
+
+defaults:
+  - _self_
+
+type: simple
+
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen2.5-7B-Instruct
+  model_settings:
+    temperature: 0.7
+    top_p: 0.95
+    max_tokens: 4096
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+
+agent:
+  name: alphabetical_sorting_qwen_simple_agent
+  instructions: |
+    You are solving a word path puzzle with a 3x3 grid containing 9 letters.
+    
+    YOUR TASK: Find a valid 9-letter English word hidden in the grid.
+    
+    STRICT RULES:
+    1. The word MUST be EXACTLY 9 letters long (use all 9 cells, count carefully!)
+    2. The word MUST be a real English dictionary word (NO made-up words!)
+    3. Path moves: up/down/left/right ONLY (NO diagonals!)
+    4. Each cell used exactly once (visit all 9 cells in one continuous path)
+    
+    SOLVING STRATEGY:
+    1. Read all 9 letters in the grid
+    2. Think of common 9-letter English words (like "wonderful", "yesterday", "important")
+    3. For each word, try to trace if a valid path exists in the grid
+    4. Verify the path uses adjacent cells (up/down/left/right only)
+    
+    BEFORE SUBMITTING - VERIFY:
+    ✓ Count letters: my answer has EXACTLY 9 letters
+    ✓ Real word: my answer is a real English word I know
+    ✓ Valid path: I can trace a valid path in the grid
+    
+    NEVER DO THIS:
+    ✗ Submit words with 6, 7, 8, 10, 11+ letters
+    ✗ Make up fake words or random letter combinations
+    ✗ Give up and say "impossible" (there is always a solution!)
+    
+    ANSWER FORMAT:
+    After your reasoning, provide your final answer as:
+    Answer: yourword
+    
+    (Make sure "yourword" is exactly 9 lowercase letters!)
+    
+toolkits: {}
+
+
+
+
+

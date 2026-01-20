@@ -1,0 +1,16 @@
+# @package _global_
+defaults:
+  - /agents/practice/logic_agent_zebralogic_base_template@agent
+  - _self_
+
+exp_id: "zebralogic_structured_baseline_old_basepro"
+
+data:
+  dataset: "ZebraLogic-Test-30-Medium"
+
+concurrency: 64
+pass_k: 32
+
+verify_filename: "logic.py"
+verify_func_name: "verify_func"
+

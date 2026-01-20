@@ -1,0 +1,79 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic_structured
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\n\
+    \nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\n## IMPORTANT: Structured Reasoning Format\n\nTo enable error\
+    \ detection and learning, you MUST follow this standardized format:\n\n### Step\
+    \ Numbering\n- Use clear step numbering: \"1.\", \"2.\", \"3.\" (required)\n-\
+    \ Each step should be on a new line\n- Example:\n  1. From clue 1, Peter is in\
+    \ house 1.\n  2. From clue 2, Alice is in house 2.\n\n### Clue Reference (CRITICAL)\n\
+    - ALWAYS explicitly reference clues when using them\n- Use formats: \"From clue\
+    \ 1\", \"According to clue 2\", \"Based on clue 3\"\n- Do not make deductions\
+    \ without citing the source clue\n- Example:\n  1. From clue 1, Peter is in house\
+    \ 1.\n  2. From clue 3, the person in house 1 has a bird.\n  3. Therefore, Peter\
+    \ has a bird (combining clues 1 and 3).\n\n### Assertion Format (CRITICAL)\n-\
+    \ Use explicit, consistent formats for assignments:\n  - \"X is in house Y\" (for\
+    \ person assignments)\n  - \"House X has Y\" (for house attributes)\n  - \"X has\
+    \ Y\" (for entity attributes)\n- Be consistent with entity and attribute names\n\
+    - Example:\n  1. Peter is in house 1.\n  2. House 1 has color red.\n  3. Peter\
+    \ has pet bird.\n\n### Logical Connections\n- Use explicit logical connectors:\
+    \ \"Therefore\", \"Thus\", \"Hence\", \"So\"\n- Show the logical flow between\
+    \ steps\n- Example:\n  1. From clue 1, Peter is in house 1.\n  2. From clue 2,\
+    \ Alice is in house 2.\n  3. Therefore, Peter and Alice are in different houses.\n\
+    \n### Elimination and Constraints\n- When eliminating possibilities, state it\
+    \ explicitly:\n  - \"We can eliminate X because...\"\n  - \"X cannot be Y because...\"\
+    \n- Track uniqueness constraints\n- Example:\n  1. From clue 4, the person in\
+    \ house 1 has color red.\n  2. Therefore, Peter has color red.\n  3. We can eliminate\
+    \ red for other houses (uniqueness constraint).\n\n### Verification Step (REQUIRED)\n\
+    - ALWAYS include a verification step before the final answer\n- Check each clue/constraint\
+    \ explicitly\n- Example:\n  Verification:\n  - Clue 1: Peter is in house 1. ✓\n\
+    \  - Clue 2: Alice is in house 2. ✓\n  - All constraints satisfied.\n\n## Answer\
+    \ Format\n\nThe last part of your final response should be in the following format:\n\
+    <answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n## Format Summary\n\
+    \nYour response should look like:\n\n1. From clue X, [make assertion in standard\
+    \ format].\n2. From clue Y, [make assertion in standard format].\n3. Therefore,\
+    \ [logical conclusion].\n...\n\nVerification:\n- Clue 1: [check] ✓\n- Clue 2:\
+    \ [check] ✓\n...\n\n<answer>\n\\\\boxed{{'answer here'}}\n</answer>\n\nWhen solving\
+    \ problems, you MUST first carefully read and understand the helpful instructions\
+    \ and experiences:\n[G0]. Constraint validation: Explicitly rule out configurations\
+    \ that satisfy individual constraints but conflict with others to ensure a unique\
+    \ solution.\n[G1]. Table tracking: Use a structured table/grid from the beginning\
+    \ to track known and unknown attributes, assignments, dependencies, and constraints\
+    \ systematically. Verify uniqueness and ordering constraints incrementally during\
+    \ each reasoning step, cross-checking against all relevant clues to prevent contradictions\
+    \ and reduce backtracking.\n[G2]. Grid mapping: Use a structured grid/table to\
+    \ map attributes to houses and cross-check clue dependencies to ensure systematic\
+    \ constraint satisfaction.\n[G3]. Direct clues first: Begin with clues that fix\
+    \ positions or identities to anchor deductions and eliminate other options systematically.\n\
+    [G4]. Cross-verify assignments: Immediately test each assumption against all relevant\
+    \ clues to ensure consistency and avoid contradictions.\n[G5]. Test rule-out scenarios:\
+    \ Explicitly state exclusions and rule-out scenarios (e.g., 'Stew cannot be in\
+    \ houses 2 or 4, and not in 1 or 3, so only house 5 is valid') to improve clarity\
+    \ and methodological robustness in eliminating invalid configurations.\n[G6].\
+    \ Group equivalent attributes: Identify and group clues that reference the same\
+    \ attribute early, labeling them (e.g., 'Arnold’s cluster') to reinforce logical\
+    \ consistency, traceability, and accelerate deductions.\n[G7]. Track attribute\
+    \ groupings: Label and reference attribute groupings throughout the reasoning\
+    \ process to improve transparency and traceability.\n[G8]. Clue labeling: Combine\
+    \ grouping equivalent clues (G6) with labeling them as a unified strategy to enhance\
+    \ problem-solving efficiency by explicitly organizing and referencing interdependent\
+    \ domains."
+toolkits: {}

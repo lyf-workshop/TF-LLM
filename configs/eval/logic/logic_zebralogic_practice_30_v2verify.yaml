@@ -1,0 +1,93 @@
+# ZebraLogic Grid Hard 20 数据集评估配置
+# 使用 V2 版本的错误分析器
+
+dataset_name: "ZebraLogic-Grid-Hard-20"
+dataset_kwargs:
+  split: practice
+  grid_size: 5
+  num_samples: 30  # 用于练习的样本数
+
+processer_name: "training_free_grpo"
+
+# 使用 V2 版本的增强验证器
+# V2 改进: 专注推理过程质量，简洁有用的错误提示
+verify_filename: "logic_with_error_analysis_v2.py"
+verify_func_name: "verify_func"
+
+# 评估配置
+max_rounds: 10  # 每个样本的最大轮次
+save_trajectory: true  # 保存轨迹用于经验生成
+
+# 注意: V2 版本的错误分析默认启用
+# 如果需要禁用，可以在运行时传递 enable_error_analysis=False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

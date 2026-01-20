@@ -1,0 +1,31 @@
+# @package _global_
+# Word Puzzle Baseline Evaluation (无经验)
+# 用于测试原始 Agent 的性能
+
+defaults:
+  - /agents/practice/logic_agent_hierarchical_learning_clean@agent
+  - _self_
+
+exp_id: "word_puzzle_baseline_eval"
+
+# Evaluation data configuration
+data:
+  dataset: "KORGym-WordPuzzle-Baseline"
+  batch_size: 20
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_name: "8-word_puzzle"
+  game_host: "localhost"
+  game_port: 8775
+  level: 3
+  num_seeds: 20  # 评估 20 个游戏实例
+
+concurrency: 10
+pass_k: 1
+
+# Verification settings (not used for KORGym but required by config)
+verify_filename: "korgym_verify.py"
+verify_func_name: "verify_func"
+

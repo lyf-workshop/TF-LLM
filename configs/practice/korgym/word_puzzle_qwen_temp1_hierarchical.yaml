@@ -1,0 +1,58 @@
+# @package _global_
+# Word Puzzle Hierarchical Learning - Qwen2.5-7B-Instruct (Temperature 1.0)
+# 使用默认 temperature 1.0
+
+defaults:
+  - /agents/practice/word_puzzle_qwen_temp1@evaluation.agent
+  - _self_
+
+exp_id: word_puzzle_qwen_temp1_hierarchical
+
+# Practice Arguments
+practice:
+  epochs: 10
+  batch_size: 5
+  grpo_n: 5
+  rollout_concurrency: 5
+  rollout_temperature: 1.0
+  task_timeout: 1800
+  do_eval: false
+  agent_objective: |
+    input: A crossword puzzle with clues for horizontal and vertical entries
+    output: A list of words that correctly fill all positions in the puzzle
+  learning_objective: |
+    Help the agent improve crossword puzzle solving by extracting strategies for understanding clues, pattern recognition, and word relationships.
+  num_experiences_per_query: 1
+  
+  # Hierarchical learning settings
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5
+    l2_aggregation_threshold: 3
+    max_l0_per_game: 1
+    max_l0_recent: 30
+    include_l0_in_prompt: true
+    experience_save_path: workspace/hierarchical_experiences/word_puzzle_qwen_temp1.json
+    agent_save_path: workspace/agents/word_puzzle_qwen_temp1_enhanced.yaml
+
+# KORGym Game Settings
+korgym:
+  enabled: true
+  game_name: "8-word_puzzle"
+  game_host: "localhost"
+  game_port: 8775
+  level: 4
+  num_seeds: 50
+  max_rounds: 50
+
+# Data configuration
+data:
+  practice_dataset_name: KORGym-WordPuzzle-Qwen-Temp1-Train
+  eval_dataset_name: KORGym-WordPuzzle-Qwen-Temp1-Eval
+
+# Evaluation settings
+evaluation:
+  data:
+    dataset: KORGym-WordPuzzle-Qwen-Temp1-Eval
+    pass_k: 1
+  batch_size: 5

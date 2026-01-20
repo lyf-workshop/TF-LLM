@@ -1,0 +1,3366 @@
+{
+  "num_games": 500,
+  "average_score": 0.03226980796980797,
+  "std_score": 0.060308142075743816,
+  "min_score": 0.0,
+  "max_score": 0.25,
+  "success_rate": 0.258,
+  "detailed_results": [
+    {
+      "seed": 10000,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BLOW\", \"I\", \"WARP\", \"WHAT\", \"STAB\", \"VEDA\"]",
+      "response": "Answer: [\"BLOW\", \"I\", \"WARP\", \"WHAT\", \"STAB\", \"VEDA\"]"
+    },
+    {
+      "seed": 10001,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"UNTUNED\", \"ROSIE\", \"GO_TO_BED\", \"GAUSS\", \"ALLOPHONE\", \"THORN\", \"WHEW\", \"EARLIER\", \"TAPES\", \"BRUSH\"]",
+      "response": "Answer: [\"CENSUS\", \"UNTUNED\", \"ROSIE\", \"GO_TO_BED\", \"GAUSS\", \"ALLOPHONE\", \"THORN\", \"WHEW\", \"EARLIER\", \"TAPES\", \"BRUSH\"]"
+    },
+    {
+      "seed": 10002,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"SPOILS\", \"GINA\", \"GOT_BALL\", \"MARCUS\", \"TV\", \"SIDEKICK\", \"ALIVET\", \"EARY\", \"SHOES\", \"BRACES\", \"KEVIN\"]",
+      "response": "Answer: [\"CENSUS\", \"SPOILS\", \"GINA\", \"GOT_BALL\", \"MARCUS\", \"TV\", \"SIDEKICK\", \"ALIVET\", \"EARY\", \"SHOES\", \"BRACES\", \"KEVIN\"]"
+    },
+    {
+      "seed": 10003,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"WALRUS\", \"DRY\", \"UNEMPLOYED\", \"ENTITLE\", \"LUXURY\", \"PICTURED\", \"FOXBORO\", \"RESPLendent\"]",
+      "response": "Answer: [\"WALRUS\", \"DRY\", \"UNEMPLOYED\", \"ENTITLE\", \"LUXURY\", \"PICTURED\", \"FOXBORO\", \"RESPLendent\"]"
+    },
+    {
+      "seed": 10004,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"RequestMethod\", \"BeijingCapital\", \"Fever\", \"Heart\", \"Fright\", \"Ad\", \"Sahara\", \"Faint\", \"Barbecue\", \"Rapidly\", \"Emojis\", \"Stevie\", \"Penny\", \"Rooibos\"]",
+      "response": "Solution:\n1.RequestMethod\n2.BeijingCapital\n3.Fever\n4.Heart\n5.Fright\n6.Ad\n7.Sahara\n8.Faint\n9.Barbecue\n10.Rapidly\n11.Emojis\n12.Stevie\n13.Penny\n14.Rooibos\n\nAnswer: [\"RequestMethod\", \"BeijingCapital\", \"Fe"
+    },
+    {
+      "seed": 10005,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"美麗\", \"ROSIE\", \"GO_TO_BED\", \"GAUSS\", \"LA\", \"BUCKET\", \"ALAS\", \"BACKWARD\"]",
+      "response": "Answer: [\"CENSUS\", \"美麗\", \"ROSIE\", \"GO_TO_BED\", \"GAUSS\", \"LA\", \"BUCKET\", \"ALAS\", \"BACKWARD\"]"
+    },
+    {
+      "seed": 10006,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"CENSUS\", \"SAD\", \"ROSIE\", \"GO_TO_BED\", \"CRICKET\", \"GERMANY\", \"FLOWER\", \"ALARM\", \"THEN\", \"SHOES\", \"BRACELET\", \"JORGE\", \"SHAPES\", \"ESCUDOS\", \"EASE\"]",
+      "response": "Answer: [\"CENSUS\", \"SAD\", \"ROSIE\", \"GO_TO_BED\", \"CRICKET\", \"GERMANY\", \"FLOWER\", \"ALARM\", \"THEN\", \"SHOES\", \"BRACELET\", \"JORGE\", \"SHAPES\", \"ESCUDOS\", \"EASE\"]"
+    },
+    {
+      "seed": 10007,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"SAD\", \"F女の子\", \"GO_TO_BED\", \"MOHANDAS_K_GANDHI\", \"SWISS\", \"ΥΕΩΦΟΡΟΣ\", \"RELIEVED\", \"PAST\", \"SHOES\", \"BRUSH\", \"CLARK\"]",
+      "response": "Answer: [\"CENSUS\", \"SAD\", \"F女の子\", \"GO_TO_BED\", \"MOHANDAS_K_GANDHI\", \"SWISS\", \"ΥΕΩΦΟΡΟΣ\", \"RELIEVED\", \"PAST\", \"SHOES\", \"BRUSH\", \"CLARK\"]"
+    },
+    {
+      "seed": 10008,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LANCZOS\", \"ESQ\", \"ANAHEIM\", \"TOILET\", \"PARK\", \"SUBLET\", \"RENEGE\"]",
+      "response": "Answer: [\"LANCZOS\", \"ESQ\", \"ANAHEIM\", \"TOILET\", \"PARK\", \"SUBLET\", \"RENEGE\"]"
+    },
+    {
+      "seed": 10009,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"KOVSZEGI\", \"ESQ\", \"OR Wrestling\", \"TOILET\", \":Event\", \"LEASE\", \"RENEGE\"]",
+      "response": "Answer: [\"KOVSZEGI\", \"ESQ\", \"OR Wrestling\", \"TOILET\", \":Event\", \"LEASE\", \"RENEGE\"]"
+    },
+    {
+      "seed": 10010,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CENSUS\", \"SUFFER\", \"ROSENY\", \"GO_TRAVEL\", \"GREGORY\", \"THEO\", \"FAUNA\", \"ALOFT\", \"EARLIER\", \"ANKLE Mats\"]",
+      "response": "Answer: [\"CENSUS\", \"SUFFER\", \"ROSENY\", \"GO_TRAVEL\", \"GREGORY\", \"THEO\", \"FAUNA\", \"ALOFT\", \"EARLIER\", \"ANKLE Mats\"]"
+    },
+    {
+      "seed": 10011,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"NASR\",\"Interpreter\",\"Andre\",\"TOILET\",\"HEE\",\"Sublet\",\"Repudiate\",\"EPG\",\"LP\",\"Roamed\"]",
+      "response": "Answer: [\"NASR\",\"Interpreter\",\"Andre\",\"TOILET\",\"HEE\",\"Sublet\",\"Repudiate\",\"EPG\",\"LP\",\"Roamed\"]"
+    },
+    {
+      "seed": 10012,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"拉斯洛\", \"律师\", \"职业摔跤手\", \"马桶\", \"前进\", \"转租\"]",
+      "response": "Answer: [\"拉斯洛\", \"律师\", \"职业摔跤手\", \"马桶\", \"前进\", \"转租\"]"
+    },
+    {
+      "seed": 10013,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"VASILOS\", \"INTERPRET\", \"OR WLAN\", \"TOILET\", \"SIDE\"]",
+      "response": "Answer: [\"VASILOS\", \"INTERPRET\", \"OR WLAN\", \"TOILET\", \"SIDE\"]"
+    },
+    {
+      "seed": 10014,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"MOP\", \"POP\", \"ADVOCATE\", \"NOT AT ALL\", \"OPERATE\", \"SKIVVIES\", \"DU DUSSART\", \"STAGING\", \"JOBS\", \"POINTS\", \"REFUNDS\", \"KIIDS\"]",
+      "response": "Based on the clues provided and the structure of a typical crossword, I will now fill in the answers.\n\n1. Spiky two-tone men's hairstyle - MOP (Mohawk)\n2. Soda fountain drinks - POP\n3. Advocate for a "
+    },
+    {
+      "seed": 10015,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LASZLO\", \"INTERPRET\", \"WWE\", \"TOILET\", \"CAUCUS\", \"SUBLET\", \"REEK\", \"EPG\", \"ZUNE\"]",
+      "response": "Answer: [\"LASZLO\", \"INTERPRET\", \"WWE\", \"TOILET\", \"CAUCUS\", \"SUBLET\", \"REEK\", \"EPG\", \"ZUNE\"]"
+    },
+    {
+      "seed": 10016,
+      "score": 0.07142857142857142,
+      "success": true,
+      "action": "[\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"DESERT\", \"BLIND\", \"BBQ\", \"FAST\", \"EMOTICONS\", \"GEORGE\", \"COMPANION\", \"HEATHER\"]",
+      "response": "Answer: [\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"DESERT\", \"BLIND\", \"BBQ\", \"FAST\", \"EMOTICONS\", \"GEORGE\", \"COMPANION\", \"HEATHER\"]"
+    },
+    {
+      "seed": 10017,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"DELTAS\", \"PEACEFUL\", \"BRASILIAN\", \"MYRIAD\", \"ACCLAIM\", \"SHerry\", \"BUSY\", \"A+\", \"LINGUISTICS\"]",
+      "response": "Answer: [\"DELTAS\", \"PEACEFUL\", \"BRASILIAN\", \"MYRIAD\", \"ACCLAIM\", \"SHerry\", \"BUSY\", \"A+\", \"LINGUISTICS\"]"
+    },
+    {
+      "seed": 10018,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"DEBONAIR\", \"CALMER\", \"BRAZILIAN\", \"SWarms\", \"CHEERS\", \"DOCE\", \"SUMPTUOUS\"]",
+      "response": "Answer: [\"DEBONAIR\", \"CALMER\", \"BRAZILIAN\", \"SWarms\", \"CHEERS\", \"DOCE\", \"SUMPTUOUS\"]"
+    },
+    {
+      "seed": 10019,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"GERBILS\", \"CALMEST\", \"BRAZILIAN\", \"MYRIADS\", \"CHEERS\", \"PRIORAT\", \"SYLLABUS\", \"AONGUS\", \"LINGUISTIC\"]",
+      "response": "Answer: [\"GERBILS\", \"CALMEST\", \"BRAZILIAN\", \"MYRIADS\", \"CHEERS\", \"PRIORAT\", \"SYLLABUS\", \"AONGUS\", \"LINGUISTIC\"]"
+    },
+    {
+      "seed": 10020,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"SARAHDESERT\", \"DIZZY\", \"GRILL\", \"RAPIDLY\"]",
+      "response": "Answer: [\"EASY\", \"AIRPORT\", \"SINGER\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"SARAHDESERT\", \"DIZZY\", \"GRILL\", \"RAPIDLY\"]"
+    },
+    {
+      "seed": 10021,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MARY\", \"COINS\", \"PEAS\", \"SINGLE\", \"QUILL\", \"CAT\", \"OBERON\"]",
+      "response": "Answer: [\"+++++++++\", \"M+++++R+Y+\", \"N+T++C+++\", \"+A++++++++\", \"Q+++++++\", \"C+++++++T\", \"+O++++++++\", \"+++++++++\", \"+++++++++\", \"++++++S++\"]  \nAnswer: [\"MARY\", \"COINS\", \"PEAS\", \"SINGLE\", \"QUILL\", \"CAT"
+    },
+    {
+      "seed": 10022,
+      "score": 0.07692307692307693,
+      "success": true,
+      "action": "[\"EASY\", \"AIRPORT\", \"SINGER\", \"TRUE\", \"SCREAMS\", \"AUDIENCE\", \"SARAH\", \"DESERT\", \"OUTcold\", \"BARBECUE\", \"RAPID\", \"EMOTICONS\"]",
+      "response": "Answer: [\"EASY\", \"AIRPORT\", \"SINGER\", \"TRUE\", \"SCREAMS\", \"AUDIENCE\", \"SARAH\", \"DESERT\", \"OUTcold\", \"BARBECUE\", \"RAPID\", \"EMOTICONS\"]"
+    },
+    {
+      "seed": 10023,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"EASY\", \"AIRBUS\", \"FEVER\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"SARA\", \"BLIND\", \"BBQ\", \"RUSH\", \"EMOTICONS\", \"CHONG\"]",
+      "response": "Answer: [\"EASY\", \"AIRBUS\", \"FEVER\", \"EMOTIONS\", \"SCREAMS\", \"AUDIENCE\", \"SARA\", \"BLIND\", \"BBQ\", \"RUSH\", \"EMOTICONS\", \"CHONG\"]"
+    },
+    {
+      "seed": 10024,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MULLET\", \"COKE\", \"SUPPORTER\", \"NOTATALL\", \"OUSUALLY\", \"BUNT\", \"DE SENDIS\", \"FACEPAINT\", \"STAR\"]",
+      "response": "Based on the provided clues and the structure of a typical crossword puzzle, let's fill in the words step-by-step:\n\n1. Spiky two-tone men's hairstyle (8)\n   - Might be \"MULLET\"\n\n2. Soda fountain drink"
+    },
+    {
+      "seed": 10025,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SCHEMES\", \"Meredith\", \"TODMOROON\", \"C Spinner\", \"CORPORATION\", \"QUEASY\"]",
+      "response": "Answer: [\"SCHEMES\", \"Meredith\", \"TODMOROON\", \"C Spinner\", \"CORPORATION\", \"QUEASY\"]"
+    },
+    {
+      "seed": 10026,
+      "score": 0.07142857142857142,
+      "success": true,
+      "action": "[\"ABYSS\", \"USEFUL\", \"DRY\", \"SILVAN\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\", \"TABLE\", \"LUDO\", \"HORN\", \"FRISBEE\", \"PEACEFULLY\", \"WHILE\"]",
+      "response": "Answer: [\"ABYSS\", \"USEFUL\", \"DRY\", \"SILVAN\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\", \"TABLE\", \"LUDO\", \"HORN\", \"FRISBEE\", \"PEACEFULLY\", \"WHILE\"]"
+    },
+    {
+      "seed": 10027,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"HARSH\", \"SODAS\", \"SUPPORT\", \"NEVER\", \"REMOVE\", \"GRILLS\", \"DERBY\", \"COSMET\", \"SPIKE\", \"ARROW\", \"REFUNDS\", \"POCKET\"]",
+      "response": "Answer: [\"HARSH\", \"SODAS\", \"SUPPORT\", \"NEVER\", \"REMOVE\", \"GRILLS\", \"DERBY\", \"COSMET\", \"SPIKE\", \"ARROW\", \"REFUNDS\", \"POCKET\"]"
+    },
+    {
+      "seed": 10028,
+      "score": 0.18181818181818182,
+      "success": true,
+      "action": "[\"zingarolo\", \"useful\", \"droughts\", \"gibbon\", \"pancreas\", \"betro\", \"feeder\", \"repeats\", \"bowlingalo\", \"pooncci\", \"antlers\"]",
+      "response": "Based on the given clues and the structure of the crossword, I will fill in the words for each clue.\n\n1. Salad dressing that sounds mythical (9) - ZINGAROLO\n2. Useful part of a website (6 to 2) - USEF"
+    },
+    {
+      "seed": 10029,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"AIFIED\", \"USEFUL\", \"DROPS\", \"LEON\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\", \"TABLES\", \"CHESS\", \"HORN\", \"TAG\", \"PEACEFULLY\", \"ANTI\", \"HAWAIIAN\"]",
+      "response": "Answer: [\"AIFIED\", \"USEFUL\", \"DROPS\", \"LEON\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\", \"TABLES\", \"CHESS\", \"HORN\", \"TAG\", \"PEACEFULLY\", \"ANTI\", \"HAWAIIAN\"]"
+    },
+    {
+      "seed": 10030,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CEVICHE\", \"HELPFUL\", \"DROPS\", \"LARK\", \"BROOD\", \"TRAITOR\", \"FEED\", \"AGAIN\", \"PONGOLITHS\", \"LUDO\", \"ANTELER\", \"MAROONED\", \"PEACEFULLY\", \"QRSTU\", \"PUDDING\"]",
+      "response": "Answer: [\"CEVICHE\", \"HELPFUL\", \"DROPS\", \"LARK\", \"BROOD\", \"TRAITOR\", \"FEED\", \"AGAIN\", \"PONGOLITHS\", \"LUDO\", \"ANTELER\", \"MAROONED\", \"PEACEFULLY\", \"QRSTU\", \"PUDDING\"]"
+    },
+    {
+      "seed": 10031,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SPIKEY\", \"COKE\", \"BACKER\", \"NEVER\", \"EXTRACT\", \"BBQ\", \"ADELPHIC\", \"STAGING\"]",
+      "response": "Answer: [\"SPIKEY\", \"COKE\", \"BACKER\", \"NEVER\", \"EXTRACT\", \"BBQ\", \"ADELPHIC\", \"STAGING\"]"
+    },
+    {
+      "seed": 10032,
+      "score": 0.18181818181818182,
+      "success": true,
+      "action": "[\"AIPOWER\", \"URLS\", \"DROUGHTS\", \"GOOSEMAVERICK\", \"Pancreas\", \"Betrayal\", \"PROVIDE\", \"REPEAT\", \"PingPongTV\", \"TableTennis\", \"L Unicorn\"]",
+      "response": "Answer: [\"AIPOWER\", \"URLS\", \"DROUGHTS\", \"GOOSEMAVERICK\", \"Pancreas\", \"Betrayal\", \"PROVIDE\", \"REPEAT\", \"PingPongTV\", \"TableTennis\", \"L Unicorn\"]"
+    },
+    {
+      "seed": 10033,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"SANITIZE\", \"SPYS\", \"EPISODES\", \"WAVE-MARPOL\", \"HELLO\", \"HOTSTUFF\", \"FATTEN\"]",
+      "response": "Answer: [\"SANITIZE\", \"SPYS\", \"EPISODES\", \"WAVE-MARPOL\", \"HELLO\", \"HOTSTUFF\", \"FATTEN\"]"
+    },
+    {
+      "seed": 10034,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"HEDGEHOG\", \"SODAS\", \"BACKER\", \"NEVER\", \"REMOVAL\", \"COOKS\", \"BERNADETTE\", \"STAGING\", \"GESHICKT\", \"ARROWS\", \"REFUNDS\", \"Pouch\"]",
+      "response": "Answer: [\"HEDGEHOG\", \"SODAS\", \"BACKER\", \"NEVER\", \"REMOVAL\", \"COOKS\", \"BERNADETTE\", \"STAGING\", \"GESHICKT\", \"ARROWS\", \"REFUNDS\", \"Pouch\"]"
+    },
+    {
+      "seed": 10035,
+      "score": 0.09090909090909091,
+      "success": true,
+      "action": "[\"AIOLOS\", \"URLS\", \"DRY\", \"VIC\", \"Pancreas\", \" BETRAYER\", \"FEED\", \"REPEAT\", \"TABLETennis\", \"CHESS\", \"HORN\"]",
+      "response": "Answer: [\"AIOLOS\", \"URLS\", \"DRY\", \"VIC\", \"Pancreas\", \" BETRAYER\", \"FEED\", \"REPEAT\", \"TABLETennis\", \"CHESS\", \"HORN\"]"
+    },
+    {
+      "seed": 10036,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"CAESAR\", \"URL\", \"DROPS\", \"GEOFF\", \"Pancreas\", \"Betray\", \"FEED\", \"REPEAT\", \"PingPong\", \"Ludo\", \"R-No\", \"Hacky\", \"Peaceably\", \"against\", \"Pottage\"]",
+      "response": "Answer: [\"CAESAR\", \"URL\", \"DROPS\", \"GEOFF\", \"Pancreas\", \"Betray\", \"FEED\", \"REPEAT\", \"PingPong\", \"Ludo\", \"R-No\", \"Hacky\", \"Peaceably\", \"against\", \"Pottage\"]"
+    },
+    {
+      "seed": 10037,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"CESUMI\", \"USEFUL\", \"DROPS\", \"GEESE\", \"Pancreas\", \" BETRIE\", \"FEEDS\", \"REPEAT\", \"MATCHES\", \"CHESS\", \"HORN\", \"DITCH\", \"PEACEFULLY\", \"PROTESTING\", \"PALUAI\"]",
+      "response": "Answer: [\"CESUMI\", \"USEFUL\", \"DROPS\", \"GEESE\", \"Pancreas\", \" BETRIE\", \"FEEDS\", \"REPEAT\", \"MATCHES\", \"CHESS\", \"HORN\", \"DITCH\", \"PEACEFULLY\", \"PROTESTING\", \"PALUAI\"]"
+    },
+    {
+      "seed": 10038,
+      "score": 0.25,
+      "success": true,
+      "action": "[\"ZOESTAND\", \"SEO\", \"DROUGHTS\", \"GEESE\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\"]",
+      "response": "Answer: [\"ZOESTAND\", \"SEO\", \"DROUGHTS\", \"GEESE\", \"Pancreas\", \"TRAITOR\", \"FEED\", \"REPEAT\"]"
+    },
+    {
+      "seed": 10039,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"SANITIZE\", \"SPYs\", \"EPISODEs\", \"CEQUIPE\", \"OWL\", \"HOTST\", \"FOOD\"]",
+      "response": "Based on the provided clues and the structure of the crossword puzzle, let's fill in the words for each clue:\n\n1. Remove germs from, in a way (5) - This could be \"SANITIZE\" as it fits the length and c"
+    },
+    {
+      "seed": 10040,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"CELERY\", \"META\", \"DRY\", \"GEO\", \"Pancreas\", \"TRAIT\", \"FEED\", \"REPEAT\", \"PONGOLYMPICS\", \"CHESS\", \"HORNS\", \"FOOTBALL\"]",
+      "response": "Answer: [\"CELERY\", \"META\", \"DRY\", \"GEO\", \"Pancreas\", \"TRAIT\", \"FEED\", \"REPEAT\", \"PONGOLYMPICS\", \"CHESS\", \"HORNS\", \"FOOTBALL\"]"
+    },
+    {
+      "seed": 10041,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"SYRACUSE\", \"USEFUL\", \"DRY\", \"CAT\", \"Pancreas\", \"TRAITOR\", \"NOURISH\", \"REPEAT\", \"TABLE TENNIS\", \"CHOMA\", \"REINDEER\", \"FLAGBALL\"]",
+      "response": "Answer: [\"SYRACUSE\", \"USEFUL\", \"DRY\", \"CAT\", \"Pancreas\", \"TRAITOR\", \"NOURISH\", \"REPEAT\", \"TABLE TENNIS\", \"CHOMA\", \"REINDEER\", \"FLAGBALL\"]"
+    },
+    {
+      "seed": 10042,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"ANIMATED\", \"OFFERING\", \"KIMIGAYO\", \"MICKEY\", \"PANTS\", \"HERALDRY\", \"STEPH\", \"INSIST\", \"ERUDES\", \"FIGHTS\", \"LAWN\", \"DILL\"]",
+      "response": "Answer: [\"ANIMATED\", \"OFFERING\", \"KIMIGAYO\", \"MICKEY\", \"PANTS\", \"HERALDRY\", \"STEPH\", \"INSIST\", \"ERUDES\", \"FIGHTS\", \"LAWN\", \"DILL\"]"
+    },
+    {
+      "seed": 10043,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"DISINFECT\", \"SPY\", \"EPISODES\", \"WET\", \"HOORAY\", \"HOT\", \"FAT\", \"SCHOOL\", \"MOUNT\", \"HAMBURGER\", \"THEYTHROTTLEGAIN\", \"BUYONEGETONEFREE\", \"CRUEL\", \"TRANSAXLE\", \"CAUTION\"]",
+      "response": "Answer: [\"DISINFECT\", \"SPY\", \"EPISODES\", \"WET\", \"HOORAY\", \"HOT\", \"FAT\", \"SCHOOL\", \"MOUNT\", \"HAMBURGER\", \"THEYTHROTTLEGAIN\", \"BUYONEGETONEFREE\", \"CRUEL\", \"TRANSAXLE\", \"CAUTION\"]"
+    },
+    {
+      "seed": 10044,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"SANITIZE\", \"SPY\", \"EPISODES\", \"WATERLODIE\", \"HOORAY\"]",
+      "response": "Answer: [\"SANITIZE\", \"SPY\", \"EPISODES\", \"WATERLODIE\", \"HOORAY\"]"
+    },
+    {
+      "seed": 10045,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"ANIMATED\", \"DENSEST\", \"KIMIGAYO\", \"MICKEY\", \"PANTS\", \"HERALDRY\", \"STEPH\", \"SSERTED\", \"ERUDES\", \"STRUGLES\", \"LANDSCAPE\", \"PREPERS\"]",
+      "response": "Answer: [\"ANIMATED\", \"DENSEST\", \"KIMIGAYO\", \"MICKEY\", \"PANTS\", \"HERALDRY\", \"STEPH\", \"SSERTED\", \"ERUDES\", \"STRUGLES\", \"LANDSCAPE\", \"PREPERS\"]"
+    },
+    {
+      "seed": 10046,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"sanitize\", \"spies\", \"episodes\", \"waltz\", \"hello\", \"onfire\", \"fleshout\", \"schoolhouse\", \"mountain\", \"cheeseburger\"]",
+      "response": "Answer: [\"sanitize\", \"spies\", \"episodes\", \"waltz\", \"hello\", \"onfire\", \"fleshout\", \"schoolhouse\", \"mountain\", \"cheeseburger\"]"
+    },
+    {
+      "seed": 10047,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOSES\", \"SLIDE\", \"FLAPS\", \"ICU\", \"PURE\", \"KUTLUS\", \"REBEL\", \"TINS\"]",
+      "response": "Answer: [\"LOSES\", \"SLIDE\", \"FLAPS\", \"ICU\", \"PURE\", \"KUTLUS\", \"REBEL\", \"TINS\"]"
+    },
+    {
+      "seed": 10048,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TRIVIA\", \"NYT\", \"UTTER\", \"SKETCHY\", \"ZEYKLOT\", \"SWAGGERS\", \"ARTHUR\", \"SWAT\", \"VOICING\", \"LITERATURE\", \"BIGBANG\", \"F_CPU\"]",
+      "response": "Answer: [\"TRIVIA\", \"NYT\", \"UTTER\", \"SKETCHY\", \"ZEYKLOT\", \"SWAGGERS\", \"ARTHUR\", \"SWAT\", \"VOICING\", \"LITERATURE\", \"BIGBANG\", \"F_CPU\"]"
+    },
+    {
+      "seed": 10049,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHIPS\", \"CHINA\", \"DEBAUDE\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"STALKING\", \"POP\", \"WRESTING\", \"LEWIS\", \"MOUSE\"]",
+      "response": "Answer: [\"SHIPS\", \"CHINA\", \"DEBAUDE\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"STALKING\", \"POP\", \"WRESTING\", \"LEWIS\", \"MOUSE\"]"
+    },
+    {
+      "seed": 10050,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHelters\", \"MANDARIN\", \"CRE덩IOUS\", \"DIVE\", \"COADEN\", \"TRAPPED\", \"PUB ANCIENTS\"]",
+      "response": "Answer: [\"SHelters\", \"MANDARIN\", \"CRE덩IOUS\", \"DIVE\", \"COADEN\", \"TRAPPED\", \"PUB ANCIENTS\"]"
+    },
+    {
+      "seed": 10051,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"AGAINST\", \"STORY\", \"WATCH\", \"PLEASANT\", \"WHILE\"]",
+      "response": "Answer: [\"AGAINST\", \"STORY\", \"WATCH\", \"PLEASANT\", \"WHILE\"]"
+    },
+    {
+      "seed": 10052,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"ipods\", \"mandchurians\", \"lech\", \"slum\", \"dozen\", \"caught\", \"private\", \"synth\", \"fumbling\", \"lewis\", \"rats\", \"king\", \"served\", \"sleigh\"]",
+      "response": "Based on the clues provided and the structure of the crossword, here are the answers:\n\n1. Ipods\n2. mandchurians\n3. lech\n4. slum\n5. dozen\n6. caught\n7. private\n8. synth\n9. fumbling\n10. lewis\n11. rats\n12"
+    },
+    {
+      "seed": 10053,
+      "score": 0.1111111111111111,
+      "success": true,
+      "action": "[\"LOSES\", \"RELIES\", \"CARDBOARDS\", \"ICU\", \"STERILE\", \"WILLIAMFAULKNER\", \"UNCOOPERATIVE\", \"BLOCS\", \"STOMATA\"]",
+      "response": "Answer: [\"LOSES\", \"RELIES\", \"CARDBOARDS\", \"ICU\", \"STERILE\", \"WILLIAMFAULKNER\", \"UNCOOPERATIVE\", \"BLOCS\", \"STOMATA\"]"
+    },
+    {
+      "seed": 10054,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TRIVIA\", \"NEWS\", \"FULLOF\", \"SUMMARY\", \"POLISH\", \"PRIZES\", \"STEVIE\", \"SWAT\", \"TELL\", \"DWB\", \"KISSING\", \"FORMS\", \"UPGRADE\", \"CRAZY\"]",
+      "response": "Answer: [\"TRIVIA\", \"NEWS\", \"FULLOF\", \"SUMMARY\", \"POLISH\", \"PRIZES\", \"STEVIE\", \"SWAT\", \"TELL\", \"DWB\", \"KISSING\", \"FORMS\", \"UPGRADE\", \"CRAZY\"]"
+    },
+    {
+      "seed": 10055,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"detail\", \"QUINTON\", \"ROM\", \"ALLOT\", \"POD\", \"GUEST\", \"STUNTS\", \"CROWD\", \"BROTHERS\", \"C\", \"ACTUALLY\", \"INHERITS\", \"OWNER\", \"PROVIDE\", \"WEST\"]",
+      "response": "SOLVING THE CROSSWORD WITH THE GIVEN CLUES:\n\n1. Micromanager's focus: This could be \"-detail\" as it refers to focus on small details.\n2. Indy racer Danica or sportscaster Dan: This clue might refer to"
+    },
+    {
+      "seed": 10056,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ADVERTISEMENT\", \"ABUNDANT\", \"NATIONAL\", \"MICKEY\", \"PANTS\", \"COAT\", \"STEPHEN_CURRY\", \"ASSERTED\", \"ERUDED\", \"FARM\", \"LANDSCAPER\"]",
+      "response": "Answer: [\"ADVERTISEMENT\", \"ABUNDANT\", \"NATIONAL\", \"MICKEY\", \"PANTS\", \"COAT\", \"STEPHEN_CURRY\", \"ASSERTED\", \"ERUDED\", \"FARM\", \"LANDSCAPER\"]"
+    },
+    {
+      "seed": 10057,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ANIMATED\", \"OFFERING\", \"KIMIGAYO\", \"ELVIS\", \"PANTS\", \"TROPHIES\", \"STEPHEN_CURRY\", \"INSISTED\", \"ERUDED\", \"FIGHTS\", \"LANDSCAPER\", \"FERMENTS\"]",
+      "response": "Answer: [\"ANIMATED\", \"OFFERING\", \"KIMIGAYO\", \"ELVIS\", \"PANTS\", \"TROPHIES\", \"STEPHEN_CURRY\", \"INSISTED\", \"ERUDED\", \"FIGHTS\", \"LANDSCAPER\", \"FERMENTS\"]"
+    },
+    {
+      "seed": 10058,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"ANIMATED\", \"ABUNDANT\", \"HIMN\", \"MJ\", \"PANTS\", \"EMBLEMS\", \"STEPH\", \"ASSERTED\", \"ERUPTS\", \"FIGHTING\"]",
+      "response": "Answer: [\"ANIMATED\", \"ABUNDANT\", \"HIMN\", \"MJ\", \"PANTS\", \"EMBLEMS\", \"STEPH\", \"ASSERTED\", \"ERUPTS\", \"FIGHTING\"]"
+    },
+    {
+      "seed": 10059,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROADTRIP\", \"NEWSPAPER\", \"UTERUS\", \"SKETCHY\", \"PLNKS\", \"FREEBIES\", \"ETTA\", \"BAYER\", \"UtTERS\", \"DIPLOMA\", \"JOHNNY\", \"FORMS\"]",
+      "response": "Answer: [\"ROADTRIP\", \"NEWSPAPER\", \"UTERUS\", \"SKETCHY\", \"PLNKS\", \"FREEBIES\", \"ETTA\", \"BAYER\", \"UtTERS\", \"DIPLOMA\", \"JOHNNY\", \"FORMS\"]"
+    },
+    {
+      "seed": 10060,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TRIVIA\", \"NEWSDAY\", \"ZWANGER\", \"SKIMPY\", \"PLNARK\", \"SWAGGERS\", \"RAYMORE\", \"SWAT\", \"PRESERVES\", \"SAT\", \"مراقب\", \"BUFFERS\", \"UPGRADE\", \"SUCCESSES\"]",
+      "response": "Answer: [\"TRIVIA\", \"NEWSDAY\", \"ZWANGER\", \"SKIMPY\", \"PLNARK\", \"SWAGGERS\", \"RAYMORE\", \"SWAT\", \"PRESERVES\", \"SAT\", \"مراقب\", \"BUFFERS\", \"UPGRADE\", \"SUCCESSES\"]"
+    },
+    {
+      "seed": 10061,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOST\", \"SLOPE\", \"TUBES\", \"ICU\", \"STERILE\"]",
+      "response": "Answer: [\"LOST\", \"SLOPE\", \"TUBES\", \"ICU\", \"STERILE\"]"
+    },
+    {
+      "seed": 10062,
+      "score": 0.1111111111111111,
+      "success": true,
+      "action": "[\"LOSES\", \"LUBES\", \"CARDBOARDS\", \"ICUs\", \"STERILE\", \"PAUL\", \"UNCOOPERATIVE\", \"BLOBS\", \"STOMATA\"]",
+      "response": "Answer: [\"LOSES\", \"LUBES\", \"CARDBOARDS\", \"ICUs\", \"STERILE\", \"PAUL\", \"UNCOOPERATIVE\", \"BLOBS\", \"STOMATA\"]"
+    },
+    {
+      "seed": 10063,
+      "score": 0.07142857142857142,
+      "success": true,
+      "action": "[\"SHelters\", \"CHINA\", \"LECH\", \"SLUM\", \"BOX\", \"TRAP\", \"PRIvate\", \"NEW\", \"SWINGING\", \"CAST\", \"MOUSE\", \"STAR\", \"SERVED\", \"SLEIGH\"]",
+      "response": "Answer: [\"SHelters\", \"CHINA\", \"LECH\", \"SLUM\", \"BOX\", \"TRAP\", \"PRIvate\", \"NEW\", \"SWINGING\", \"CAST\", \"MOUSE\", \"STAR\", \"SERVED\", \"SLEIGH\"]"
+    },
+    {
+      "seed": 10064,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHEDS\", \"MANDARIN\", \"LEECHES\", \"SLUM\", \"FOURTEEN\", \"LIARS\", \"PUBMED\", \"HYMN\", \"WEEPING\", \"CONRAD\", \" şikARS\", \"NOOB\"]",
+      "response": "Answer: [\"SHEDS\", \"MANDARIN\", \"LEECHES\", \"SLUM\", \"FOURTEEN\", \"LIARS\", \"PUBMED\", \"HYMN\", \"WEEPING\", \"CONRAD\", \" şikARS\", \"NOOB\"]"
+    },
+    {
+      "seed": 10065,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOSES\", \"LOOSEN\", \"CARDBOARD\", \"ICU\", \"PURE\"]",
+      "response": "Answer: [\"LOSES\", \"LOOSEN\", \"CARDBOARD\", \"ICU\", \"PURE\"]"
+    },
+    {
+      "seed": 10066,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOSES\", \"LOOSEN\", \"FLO攀\", \"ICU\", \"PURITY\", \"POLO\", \"UNCOOP\", \"LOAFS\"]",
+      "response": "Answer: [\"LOSES\", \"LOOSEN\", \"FLO攀\", \"ICU\", \"PURITY\", \"POLO\", \"UNCOOP\", \"LOAFS\"]"
+    },
+    {
+      "seed": 10067,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FOCUS\", \"PATRICK\", \"KISS\"', \" глубоко\", \"BILLABONG\", \"GUESTS\", \"EARTHTAKES\", \"CARRIAGE\", \"DUDES\", \"DISTRICT\", \"AS.firstname\", \"ENLARGES\", \"ADMIN\", \"PAYS\"]",
+      "response": "Answer: [\"FOCUS\", \"PATRICK\", \"KISS\"', \" глубоко\", \"BILLABONG\", \"GUESTS\", \"EARTHTAKES\", \"CARRIAGE\", \"DUDES\", \"DISTRICT\", \"AS.firstname\", \"ENLARGES\", \"ADMIN\", \"PAYS\"]"
+    },
+    {
+      "seed": 10068,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOSES\", \"UN万欧元\", \"BOXES\", \"ICU\", \"PURIFIED\"]",
+      "response": "Answer: [\"LOSES\", \"UN万欧元\", \"BOXES\", \"ICU\", \"PURIFIED\"]"
+    },
+    {
+      "seed": 10069,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOSES\", \"SLOPES\", \"CARTS\", \"ICUS\", \"PURE\", \"GRANT\", \"REPLY\", \"BREADS\", \"STOMA\"]",
+      "response": "Answer: [\"LOSES\", \"SLOPES\", \"CARTS\", \"ICUS\", \"PURE\", \"GRANT\", \"REPLY\", \"BREADS\", \"STOMA\"]"
+    },
+    {
+      "seed": 10070,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHIPS\", \"MANDARINS\", \"LECHER\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"ANON\", \"POLO\", \"SWINGING\", \"LEWIS\", \"MAMMALS\", \"STAR\", \"SERVED\"]",
+      "response": "Answer: [\"SHIPS\", \"MANDARINS\", \"LECHER\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"ANON\", \"POLO\", \"SWINGING\", \"LEWIS\", \"MAMMALS\", \"STAR\", \"SERVED\"]"
+    },
+    {
+      "seed": 10071,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MOBILES\", \"CHINA\", \"LECHER\", \"SQUALOR\", \"DOZEN\", \"TRAP\", \"PRIVAE\", \"WHISP\", \"SWINGING\", \"LEONIDAS\", \"MARMOTS\", \"JUNIOR\"]",
+      "response": "Answer: [\"MOBILES\", \"CHINA\", \"LECHER\", \"SQUALOR\", \"DOZEN\", \"TRAP\", \"PRIVAE\", \"WHISP\", \"SWINGING\", \"LEONIDAS\", \"MARMOTS\", \"JUNIOR\"]"
+    },
+    {
+      "seed": 10072,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MOON\", \"SMART\", \"CARVED\", \"CASH\", \"ADULT\"]",
+      "response": "Based on the clues provided, the words that seem to fit are:\n\n1. Shining circle in the night sky - MOON\n2. A little too clever - SMART\n3. Sculpted - CARVED\n4. King's ___ (large sum of money) - CASH\n5."
+    },
+    {
+      "seed": 10073,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MOON\", \"SMART\", \"CARVED\", \"TREASURY\", \"ADULT\"]",
+      "response": "Based on the clues provided, here are the corresponding words for the crossword puzzle:\n\n1. Shining circle in the night sky - Clue: 1\n   - Answer: MOON\n\n2. A little too clever - Clue: 2\n   - Answer: S"
+    },
+    {
+      "seed": 10074,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"SHELTERS\", \"OGLE\", \"BASED\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"PRIVATE\", \"NEW\", \"WARMING\", \"LEFF\"]",
+      "response": "Answer: [\"SHELTERS\", \"OGLE\", \"BASED\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"PRIVATE\", \"NEW\", \"WARMING\", \"LEFF\"]"
+    },
+    {
+      "seed": 10075,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MOBILES\", \"CHINA\", \"TARTAR\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"PUBMED\", \"NEWPOP\", \"WARMING\", \"LEWIS\"]",
+      "response": "Answer: [\"MOBILES\", \"CHINA\", \"TARTAR\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"PUBMED\", \"NEWPOP\", \"WARMING\", \"LEWIS\"]"
+    },
+    {
+      "seed": 10076,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHACKLES\", \"MANDARIN\", \"SALAKA\", \"SLUM\", \"DOZEN\", \"TRNA\", \"STALKERS\", \"NEWWAVE\", \"UPPING\", \"LEOUNIS\"]",
+      "response": "Answer: [\"SHACKLES\", \"MANDARIN\", \"SALAKA\", \"SLUM\", \"DOZEN\", \"TRNA\", \"STALKERS\", \"NEWWAVE\", \"UPPING\", \"LEOUNIS\"]"
+    },
+    {
+      "seed": 10077,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHELTER\", \"CHIEN\", \"SLUTTY\", \"DUNGEON\", \"DOZEN\", \"TRAPPING\", \"STALKING\", \"NEWPOPS\", \"SWINGING\", \"PREMATTE\"]",
+      "response": "Answer: [\"SHELTER\", \"CHIEN\", \"SLUTTY\", \"DUNGEON\", \"DOZEN\", \"TRAPPING\", \"STALKING\", \"NEWPOPS\", \"SWINGING\", \"PREMATTE\"]"
+    },
+    {
+      "seed": 10078,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"SHEDS\", \"CHINA\", \"LECH\", \"SLUM\", \"DOZEN\", \"TRIP\", \"STALK\", \"SYNTH\", \"SWING\", \"LEFFT\"]",
+      "response": "Answer: [\"SHEDS\", \"CHINA\", \"LECH\", \"SLUM\", \"DOZEN\", \"TRIP\", \"STALK\", \"SYNTH\", \"SWING\", \"LEFFT\"]"
+    },
+    {
+      "seed": 10079,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MOBILES\", \"CHINAMEN\", \"SNEAKY\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"SECRET\", \"AORTA\", \"WARMING\", \"PREVIOUS\"]",
+      "response": "Answer: [\"MOBILES\", \"CHINAMEN\", \"SNEAKY\", \"SLUM\", \"DOZEN\", \"TRAPPED\", \"SECRET\", \"AORTA\", \"WARMING\", \"PREVIOUS\"]"
+    },
+    {
+      "seed": 10080,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MOBILES\", \"CHINA\", \"LECHER\", \"SLUM\", \"DOZEN\", \"TRAPS\", \"PAIDS\", \"INSTA\", \"SWING\", \"CAST\"]",
+      "response": "Answer: [\"MOBILES\", \"CHINA\", \"LECHER\", \"SLUM\", \"DOZEN\", \"TRAPS\", \"PAIDS\", \"INSTA\", \"SWING\", \"CAST\"]"
+    },
+    {
+      "seed": 10081,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHEDS\", \"CHIN\", \"S OP\", \"SLUM\", \"DOZEN\", \"TRAP\", \"PRIV\", \"JPop\", \"Swing\", \"CAST\"]",
+      "response": "Answer: [\"SHEDS\", \"CHIN\", \"S OP\", \"SLUM\", \"DOZEN\", \"TRAP\", \"PRIV\", \"JPop\", \"Swing\", \"CAST\"]"
+    },
+    {
+      "seed": 10082,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"SHELTERS\", \"CHINA\", \"T ViewChildE\", \"D狭窄\", \"DOZEN\", \"SCAMMED\", \"PUBSUB\", \"SYNTH\", \"WARMING\", \"LESTrz\" ]",
+      "response": "Answer: [\"SHELTERS\", \"CHINA\", \"T ViewChildE\", \"D狭窄\", \"DOZEN\", \"SCAMMED\", \"PUBSUB\", \"SYNTH\", \"WARMING\", \"LESTrz\" ]"
+    },
+    {
+      "seed": 10083,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BAKED\", \"PUZZLE\", \"DRESSED\", \"VOICE\", \"ELF\", \"SPOIL\", \"VEST\", \"DECOR\", \"CATS \", \"RAFTS\"]",
+      "response": "Answer: [\"BAKED\", \"PUZZLE\", \"DRESSED\", \"VOICE\", \"ELF\", \"SPOIL\", \"VEST\", \"DECOR\", \"CATS \", \"RAFTS\"]"
+    },
+    {
+      "seed": 10084,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"PALETTED\", \"PUZZLE\", \"GROOMED\", \"CALLER\", \"EL\", \"SPOIL\", \"ARTICLE\", \"ORNAMENTS\", \"TANGO\", \"COMPETITIONS\", \"WICKED\", \"RAPPER\"]",
+      "response": "Answer: [\"PALETTED\", \"PUZZLE\", \"GROOMED\", \"CALLER\", \"EL\", \"SPOIL\", \"ARTICLE\", \"ORNAMENTS\", \"TANGO\", \"COMPETITIONS\", \"WICKED\", \"RAPPER\"]"
+    },
+    {
+      "seed": 10085,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BAKE\", \"PUZZLE\", \"BENUPT\", \"：\"+\", \"ALPHA\", \"SPOIL\", \"STRAW\", \"：\"+\", \"EVITA\", \"COMPET\", \"OZARXRP\", \"NSYNC\"]",
+      "response": "Answer: [\"BAKE\", \"PUZZLE\", \"BENUPT\", \"：\"+\", \"ALPHA\", \"SPOIL\", \"STRAW\", \"：\"+\", \"EVITA\", \"COMPET\", \"OZARXRP\", \"NSYNC\"]"
+    },
+    {
+      "seed": 10086,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BAKED\", \"PUZZLE\", \"DRESSED\", \"ASKED\", \"EARTH\", \"SPOIL\", \"JOINT\"]",
+      "response": "Answer: [\"BAKED\", \"PUZZLE\", \"DRESSED\", \"ASKED\", \"EARTH\", \"SPOIL\", \"JOINT\"]"
+    },
+    {
+      "seed": 10087,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"ABBOTSFORD\", \"RE_RUN\", \"SPRAWLS\", \"Fiesta\", \"VULCAN\", \"AMBASSADOR\", \"EUREKA\", \"REPENT\", \"NEATLY\", \"THENCE\"]",
+      "response": "Answer: [\"ABBOTSFORD\", \"RE_RUN\", \"SPRAWLS\", \"Fiesta\", \"VULCAN\", \"AMBASSADOR\", \"EUREKA\", \"REPENT\", \"NEATLY\", \"THENCE\"]"
+    },
+    {
+      "seed": 10088,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SPOTS\", \"IRRITABLE\", \"BUS\", \"SOAP\", \"HOT\", \"NAIBO\", \"COOK\", \"LAMBORGHINI\", \"DISTRACT\", \"NAPER\", \"PURE\", \"COMPETITOR\"]",
+      "response": "Answer: [\"SPOTS\", \"IRRITABLE\", \"BUS\", \"SOAP\", \"HOT\", \"NAIBO\", \"COOK\", \"LAMBORGHINI\", \"DISTRACT\", \"NAPER\", \"PURE\", \"COMPETITOR\"]"
+    },
+    {
+      "seed": 10089,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"OMG\", \"FOR SALE\", \"SMILE\", \"DISARM\", \"UPFRONT\", \"PROVEN\", \"ENORMOUS\", \"FLimsY\", \"RATING\", \"UNhappy\"]",
+      "response": "Answer: [\"OMG\", \"FOR SALE\", \"SMILE\", \"DISARM\", \"UPFRONT\", \"PROVEN\", \"ENORMOUS\", \"FLimsY\", \"RATING\", \"UNhappy\"]"
+    },
+    {
+      "seed": 10090,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"ABBAS\", \"SYNC\", \"STRETCHES\", \"FIesta\", \"Klingon\", \"AMBASSADOR\", \"EUREKA\", \"REPENT\"]",
+      "response": "Answer: [\"ABBAS\", \"SYNC\", \"STRETCHES\", \"FIesta\", \"Klingon\", \"AMBASSADOR\", \"EUREKA\", \"REPENT\"]"
+    },
+    {
+      "seed": 10091,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"ANTIGEN\", \"CARAVEL\", \"LAS_VEGAS\", \"CANE\", \"POTATOES\", \"TOSTADAS\", \"NOT\", \"WOW\"]",
+      "response": "Answer: [\"ANTIGEN\", \"CARAVEL\", \"LAS_VEGAS\", \"CANE\", \"POTATOES\", \"TOSTADAS\", \"NOT\", \"WOW\"]"
+    },
+    {
+      "seed": 10092,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"GONE\", \"FOR SALE\", \"SMILE\", \"DEFUSE\", \"FRANKLY\", \"PROVEN\", \"ENORMOUS\", \"FLimsY\", \"RATING\", \"UNHAPy\", \"ABRAHAM\", \"FAULTY\", \"WORSE\", \"GOOGLE\", \"RAM\"]",
+      "response": "Answer: [\"GONE\", \"FOR SALE\", \"SMILE\", \"DEFUSE\", \"FRANKLY\", \"PROVEN\", \"ENORMOUS\", \"FLimsY\", \"RATING\", \"UNHAPy\", \"ABRAHAM\", \"FAULTY\", \"WORSE\", \"GOOGLE\", \"RAM\"]"
+    },
+    {
+      "seed": 10093,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"=_(\",\"ILLUS\", \"SMILE\",\"DISARM\",\"FRANKLY\",\"PROVED\",\"ENORMOUS\",\"FLimsY\",\"RATING\",\"DISSATISFIED\",\"ABRAHAM\"]",
+      "response": "Answer: [\"=_(\",\"ILLUS\", \"SMILE\",\"DISARM\",\"FRANKLY\",\"PROVED\",\"ENORMOUS\",\"FLimsY\",\"RATING\",\"DISSATISFIED\",\"ABRAHAM\"]"
+    },
+    {
+      "seed": 10094,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"EMOTE\", \"FOR SALE\", \"CHEER\", \"DISARM\", \"FRANKLY\", \"PROVEN\", \"ENORMOUS\"]",
+      "response": "Answer: [\"EMOTE\", \"FOR SALE\", \"CHEER\", \"DISARM\", \"FRANKLY\", \"PROVEN\", \"ENORMOUS\"]"
+    },
+    {
+      "seed": 10095,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"CLAIRSOMATIC\", \"FORSALE\", \"GIMMEACHANCE\", \"DISARM\", \"FRANKLY\", \"PROVEN\"]",
+      "response": "Answer: [\"CLAIRSOMATIC\", \"FORSALE\", \"GIMMEACHANCE\", \"DISARM\", \"FRANKLY\", \"PROVEN\"]"
+    },
+    {
+      "seed": 10096,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"OMG\", \"FOR SALE\", \"CHEER UP\", \"DISARM\", \"TO TELL\", \"PROVEN\", \"ENORMOUS\", \"FLimsY\", \"SERVICE\", \"UNHAPPY\", \"ABRAHAM\", \"BREAK DOWN\", \"WORSE\", \"GOOGLE\", \"BUFFALO\"]",
+      "response": "Answer: [\"OMG\", \"FOR SALE\", \"CHEER UP\", \"DISARM\", \"TO TELL\", \"PROVEN\", \"ENORMOUS\", \"FLimsY\", \"SERVICE\", \"UNHAPPY\", \"ABRAHAM\", \"BREAK DOWN\", \"WORSE\", \"GOOGLE\", \"BUFFALO\"]"
+    },
+    {
+      "seed": 10097,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ABBOT\", \"AGAIN\", \"SPLUT\", \"FESTE\", \"MUUC\", \"CHARGE\"]",
+      "response": "Answer: [\"ABBOT\", \"AGAIN\", \"SPLUT\", \"FESTE\", \"MUUC\", \"CHARGE\"]"
+    },
+    {
+      "seed": 10098,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"spots\", \"irritated\", \"bus\", \"detergent\", \"hot\", \"Naismith\", \"bake\", \"car\", \"scare\", \"Naperville\", \"pure\", \"rival\", \"staying\"]",
+      "response": "Answer: [\"spots\", \"irritated\", \"bus\", \"detergent\", \"hot\", \"Naismith\", \"bake\", \"car\", \"scare\", \"Naperville\", \"pure\", \"rival\", \"staying\"]"
+    },
+    {
+      "seed": 10099,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ABBOT\", \"RERUN\", \"SLOSHES\", \"FESTIVALS\", \"ROMULANS\", \"AMBASSADOR\", \"EPIPHANY\", \"REPENT\"]",
+      "response": "Answer: [\"ABBOT\", \"RERUN\", \"SLOSHES\", \"FESTIVALS\", \"ROMULANS\", \"AMBASSADOR\", \"EPIPHANY\", \"REPENT\"]"
+    },
+    {
+      "seed": 10100,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROOFTOPS\", \"ANGRILY\", \"ONWARDS\", \"SUDSY\", \"HOTSPOTS\", \"Na Brands\", \"COOKING\", \"FERRARS\", \"REPUZZLE\"]",
+      "response": "Answer: [\"ROOFTOPS\", \"ANGRILY\", \"ONWARDS\", \"SUDSY\", \"HOTSPOTS\", \"Na Brands\", \"COOKING\", \"FERRARS\", \"REPUZZLE\"]"
+    },
+    {
+      "seed": 10101,
+      "score": 0.25,
+      "success": true,
+      "action": "[\"ABBOTS\", \"TOOK\", \"SPLODE\", \"FIesta\", \"TRADIION\", \"AMBASSADOR\", \"EUREKA\", \"EXPIATE\"]",
+      "response": "Answer: [\"ABBOTS\", \"TOOK\", \"SPLODE\", \"FIesta\", \"TRADIION\", \"AMBASSADOR\", \"EUREKA\", \"EXPIATE\"]"
+    },
+    {
+      "seed": 10102,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ABBOT\", \"RERUN\", \"SLOSHES\", \"FESTIVE\", \"KDIRAKIS\", \"AMBASSADOR\", \"EUREKA\"]",
+      "response": "Answer: [\"ABBOT\", \"RERUN\", \"SLOSHES\", \"FESTIVE\", \"KDIRAKIS\", \"AMBASSADOR\", \"EUREKA\"]"
+    },
+    {
+      "seed": 10103,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"VIEW\", \"IRRITABLE\", \"BOARD\", \" LIKE\", \" HOT\", \"NAQNEDO\", \"FERRARI\", \"ANXIOUS\", \"HYDE\", \"LINN\", \"AWSOME\", \"RIVAL\", \"STAY\", \"WOW\", \"MAY\"]",
+      "response": "Answer: [\"VIEW\", \"IRRITABLE\", \"BOARD\", \" LIKE\", \" HOT\", \"NAQNEDO\", \"FERRARI\", \"ANXIOUS\", \"HYDE\", \"LINN\", \"AWSOME\", \"RIVAL\", \"STAY\", \"WOW\", \"MAY\"]"
+    },
+    {
+      "seed": 10104,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SCENES\", \"IRRITABLE\", \"SPEED\", \"DRY\", \"HEAT\", \"NAIWAKA\", \"COOK\", \"SUPER\", \"SHY\", \"LINCOLN\", \"FRESH\", \"COMPETITOR\"]",
+      "response": "Answer: [\"SCENES\", \"IRRITABLE\", \"SPEED\", \"DRY\", \"HEAT\", \"NAIWAKA\", \"COOK\", \"SUPER\", \"SHY\", \"LINCOLN\", \"FRESH\", \"COMPETITOR\"]"
+    },
+    {
+      "seed": 10105,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"ABBED\",\"AGAIN\",\"TAGGED\",\"Fiesta\",\"Romulans\",\"Ambassador\"]",
+      "response": "Answer: [\"ABBED\",\"AGAIN\",\"TAGGED\",\"Fiesta\",\"Romulans\",\"Ambassador\"]"
+    },
+    {
+      "seed": 10106,
+      "score": 0.07142857142857142,
+      "success": true,
+      "action": "[\"GEODE\", \"MERcury\", \"OUTRANKS\", \"WHALE\", \"COWBOY\", \"黧.userService.getUserInterestWords('adjectives').split(',')[0]\", \"TIPS\", \"PEDALS\", \"OKAY\", \"ethylene\", \"self\", \"DRIVER\", \"KIL operative\", \"MAU\"]",
+      "response": "Answer: [\"GEODE\", \"MERcury\", \"OUTRANKS\", \"WHALE\", \"COWBOY\", \"黧.userService.getUserInterestWords('adjectives').split(',')[0]\", \"TIPS\", \"PEDALS\", \"OKAY\", \"ethylene\", \"self\", \"DRIVER\", \"KIL operative\", \""
+    },
+    {
+      "seed": 10107,
+      "score": 0.07692307692307693,
+      "success": true,
+      "action": "[\"DOME\", \"MERCURY\", \"OUTRIDE\", \"MOOSE\", \"MOLECULE\", \"MARKUP\", \"PEDALS\", \"PUMP\", \"NILL\", \"ETHELENES\", \"PUERTA\", \"LIEBERMAN\"]",
+      "response": "Answer: [\"DOME\", \"MERCURY\", \"OUTRIDE\", \"MOOSE\", \"MOLECULE\", \"MARKUP\", \"PEDALS\", \"PUMP\", \"NILL\", \"ETHELENES\", \"PUERTA\", \"LIEBERMAN\"]"
+    },
+    {
+      "seed": 10108,
+      "score": 0.2222222222222222,
+      "success": true,
+      "action": "[\"abbey\", \"ran\", \"sprawls\", \"colada\", \"vulcan\", \"envoy\", \"eureka\", \"expiate\", \"toast\"]",
+      "response": "Based on the clues and the crossword structure, here are the words that fit:\n\n1. Westminster Abbey section hinted at by this puzzle's architecture - abbey\n2. Ran through again - ran\n3. Spreads out ung"
+    },
+    {
+      "seed": 10109,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"ABBOT\", \"AGAIN\", \"FLUNG\", \"FIESTA\", \"ROMULANS\"]",
+      "response": "Answer: [\"ABBOT\", \"AGAIN\", \"FLUNG\", \"FIESTA\", \"ROMULANS\"]"
+    },
+    {
+      "seed": 10110,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"DOMES\", \"MERcury\", \"BEATS\", \"WHALs\", \"DYALK\", \"SIMPLES\", \"MARKUPS\", \"PEDALS\", \"NONE\", \"ETERS\", \"MARQUEE\", \"DROVER\", \"ALEXANDER\", \"GRIND\"]",
+      "response": "Answer: [\"DOMES\", \"MERcury\", \"BEATS\", \"WHALs\", \"DYALK\", \"SIMPLES\", \"MARKUPS\", \"PEDALS\", \"NONE\", \"ETERS\", \"MARQUEE\", \"DROVER\", \"ALEXANDER\", \"GRIND\"]"
+    },
+    {
+      "seed": 10111,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ABBOT\", \"AGAIN\", \"TROWELS\", \"FIesta\", \"KDO\", \"AMBASSADOR\", \"EUREKA\", \"REPENT\", \"ADVERTISER\", \"THence\", \"ENDEUDING\", \"TAXES\"]",
+      "response": "Answer: [\"ABBOT\", \"AGAIN\", \"TROWELS\", \"FIesta\", \"KDO\", \"AMBASSADOR\", \"EUREKA\", \"REPENT\", \"ADVERTISER\", \"THence\", \"ENDEUDING\", \"TAXES\"]"
+    },
+    {
+      "seed": 10112,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"ABBOT\", \"AGAIN\", \"SCRAMbles\", \"FIESTA\", \"ROMULANS\", \"ENVOY\", \"Dawns\", \"RENDERS\", \"CHAMPAGNE\", \"DERIVES\"]",
+      "response": "Answer: [\"ABBOT\", \"AGAIN\", \"SCRAMbles\", \"FIESTA\", \"ROMULANS\", \"ENVOY\", \"Dawns\", \"RENDERS\", \"CHAMPAGNE\", \"DERIVES\"]"
+    },
+    {
+      "seed": 10113,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"DOMES\", \"MERcury\", \"OUTRIDS\", \"SEADRAG\", \"DANNYY\", \"APLIKE\", \"MARKUPS\", \"ACCELERATE\", \"NONSESS\", \"ETTOLINE\", \"OLVIDO\", \"HERMES\", \"QUITE\", \"GROUNDS\"]",
+      "response": "Answer: [\"DOMES\", \"MERcury\", \"OUTRIDS\", \"SEADRAG\", \"DANNYY\", \"APLIKE\", \"MARKUPS\", \"ACCELERATE\", \"NONSESS\", \"ETTOLINE\", \"OLVIDO\", \"HERMES\", \"QUITE\", \"GROUNDS\"]"
+    },
+    {
+      "seed": 10114,
+      "score": 0.07692307692307693,
+      "success": true,
+      "action": "[\"DOMES\", \"MERcury\", \"PREDATES\", \"MOOSE\", \"DICK\", \"COMPLEX\", \"MARKUP\", \"PEDALS\", \"NONE\", \"ETches\", \"Kahlo\", \"RODED\"]",
+      "response": "Answer: [\"DOMES\", \"MERcury\", \"PREDATES\", \"MOOSE\", \"DICK\", \"COMPLEX\", \"MARKUP\", \"PEDALS\", \"NONE\", \"ETches\", \"Kahlo\", \"RODED\"]"
+    },
+    {
+      "seed": 10115,
+      "score": 0.2222222222222222,
+      "success": true,
+      "action": "[\" QUIET\", \" DISAGREE\", \" DRUMSET\", \" ARTFAIR\", \" COMEDYAN\", \" OVERTHR\", \" TERRORI\", \" STREAML\", \" AWAYTE\"]",
+      "response": "Answer: [\" QUIET\", \" DISAGREE\", \" DRUMSET\", \" ARTFAIR\", \" COMEDYAN\", \" OVERTHR\", \" TERRORI\", \" STREAML\", \" AWAYTE\"]"
+    },
+    {
+      "seed": 10116,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"DOMES\", \"MERcury\", \"DOMINATES\", \"WHALE\", \"STELLA\", \"COMPLEX\", \"MARKUPS\", \"PEDAL\", \"NOISSUE\", \"ETHYLENE\", \"KOLOMNA\", \"DRIVER\", \"GULLiver\", \"FLOOR\"]",
+      "response": "Answer: [\"DOMES\", \"MERcury\", \"DOMINATES\", \"WHALE\", \"STELLA\", \"COMPLEX\", \"MARKUPS\", \"PEDAL\", \"NOISSUE\", \"ETHYLENE\", \"KOLOMNA\", \"DRIVER\", \"GULLiver\", \"FLOOR\"]"
+    },
+    {
+      "seed": 10117,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"DOMES\", \"MERCI\", \"OUTRIG\", \"WHALE\", \"DREW\", \"ESSENT\", \"MARKUP\", \"PEDAL\", \"NEPOT\", \"ETHAN\", \"SELF\", \"PUSHE\"]",
+      "response": "Answer: [\"DOMES\", \"MERCI\", \"OUTRIG\", \"WHALE\", \"DREW\", \"ESSENT\", \"MARKUP\", \"PEDAL\", \"NEPOT\", \"ETHAN\", \"SELF\", \"PUSHE\"]"
+    },
+    {
+      "seed": 10118,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"NO\", \"QUARREL\", \"DRUMS\", \"EXHIBITION\", \"CASTS\", \"HUMBLES\"]",
+      "response": "Answer: [\"NO\", \"QUARREL\", \"DRUMS\", \"EXHIBITION\", \"CASTS\", \"HUMBLES\"]"
+    },
+    {
+      "seed": 10119,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"NO\", \"QUARTER\", \"DRUMS\", \"ARTSHOW\", \"CASTS\", \"INSTALLS\", \"RADICALS\", \"STREAMLINE\", \"LEADS\", \"UPDATES\", \"PRIORITY\", \"FOODLE\", \"BOUT\", \"ORNAMENTS\", \"SETBACK\"]",
+      "response": "Answer: [\"NO\", \"QUARTER\", \"DRUMS\", \"ARTSHOW\", \"CASTS\", \"INSTALLS\", \"RADICALS\", \"STREAMLINE\", \"LEADS\", \"UPDATES\", \"PRIORITY\", \"FOODLE\", \"BOUT\", \"ORNAMENTS\", \"SETBACK\"]"
+    },
+    {
+      "seed": 10120,
+      "score": 0.0,
+      "success": false,
+      "action": "[\" QUIET\", \"PROTEST\", \"DRUMS\", \"EXPO\", \"SKETCHES\", \"FALLS\", \"RADICALS\", \"STREAMLINED\", \"RETIRES\"]",
+      "response": "Answer: [\" QUIET\", \"PROTEST\", \"DRUMS\", \"EXPO\", \"SKETCHES\", \"FALLS\", \"RADICALS\", \"STREAMLINED\", \"RETIRES\"]"
+    },
+    {
+      "seed": 10121,
+      "score": 0.07142857142857142,
+      "success": true,
+      "action": "[\"SERUMS\", \"RANK\", \"ROOSTERS\", \"BETWEEN\", \"PARADISES\", \"HEART\", \"CBS\", \"ALGERIA\", \"+-+-\", \"INSPIRE\", \"LEAVES\", \"MOVIE\", \"ANXIOUS\", \"DOWN\"]",
+      "response": "Answer: [\"SERUMS\", \"RANK\", \"ROOSTERS\", \"BETWEEN\", \"PARADISES\", \"HEART\", \"CBS\", \"ALGERIA\", \"+-+-\", \"INSPIRE\", \"LEAVES\", \"MOVIE\", \"ANXIOUS\", \"DOWN\"]"
+    },
+    {
+      "seed": 10122,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"VALENTINES\", \"NICCOLO\", \"WHISKEY\", \"MINDY\", \"TITANIC\", \"COMPUTER\", \"DRAW\", \"EXPLODED\", \"REACH\", \"LANE\"]",
+      "response": "Answer: [\"VALENTINES\", \"NICCOLO\", \"WHISKEY\", \"MINDY\", \"TITANIC\", \"COMPUTER\", \"DRAW\", \"EXPLODED\", \"REACH\", \"LANE\"]"
+    },
+    {
+      "seed": 10123,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"ADVANCE\", \"NAPA\", \"ANXIOUS\", \"GRITTY\", \"HERBS\", \"FREQUENT\", \"SIDE\", \"SLANDERS\"]",
+      "response": "Answer: [\"ADVANCE\", \"NAPA\", \"ANXIOUS\", \"GRITTY\", \"HERBS\", \"FREQUENT\", \"SIDE\", \"SLANDERS\"]"
+    },
+    {
+      "seed": 10124,
+      "score": 0.0,
+      "success": false,
+      "action": "[\":'. solitary\", \"valley\", \"tonic\", \"gritty\", \"tea\", \"bribe\", \"dinner\", \"libels\", \"twister\", \"alleged\", \"harsh\"]",
+      "response": "Answer: [\":'.$ solitary\", \"valley\", \"tonic\", \"gritty\", \"tea\", \"bribe\", \"dinner\", \"libels\", \"twister\", \"alleged\", \"harsh\"]"
+    },
+    {
+      "seed": 10125,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FOIL\", \"RANK\", \"ROOST\", \"BETWEEN\", \"PARADISES\", \"HEART\", \"CBS\", \"EGYPT\", \"DOUXT\", \"MORGAN\", \"LEAVES\", \"FRAY\", \"SEE\"]",
+      "response": "Answer: [\"FOIL\", \"RANK\", \"ROOST\", \"BETWEEN\", \"PARADISES\", \"HEART\", \"CBS\", \"EGYPT\", \"DOUXT\", \"MORGAN\", \"LEAVES\", \"FRAY\", \"SEE\"]"
+    },
+    {
+      "seed": 10126,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"POLICE\", \"START\", \"HEN\", \"FOR\", \"UPLOAD\", \"GOALS\"]",
+      "response": "Answer: [\"POLICE\", \"START\", \"HEN\", \"FOR\", \"UPLOAD\", \"GOALS\"]"
+    },
+    {
+      "seed": 10127,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"DOG\", \"START\", \"EGG\", \"FOR\", \"UPLOADING\", \"GOALS\"]",
+      "response": "Answer: [\"DOG\", \"START\", \"EGG\", \"FOR\", \"UPLOADING\", \"GOALS\"]"
+    },
+    {
+      "seed": 10128,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"POLICE\", \"START\", \"EGGSPONDED\", \"LODGE\", \"UPLOADING\"]",
+      "response": "Answer: [\"POLICE\", \"START\", \"EGGSPONDED\", \"LODGE\", \"UPLOADING\"]"
+    },
+    {
+      "seed": 10129,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"gig\", \"aha\", \"texas\", \"bilboards\", \"and\", \"dopey\", \"cookie\", \"man\", \"flu\", \"pipes\", \"repeat\"]",
+      "response": "Answer: [\"gig\", \"aha\", \"texas\", \"bilboards\", \"and\", \"dopey\", \"cookie\", \"man\", \"flu\", \"pipes\", \"repeat\"]"
+    },
+    {
+      "seed": 10130,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10131,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"QUITTING\",\"TMAKE\",\"PENDING\",\"METHODOLOGY\",\"BRANCH\",\"STUCK\"]",
+      "response": "Answer: [\"QUITTING\",\"TMAKE\",\"PENDING\",\"METHODOLOGY\",\"BRANCH\",\"STUCK\"]"
+    },
+    {
+      "seed": 10132,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10133,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ABTOL\", \"TAYLOR\", \"PENDING\", \"STADIUM\", \"BRANCH\", \"ENTRAY\"]",
+      "response": "Answer: [\"ABTOL\", \"TAYLOR\", \"PENDING\", \"STADIUM\", \"BRANCH\", \"ENTRAY\"]"
+    },
+    {
+      "seed": 10134,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10135,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"GIG\", \"HYPOTHETICALLY\", \"TEXAS\", \"ST על\", \"MERGED\", \"WAIVE\"]",
+      "response": "Answer: [\"GIG\", \"HYPOTHETICALLY\", \"TEXAS\", \"ST על\", \"MERGED\", \"WAIVE\"]"
+    },
+    {
+      "seed": 10136,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10137,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SPF\", \"RANK\", \"CROW\", \"MATCH\", \"HEAVEN\", \"HEADACHE\", \"NBC\", \"ALGERIA\", \"cut\", \"SPIRIT\"]",
+      "response": "Answer: [\"SPF\", \"RANK\", \"CROW\", \"MATCH\", \"HEAVEN\", \"HEADACHE\", \"NBC\", \"ALGERIA\", \"cut\", \"SPIRIT\"]"
+    },
+    {
+      "seed": 10138,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10139,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"WAGON\", \"DIALECT\", \"DIVIDEND\", \"CONTAINER\", \"THANKS\", \"UNTIE\", \"SDEGREES\", \"Walden\", \"FARM\", \"SNIP\"]",
+      "response": "Answer: [\"WAGON\", \"DIALECT\", \"DIVIDEND\", \"CONTAINER\", \"THANKS\", \"UNTIE\", \"SDEGREES\", \"Walden\", \"FARM\", \"SNIP\"]"
+    },
+    {
+      "seed": 10140,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"MADE\", \"OUT\", \"RIFLE\", \"UNIQUE\", \"TEARS\"]",
+      "response": "Answer: [\"ROBOT\", \"MADE\", \"OUT\", \"RIFLE\", \"UNIQUE\", \"TEARS\"]"
+    },
+    {
+      "seed": 10141,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10142,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TRUSS\", \"SUN RA\", \"AXIOM\", \"UTILITY ROOM\", \"EUTOPHAN\", \"DISMANTLED\"]",
+      "response": "Based on the provided clues and the game rules, here are the words that fit the crossword grid:\n\n1. Bike support: TRUSS\n2. Afrofuturist jazz composer who claimed he was from Saturn: SUN RA\n3. Irrefuta"
+    },
+    {
+      "seed": 10143,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"COACH\", \"ACCENT\", \"DIVIDEND\", \"CONTAINERS\", \"THANKS\", \"FOOT\", \"DRY\", \"WALDO\", \"FARM\", \"HARVEST\", \"OLIVEOIL\"]",
+      "response": "Answer: [\"COACH\", \"ACCENT\", \"DIVIDEND\", \"CONTAINERS\", \"THANKS\", \"FOOT\", \"DRY\", \"WALDO\", \"FARM\", \"HARVEST\", \"OLIVEOIL\"]"
+    },
+    {
+      "seed": 10144,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"EMPTY\", \"HASTE\", \"PECTIN\", \"BRANDS\", \"RIDERS\"]",
+      "response": "Answer: [\"EMPTY\", \"HASTE\", \"PECTIN\", \"BRANDS\", \"RIDERS\"]"
+    },
+    {
+      "seed": 10145,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10146,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"STAND\", \" practition\", \"AXIOM\", \"LIBRARY\", \"FIFTH\"]",
+      "response": "Answer: [\"STAND\", \" practition\", \"AXIOM\", \"LIBRARY\", \"FIFTH\"]"
+    },
+    {
+      "seed": 10147,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"STOLEN\", \"SORRY\", \"CHOOSE\", \"POOL\", \"STAY\", \"MOUND\", \"SHALS\", \"BURST\", \"KANYE\", \"SWIFT\", \"DRINK\", \"FIELD\", \"SONGS\", \"RAMON\", \"AUG\"]",
+      "response": "Answer: [\"STOLEN\", \"SORRY\", \"CHOOSE\", \"POOL\", \"STAY\", \"MOUND\", \"SHALS\", \"BURST\", \"KANYE\", \"SWIFT\", \"DRINK\", \"FIELD\", \"SONGS\", \"RAMON\", \"AUG\"]"
+    },
+    {
+      "seed": 10148,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TRUCKS\", \"DJ_SPECKTRUM\", \"AXIOM\", \"HACKERSPACE\", \"SWING_STREET\", \"FRAC_TURES\"]",
+      "response": "Answer: [\"TRUCKS\", \"DJ_SPECKTRUM\", \"AXIOM\", \"HACKERSPACE\", \"SWING_STREET\", \"FRAC_TURES\"]"
+    },
+    {
+      "seed": 10149,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10150,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TRAVELS\", \"RAMEN\", \"EXTEND\", \"TREE\", \"FORMATION\", \"CALM\"]",
+      "response": "Answer: [\"TRAVELS\", \"RAMEN\", \"EXTEND\", \"TREE\", \"FORMATION\", \"CALM\"]"
+    },
+    {
+      "seed": 10151,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FISH\", \"CENTER\", \"CORE\", \"WRECKERS\", \"BAD\", \"LEAFS\", \"TIPTOE\", \"PINK\", \"NAMES\", \"ROVER\", \"ANTONIA\"]",
+      "response": "Answer: [\"FISH\", \"CENTER\", \"CORE\", \"WRECKERS\", \"BAD\", \"LEAFS\", \"TIPTOE\", \"PINK\", \"NAMES\", \"ROVER\", \"ANTONIA\"]"
+    },
+    {
+      "seed": 10152,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10153,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"TRAVELS\", \"RAMEN\", \"EXTRA\", \"TREE\", \"PETCO\", \"HOLY\", \"BEAUTY\", \"FLAT\", \"WFŚYW\", \"DENVER\", \"KEYS\", \"UＳＮＳＴＡＴＥＵＳ\"]",
+      "response": "Answer: [\"TRAVELS\", \"RAMEN\", \"EXTRA\", \"TREE\", \"PETCO\", \"HOLY\", \"BEAUTY\", \"FLAT\", \"WFŚYW\", \"DENVER\", \"KEYS\", \"UＳＮＳＴＡＴＥＵＳ\"]"
+    },
+    {
+      "seed": 10154,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10155,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TRIKE\", \"SUNRAISE\", \"TRUTH\", \"LAIR\", \"STREETS\", \"PARTIES\"]",
+      "response": "Based on the clues provided and the structure of a typical crossword puzzle, here are the corresponding words:\n\n1. Bike support (6) : TRIKE\n2. Afrofuturist jazz composer who claimed he was from Saturn"
+    },
+    {
+      "seed": 10156,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10157,
+      "score": 0.0,
+      "success": false,
+      "error": "500 Server Error: Internal Server Error for url: http://localhost:8775/generate"
+    },
+    {
+      "seed": 10158,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"STEALING\", \"SORRY\", \"CHOOSE\", \"BALLS\", \"MINOR\", \"MOUNDS\", \"POLICEMEN\", \"BURSTING\", \"KANYE\", \"SPEED\", \"DRINKS\", \"FIELD\", \"SONG\"]",
+      "response": "Answer: [\"STEALING\", \"SORRY\", \"CHOOSE\", \"BALLS\", \"MINOR\", \"MOUNDS\", \"POLICEMEN\", \"BURSTING\", \"KANYE\", \"SPEED\", \"DRINKS\", \"FIELD\", \"SONG\"]"
+    },
+    {
+      "seed": 10159,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"TRAVELS\", \"RAMEN\", \"DRags\", \"TREE\", \"WALTER\", \"HEART\", \"FINE\", \"FLAT\"]",
+      "response": "Answer: [\"TRAVELS\", \"RAMEN\", \"DRags\", \"TREE\", \"WALTER\", \"HEART\", \"FINE\", \"FLAT\"]"
+    },
+    {
+      "seed": 10160,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10161,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SPOKE\", \"JAKEPIERCE\", \"FACT\", \"HACKERSPACE\", \"ST_NEXTAVG\"]",
+      "response": "Answer: [\"SPOKE\", \"JAKEPIERCE\", \"FACT\", \"HACKERSPACE\", \"ST_NEXTAVG\"]"
+    },
+    {
+      "seed": 10162,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10163,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"TRAVELS\", \"RAMEN\", \"DRAGS\", \"TREE\", \"GIBSON\", \"HEART\", \"LOVELY\", \"FLAT\"]",
+      "response": "Answer: [\"TRAVELS\", \"RAMEN\", \"DRAGS\", \"TREE\", \"GIBSON\", \"HEART\", \"LOVELY\", \"FLAT\"]"
+    },
+    {
+      "seed": 10164,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10165,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"AUDIENCE\", \"EUDORA\", \"EXACTLY\", \"PEICES\", \"INCLUSI\", \"TH陡RE\", \"REFLUX\", \"ASLEEP\", \"MAKING\", \"SNAPS\"]",
+      "response": "Answer: [\"AUDIENCE\", \"EUDORA\", \"EXACTLY\", \"PEICES\", \"INCLUSI\", \"TH陡RE\", \"REFLUX\", \"ASLEEP\", \"MAKING\", \"SNAPS\"]"
+    },
+    {
+      "seed": 10166,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10167,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"TRAVELS\", \"RAMEN\", \"EXTEND\", \"PARK\", \"GUTHRIE\", \"HOPE\", \"BEAUTY\", \"FLAT\"]",
+      "response": "Answer: [\"TRAVELS\", \"RAMEN\", \"EXTEND\", \"PARK\", \"GUTHRIE\", \"HOPE\", \"BEAUTY\", \"FLAT\"]"
+    },
+    {
+      "seed": 10168,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10169,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"AIDE\", \"ASSURES\", \"GENEROUS\", \"RESCUE\", \"BULLETIN\", \"NEATLY\", \"NR\", \"THEATRE\", \"ABSURDISM\", \"OPPOSITELY\"]",
+      "response": "Based on the clues provided and the typical structure of a crossword puzzle, I will fill in the words step by step. Here’s my step-by-step reasoning:\n\n1. **Clue 1**: Military assistant (7) - Could be "
+    },
+    {
+      "seed": 10170,
+      "score": 0.25,
+      "success": true,
+      "action": "[\"TRAVELS\", \"RAMEN\", \"DRAWS\", \"WOODS\", \"MCGUIRE\", \"CALM\", \"ARES\", \"FLAT\"]",
+      "response": "Answer: [\"TRAVELS\", \"RAMEN\", \"DRAWS\", \"WOODS\", \"MCGUIRE\", \"CALM\", \"ARES\", \"FLAT\"]"
+    },
+    {
+      "seed": 10171,
+      "score": 0.0,
+      "success": false,
+      "error": "500 Server Error: Internal Server Error for url: http://localhost:8775/generate"
+    },
+    {
+      "seed": 10172,
+      "score": 0.1111111111111111,
+      "success": true,
+      "action": "[\"TRAVELS\", \"RAMEN\", \"EXTEND\", \"TREE\", \"RONALD\", \"CALM\", \"LOVELY\", \"FLAT\", \"BLOOMINGTON\"]",
+      "response": "Answer: [\"TRAVELS\", \"RAMEN\", \"EXTEND\", \"TREE\", \"RONALD\", \"CALM\", \"LOVELY\", \"FLAT\", \"BLOOMINGTON\"]"
+    },
+    {
+      "seed": 10173,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"SERGEANT\", \"ENSURES\", \"ALTRIOUS\", \"RESTORED\", \"RECIPIENT\", \"NEATLY\", \"N.Game\", \"ACTORS\", \"FOOLISH\", \"OPPOSING\", \"REVEALED\", \"SUBMISSIVE\", \"INPUT\", \"Maltese\", \"Lie\"]",
+      "response": "Answer: [\"SERGEANT\", \"ENSURES\", \"ALTRIOUS\", \"RESTORED\", \"RECIPIENT\", \"NEATLY\", \"N.Game\", \"ACTORS\", \"FOOLISH\", \"OPPOSING\", \"REVEALED\", \"SUBMISSIVE\", \"INPUT\", \"Maltese\", \"Lie\"]"
+    },
+    {
+      "seed": 10174,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"STOLEN\", \"SORRY\", \"SEATS\", \"BALLS\", \"IF\", \"PILES\", \"CCHS\", \"BURST\", \"TYWKER\", \"SPEED\", \"TODDY\", \"FIRMLY\"]",
+      "response": "Answer: [\"STOLEN\", \"SORRY\", \"SEATS\", \"BALLS\", \"IF\", \"PILES\", \"CCHS\", \"BURST\", \"TYWKER\", \"SPEED\", \"TODDY\", \"FIRMLY\"]"
+    },
+    {
+      "seed": 10175,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10176,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CRABS\", \"PINS\", \"LOTO\", \"QUAGMIRE\", \" STATE\", \"EMAIL\", \"MADAMS\", \"JOINT\", \"LESION\"]",
+      "response": "Answer: [\"CRABS\", \"PINS\", \"LOTO\", \"QUAGMIRE\", \" STATE\", \"EMAIL\", \"MADAMS\", \"JOINT\", \"LESION\"]"
+    },
+    {
+      "seed": 10177,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10178,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SNAIL\", \"R评Y\", \"YES\", \"REPAY\", \"COMMON\", \"HUGGED\", \"SYKMANN\", \"FLAWED\"]",
+      "response": "Answer: [\"SNAIL\", \"R评Y\", \"YES\", \"REPAY\", \"COMMON\", \"HUGGED\", \"SYKMANN\", \"FLAWED\"]"
+    },
+    {
+      "seed": 10179,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10180,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"RAD\", \"EXTREME\", \"JUST\", \"ASHES\", \"ARENT\"]",
+      "response": "Answer: [\"RAD\", \"EXTREME\", \"JUST\", \"ASHES\", \"ARENT\"]"
+    },
+    {
+      "seed": 10181,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10182,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"吸入\", \"困倦\", \"邪恶\", \"河盗\", \"经济型\", \"鄙视\", \"装盘\", \"决定\", \"跨年派对\", \"收货处\", \"派对\", \"肯尼迪援助组织\", \"沾满\", \"疼痛\", \"洛杉矶\"]",
+      "response": "Answer: [\"吸入\", \"困倦\", \"邪恶\", \"河盗\", \"经济型\", \"鄙视\", \"装盘\", \"决定\", \"跨年派对\", \"收货处\", \"派对\", \"肯尼迪援助组织\", \"沾满\", \"疼痛\", \"洛杉矶\"]"
+    },
+    {
+      "seed": 10183,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10184,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"NARROW\", \"TIMELY\", \"HAIKY\", \"PIGGY\", \"COMMON\", \"HUGGED\", \"GEOFFREY\", \"IMPER\"]",
+      "response": "To solve this crossword puzzle, I will follow the given clues and fill in the words based on the grid provided in the game. Each clue must fit into the corresponding white squares.\n\n1. Narrow (5) - Th"
+    },
+    {
+      "seed": 10185,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CRUSTACEANS\", \"PINNERS\", \"SOLA\", \"ARENACEOUS\", \"STATELINE\", \"THROTTLING\", \"DESSFEMMES\", \"MEMBERSHIP\", \"MOSSED\"]",
+      "response": "Answer: [\"CRUSTACEANS\", \"PINNERS\", \"SOLA\", \"ARENACEOUS\", \"STATELINE\", \"THROTTLING\", \"DESSFEMMES\", \"MEMBERSHIP\", \"MOSSED\"]"
+    },
+    {
+      "seed": 10186,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10187,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CRABS\", \"PINS\", \"ALONE\", \"SAND\", \"STATE\"]",
+      "response": "Answer: [\"CRABS\", \"PINS\", \"ALONE\", \"SAND\", \"STATE\"]"
+    },
+    {
+      "seed": 10188,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10189,
+      "score": 0.07692307692307693,
+      "success": true,
+      "action": "[\"RELAX\", \"GRIP\", \"IRRITATION\", \"WANDERED\", \"TONES\", \"ADAPTERS\", \"SKATE\", \"DON'T\", \" yearns \", \"SEEPED\", \"THANKYOUCARD\", \"NOCTILUCENT\", \"TRIALED\"]",
+      "response": "Answer: [\"RELAX\", \"GRIP\", \"IRRITATION\", \"WANDERED\", \"TONES\", \"ADAPTERS\", \"SKATE\", \"DON'T\", \" yearns \", \"SEEPED\", \"THANKYOUCARD\", \"NOCTILUCENT\", \"TRIALED\"]"
+    },
+    {
+      "seed": 10190,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10191,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CRABS\", \"PINS\", \"AUT\", \"SAND\", \"BELLS\"]",
+      "response": "Answer: [\"CRABS\", \"PINS\", \"AUT\", \"SAND\", \"BELLS\"]"
+    },
+    {
+      "seed": 10192,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10193,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"RELAX\", \"GRAPES\", \"IRRITATION\", \"WANDERED\", \"SJVOYC\", \"ADSL\", \"SKATEBOARDS\", \"DOINTIME\", \"范冰冰\", \"SEEPAGE\", \"MONOCHROME\", \"NOCTILUCEPTS\"]",
+      "response": "Answer: [\"RELAX\", \"GRAPES\", \"IRRITATION\", \"WANDERED\", \"SJVOYC\", \"ADSL\", \"SKATEBOARDS\", \"DOINTIME\", \"范冰冰\", \"SEEPAGE\", \"MONOCHROME\", \"NOCTILUCEPTS\"]"
+    },
+    {
+      "seed": 10194,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"REVERED\", \"LEZZY\", \"EVIL\", \"SONG⎨Y\", \"BEST}], \"DISDAINED\", \"TAPA\"]",
+      "response": "Solution based on given clues and crossword structure:\n1. REVERED\n2. LEZZY\n3. EVIL\n4. SONG⎨Y\n5. BEST]});\n6. DISDAINED\n7. TAPA支线任务:\nAnswer: [\"REVERED\", \"LEZZY\", \"EVIL\", \"SONG⎨Y\", \"BEST}], \"DISDAINED\", "
+    },
+    {
+      "seed": 10195,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"NARROW\", \"ROBERT\", \"MISSES\", \"RENDERS\", \"EXTENSIVE\", \"EMBRACED\", \"MC\tDECLARES\", \"FLAWED\"]",
+      "response": "Answer: [\"NARROW\", \"ROBERT\", \"MISSES\", \"RENDERS\", \"EXTENSIVE\", \"EMBRACED\", \"MC\tDECLARES\", \"FLAWED\"]"
+    },
+    {
+      "seed": 10196,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10197,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"RELAX\", \"GRIP\", \"IRRITATION\", \"WANDERED\", \"SLOBBER\", \"CABLES\", \"SKATES\", \"DOINF\"path: \"FORM\", \"CRAVING\", \"SEEP\", \"DOMO\", \"STRATUS\"]",
+      "response": "Answer: [\"RELAX\", \"GRIP\", \"IRRITATION\", \"WANDERED\", \"SLOBBER\", \"CABLES\", \"SKATES\", \"DOINF\"path: \"FORM\", \"CRAVING\", \"SEEP\", \"DOMO\", \"STRATUS\"]"
+    },
+    {
+      "seed": 10198,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10199,
+      "score": 0.09090909090909091,
+      "success": true,
+      "action": "[\"MASERATI\", \"EATS\", \"APPLET\", \"ELIMINATED\", \"ENUNCIATES\", \"APPEALS\", \"BAKED\", \"CHANDLER\", \"LONGS\", \"SOURING\", \"STARVES\"]",
+      "response": "Answer: [\"MASERATI\", \"EATS\", \"APPLET\", \"ELIMINATED\", \"ENUNCIATES\", \"APPEALS\", \"BAKED\", \"CHANDLER\", \"LONGS\", \"SOURING\", \"STARVES\"]"
+    },
+    {
+      "seed": 10200,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BRADY\", \"ANON\", \"LOKAS\", \"JAMBS\", \"INBAR\", \"GREEE\", \"TWOSIZ\"]",
+      "response": "Answer: [\"BRADY\", \"ANON\", \"LOKAS\", \"JAMBS\", \"INBAR\", \"GREEE\", \"TWOSIZ\"]"
+    },
+    {
+      "seed": 10201,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BRINSLEY\", \"cheap\", \"ASPITAL\", \"TRADE\", \"PENDING\", \"KEVIN\", \"TWOSIZE\", \"KETTLE\"]",
+      "response": "Answer: [\"BRINSLEY\", \"cheap\", \"ASPITAL\", \"TRADE\", \"PENDING\", \"KEVIN\", \"TWOSIZE\", \"KETTLE\"]"
+    },
+    {
+      "seed": 10202,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10203,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BASS\", \"HOOP\", \"BYTE\", \"公积\", \"STEM\", \"TIPTOE\", \"Pastel\", \"CARDINAL\", \"RADAR\", \"MINI\", \"AINA\", \"ENCRUST\"]",
+      "response": "Answer: [\"BASS\", \"HOOP\", \"BYTE\", \"公积\", \"STEM\", \"TIPTOE\", \"Pastel\", \"CARDINAL\", \"RADAR\", \"MINI\", \"AINA\", \"ENCRUST\"]"
+    },
+    {
+      "seed": 10204,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10205,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"REEL\", \"ANDRE\", \"BYTE\", \"BLAKEY\", \"SAD\", \"LEAFERS\", \"ALERT\", \"PINK\", \"RADII\", \"ROVER\", \"PAIGE\", \"REMIND\"]",
+      "response": "Answer: [\"REEL\", \"ANDRE\", \"BYTE\", \"BLAKEY\", \"SAD\", \"LEAFERS\", \"ALERT\", \"PINK\", \"RADII\", \"ROVER\", \"PAIGE\", \"REMIND\"]"
+    },
+    {
+      "seed": 10206,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10207,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BRADY\", \"ANXIOUS\", \"SANITY\", \"BLACK\", \"UN WOMAN\", \"TIP\", \"TOES\", \"MASHERS\"]",
+      "response": "Answer: [\"BRADY\", \"ANXIOUS\", \"SANITY\", \"BLACK\", \"UN WOMAN\", \"TIP\", \"TOES\", \"MASHERS\"]"
+    },
+    {
+      "seed": 10208,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10209,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"pork\", \"receded\", \"hov\", \"slimy\", \"jittery\"]",
+      "response": "Answer: [\"pork\", \"receded\", \"hov\", \"slimy\", \"jittery\"]"
+    },
+    {
+      "seed": 10210,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10211,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROVER\", \"GOAL\", \"DISCOVERED\", \"QUESTIONED\", \"UNIQUE\", \"SHREDS\"]",
+      "response": "Answer: [\"ROVER\", \"GOAL\", \"DISCOVERED\", \"QUESTIONED\", \"UNIQUE\", \"SHREDS\"]"
+    },
+    {
+      "seed": 10212,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10213,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FISH\", \"HOOP\", \"BYTE\", \"HERITAGE\", \"BAD\", \"LEAF\", \"TIPTOE\", \"PINK\", \"HOLD\", \"MINI\", \"VIRGINIA\", \"REMEMBER\", \"WITH crust\", \"ROOTS\"]",
+      "response": "Answer: [\"FISH\", \"HOOP\", \"BYTE\", \"HERITAGE\", \"BAD\", \"LEAF\", \"TIPTOE\", \"PINK\", \"HOLD\", \"MINI\", \"VIRGINIA\", \"REMEMBER\", \"WITH crust\", \"ROOTS\"]"
+    },
+    {
+      "seed": 10214,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FLY\", \"ANDRE\", \"RAM\", \"CAPODILLO\", \"AVE\", \"LEA\", \"TIPS\", \"PINK\", \"RINGS\", \"MG\", \"LILIANA\", \"HINT\", \"ENCASED\", \"TUBERS\"]",
+      "response": "Solution:\n1. Angler's rod: FLY\n2. Pro hoops center Deandre: ANDRE\n3. The brain, in computerese: RAM\n4. NASCAR star whose son, grandson, and great-grandson (!) all also raced in NASCAR: CAPODILLO\n5. Me"
+    },
+    {
+      "seed": 10215,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FISH\", \"ANDRE\", \"BYTE\", \"HANSEN\", \"STING\", \"GEARS\"]",
+      "response": "Answer: [\"FISH\", \"ANDRE\", \"BYTE\", \"HANSEN\", \"STING\", \"GEARS\"]"
+    },
+    {
+      "seed": 10216,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"pork\", \"receded\", \"withheld\", \"like\", \"jittery\"]",
+      "response": "Answer: [\"pork\", \"receded\", \"withheld\", \"like\", \"jittery\"]"
+    },
+    {
+      "seed": 10217,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10218,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"SEEK\", \"DREW\", \"QUERIES\", \"UNIQUE\", \"BITES\", \"BLUNTLY\"]",
+      "response": "Answer: [\"ROBOT\", \"SEEK\", \"DREW\", \"QUERIES\", \"UNIQUE\", \"BITES\", \"BLUNTLY\"]"
+    },
+    {
+      "seed": 10219,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10220,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"ROBOT\", \"AIM\", \"CHECKED\", \"BOMBARD\", \"UNIQUE\", \"RIBBON\", \"BLUNT\"]",
+      "response": "Answer: [\"ROBOT\", \"AIM\", \"CHECKED\", \"BOMBARD\", \"UNIQUE\", \"RIBBON\", \"BLUNT\"]"
+    },
+    {
+      "seed": 10221,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10222,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"叹了气\", \"consulted\", \"assailed\", \"unique\", \"shreds\", \"thwacked\"]",
+      "response": "Answer: [\"ROBOT\", \"叹了气\", \"consulted\", \"assailed\", \"unique\", \"shreds\", \"thwacked\"]"
+    },
+    {
+      "seed": 10223,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10224,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"GAIN\", \"CONSULTED\", \"ASSAULT\", \"UNIQUE\", \"RIPES\", \"BAMBOOSED\"]",
+      "response": "Answer: [\"ROBOT\", \"GAIN\", \"CONSULTED\", \"ASSAULT\", \"UNIQUE\", \"RIPES\", \"BAMBOOSED\"]"
+    },
+    {
+      "seed": 10225,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"GOAL\", \"MAPPED\", \"ASSAULT\", \"UNIQUE\", \"TEAR\", \"BRAWL\", \"OBSCURE\", \"STRIKE\", \"FEMALES\", \"ANDREYA\", \"SUPPOSE\", \"ADDRESSES\", \"CALENDARED\"]",
+      "response": "Answer: [\"ROBOT\", \"GOAL\", \"MAPPED\", \"ASSAULT\", \"UNIQUE\", \"TEAR\", \"BRAWL\", \"OBSCURE\", \"STRIKE\", \"FEMALES\", \"ANDREYA\", \"SUPPOSE\", \"ADDRESSES\", \"CALENDARED\"]"
+    },
+    {
+      "seed": 10226,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10227,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"HAVING\", \"consulted\", \"assailed\", \"unique\", \"thread\", \"injured\"]",
+      "response": "Answer: [\"ROBOT\", \"HAVING\", \"consulted\", \"assailed\", \"unique\", \"thread\", \"injured\"]"
+    },
+    {
+      "seed": 10228,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10229,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TUTU\", \"WHADDAYA\", \"AIRTIME\", \"ONJOIN\", \"TIBETANS\", \"DISAPPROVAL\", \" OVERFINALLY\"]",
+      "response": "Answer: [\"TUTU\", \"WHADDAYA\", \"AIRTIME\", \"ONJOIN\", \"TIBETANS\", \"DISAPPROVAL\", \" OVERFINALLY\"]"
+    },
+    {
+      "seed": 10230,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10231,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"GOOD\", \"USED\", \"ASKED\", \"UNIQUE\", \"TORN\", \"B*</t\", \"GLANCE\", \"BOCCHI\", \"INDIRECT\", \"MODEL\", \"SUPOSE\", \"ADRESSES\", \"PLANNED\"]",
+      "response": "Answer: [\"ROBOT\", \"GOOD\", \"USED\", \"ASKED\", \"UNIQUE\", \"TORN\", \"B*</t\", \"GLANCE\", \"BOCCHI\", \"INDIRECT\", \"MODEL\", \"SUPOSE\", \"ADRESSES\", \"PLANNED\"]"
+    },
+    {
+      "seed": 10232,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10233,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"HAND\", \"DISCUSSED\", \"GIMMIE\", \"UNIQUE\", \"FIBERS\", \"BEATEN\", \"SIDeways\", \"STRIKE\", \"WOMEN\", \"BARBARA\", \"IMPLY\", \"ADRESSES\", \"SCHEDULED\"]",
+      "response": "Answer: [\"ROBOT\", \"HAND\", \"DISCUSSED\", \"GIMMIE\", \"UNIQUE\", \"FIBERS\", \"BEATEN\", \"SIDeways\", \"STRIKE\", \"WOMEN\", \"BARBARA\", \"IMPLY\", \"ADRESSES\", \"SCHEDULED\"]"
+    },
+    {
+      "seed": 10234,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10235,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"HAND\", \" توفير\", \"ASAL\", \"ONCE\", \"丝\", \"BLUNT\", \"GLANCE\", \"SABOTAGE\", \"WOMEN\", \"KELLER\", \"IMPLY\", \"ADDRESSES\"]",
+      "response": "Answer: [\"ROBOT\", \"HAND\", \" توفير\", \"ASAL\", \"ONCE\", \"丝\", \"BLUNT\", \"GLANCE\", \"SABOTAGE\", \"WOMEN\", \"KELLER\", \"IMPLY\", \"ADDRESSES\"]"
+    },
+    {
+      "seed": 10236,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10237,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ROBOT\", \"GOAL\", \"MAPPED\", \"GOES\", \"UNIQUE\", \"TEARS\", \"BONKED\", \"GLANCE\", \"STRIKE\", \"STAFF\", \"TYLER\", \"SUITE\", \"ADDRESSES\", \"SCHEDULED\"]",
+      "response": "Answer: [\"ROBOT\", \"GOAL\", \"MAPPED\", \"GOES\", \"UNIQUE\", \"TEARS\", \"BONKED\", \"GLANCE\", \"STRIKE\", \"STAFF\", \"TYLER\", \"SUITE\", \"ADDRESSES\", \"SCHEDULED\"]"
+    },
+    {
+      "seed": 10238,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10239,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"SYDNEY\", \"WILLIAMSBURG\", \"TOILET\", \"PETE\", \"FALCON\"]",
+      "response": "Answer: [\"SYDNEY\", \"WILLIAMSBURG\", \"TOILET\", \"PETE\", \"FALCON\"]"
+    },
+    {
+      "seed": 10240,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10241,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"OMNIBUS\", \"GROUP\", \"TOOT\", \"C Singh\", \"Sugar, Sugar\"]",
+      "response": "Answer: [\"OMNIBUS\", \"GROUP\", \"TOOT\", \"C Singh\", \"Sugar, Sugar\"]"
+    },
+    {
+      "seed": 10242,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10243,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"OMNIPRESENT\", \"GROUP\", \"HOBBY\", \"MISCELLANY\", \"ㄖ펴ppy荥\"]",
+      "response": "Answer: [\"OMNIPRESENT\", \"GROUP\", \"HOBBY\", \"MISCELLANY\", \"ㄖ펴ppy荥\"]"
+    },
+    {
+      "seed": 10244,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10245,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"SURPRISED\", \"ELgin\", \"Frederick\", \"TIMBLIN\", \"Fees\", \"INDICTs\", \"Good\", \"PREACHes\"]",
+      "response": "Answer: [\"SURPRISED\", \"ELgin\", \"Frederick\", \"TIMBLIN\", \"Fees\", \"INDICTs\", \"Good\", \"PREACHes\"]"
+    },
+    {
+      "seed": 10246,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10247,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"HEALTHY\", \"LOONEY\", \"TOTS\", \" TYSON\", \"COAST\", \"LIKE\"]",
+      "response": "Answer: [\"HEALTHY\", \"LOONEY\", \"TOTS\", \" TYSON\", \"COAST\", \"LIKE\"]"
+    },
+    {
+      "seed": 10248,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TUTUCANO\", \"Freshie\", \"Aired\", \"Clocks\", \"Shepherds\", \"Reproach\", \"Finally\", \"Sella\", \"Obvious\", \"Chef\", \"Kangaroo\", \"Walkouts\", \"Hers\"]",
+      "response": "Answer: [\"TUTUCANO\", \"Freshie\", \"Aired\", \"Clocks\", \"Shepherds\", \"Reproach\", \"Finally\", \"Sella\", \"Obvious\", \"Chef\", \"Kangaroo\", \"Walkouts\", \"Hers\"]"
+    },
+    {
+      "seed": 10249,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10250,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"NOMINATE\", \"ALRIGHT\", \"AIRBORNE\", \"GOESWORKING\", \"TIBETANS\", \"DISAPPROVAL\", \"FINALLY\", \"ENSORCELS\", \"OBVIOUSLY\", \"KITCHEN\"]",
+      "response": "Answer: [\"NOMINATE\", \"ALRIGHT\", \"AIRBORNE\", \"GOESWORKING\", \"TIBETANS\", \"DISAPPROVAL\", \"FINALLY\", \"ENSORCELS\", \"OBVIOUSLY\", \"KITCHEN\"]"
+    },
+    {
+      "seed": 10251,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10252,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"N أيام\", \"ALRIGHT\", \"AIRTIME\", \"BEGIN\", \"TIBETAN\", \"DISAPPROVAL\", \"FINALLY\", \"VENTRICLES\", \"IT'S OBVIOUS\", \"RECIPE\"]",
+      "response": "Answer: [\"N أيام\", \"ALRIGHT\", \"AIRTIME\", \"BEGIN\", \"TIBETAN\", \"DISAPPROVAL\", \"FINALLY\", \"VENTRICLES\", \"IT'S OBVIOUS\", \"RECIPE\"]"
+    },
+    {
+      "seed": 10253,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TOSHABEHIND\", \"WOAH\", \"AIRBORNE\", \"GOALS démarrer\", \"TIBETAN\", \"DISAPPROVAL\", \"FINALLY\", \"VENTRICLES\", \"OBVIOUS\", \"KITCHEN\"]",
+      "response": "Answer: [\"TOSHABEHIND\", \"WOAH\", \"AIRBORNE\", \"GOALS démarrer\", \"TIBETAN\", \"DISAPPROVAL\", \"FINALLY\", \"VENTRICLES\", \"OBVIOUS\", \"KITCHEN\"]"
+    },
+    {
+      "seed": 10254,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"NADINE\", \"ALRIGHTY\", \"AIRBORNE\", \"ON=\\\"/START*\", \"TIBETANS\", \"REJECTION\", \"FINALLY\", \"VENTRICES\", \"OBVIOUSLY\", \"KITCHEN\"]",
+      "response": "Answer: [\"NADINE\", \"ALRIGHTY\", \"AIRBORNE\", \"ON=\\\"/START*\", \"TIBETANS\", \"REJECTION\", \"FINALLY\", \"VENTRICES\", \"OBVIOUSLY\", \"KITCHEN\"]"
+    },
+    {
+      "seed": 10255,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"DIESEL\", \"LARRY\", \"MANNIS\", \"PORTER\", \"GIELD\"]",
+      "response": "Based on the given clues, let's solve the crossword puzzle:\n\n1. Truck seen during a power outage, maybe - This clue suggests a word that resembles a truck during a power outage. A plausible answer is "
+    },
+    {
+      "seed": 10256,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"LOBE\", \"RITUAL\", \"PAINTER\", \"OOGA\", \"WARRAYT\", \"TORREY\", \"CREOLE\", \"MYCHEL\"]",
+      "response": "Answer: [\"LOBE\", \"RITUAL\", \"PAINTER\", \"OOGA\", \"WARRAYT\", \"TORREY\", \"CREOLE\", \"MYCHEL\"]"
+    },
+    {
+      "seed": 10257,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10258,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"QUIT\", \"BABYSHOWER\", \"HTTPS\", \"TAKOVER\", \"ALLEY\"]",
+      "response": "Answer: [\"QUIT\", \"BABYSHOWER\", \"HTTPS\", \"TAKOVER\", \"ALLEY\"]"
+    },
+    {
+      "seed": 10259,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10260,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MVC\", \"ARL\", \"HTH\", \"THE\", \"SHOES\", \"BOP\", \"STUDY\", \"STATUE\", \"ASK\", \"RATING\", \"WORST\"]",
+      "response": "Answer: [\"MVC\", \"ARL\", \"HTH\", \"THE\", \"SHOES\", \"BOP\", \"STUDY\", \"STATUE\", \"ASK\", \"RATING\", \"WORST\"]"
+    },
+    {
+      "seed": 10261,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10262,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"FRANK\", \"ARLINGTON\", \"OBELISK\", \"THE\", \"SHOES\", \"WILD\", \"ENRICHMENT\", \"STATUE\"]",
+      "response": "Answer: [\"FRANK\", \"ARLINGTON\", \"OBELISK\", \"THE\", \"SHOES\", \"WILD\", \"ENRICHMENT\", \"STATUE\"]"
+    },
+    {
+      "seed": 10263,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10264,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"METALLOIDS\", \"COWRIES\", \"MAGISTRATE\", \"SPIONAGE\", \"LAUREL\", \"CORDUROY\", \"SNOWDRIFTS\"]",
+      "response": "Based on the clues provided and the standard crossword format, here are the answers I deduced:\n\n1. Metal band with a killer name? - METALLOIDS\n2. Makeshift money - COWRIES\n3. Judge - MAGISTRATE\n4. Gen"
+    },
+    {
+      "seed": 10265,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"frank\", \"arlington\", \"hyperion\", \"the\", \"shoes\", \"walks\", \"study\", \"statue\"]",
+      "response": "Answer: [\"frank\", \"arlington\", \"hyperion\", \"the\", \"shoes\", \"walks\", \"study\", \"statue\"]"
+    },
+    {
+      "seed": 10266,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10267,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"JFK\", \"GRACELAND\", \"HOLLYWOOD\", \"THE_CLAWS\", \"SHOES\", \"FOUR_ER\", \"TUTORIALS\", \"STATUE_OF LibertY\"]",
+      "response": "Answer: [\"JFK\", \"GRACELAND\", \"HOLLYWOOD\", \"THE_CLAWS\", \"SHOES\", \"FOUR_ER\", \"TUTORIALS\", \"STATUE_OF LibertY\"]"
+    },
+    {
+      "seed": 10268,
+      "score": 0.0,
+      "success": false,
+      "error": "500 Server Error: Internal Server Error for url: http://localhost:8775/generate"
+    },
+    {
+      "seed": 10269,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOST\", \"LEE\", \"MALEK\", \"PORTER\", \"ROYAL\", \"GIANTS\", \"GAUAINU\", \"EARY\", \"STUDY\"]",
+      "response": "Answer: [\"LOST\", \"LEE\", \"MALEK\", \"PORTER\", \"ROYAL\", \"GIANTS\", \"GAUAINU\", \"EARY\", \"STUDY\"]"
+    },
+    {
+      "seed": 10270,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10271,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FRANK\", \"ARLISS\", \"HYPERION\", \"THE\", \"SHOE\", \"BALLS\"]",
+      "response": "Answer: [\"FRANK\", \"ARLISS\", \"HYPERION\", \"THE\", \"SHOE\", \"BALLS\"]"
+    },
+    {
+      "seed": 10272,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10273,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"Sinatra\", \"Arkalon\", \"Avenue\", \"Franz\", \"Shoes\", \"Walks\", \"Examinations\", \"Eleanor\", \"Ask\", \"Rating\", \"Worst\"]",
+      "response": "Answer: [\"Sinatra\", \"Arkalon\", \"Avenue\", \"Franz\", \"Shoes\", \"Walks\", \"Examinations\", \"Eleanor\", \"Ask\", \"Rating\", \"Worst\"]"
+    },
+    {
+      "seed": 10274,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10275,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"FIDEL\", \"ARLCUT\", \"HILANDER\", \"THE痞子BOYS\", \"SOREFOOT\", \"BASEON\", \"ENRGYW\", \"Although\", \"ASKFOR\", \"CREDIT\"]",
+      "response": "Answer: [\"FIDEL\", \"ARLCUT\", \"HILANDER\", \"THE痞子BOYS\", \"SOREFOOT\", \"BASEON\", \"ENRGYW\", \"Although\", \"ASKFOR\", \"CREDIT\"]"
+    },
+    {
+      "seed": 10276,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"EDGING\", \"SWAY\", \"MBNA\", \"BOATING\", \"SAAG\", \"IMPROVES\", \"APPROACHES\", \"LUMINOUS\", \"HASNT\", \"WAISTCOAT\", \"PUTON\", \"GARDENA\", \"GLAMOUR\", \"TRUSS\", \"PREVENTS\"]",
+      "response": "Answer: [\"EDGING\", \"SWAY\", \"MBNA\", \"BOATING\", \"SAAG\", \"IMPROVES\", \"APPROACHES\", \"LUMINOUS\", \"HASNT\", \"WAISTCOAT\", \"PUTON\", \"GARDENA\", \"GLAMOUR\", \"TRUSS\", \"PREVENTS\"]"
+    },
+    {
+      "seed": 10277,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10278,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"EDGING\", \"DEFIRO\", \"MONSANTO\", \"LAKEHOUSE\", \"DORDERDICE\", \"ENHELPS\", \"OBEYS\", \"LAMP\", \"BEGIN\", \"BELTLINE\", \"PUTON\", \"PL请点击以获取更多提示ifecycle\"]",
+      "response": "Answer: [\"EDGING\", \"DEFIRO\", \"MONSANTO\", \"LAKEHOUSE\", \"DORDERDICE\", \"ENHELPS\", \"OBEYS\", \"LAMP\", \"BEGIN\", \"BELTLINE\", \"PUTON\", \"PL请点击以获取更多提示ifecycle\"]"
+    },
+    {
+      "seed": 10279,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10280,
+      "score": 0.07142857142857142,
+      "success": true,
+      "action": "[\"EDGING\", \"SWAYS\", \"NCR\", \"FISHING\", \"NACHOS\", \"IMPROVES\", \"CLOSER\", \"LANTERNS\", \"NOT\", \"BELTED\", \"DON\", \"HOE\", \"VOICED\", \"BRUSH\"]",
+      "response": "Answer: [\"EDGING\", \"SWAYS\", \"NCR\", \"FISHING\", \"NACHOS\", \"IMPROVES\", \"CLOSER\", \"LANTERNS\", \"NOT\", \"BELTED\", \"DON\", \"HOE\", \"VOICED\", \"BRUSH\"]"
+    },
+    {
+      "seed": 10281,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10282,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"GARDEN\", \"ENCOURA\", \"MASTERC\", \"SWIMMI\", \"POHOG\", \"IMPRO\", \"APPROA\", \"RIBBIN\", \"YETTO\", \"BELT\", \"DON\", \"HECTAR\", \"CHARM\", \"LANCET\", \"STABIL\"]",
+      "response": "Analyzing the clues and trying to fit them into the crossword grid:\n\n1. Decorative backyard border (6) - GARDEN\n2. Persuades to volunteer (6) - ENCOURA\n3. Company that invented the A.T.M., informally "
+    },
+    {
+      "seed": 10283,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FERN\", \"SWAY\", \"美洲银行\", \"FISHING\", \"LAPSED\", \"APPROACHES\", \"LIGHTS\", \"HASN'T\", \"BELTED\", \"DOFFING\", \"PLOW\", \"VOICED\", \"BRUSH\"]",
+      "response": "Answer: [\"FERN\", \"SWAY\", \"美洲银行\", \"FISHING\", \"LAPSED\", \"APPROACHES\", \"LIGHTS\", \"HASN'T\", \"BELTED\", \"DOFFING\", \"PLOW\", \"VOICED\", \"BRUSH\"]"
+    },
+    {
+      "seed": 10284,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"EDGING\", \"SPLICES\", \"MONOGRAM\", \"SWIMMING\", \"PIYYIS\", \"IMPROVES\", \"APPROACHES\", \"LAVENDERS\", \"HASNT\", \"BELTWAY\", \"DONNOT\", \"TILLER\"]",
+      "response": "Answer: [\"EDGING\", \"SPLICES\", \"MONOGRAM\", \"SWIMMING\", \"PIYYIS\", \"IMPROVES\", \"APPROACHES\", \"LAVENDERS\", \"HASNT\", \"BELTWAY\", \"DONNOT\", \"TILLER\"]"
+    },
+    {
+      "seed": 10285,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10286,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"FERN\", \"PERSUADES\", \"MACHINE\", \"BOATING\", \"NARANJAS\", \"IMPROVES\", \"CLOSER\", \"BULBS\", \"REALIZE\", \"BELTED\", \"UNBUTTON\", \"PLOW\", \"VOICED\", \"-item\"]",
+      "response": "Answer: [\"FERN\", \"PERSUADES\", \"MACHINE\", \"BOATING\", \"NARANJAS\", \"IMPROVES\", \"CLOSER\", \"BULBS\", \"REALIZE\", \"BELTED\", \"UNBUTTON\", \"PLOW\", \"VOICED\", \"-item\"]"
+    },
+    {
+      "seed": 10287,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10288,
+      "score": 0.13333333333333333,
+      "success": true,
+      "action": "[\"EDGING\", \"SWAYS\", \"BANKS\", \"BOATING\", \"HANDS\", \"IMPROVES\", \"NEARS\", \"LANTERNS\", \"YET\", \"WAISTLINE\", \"UNDRESS\", \"PLOW\", \"BELCRAZY\", \"PAINTS\", \"STUNS\"]",
+      "response": "Answer: [\"EDGING\", \"SWAYS\", \"BANKS\", \"BOATING\", \"HANDS\", \"IMPROVES\", \"NEARS\", \"LANTERNS\", \"YET\", \"WAISTLINE\", \"UNDRESS\", \"PLOW\", \"BELCRAZY\", \"PAINTS\", \"STUNS\"]"
+    },
+    {
+      "seed": 10289,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10290,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"EDGING\", \"SPLICES\", \"NCR\", \"RESORT\", \"POH\", \"IMPROVES\", \"NEARS\", \"LUMENS\", \"HASNT\", \"WAISTLINE\", \"PUTONS\", \"DALI\"]",
+      "response": "Answer: [\"EDGING\", \"SPLICES\", \"NCR\", \"RESORT\", \"POH\", \"IMPROVES\", \"NEARS\", \"LUMENS\", \"HASNT\", \"WAISTLINE\", \"PUTONS\", \"DALI\"]"
+    },
+    {
+      "seed": 10291,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10292,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SURPRISED\", \"ELINT\", \"GEORGE\", \"TIMBLIN\", \"DUETS\", \"ACCUSES\"]",
+      "response": "Answer: [\"SURPRISED\", \"ELINT\", \"GEORGE\", \"TIMBLIN\", \"DUETS\", \"ACCUSES\"]"
+    },
+    {
+      "seed": 10293,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10294,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SURPRISED\", \"ELI\", \"TEDDY\", \"TIMBERLINE\", \"QUESTIONABLE\", \"IMPEDIE\", \"LUCK\", \"REVERE\", \"KUNGPOO\", \"QUESADILLA\", \"MIXMASTER\", \"SISTER\"]",
+      "response": "Answer: [\"SURPRISED\", \"ELI\", \"TEDDY\", \"TIMBERLINE\", \"QUESTIONABLE\", \"IMPEDIE\", \"LUCK\", \"REVERE\", \"KUNGPOO\", \"QUESADILLA\", \"MIXMASTER\", \"SISTER\"]"
+    },
+    {
+      "seed": 10295,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10296,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SURPRISED\", \"ELGIN\", \"LOUIS\", \"BABES\", \"OKLAHOMA\", \"FINES\", \"LUCKY\", \"AMEN\", \"KUBO\", \"MERIES\", \"CONCRETE\", \"NICKIE\", \"DIAZ\", \"HAMONIA\"]",
+      "response": "Answer: [\"SURPRISED\", \"ELGIN\", \"LOUIS\", \"BABES\", \"OKLAHOMA\", \"FINES\", \"LUCKY\", \"AMEN\", \"KUBO\", \"MERIES\", \"CONCRETE\", \"NICKIE\", \"DIAZ\", \"HAMONIA\"]"
+    },
+    {
+      "seed": 10297,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10298,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHARE\", \"ANNOUNCED\", \"CLEAN\", \"ADXED\", \"INSERTED\", \"PRICE\", \"SLOW\", \"TIN\", \"DROplets\", \"BEAR\", \"COCONUT\", \"AIMING\", \"CREMIani\", \"ASSASSIN\", \"FLUID\"]",
+      "response": "Answer: [\"SHARE\", \"ANNOUNCED\", \"CLEAN\", \"ADXED\", \"INSERTED\", \"PRICE\", \"SLOW\", \"TIN\", \"DROplets\", \"BEAR\", \"COCONUT\", \"AIMING\", \"CREMIani\", \"ASSASSIN\", \"FLUID\"]"
+    },
+    {
+      "seed": 10299,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10300,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHO\", \"CRA\", \"PROSP\", \"NEED\", \"TOW\", \"WAT\", \"CHI\", \"PERF\", \"PO\", \"LIT\", \"HOU\"]",
+      "response": "Clue 1: Remove, as snow or leaves from a sidewalk -> SHO -> SHO\nClue 2: Fanciful -> CRA -> CRA\nClue 3: Financial prosperity -> PROSPER -> PROSP\nClue 4: Stamping need -> NEEDLE -> NEED\nClue 5: Nowheres"
+    },
+    {
+      "seed": 10301,
+      "score": 0.09090909090909091,
+      "success": true,
+      "action": "[\"EXPRESSIONS\", \"TEAPOT\", \"STAYED\", \"EXCAVATE\", \"NIXON\", \"SLIM\", \"WAFER\", \"DIAGNOSE\", \"ALUMINIUM\", \"LISTED\", \"HONorary\"]",
+      "response": "Answer: [\"EXPRESSIONS\", \"TEAPOT\", \"STAYED\", \"EXCAVATE\", \"NIXON\", \"SLIM\", \"WAFER\", \"DIAGNOSE\", \"ALUMINIUM\", \"LISTED\", \"HONorary\"]"
+    },
+    {
+      "seed": 10302,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10303,
+      "score": 0.1111111111111111,
+      "success": true,
+      "action": "[\"LATE\", \"BUYONEGETONEFREE\", \"MADE\", \"FIELD\", \"WINNER\", \"BIODIESEL\", \"SPunky\", \"SENIOR\", \"LACTASE\"]",
+      "response": "Answer: [\"LATE\", \"BUYONEGETONEFREE\", \"MADE\", \"FIELD\", \"WINNER\", \"BIODIESEL\", \"SPunky\", \"SENIOR\", \"LACTASE\"]"
+    },
+    {
+      "seed": 10304,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ADDS\", \"FEAST\", \"GLOBA\", \"SOEKARNO\", \"AUCTIONS\", \"QUANTITIES\", \"FANG\", \"PROFESSOR\", \"GADGETS\", \"OVERPAIRED\", \"OBSTINACY\", \"TESTING\"]",
+      "response": "Answer: [\"ADDS\", \"FEAST\", \"GLOBA\", \"SOEKARNO\", \"AUCTIONS\", \"QUANTITIES\", \"FANG\", \"PROFESSOR\", \"GADGETS\", \"OVERPAIRED\", \"OBSTINACY\", \"TESTING\"]"
+    },
+    {
+      "seed": 10305,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10306,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOBBY\", \"DOCK\", \"CHORUS\", \"HOPE\", \"MADE\", \"REEF\", \"B<!--[<tr class=\"clue\" data-number=\"7\"> <![CDATA[Back to the Future]]> <trait class=\"d\">villains</trait> </tr> -->LOUDEN\", \"GROWTH\"]",
+      "response": "Answer: [\"LOBBY\", \"DOCK\", \"CHORUS\", \"HOPE\", \"MADE\", \"REEF\", \"B<!--[<tr class=\"clue\" data-number=\"7\"> <![CDATA[Back to the Future]]> <trait class=\"d\">villains</trait> </tr> -->LOUDEN\", \"GROWTH\"]"
+    },
+    {
+      "seed": 10307,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10308,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LODGE\", \"DUCK\", \"CHANT\", \"WAIT\", \"MADE\", \"GAOL\", \"BETAS\", \"GROW\"]",
+      "response": "Answer: [\"LODGE\", \"DUCK\", \"CHANT\", \"WAIT\", \"MADE\", \"GAOL\", \"BETAS\", \"GROW\"]"
+    },
+    {
+      "seed": 10309,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10310,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOBBY\", \"DUCK\", \"HA\", \"STALL\", \"MADE\", \"POD\", \"BETES\", \"GROWTH\"]",
+      "response": "Answer: [\"LOBBY\", \"DUCK\", \"HA\", \"STALL\", \"MADE\", \"POD\", \"BETES\", \"GROWTH\"]"
+    },
+    {
+      "seed": 10311,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10312,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHOES\", \"DUCK\", \"HAIL\", \"WAIT\", \"MADE\", \"QUIT\", \"BUMS\", \"GROWTH\"]",
+      "response": "Answer: [\"SHOES\", \"DUCK\", \"HAIL\", \"WAIT\", \"MADE\", \"QUIT\", \"BUMS\", \"GROWTH\"]"
+    },
+    {
+      "seed": 10313,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10314,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOBBY\", \"RAFT\", \"CHANT\", \"WAIT\", \"MADE\", \"LEROS\", \"BETAS\", \"GROWTH\"]",
+      "response": "Answer: [\"LOBBY\", \"RAFT\", \"CHANT\", \"WAIT\", \"MADE\", \"LEROS\", \"BETAS\", \"GROWTH\"]"
+    },
+    {
+      "seed": 10315,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10316,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LOBBY\", \"JEPPES\", \"HOO\", \"STAY\", \"MADE\", \"RAPE\", \"BANNERS\", \"GROWTH\"]",
+      "response": "Answer: [\"LOBBY\", \"JEPPES\", \"HOO\", \"STAY\", \"MADE\", \"RAPE\", \"BANNERS\", \"GROWTH\"]"
+    },
+    {
+      "seed": 10317,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10318,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"STORAGE\", \"JEEP\", \"Hallelujah\", \"PATIENCE\", \"MADE\", \"SUBWAY\", \"BADDIES\", \"GERMINATION\"]",
+      "response": "Answer: [\"STORAGE\", \"JEEP\", \"Hallelujah\", \"PATIENCE\", \"MADE\", \"SUBWAY\", \"BADDIES\", \"GERMINATION\"]"
+    },
+    {
+      "seed": 10319,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10320,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LISTEN\", \"DUB\", \"SHARP\", \"MONUMENT\", \"E STREET\", \"ESCAPE\", \"ROOTS\", \"OEDIPUS\"]",
+      "response": "Based on the clues provided and the typical structure of crossword puzzles, here are the words I would fill in:\n\n1. Broker to whom \"people listen,\" according to old ads - LISTEN\n2. ___ tape, named for"
+    },
+    {
+      "seed": 10321,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"LISTEN\", \"SPL\", \"CLAWS\", \"MEMORIAL\", \"FAN\", \"SRX\", \"TOWS\", \"OCOMplex\"]",
+      "response": "Based on the clues and the structure of a typical crossword puzzle, here are the answers:\n\n1. LISTEN (broker to whom \"people listen,\" according to old ads)\n2. SPL (spl, named for the head electrician "
+    },
+    {
+      "seed": 10322,
+      "score": 0.2222222222222222,
+      "success": true,
+      "action": "[\"ADD\", \"DEVOUR\", \"TABLOID\", \"SUKYAR\tunion\", \"AUDITS\", \"QUANTITIES\", \"PAW\", \"TEACH\", \" TOOL\"]",
+      "response": "Answer: [\"ADD\", \"DEVOUR\", \"TABLOID\", \"SUKYAR\tunion\", \"AUDITS\", \"QUANTITIES\", \"PAW\", \"TEACH\", \" TOOL\"]"
+    },
+    {
+      "seed": 10323,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10324,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ALMA\", \"BRINGS\", \"PLAYS\", \"SNORK\", \"DISPUTES\", \"SIN_\", \"DRAFT\", \"CALMS\", \"ECONOMIST\"]",
+      "response": "Answer: [\"ALMA\", \"BRINGS\", \"PLAYS\", \"SNORK\", \"DISPUTES\", \"SIN_\", \"DRAFT\", \"CALMS\", \"ECONOMIST\"]"
+    },
+    {
+      "seed": 10325,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10326,
+      "score": 0.25,
+      "success": true,
+      "action": "[\"ADDS\", \"MEALS\", \"TABLOID\", \"SOEKARNO\", \"AUDITS\", \"DIMENSIONS\", \"CLAW\", \"TESTS\"]",
+      "response": "Answer: [\"ADDS\", \"MEALS\", \"TABLOID\", \"SOEKARNO\", \"AUDITS\", \"DIMENSIONS\", \"CLAW\", \"TESTS\"]"
+    },
+    {
+      "seed": 10327,
+      "score": 0.0,
+      "success": false,
+      "error": "500 Server Error: Internal Server Error for url: http://localhost:8775/generate"
+    },
+    {
+      "seed": 10328,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BLAND\", \"LOONEY\", \"TUNES\", \"WINTERS\", \"MAINE\", \"STARS\", \"SUONE\", \"WHEN\"]",
+      "response": "Answer: [\"BLAND\", \"LOONEY\", \"TUNES\", \"WINTERS\", \"MAINE\", \"STARS\", \"SUONE\", \"WHEN\"]"
+    },
+    {
+      "seed": 10329,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10330,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TOTALS\", \"TOXIC\", \"ENTREES\", \"CHRISTALLA\", \"ASCAP\", \"RECOGNIZED\", \"PREFERABLE\"]",
+      "response": "Based on the given clues and without the actual crossword grid, I'll make educated guesses for each word. Here are the guessed words:\n\n1. Small sums: TOTALS\n2. Like poisonous fumes: TOXIC\n3. Featured "
+    },
+    {
+      "seed": 10331,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SMALL\", \"TOXIC\", \"ENTREES\", \"CHRISTOPHER_PARKE\", \"ROBERTA晨报\", \"WOULD\", \"BREAD Tours\", \"PLANETS\", \"CANTIERI\", \"NORTHWEST\"]",
+      "response": "Answer: [\"SMALL\", \"TOXIC\", \"ENTREES\", \"CHRISTOPHER_PARKE\", \"ROBERTA晨报\", \"WOULD\", \"BREAD Tours\", \"PLANETS\", \"CANTIERI\", \"NORTHWEST\"]"
+    },
+    {
+      "seed": 10332,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10333,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"klee\", \"messed\", \"snatched\", \"strip\", \"kings\", \"coffins\", \"beet\", \"erried\", \"yu\", \"claims\", \"remainder\"]",
+      "response": "Answer: [\"klee\", \"messed\", \"snatched\", \"strip\", \"kings\", \"coffins\", \"beet\", \"erried\", \"yu\", \"claims\", \"remainder\"]"
+    },
+    {
+      "seed": 10334,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10335,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FIGHTS\", \"TEACHING\", \"W嚅L\", \"PERS\ttypES\", \"SHOWED\", \"HEF_FELT\", \"TRUTH\", \"ALEX\", \"MIKKEL\", \"SCISSORS\"]",
+      "response": "Answer: [\"FIGHTS\", \"TEACHING\", \"W嚅L\", \"PERS\ttypES\", \"SHOWED\", \"HEF_FELT\", \"TRUTH\", \"ALEX\", \"MIKKEL\", \"SCISSORS\"]"
+    },
+    {
+      "seed": 10336,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10337,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"OPINES\", \"BYS.ErrorCode\", \"G日报记者\", \"SOEKARNO\", \"TAUDITS\", \"QUANTITIES\", \"PALM\", \"TEACH\", \"MOBIL\", \"阒yüò\"]",
+      "response": "Answer: [\"OPINES\", \"BYS.ErrorCode\", \"G日报记者\", \"SOEKARNO\", \"TAUDITS\", \"QUANTITIES\", \"PALM\", \"TEACH\", \"MOBIL\", \"阒yüò\"]"
+    },
+    {
+      "seed": 10338,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"ADD\", \"FEAST\", \"GARBAGE\", \"SOEKARNO\", \"AUDITS\", \"QUANTITIES\", \"CLAW\"]",
+      "response": "Answer: [\"ADD\", \"FEAST\", \"GARBAGE\", \"SOEKARNO\", \"AUDITS\", \"QUANTITIES\", \"CLAW\"]"
+    },
+    {
+      "seed": 10339,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10340,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"ADD\", \"FEAST\", \"TABLOID\", \"SOEKARNO\", \"AUDITS\", \"QUANTITIES\", \"PAW\", \"TEACHER\", \"GIZMOS\", \"BRAT\"]",
+      "response": "Answer: [\"ADD\", \"FEAST\", \"TABLOID\", \"SOEKARNO\", \"AUDITS\", \"QUANTITIES\", \"PAW\", \"TEACHER\", \"GIZMOS\", \"BRAT\"]"
+    },
+    {
+      "seed": 10341,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10342,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"ADDS\", \"EATS\", \"GTRAINEE\", \"SOEKARNO\", \"AUDITS\", \"QUANTITIES\", \"CLAW\", \"TESTS\"]",
+      "response": "Answer: [\"ADDS\", \"EATS\", \"GTRAINEE\", \"SOEKARNO\", \"AUDITS\", \"QUANTITIES\", \"CLAW\", \"TESTS\"]"
+    },
+    {
+      "seed": 10343,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10344,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SUMS\", \"GASES\", \"ENTREES\", \"EMMA\", \"ZONE\", \"WOULD\", \"MIXTURE\", \"PLANETS\", \"ARBORS\", \"DEVICES\", \"PONIES\", \"IMES\", \"TOWELS\", \"KASTEN\"]",
+      "response": "Solution based on the given clues and typical crossword puzzle solving techniques:\n\n1. Small sums - SUMS\n2. Like poisonous fumes - GASES\n3. Featured dishes - ENTREES\n4. First woman to sit as a member "
+    },
+    {
+      "seed": 10345,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FEMALES\", \"UNSTABLE\", \"COMPLAINTS\", \"ACCEPTABLE\", \"DONTCUT\"]",
+      "response": "Answer: [\"FEMALES\", \"UNSTABLE\", \"COMPLAINTS\", \"ACCEPTABLE\", \"DONTCUT\"]"
+    },
+    {
+      "seed": 10346,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10347,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SMALL\", \"TOXIC\", \"ENTREES\", \" CHRISTOPHER\", \"STRaight\", \"DECIDED\", \"PAINTING\", \"SATELLITES\", \"AROYD\", \"NORTH\", \"SADDLE\", \"ICQ\", \"SHOWER\"]",
+      "response": "Answer: [\"SMALL\", \"TOXIC\", \"ENTREES\", \" CHRISTOPHER\", \"STRaight\", \"DECIDED\", \"PAINTING\", \"SATELLITES\", \"AROYD\", \"NORTH\", \"SADDLE\", \"ICQ\", \"SHOWER\"]"
+    },
+    {
+      "seed": 10348,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10349,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SMALL\", \"TOXIC\", \"ENTREES\", \"HILARY\", \"ERIC\", \"DECIDED\", \"PANTRY\", \"ASTRONAUTS\", \"ARABESQUE\", \"NORTH\", \"RINSE\"]",
+      "response": "Answer: [\"SMALL\", \"TOXIC\", \"ENTREES\", \"HILARY\", \"ERIC\", \"DECIDED\", \"PANTRY\", \"ASTRONAUTS\", \"ARABESQUE\", \"NORTH\", \"RINSE\"]"
+    },
+    {
+      "seed": 10350,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10351,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"nilai\", \"gases\", \"maincuts\", \"Alice\", \"JoelDavis\", \"determined\", \"mixingbasin\", \"planetsphere\", \"hedgevine\"]",
+      "response": "This appears to be a standard crossword puzzle with given clues. Let's start solving it step by step.\n\n### Clue-by-Clue Analysis:\n1. **Small sums** (5)\n2. **Like poisonous fumes** (5)\n3. **Featured di"
+    },
+    {
+      "seed": 10352,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"AS\", \"GAS\", \"ACTOR'S\", \"NANCY\", \"DAL\", \"REDETERMIN\", \"PANERA\", \"SOLARDISPLA\", \"VINEDSET\"]",
+      "response": "Based on the provided clues and the typical structure of a crossword puzzle, let's solve the crossword step by step.\n\n1. Small sums (6) - S\"As\" (since sums can be denoted by \"as\" in smaller numbers)\n2"
+    },
+    {
+      "seed": 10353,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SMALL\", \"TOXIC\", \"ENTREES\", \"CHRISTINA\", \"ALAN\", \"WASN'T\", \"BAKING\", \"PLANETS\", \"HEDGES\"]",
+      "response": "Answer: [\"SMALL\", \"TOXIC\", \"ENTREES\", \"CHRISTINA\", \"ALAN\", \"WASN'T\", \"BAKING\", \"PLANETS\", \"HEDGES\"]"
+    },
+    {
+      "seed": 10354,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TAKE\", \"BABY\", \"SHAKE\", \"NEAR\", \"CONFUS\", \"SELF\", \"COPY\", \"BURY\", \"TORON\"]",
+      "response": "Answer: [\"TAKE\", \"BABY\", \"SHAKE\", \"NEAR\", \"CONFUS\", \"SELF\", \"COPY\", \"BURY\", \"TORON\"]"
+    },
+    {
+      "seed": 10355,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TAKE\", \"PINA\", \"SHAKES\", \"NEAR\", \"MIXED\", \"SHE\", \"COPY\"]",
+      "response": "Answer: [\"TAKE\", \"PINA\", \"SHAKES\", \"NEAR\", \"MIXED\", \"SHE\", \"COPY\"]"
+    },
+    {
+      "seed": 10356,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10357,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SPIKY\", \"GYMNASIA\", \"SOUNDS\", \"SOUR\", \"SIGHT\", \"ATTENTION\", \"TWENTY_\", \"OPINIONS\", \"ALCOHOLS\", \"METROPOLIS\", \"WAIT_\", \"OPINIONS\"]",
+      "response": "Answer: [\"SPIKY\", \"GYMNASIA\", \"SOUNDS\", \"SOUR\", \"SIGHT\", \"ATTENTION\", \"TWENTY_\", \"OPINIONS\", \"ALCOHOLS\", \"METROPOLIS\", \"WAIT_\", \"OPINIONS\"]"
+    },
+    {
+      "seed": 10358,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10359,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"GOOGLE\", \"FAVALORA\", \"ALAS\", \"THEIRS\", \"ROOKIE\", \"THE_OLD_SEVENTEEN\", \"BARKS\", \"SEAT\", \"CAMOMILE\", \"PRODDING\", \"LAROUSSE\", \"PHONETICS\", \"SHERISON\", \"TILL_NOW\", \"AMBITION\"]",
+      "response": "Answer: [\"GOOGLE\", \"FAVALORA\", \"ALAS\", \"THEIRS\", \"ROOKIE\", \"THE_OLD_SEVENTEEN\", \"BARKS\", \"SEAT\", \"CAMOMILE\", \"PRODDING\", \"LAROUSSE\", \"PHONETICS\", \"SHERISON\", \"TILL_NOW\", \"AMBITION\"]"
+    },
+    {
+      "seed": 10360,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TEMPER\", \"VIANDA\", \"SOUNDS\", \"SOUR\", \"BARREL\", \" SERVICE\", \"TWENTY\", \"ONLY\", \"PERFUMES\", \"THEM\", \"WHILE\", \"TWELVE\", \"TEN\", \"LICORICE\"]",
+      "response": "Answer: [\"TEMPER\", \"VIANDA\", \"SOUNDS\", \"SOUR\", \"BARREL\", \" SERVICE\", \"TWENTY\", \"ONLY\", \"PERFUMES\", \"THEM\", \"WHILE\", \"TWELVE\", \"TEN\", \"LICORICE\"]"
+    },
+    {
+      "seed": 10361,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10362,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"TEMPS\", \"VIDANTA\", \"IMHO\", \"SOUR\", \"GUNPOWDER\", \"INTERACTION\", \"TWENTYFIVE\", \"INDIVIDUALS\", \"ALCOHOLS\"]",
+      "response": "Answer: [\"TEMPS\", \"VIDANTA\", \"IMHO\", \"SOUR\", \"GUNPOWDER\", \"INTERACTION\", \"TWENTYFIVE\", \"INDIVIDUALS\", \"ALCOHOLS\"]"
+    },
+    {
+      "seed": 10363,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10364,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MOODY\", \"GOLF\", \"SOUNDS\", \"SOUR\", \"SCOPE\", \"CARE\", \"TWENTY\"]",
+      "response": "Answer: [\"MOODY\", \"GOLF\", \"SOUNDS\", \"SOUR\", \"SCOPE\", \"CARE\", \"TWENTY\"]"
+    },
+    {
+      "seed": 10365,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10366,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"Daffy\", \"Vidanta\", \"SOUNDS\", \"LIKE\", \"STARED\", \"COMPLIMENT\", \"FIFTY\", \"ONLY\", \"ALCHOLILS\", \"ELFIN\", \"VERY\", \"ELFINTIME\"]",
+      "response": "Based on the provided clues and the game rules, we will analyze each one step by step to create the words for the crossword.\n\n1. Temperamental toon (5) - From the clue, \"temperamental toon\", it sugges"
+    },
+    {
+      "seed": 10367,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MOODY\", \"GOLF\", \"HMM\", \"SOUR\", \"TROWEL\", \"COMMENTS\", \"TULUSTRIA\", \"INDIVIDUALS\"]",
+      "response": "Answer: [\"MOODY\", \"GOLF\", \"HMM\", \"SOUR\", \"TROWEL\", \"COMMENTS\", \"TULUSTRIA\", \"INDIVIDUALS\"]"
+    },
+    {
+      "seed": 10368,
+      "score": 0.0,
+      "success": false,
+      "error": "500 Server Error: Internal Server Error for url: http://localhost:8775/generate"
+    },
+    {
+      "seed": 10369,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SUBMITTED\", \"TEDDY\", \"THEMBE\", \"OECIST\", \"GOOGOL\", \"KARYOTYPE\", \"LEWIS\", \"%\"]",
+      "response": "Answer: [\"SUBMITTED\", \"TEDDY\", \"THEMBE\", \"OECIST\", \"GOOGOL\", \"KARYOTYPE\", \"LEWIS\", \"%\"]"
+    },
+    {
+      "seed": 10370,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"klee\", \"spew\", \"snatch\", \"strip\", \"kings\", \"caskets\"]",
+      "response": "Answer: [\"klee\", \"spew\", \"snatch\", \"strip\", \"kings\", \"caskets\"]"
+    },
+    {
+      "seed": 10371,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"BEERS\", \"HOWDY\", \"PRIDE\", \"MATinee\", \"FIREstorms\", \"GARLIC\"]",
+      "response": "Answer: [\"BEERS\", \"HOWDY\", \"PRIDE\", \"MATinee\", \"FIREstorms\", \"GARLIC\"]"
+    },
+    {
+      "seed": 10372,
+      "score": 0.0,
+      "success": false,
+      "error": "500 Server Error: Internal Server Error for url: http://localhost:8775/generate"
+    },
+    {
+      "seed": 10373,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SUBMITTED\", \"OGRE\", \"WIRESISSUE\", \"OENOM.deleteById()\", \"GOOGOL\", \"PRAYERS\", \"LEWIS\"]",
+      "response": "Answer: [\"SUBMITTED\", \"OGRE\", \"WIRESISSUE\", \"OENOM.deleteById()\", \"GOOGOL\", \"PRAYERS\", \"LEWIS\"]"
+    },
+    {
+      "seed": 10374,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"GOOGLE\", \"FAWA\", \"REPROACH\", \"Revised\", \"G League\", \"BUFFALO\", \"ATTEND\", \"ROSEMARY\", \"ENCOURAGEMENT\", \"CHARLES\", \"SYLLABLES\", \"SLOUR\", \"SO_FAR\", \"AMBITION\"]",
+      "response": "Answer: [\"GOOGLE\", \"FAWA\", \"REPROACH\", \"Revised\", \"G League\", \"BUFFALO\", \"ATTEND\", \"ROSEMARY\", \"ENCOURAGEMENT\", \"CHARLES\", \"SYLLABLES\", \"SLOUR\", \"SO_FAR\", \"AMBITION\"]"
+    },
+    {
+      "seed": 10375,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10376,
+      "score": 0.13333333333333333,
+      "success": true,
+      "action": "[\"GOOGLE\", \"CUTTER\", \"LAMENT\", \"RATINGS\", \"KNICKERS\", \"THUGGISH\", \"BARKS\", \"JOIN\", \"PEPPermint\", \"PERSUADE\", \"BRONCO\", \"VERSES\", \"SALT\", \"TILL\", \"AMBITION\"]",
+      "response": "Answer: [\"GOOGLE\", \"CUTTER\", \"LAMENT\", \"RATINGS\", \"KNICKERS\", \"THUGGISH\", \"BARKS\", \"JOIN\", \"PEPPermint\", \"PERSUADE\", \"BRONCO\", \"VERSES\", \"SALT\", \"TILL\", \"AMBITION\"]"
+    },
+    {
+      "seed": 10377,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10378,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"COFFEE\", \"HELLO\", \"MLEAGUE\", \"MATINEE\", \"BLAZES\", \";drape\", \"HEART\"]",
+      "response": "Answer: [\"COFFEE\", \"HELLO\", \"MLEAGUE\", \"MATINEE\", \"BLAZES\", \";drape\", \"HEART\"]"
+    },
+    {
+      "seed": 10379,
+      "score": 0.0,
+      "success": false,
+      "error": "500 Server Error: Internal Server Error for url: http://localhost:8775/generate"
+    },
+    {
+      "seed": 10380,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"COFFEE\", \"HEY\", \"LACTION\", \"MATinee\", \"FIRES\", \"PAPAmero\"]",
+      "response": "Answer: [\"COFFEE\", \"HEY\", \"LACTION\", \"MATinee\", \"FIRES\", \"PAPAmero\"]"
+    },
+    {
+      "seed": 10381,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10382,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"GOOGLE\", \"FAUCET\", \"REGRETS\", \"UNTAMED\", \"ROOKIE\", \"THUGGLE\", \"BARKS\", \"CATALOG\", \"CHAMOMILE\", \"PERSUASIVE\"]",
+      "response": "Answer: [\"GOOGLE\", \"FAUCET\", \"REGRETS\", \"UNTAMED\", \"ROOKIE\", \"THUGGLE\", \"BARKS\", \"CATALOG\", \"CHAMOMILE\", \"PERSUASIVE\"]"
+    },
+    {
+      "seed": 10383,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MICE\", \"VERMEER\", \"GO\", \"COPY\", \"DOGGER\", \"HELEN\", \"LOWER\", \"ODDS\"]",
+      "response": "Answer: [\"MICE\", \"VERMEER\", \"GO\", \"COPY\", \"DOGGER\", \"HELEN\", \"LOWER\", \"ODDS\"]"
+    },
+    {
+      "seed": 10384,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"SHRUBERY\", \"SATYRS\", \"MAMMOTH\", \"BOILED\", \"PLANE\", \"RAD\", \"FREEBSD\"]",
+      "response": "Answer: [\"SHRUBERY\", \"SATYRS\", \"MAMMOTH\", \"BOILED\", \"PLANE\", \"RAD\", \"FREEBSD\"]"
+    },
+    {
+      "seed": 10385,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"Mood\", \"Steep\", \"Passenger\", \"Menstrual cup\", \"Stephanie\", \"Promotion\", \"Denouement\", \"Legalities\", \"He/she\"]",
+      "response": "Based on the clues provided, here are the words that fit into the crossword grid:\n\n1. Emotional condition - Mood\n2. Brew, in a way - Steep\n3. Crewless - Passenger\n4. Eco-friendly alternative to tampon"
+    },
+    {
+      "seed": 10386,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHelves\", \"FAIRIES\", \"BULGY\", \"BEYEGGS\", \"PRIMARILY\"]",
+      "response": "Answer: [\"SHelves\", \"FAIRIES\", \"BULGY\", \"BEYEGGS\", \"PRIMARILY\"]"
+    },
+    {
+      "seed": 10387,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"DOUBT\", \"ALONG\", \"SUCKED\", \"REVERSED\", \"HANDICRAFT\"]",
+      "response": "Answer: [\"DOUBT\", \"ALONG\", \"SUCKED\", \"REVERSED\", \"HANDICRAFT\"]"
+    },
+    {
+      "seed": 10388,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"MICE\", \"VERMEER\", \"GO\", \"COPY\", \"DOORMAN\", \"RICHARD\", \"POP\", \"ODDS\"]",
+      "response": "Answer: [\"MICE\", \"VERMEER\", \"GO\", \"COPY\", \"DOORMAN\", \"RICHARD\", \"POP\", \"ODDS\"]"
+    },
+    {
+      "seed": 10389,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"YOGA\", \"SUN\", \"BORDERS\", \"WOOL\", \"Panko\", \"ENTHRALL\"]",
+      "response": "Based on the clues provided and the typical structure of a crossword puzzle, here are some educated guesses for each clue:\n\n1. Less is more movement - This could refer to a form of minimalist movement"
+    },
+    {
+      "seed": 10390,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHelves\", \"FAirs\", \"HULKs\", \"BOILED\", \"PLANS\", \"RAD\", \"FREE\"]",
+      "response": "Answer: [\"SHelves\", \"FAirs\", \"HULKs\", \"BOILED\", \"PLANS\", \"RAD\", \"FREE\"]"
+    },
+    {
+      "seed": 10391,
+      "score": 0.09090909090909091,
+      "success": true,
+      "action": "[\"HAPPY\", \"BEER\", \"UNMANNED\", \"SANITSTARTS\", \"MORGAN\", \"CAMPAIGN\", \"UNHAPPY\", \"CLAIMS\", \"THEIRTHEIRS\", \"SHISHALH\", \"DIMA\"]",
+      "response": "Answer: [\"HAPPY\", \"BEER\", \"UNMANNED\", \"SANITSTARTS\", \"MORGAN\", \"CAMPAIGN\", \"UNHAPPY\", \"CLAIMS\", \"THEIRTHEIRS\", \"SHISHALH\", \"DIMA\"]"
+    },
+    {
+      "seed": 10392,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"GOOGLE\", \"PISSERO\", \"REGRET\", \"RET浩KED\", \"GRIZZLY\", \"BLACKEST\", \"BARKS\", \"ATTEND\", \"PEPPERMINT\", \"ENTICE\", \"THESEUSE\", \"MARCEL\", \"SYLLABLES\", \"SACCHARINE\", \"SO-FAR\", \"AMBITION\"]",
+      "response": "Answer: [\"GOOGLE\", \"PISSERO\", \"REGRET\", \"RET浩KED\", \"GRIZZLY\", \"BLACKEST\", \"BARKS\", \"ATTEND\", \"PEPPERMINT\", \"ENTICE\", \"THESEUSE\", \"MARCEL\", \"SYLLABLES\", \"SACCHARINE\", \"SO-FAR\", \"AMBITION\"]"
+    },
+    {
+      "seed": 10393,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10394,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"BEER\", \"HOWDY\", \"愔 Lupin\", \"MATINEE\", \"BLazes\"]",
+      "response": "Answer: [\"BEER\", \"HOWDY\", \"愔 Lupin\", \"MATINEE\", \"BLazes\"]"
+    },
+    {
+      "seed": 10395,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10396,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"COFFEE\", \"HIYA\", \"BJKLAW\", \"DAILY\", \"WILDFIRE\", \"CAYENNE\"]",
+      "response": "Answer: [\"COFFEE\", \"HIYA\", \"BJKLAW\", \"DAILY\", \"WILDFIRE\", \"CAYENNE\"]"
+    },
+    {
+      "seed": 10397,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10398,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LIVID\", \"FAKE\", \"ARMO\", \"SHAKES\", \"BRAND\", \"CHIPOT\", \"TREAD\", \"DJING\", \"SLOWLY\", \"INCONNECT\", \"RAZE\", \"ITSYOUR\", \"MIXEN\"]",
+      "response": "Answer: [\"LIVID\", \"FAKE\", \"ARMO\", \"SHAKES\", \"BRAND\", \"CHIPOT\", \"TREAD\", \"DJING\", \"SLOWLY\", \"INCONNECT\", \"RAZE\", \"ITSYOUR\", \"MIXEN\"]"
+    },
+    {
+      "seed": 10399,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10400,
+      "score": 0.16666666666666666,
+      "success": true,
+      "action": "[\"goog\", \"picnic\", \"lament\", \"retune\", \"drafts\", \"hollywood\"]",
+      "response": "Answer: [\"goog\", \"picnic\", \"lament\", \"retune\", \"drafts\", \"hollywood\"]"
+    },
+    {
+      "seed": 10401,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"情绪\", \"brewed\", \"uncrewed\", \"biocups\", \"Salvador\", \"publicity\", \"adverse\", \"insurance\"]",
+      "response": "Answer: [\"情绪\", \"brewed\", \"uncrewed\", \"biocups\", \"Salvador\", \"publicity\", \"adverse\", \"insurance\"]"
+    },
+    {
+      "seed": 10402,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10403,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"GOOGLE\", \"FAWiFi\", \"M>Please\", \"THEIRE\", \"DRAFT\", \"THEATRICALLY\"]",
+      "response": "Answer: [\"GOOGLE\", \"FAWiFi\", \"M>Please\", \"THEIRE\", \"DRAFT\", \"THEATRICALLY\"]"
+    },
+    {
+      "seed": 10404,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10405,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHELVES\", \"ETTINS\", \"HULK\", \"OMELET\", \"PLAIN\", \"LUMEN\", \"FREEFLOW\", \"POTHOL\", \"CRISP\"]",
+      "response": "SHELVES\nETTINS\nHULK\nOMELET\nPLAIN\nLUMEN\nFREEFLOW\nPOTHOL\nCRISP  \n\nAnswer: [\"SHELVES\", \"ETTINS\", \"HULK\", \"OMELET\", \"PLAIN\", \"LUMEN\", \"FREEFLOW\", \"POTHOL\", \"CRISP\"]"
+    },
+    {
+      "seed": 10406,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"STREET\", \"FACET\", \"ANCHO\", \"SHACK\", \"BRAND\", \"TOSTI\"]",
+      "response": "Answer: [\"STREET\", \"FACET\", \"ANCHO\", \"SHACK\", \"BRAND\", \"TOSTI\"]"
+    },
+    {
+      "seed": 10407,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10408,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"GOOGLE\", \"PAUL\", \"REGRET\", \"RETSD\", \"ROOKIE\", \"隆重举行\"]",
+      "response": "Answer: [\"GOOGLE\", \"PAUL\", \"REGRET\", \"RETSD\", \"ROOKIE\", \"隆重举行\"]"
+    },
+    {
+      "seed": 10409,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10410,
+      "score": 0.1111111111111111,
+      "success": true,
+      "action": "[\"LIKE\", \"FAIRY\", \"MASSIVE\", \"MEDIUM\", \"FLAT\", \"LUX\", \"FREE\", \"POtholes\", \"WALKS\"]",
+      "response": "Answer: [\"LIKE\", \"FAIRY\", \"MASSIVE\", \"MEDIUM\", \"FLAT\", \"LUX\", \"FREE\", \"POtholes\", \"WALKS\"]"
+    },
+    {
+      "seed": 10411,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10412,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LIKE\", \"FAIRY\", \"BUDDY\", \"FAB\", \"FLAT\"]",
+      "response": "Answer: [\"LIKE\", \"FAIRY\", \"BUDDY\", \"FAB\", \"FLAT\"]"
+    },
+    {
+      "seed": 10413,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"happy\", \"brew\", \"empty\", \"pad\", \"Cardoso\", \"public\", \"unhappy\", \"assess\", \"they\", \"shuttle\", \" PMC\"]",
+      "response": "Answer: [\"happy\", \"brew\", \"empty\", \"pad\", \"Cardoso\", \"public\", \"unhappy\", \"assess\", \"they\", \"shuttle\", \" PMC\"]"
+    },
+    {
+      "seed": 10414,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10415,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHelves\", \"FAeries\", \"MUScle\", \" EggS\", \"PLAIN\", \"CURRent\", \"FREEx\", \"PothOls\"]",
+      "response": "Answer: [\"SHelves\", \"FAeries\", \"MUScle\", \" EggS\", \"PLAIN\", \"CURRent\", \"FREEx\", \"PothOls\"]"
+    },
+    {
+      "seed": 10416,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10417,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"happy\", \"brew\", \"crew\", \"pad\", \"Mariana\"]",
+      "response": "Answer: [\"happy\", \"brew\", \"crew\", \"pad\", \"Mariana\"]"
+    },
+    {
+      "seed": 10418,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LIKE\", \"FAIRIES\", \"HUGE\", \"BOILED\", \"FLAT\", \"LUMEN\", \"FREE\", \"PO坑\"]",
+      "response": "Answer: [\"LIKE\", \"FAIRIES\", \"HUGE\", \"BOILED\", \"FLAT\", \"LUMEN\", \"FREE\", \"PO坑\"]"
+    },
+    {
+      "seed": 10419,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"happy\", \"brew\", \"empty\", \"cloth\", \"jess\", \"media\", \"disaster\", \"claims\", \"they\", \"qftwa\", \"slyrider\", \"rich\", \"fractures\", \"dilute\"]",
+      "response": "Answer: [\"happy\", \"brew\", \"empty\", \"cloth\", \"jess\", \"media\", \"disaster\", \"claims\", \"they\", \"qftwa\", \"slyrider\", \"rich\", \"fractures\", \"dilute\"]"
+    },
+    {
+      "seed": 10420,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10421,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"THEOGONY\", \"LANVIN\", \"HARRY\", \"STARTS\", \"FRANKFORT\", \"DAD\", \"SUSTAINABLE\", \"CRISPY\", \"PAULI\", \"POWER\"]",
+      "response": "Answer: [\"THEOGONY\", \"LANVIN\", \"HARRY\", \"STARTS\", \"FRANKFORT\", \"DAD\", \"SUSTAINABLE\", \"CRISPY\", \"PAULI\", \"POWER\"]"
+    },
+    {
+      "seed": 10422,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PRIEST\", \"FAIRGOER\", \"HERB\", \"VIDEOS\", \"WEAR\", \"PAMPER\", \"SHAKSPEARE\", \"THEODDISEY\", \"SAUSAGE\"]",
+      "response": "Answer: [\"CASTLE\", \"PRIEST\", \"FAIRGOER\", \"HERB\", \"VIDEOS\", \"WEAR\", \"PAMPER\", \"SHAKSPEARE\", \"THEODDISEY\", \"SAUSAGE\"]"
+    },
+    {
+      "seed": 10423,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARSON\", \"CHICAGO\", \"FORTY\", \"CLIPS\"]",
+      "response": "Answer: [\"CASTLE\", \"PARSON\", \"CHICAGO\", \"FORTY\", \"CLIPS\"]"
+    },
+    {
+      "seed": 10424,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHLF\", \"FAERIE\", \"TFLIGHTRX\", \"POUFFY\", \"MIMSY\", \"LUMEN\", \"FREEFLOW\", \"PATCHES\", \"WIGGLES\"]",
+      "response": "Answer: [\"SHLF\", \"FAERIE\", \"TFLIGHTRX\", \"POUFFY\", \"MIMSY\", \"LUMEN\", \"FREEFLOW\", \"PATCHES\", \"WIGGLES\"]"
+    },
+    {
+      "seed": 10425,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"racks\", \"elves\", \"hulks\", \"yolk\", \"flat\", \"lumens\", \"sampler\", \"potholes\"]",
+      "response": "Based on the provided clues and the structure of a standard crossword puzzle, I will proceed to fill in the words corresponding to the clues. Here are the words I deduced:\n\n1. Like some storage shelve"
+    },
+    {
+      "seed": 10426,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARSON\", \"SUBURB\", \"QUAFF\", \"CLIPS\", \" WEARY\"]",
+      "response": "Answer: [\"CASTLE\", \"PARSON\", \"SUBURB\", \"QUAFF\", \"CLIPS\", \" WEARY\"]"
+    },
+    {
+      "seed": 10427,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10428,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARISH\", \"FAIRGOER\", \"QUAFF\", \"MOVIES\", \"TIRED\", \"ENHANCES\", \"MORROW\", \"THEATRE\", \"SNACK\", \"SPIRL\"]",
+      "response": "Answer: [\"CASTLE\", \"PARISH\", \"FAIRGOER\", \"QUAFF\", \"MOVIES\", \"TIRED\", \"ENHANCES\", \"MORROW\", \"THEATRE\", \"SNACK\", \"SPIRL\"]"
+    },
+    {
+      "seed": 10429,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"HAPPY\", \"HOW\", \"EMPTY\", \"CLOTHES\", \"MILO\", \"MARKETING\", \"DISASTROUS\", \"CLAIMS\", \"THEYTHEY\", \"SHARI'A\", \"DURABLE\", \"CRACKS\", \"WEAKEN\"]",
+      "response": "Answer: [\"HAPPY\", \"HOW\", \"EMPTY\", \"CLOTHES\", \"MILO\", \"MARKETING\", \"DISASTROUS\", \"CLAIMS\", \"THEYTHEY\", \"SHARI'A\", \"DURABLE\", \"CRACKS\", \"WEAKEN\"]"
+    },
+    {
+      "seed": 10430,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10431,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"HAPPY\", \"STEAM\", \"EMPTY\", \"CLOTHES\", \"SAUL\", \"MEDIA\", \"SAD\", \"CLAIMS\", \"THEIRS\", \"SHARI LAW\", \"PAD\", \"CRACKS\", \"DILUTE\"]",
+      "response": "Answer: [\"HAPPY\", \"STEAM\", \"EMPTY\", \"CLOTHES\", \"SAUL\", \"MEDIA\", \"SAD\", \"CLAIMS\", \"THEIRS\", \"SHARI LAW\", \"PAD\", \"CRACKS\", \"DILUTE\"]"
+    },
+    {
+      "seed": 10432,
+      "score": 0.2222222222222222,
+      "success": true,
+      "action": "[\"RACK\", \"SATYRS\", \"MEATY\", \"MEDIUM\", \"GROUNDED\", \"LUX\", \"HOUSEBETTY\", \"POtholes\", \"WALKS\"]",
+      "response": "Based on the given clues and the structure of a typical crossword puzzle, let's analyze and solve each clue one by one.\n\n1. Like some storage shelves (6) - A storage shelf can be a \"RACK\".\n2. Mythical"
+    },
+    {
+      "seed": 10433,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARSON\", \"FARMER\", \"DIADEM\", \"VIDEOS\", \"EXHAUST\", \"IMPROVES\", \"MARY\", \"MILLER\", \"STICKY\", \"TOENAIL\", \"BRAY\", \"KITTEN\", \"NO\"]",
+      "response": "Answer: [\"CASTLE\", \"PARSON\", \"FARMER\", \"DIADEM\", \"VIDEOS\", \"EXHAUST\", \"IMPROVES\", \"MARY\", \"MILLER\", \"STICKY\", \"TOENAIL\", \"BRAY\", \"KITTEN\", \"NO\"]"
+    },
+    {
+      "seed": 10434,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LIKE\", \"FAIRY\", \"MUNCH\", \"YOLK\", \"FLAT\", \"LUX\", \"FREE\", \"POthOLE\", \"WALKS\"]",
+      "response": "Answer: [\"LIKE\", \"FAIRY\", \"MUNCH\", \"YOLK\", \"FLAT\", \"LUX\", \"FREE\", \"POthOLE\", \"WALKS\"]"
+    },
+    {
+      "seed": 10435,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10436,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARSON\", \"FAYETTE\", \"HERBS\", \"VIDEOS\", \"EXHAUST\", \"BUROWS\", \"MURES\", \"FOLLIES\", \"SLADHS\", \"SETOFT\"]",
+      "response": "Answer: [\"CASTLE\", \"PARSON\", \"FAYETTE\", \"HERBS\", \"VIDEOS\", \"EXHAUST\", \"BUROWS\", \"MURES\", \"FOLLIES\", \"SLADHS\", \"SETOFT\"]"
+    },
+    {
+      "seed": 10437,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10438,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SHRIMPS\", \"FAIRIES\", \"MUDDY\", \"CREAMED\", \"FLAT\"]",
+      "response": "Answer: [\"SHRIMPS\", \"FAIRIES\", \"MUDDY\", \"CREAMED\", \"FLAT\"]"
+    },
+    {
+      "seed": 10439,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10440,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \",SLOT\", \":CALUMET\", \"LEVELS\", \"MOVIES\", \"D-Encoding\", \":BH.parseDouble\", \"MAD\", \"KIPLING\", \"||||\"\"]",
+      "response": "Answer: [\"CASTLE\", \",SLOT\", \":CALUMET\", \"LEVELS\", \"MOVIES\", \"D-Encoding\", \":BH.parseDouble\", \"MAD\", \"KIPLING\", \"||||\"\"]"
+    },
+    {
+      "seed": 10441,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10442,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARSON\", \"CALUMET\", \"HERBS\", \"CLIPS\", \"DEPLETES\", \"ENHANCES\", \"SHELLY\", \"MUSIC_HALL\"]",
+      "response": "Answer: [\"CASTLE\", \"PARSON\", \"CALUMET\", \"HERBS\", \"CLIPS\", \"DEPLETES\", \"ENHANCES\", \"SHELLY\", \"MUSIC_HALL\"]"
+    },
+    {
+      "seed": 10443,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10444,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"MINISTER\", \"FAIRGOER\", \"HERB\", \"VIDEOS\", \"EXHAUSTED\", \"ENHANCED\", \" mary\", \"BRENNAN\", \"CHEESE\", \"SCAR\", \"EYEROP\", \"SPORK\"]",
+      "response": "Answer: [\"CASTLE\", \"MINISTER\", \"FAIRGOER\", \"HERB\", \"VIDEOS\", \"EXHAUSTED\", \"ENHANCED\", \" mary\", \"BRENNAN\", \"CHEESE\", \"SCAR\", \"EYEROP\", \"SPORK\"]"
+    },
+    {
+      "seed": 10445,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10446,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARSON\", \"CLOSE\", \"QUAFF\", \"VIDEOS\", \"WEARIES\", \"ENHANCES\", \"SHAKESPEARE\", \"BROOKLYN\", \"SNACK\", \"RIVET\", \"EARTHWORM\", \"BAA\", \"KANGAROO\"]",
+      "response": "Answer: [\"CASTLE\", \"PARSON\", \"CLOSE\", \"QUAFF\", \"VIDEOS\", \"WEARIES\", \"ENHANCES\", \"SHAKESPEARE\", \"B装置已经完成了解谜过程，现在将答案以要求的格式输出：\n\nAnswer: [\"CASTLE\", \"PARSON\", \"CLOSE\", \"QUAFF\", \"VIDEOS\", \"WEARIES\", \"ENHANC"
+    },
+    {
+      "seed": 10447,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10448,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARSON\", \"FAIR\", \"QUACK\", \"VIDEOS\", \"EXHAUST\", \"ENHANCES\", \"SHAKESPEARE\", \"NICKNAME\", \"SNACK\", \"CLI Formal\", \"BAA\", \"KIDDE Formally\", \"WHO\"]",
+      "response": "Answer: [\"CASTLE\", \"PARSON\", \"FAIR\", \"QUACK\", \"VIDEOS\", \"EXHAUST\", \"ENHANCES\", \"SHAKESPEARE\", \"NICKNAME\", \"SNACK\", \"CLI Formal\", \"BAA\", \"KIDDE Formally\", \"WHO\"]"
+    },
+    {
+      "seed": 10449,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARISH\", \"PEORIA\", \"SWEAT\", \"VIDEOS\"]",
+      "response": "Answer: [\"CASTLE\", \"PARISH\", \"PEORIA\", \"SWEAT\", \"VIDEOS\"]"
+    },
+    {
+      "seed": 10450,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10451,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"CASTLE\", \"PARSON\", \"CEDAR\", \"HERBS\", \"VIDEOS\"]",
+      "response": "Answer: [\"CASTLE\", \"PARSON\", \"CEDAR\", \"HERBS\", \"VIDEOS\"]"
+    },
+    {
+      "seed": 10452,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10453,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"FIREWORKS\", \"FAKE\", \"ARSON\", \"THRU\", \"BUDDLES\", \"SALAD\", \"PORTRAIT\"]",
+      "response": "Answer: [\"FIREWORKS\", \"FAKE\", \"ARSON\", \"THRU\", \"BUDDLES\", \"SALAD\", \"PORTRAIT\"]"
+    },
+    {
+      "seed": 10454,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10455,
+      "score": 0.2,
+      "success": true,
+      "action": "[\"Début\", \"Wang\", \"Tommy\", \"Starts\", \"Frankfort\"]",
+      "response": "Answer: [\"Début\", \"Wang\", \"Tommy\", \"Starts\", \"Frankfort\"]"
+    },
+    {
+      "seed": 10456,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10457,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"HAPPY\", \"BREW\", \"CREW\", \"CATTANEOS\", \"AQUARELLE\", \"RELAY\", \"WISE\", \"CLAIMS\", \"THEIRS\", \"QATARI\", \"TUSCANIA\", \"RICH\"]",
+      "response": "Answer: [\"HAPPY\", \"BREW\", \"CREW\", \"CATTANEOS\", \"AQUARELLE\", \"RELAY\", \"WISE\", \"CLAIMS\", \"THEIRS\", \"QATARI\", \"TUSCANIA\", \"RICH\"]"
+    },
+    {
+      "seed": 10458,
+      "score": 0.1,
+      "success": true,
+      "action": "[\"CONQUER\", \"MISTAKES\", \"DISMISSE\", \"OBEYED\", \"DOLEFUL\", \"SPIKY\", \"BUGGED\", \"BELuga\", \"BRISTLE\", \"BYLAWE\"]",
+      "response": "Answer: [\"CONQUER\", \"MISTAKES\", \"DISMISSE\", \"OBEYED\", \"DOLEFUL\", \"SPIKY\", \"BUGGED\", \"BELuga\", \"BRISTLE\", \"BYLAWE\"]"
+    },
+    {
+      "seed": 10459,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10460,
+      "score": 0.0,
+      "success": false,
+      "action": "",
+      "response": "Answer: [\"PYTHON\", \"MOTORCycles\", \"ABEL\", \"THRIVE\", \"REPUTATION\", \"ANSWER\"]"
+    },
+    {
+      "seed": 10461,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10462,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"ARCTIC\", \"LESSONS\", \"BLABER\", \"FORWARD\", \"ONE\", \"COVERS\", \"SUCKUP\", \"AURORA\", \"EXPLODE\", \"DRESS\", \"PRISON\", \"GOLLY\", \"CARDS\", \"GERSHWIN\", \"VIBES\"]",
+      "response": "Answer: [\"ARCTIC\", \"LESSONS\", \"BLABER\", \"FORWARD\", \"ONE\", \"COVERS\", \"SUCKUP\", \"AURORA\", \"EXPLODE\", \"DRESS\", \"PRISON\", \"GOLLY\", \"CARDS\", \"GERSHWIN\", \"VIBES\"]"
+    },
+    {
+      "seed": 10463,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ARCTIC\", \"LESSON\", \"GAUT\", \"FOR\", \"EVEN\", \"BEDS\", \"EFFUSE\", \"AURORA\", \"EXPLODE\", \"PLUMB\", \"CHAMBER\", \"SLOTHS\"]",
+      "response": "Answer: [\"ARCTIC\", \"LESSON\", \"GAUT\", \"FOR\", \"EVEN\", \"BEDS\", \"EFFUSE\", \"AURORA\", \"EXPLODE\", \"PLUMB\", \"CHAMBER\", \"SLOTHS\"]"
+    },
+    {
+      "seed": 10464,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ARCTIC\", \"TRICKY\", \"HECK\", \"WARDS\", \"TWO\", \"COVERS\", \"SUKY\", \"AURORA\", \"INFLATE\", \"DRESS\", \".setContentType\", \"GRANDISON\"]",
+      "response": "Answer: [\"ARCTIC\", \"TRICKY\", \"HECK\", \"WARDS\", \"TWO\", \"COVERS\", \"SUKY\", \"AURORA\", \"INFLATE\", \"DRESS\", \".setContentType\", \"GRANDISON\"]"
+    },
+    {
+      "seed": 10465,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10466,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ARCTIC\", \"LESSON\", \"THE+GERMAN\", \"FRONT\", \"TWOS\", \"COVERS\", \"SYZYGY\", \"AURORA\", \"INFLATE\", \"DRESS\", \"CHIMNEY\"]",
+      "response": "Answer: [\"ARCTIC\", \"LESSON\", \"THE+GERMAN\", \"FRONT\", \"TWOS\", \"COVERS\", \"SYZYGY\", \"AURORA\", \"INFLATE\", \"DRESS\", \"CHIMNEY\"]"
+    },
+    {
+      "seed": 10467,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10468,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ARCTIC\", \"LESSON\", \"UMBRAGE\", \"FRONT\", \"235\", \"COVERS\", \".timeline\", \"AURORA\", \"EXPLODE\", \"DRESS\", \"CHATEAU\", \"SLOW\"]",
+      "response": "Answer: [\"ARCTIC\", \"LESSON\", \"UMBRAGE\", \"FRONT\", \"235\", \"COVERS\", \".timeline\", \"AURORA\", \"EXPLODE\", \"DRESS\", \"CHATEAU\", \"SLOW\"]"
+    },
+    {
+      "seed": 10469,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10470,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ARCTIC\", \"LESSON\", \"CASING\", \"AND\", \"TWOS\", \"COVERS\", \"OVERT\", \"AURORA\", \"INFLATE\", \"DRESS\", \"CHATEAU\", \"SLOW\"]",
+      "response": "Answer: [\"ARCTIC\", \"LESSON\", \"CASING\", \"AND\", \"TWOS\", \"COVERS\", \"OVERT\", \"AURORA\", \"INFLATE\", \"DRESS\", \"CHATEAU\", \"SLOW\"]"
+    },
+    {
+      "seed": 10471,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10472,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ARCTIC\", \"LESSON\", \"SAY\", \"FOR\", \"TWO\", \"MAKE\", \"PINOSE\", \"AURORA\", \"INFLATE\", \"DRESSES\", \"GAOL\", \"SLOW\"]",
+      "response": "Answer: [\"ARCTIC\", \"LESSON\", \"SAY\", \"FOR\", \"TWO\", \"MAKE\", \"PINOSE\", \"AURORA\", \"INFLATE\", \"DRESSES\", \"GAOL\", \"SLOW\"]"
+    },
+    {
+      "seed": 10473,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10474,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ARCTIC\", \"LESSON\", \"UTTER\", \"FOR\", \" TWO\", \"MAKE\", \"POMP\", \"AURORA\", \"BLOW\", \"DRESS\", \"CHATEAU\", \"SLOW\"]",
+      "response": "Answer: [\"ARCTIC\", \"LESSON\", \"UTTER\", \"FOR\", \" TWO\", \"MAKE\", \"POMP\", \"AURORA\", \"BLOW\", \"DRESS\", \"CHATEAU\", \"SLOW\"]"
+    },
+    {
+      "seed": 10475,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10476,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"ARCTIC\", \"TRICKS\", \"SAY\", \"FOR\", \"TWO\", \"BEDS\", \"SUDDY\", \"NORTH\", \"BLOW\", \"DRESS\", \"CHATEAU\", \"SLOW\"]",
+      "response": "Answer: [\"ARCTIC\", \"TRICKS\", \"SAY\", \"FOR\", \"TWO\", \"BEDS\", \"SUDDY\", \"NORTH\", \"BLOW\", \"DRESS\", \"CHATEAU\", \"SLOW\"]"
+    },
+    {
+      "seed": 10477,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10478,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ARCTIC\", \"LESSON\", \"SAY\", \"WARDS\", \"TWO\", \"BEDS\", \"PRESUMPTUOUS\", \"AURORA\", \"EXPLODE\", \"DRESS\", \"CHAMBER\", \"SLOW\"]",
+      "response": "Answer: [\"ARCTIC\", \"LESSON\", \"SAY\", \"WARDS\", \"TWO\", \"BEDS\", \"PRESUMPTUOUS\", \"AURORA\", \"EXPLODE\", \"DRESS\", \"CHAMBER\", \"SLOW\"]"
+    },
+    {
+      "seed": 10479,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"ARCTIC\", \"LESSON\", \"TELL\", \"WAY\", \"TWO\", \"COVERS\", \"SUCKERS\", \"AURORA\", \"INFLATE\", \"DRESS\", \"CHATEAU\", \"SLOW\"]",
+      "response": "Answer: [\"ARCTIC\", \"LESSON\", \"TELL\", \"WAY\", \"TWO\", \"COVERS\", \"SUCKERS\", \"AURORA\", \"INFLATE\", \"DRESS\", \"CHATEAU\", \"SLOW\"]"
+    },
+    {
+      "seed": 10480,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"LESS\", \"SUN\", \"DET\", \"WIRES\", \"FIBROUS\", \"CRUMBS\", \"STIMULATES\", \"SUBMITTED\", \"COMBO\", \"COPS\", \"DISCHARGE\", \"BACKGROUND\"]",
+      "response": "Answer: [\"LESS\", \"SUN\", \"DET\", \"WIRES\", \"FIBROUS\", \"CRUMBS\", \"STIMULATES\", \"SUBMITTED\", \"COMBO\", \"COPS\", \"DISCHARGE\", \"BACKGROUND\"]"
+    },
+    {
+      "seed": 10481,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10482,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"AVOID\", \"AIRTIME\", \"MOHORU\", \"SCREENED\", \"SATISFY\"]",
+      "response": "Answer: [\"AVOID\", \"AIRTIME\", \"MOHORU\", \"SCREENED\", \"SATISFY\"]"
+    },
+    {
+      "seed": 10483,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10484,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BET\",\"LIAR\",\"COMI\",\"UPCHARGE\",\"TONES\",\"YIPPO\",\"NOCRY\"]",
+      "response": "Answer: [\"BET\",\"LIAR\",\"COMI\",\"UPCHARGE\",\"TONES\",\"YIPPO\",\"NOCRY\"]"
+    },
+    {
+      "seed": 10485,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SERI\", \"LIAR\", \"COMM\", \"AUTO\", \"TONE\", \"YOH\", \"DIDNT\", \"SPARK\"]",
+      "response": "Answer: [\"SERI\", \"LIAR\", \"COMM\", \"AUTO\", \"TONE\", \"YOH\", \"DIDNT\", \"SPARK\"]"
+    },
+    {
+      "seed": 10486,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10487,
+      "score": 0.06666666666666667,
+      "success": true,
+      "action": "[\"vention\", \"debate\", \"minsk\", \"shift\", \"barbary\", \"dream\", \"repair\", \"crust\", \"moria\", \"fantasy\", \"ring\", \"tire\", \"hymn\", \"enthusiastically\", \"amen\"]",
+      "response": "Answer: [\"vention\", \"debate\", \"minsk\", \"shift\", \"barbary\", \"dream\", \"repair\", \"crust\", \"moria\", \"fantasy\", \"ring\", \"tire\", \"hymn\", \"enthusiastically\", \"amen\"]"
+    },
+    {
+      "seed": 10488,
+      "score": 0.08333333333333333,
+      "success": true,
+      "action": "[\"鲋TTY\", \"RAW\", \"ZOOM\", \"THIRD\", \"CAUTION\", \"SPIEGEL\", \"KHAN\", \"USEFUL\", \"RADIOS\", \"DIODE\", \"OPEN\"]",
+      "response": "Answer: [\"鲋TTY\", \"RAW\", \"ZOOM\", \"THIRD\", \"CAUTION\", \"SPIEGEL\", \"KHAN\", \"USEFUL\", \"RADIOS\", \"DIODE\", \"OPEN\"]"
+    },
+    {
+      "seed": 10489,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10490,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"STARTLING\", \"LYED\", \"TAKES\", \"ENTREE\", \"TONES\", \"YOYO\", \"DIDNT\", \"SPARKS\", \"CAPSULS\", \"RECTOR\", \"PEARL\", \"MONOLOG\"]",
+      "response": "Answer: [\"STARTLING\", \"LYED\", \"TAKES\", \"ENTREE\", \"TONES\", \"YOYO\", \"DIDNT\", \"SPARKS\", \"CAPSULS\", \"RECTOR\", \"PEARL\", \"MONOLOG\"]"
+    },
+    {
+      "seed": 10491,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10492,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"SEINFELD\", \"LYNCH\", \"TIP\", \"FEE\", \"TONES\", \"YOHYO\", \"NANCY\", \"SPIRITS\", \"TANKS\", \"RECTOR\", \"PATTON\"]",
+      "response": "Answer: [\"SEINFELD\", \"LYNCH\", \"TIP\", \"FEE\", \"TONES\", \"YOHYO\", \"NANCY\", \"SPIRITS\", \"TANKS\", \"RECTOR\", \"PATTON\"]"
+    },
+    {
+      "seed": 10493,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10494,
+      "score": 0.125,
+      "success": true,
+      "action": "[\"WIN\", \"HOLA\", \"Dawn\", \"MENU\", \"广播\", \"STALE\", \"TOT\", \"拉面\"]",
+      "response": "Answer: [\"WIN\", \"HOLA\", \"Dawn\", \"MENU\", \"广播\", \"STALE\", \"TOT\", \"拉面\"]"
+    },
+    {
+      "seed": 10495,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10496,
+      "score": 0.14285714285714285,
+      "success": true,
+      "action": "[\"WINNER\", \"HOLA\", \"DAWN\", \"TASK\", \"SAIL\", \"STAND\", \"ASCENT\"]",
+      "response": "Answer: [\"WINNER\", \"HOLA\", \"DAWN\", \"TASK\", \"SAIL\", \"STAND\", \"ASCENT\"]"
+    },
+    {
+      "seed": 10497,
+      "score": 0.0,
+      "success": false,
+      "action": "[\"BINKIES\", \"RAWBADS\", \"MARKISH\", \"OLLA\", \"ALERT\", \"_lastname\", \"FRANCES_OConneil\", \"ASSISTANT\", \"STATIONS\", \"DIODE\", \"THROUGH\", \"BLUESWAYS\", \"_SHOWS\"]",
+      "response": "Answer: [\"BINKIES\", \"RAWBADS\", \"MARKISH\", \"OLLA\", \"ALERT\", \"_lastname\", \"FRANCES_OConneil\", \"ASSISTANT\", \"STATIONS\", \"DIODE\", \"THROUGH\", \"BLUESWAYS\", \"_SHOWS\"]"
+    },
+    {
+      "seed": 10498,
+      "score": 0.0,
+      "success": false,
+      "error": "Error code: 429 - {'message': 'Request was rejected due to rate limiting. Details: TPM limit reached.', 'data': None}"
+    },
+    {
+      "seed": 10499,
+      "score": 0.07692307692307693,
+      "success": true,
+      "action": "[\"ONESIE\", \"RAW\", \"SHMASH\", \"THIRD\", \"CAUTION\", \"RHODES\", \"ERIN\", \"ASSIST\", \"RADIOS\", \"TRANSISTOR\", \" WITHOUT\", \"BLUE note\"]",
+      "response": "Answer: [\"ONESIE\", \"RAW\", \"SHMASH\", \"THIRD\", \"CAUTION\", \"RHODES\", \"ERIN\", \"ASSIST\", \"RADIOS\", \"TRANSISTOR\", \" WITHOUT\", \"BLUE note\"]"
+    }
+  ],
+  "experiment_id": "qwen_temp1_enhanced_500",
+  "agent_config": "practice/word_puzzle_qwen_temp1_hierarchical_agent",
+  "dataset_name": "KORGym-WordPuzzle-Eval-500"
+}

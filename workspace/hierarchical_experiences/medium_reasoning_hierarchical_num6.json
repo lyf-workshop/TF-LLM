@@ -1,0 +1,469 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Structure-first: Create a formal grid/table immediately to track interdependent attributes and enforce uniqueness constraints in logic puzzles.",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_1",
+      "content": "Grid usage: Use a grid/table from the start to track assignments and enforce uniqueness constraints.",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_2",
+      "content": "Structure-first: Build formal representation (like a grid/table) from the beginning to track attributes and enforce uniqueness and ordering constraints systematically.",
+      "original_id": "G2",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_3",
+      "content": "Constraint cross-check: Reference each clue explicitly in reasoning and validate against current assignments.",
+      "original_id": "G3",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_4",
+      "content": "Iterative check: Validate all constraints after each assignment step to ensure consistency.",
+      "original_id": "G4",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_5",
+      "content": "Constraint propagation hierarchy: Prioritize the most restrictive clues first to minimize ambiguity and reinforce systematic reasoning in logic puzzles.",
+      "original_id": "G5",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_6",
+      "content": "Clue anchoring: Explicitly reference applicable clues in every assignment to ensure traceability and completeness of deductions.",
+      "original_id": "G6",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_7",
+      "content": "Contradiction labeling: Explicitly reference specific clues and assumptions when identifying contradictions during deductions.",
+      "original_id": "G7",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_8",
+      "content": "Structure-first: Create a formal grid/table immediately to track interdependent attributes and enforce uniqueness constraints in logic puzzles.",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_9",
+      "content": "Grid usage: Use a grid/table from the start to track assignments and enforce uniqueness constraints.",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_10",
+      "content": "Structure-first: Build formal representation (like a grid/table) from the beginning to track attributes and enforce uniqueness and ordering constraints systematically.",
+      "original_id": "G2",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_11",
+      "content": "Constraint cross-check: Reference each clue explicitly in reasoning and validate against current assignments.",
+      "original_id": "G3",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_12",
+      "content": "Iterative check: Validate all constraints after each assignment step to ensure consistency.",
+      "original_id": "G4",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_13",
+      "content": "Constraint propagation hierarchy: Prioritize the most restrictive clues first to minimize ambiguity and reinforce systematic reasoning in logic puzzles.",
+      "original_id": "G5",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_14",
+      "content": "Clue anchoring: Explicitly reference applicable clues in every assignment to ensure traceability and completeness of deductions.",
+      "original_id": "G6",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_15",
+      "content": "Contradiction labeling: Explicitly reference specific clues and assumptions when identifying contradictions during deductions.",
+      "original_id": "G7",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_16",
+      "content": "Structure-first: Create a formal grid/table immediately to track interdependent attributes, enforce uniqueness, ordering, adjacency, and cross-validation constraints systematically, ensuring iterative validation (G4), explicit clue anchoring (G6), and systematic reasoning for scalability.",
+      "original_id": "G0",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_17",
+      "content": "Grid usage: Use a grid/table from the start to track assignments (e.g., names, pets, heights), propagate deductions, and enforce uniqueness and ordering constraints systematically, especially in complex puzzles.",
+      "original_id": "G1",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_18",
+      "content": "Structure-first: Build formal representation from the beginning to track attributes, enforce uniqueness/ordering constraints systematically, and integrate explicit clue referencing, iterative propagation, and visual anchoring of deductions to clues.",
+      "original_id": "G2",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_19",
+      "content": "Iterative check: Apply constraint cross-checking and anchor each deduction to its source clue during intermediate steps, not only in final verification, to reduce untraceable errors in complex logic puzzles.",
+      "original_id": "G3",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_20",
+      "content": "Iterative check: After each assignment step, use a grid/table to validate all constraints and eliminate reasoning gaps, ensuring logical consistency.",
+      "original_id": "G4",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_21",
+      "content": "Meta-strategy: Prioritize the most restrictive clues (e.g., positional constraints) first using a constraint propagation hierarchy to streamline reasoning, minimize backtracking, and handle interdependent attributes effectively in multi-step logic puzzles.",
+      "original_id": "G5",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_22",
+      "content": "Clue anchoring: Explicitly reference applicable clues in every assignment, especially with multiple interdependent attributes like name, house number, food, and flower, to ensure traceability and completeness of deductions.",
+      "original_id": "G6",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_23",
+      "content": "Contradiction labeling: Explicitly reference specific clues and assumptions when identifying contradictions during deductions.",
+      "original_id": "G7",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_24",
+      "content": "Meta-struct: Internalize the 'structure-first' principle as a foundational mindset, ensuring grid/table creation precedes deduction for all problem types.",
+      "original_id": "G8",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_25",
+      "content": "Structure-first: Create a formal grid/table immediately to track interdependent attributes and enforce uniqueness constraints in logic puzzles.",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_26",
+      "content": "Grid usage: Use a grid/table from the start to track assignments and enforce uniqueness constraints.",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_27",
+      "content": "Structure-first: Build formal representation (like a grid/table) from the beginning to track attributes and enforce uniqueness and ordering constraints systematically.",
+      "original_id": "G2",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_28",
+      "content": "Constraint cross-check: Reference each clue explicitly in reasoning and validate against current assignments.",
+      "original_id": "G3",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_29",
+      "content": "Iterative check: Validate all constraints after each assignment step to ensure consistency.",
+      "original_id": "G4",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_30",
+      "content": "Constraint propagation hierarchy: Prioritize the most restrictive clues first to minimize ambiguity and reinforce systematic reasoning in logic puzzles.",
+      "original_id": "G5",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_31",
+      "content": "Clue anchoring: Explicitly reference applicable clues in every assignment to ensure traceability and completeness of deductions.",
+      "original_id": "G6",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_32",
+      "content": "Contradiction labeling: Explicitly reference specific clues and assumptions when identifying contradictions during deductions.",
+      "original_id": "G7",
+      "step": 0,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_33",
+      "content": "Structure-first: Create a formal grid/table immediately to track interdependent attributes, enforce uniqueness, ordering, adjacency, and cross-validation constraints systematically, ensuring iterative validation (G4), explicit clue anchoring (G6), and systematic reasoning for scalability.",
+      "original_id": "G0",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_34",
+      "content": "Grid usage: Use a grid/table from the start to track assignments (e.g., names, pets, heights), propagate deductions, and enforce uniqueness and ordering constraints systematically, especially in complex puzzles.",
+      "original_id": "G1",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_35",
+      "content": "Structure-first: Build formal representation from the beginning to track attributes, enforce uniqueness/ordering constraints systematically, and integrate explicit clue referencing, iterative propagation, and visual anchoring of deductions to clues.",
+      "original_id": "G2",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_36",
+      "content": "Iterative check: Apply constraint cross-checking and anchor each deduction to its source clue during intermediate steps, not only in final verification, to reduce untraceable errors in complex logic puzzles.",
+      "original_id": "G3",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_37",
+      "content": "Iterative check: After each assignment step, use a grid/table to validate all constraints and eliminate reasoning gaps, ensuring logical consistency.",
+      "original_id": "G4",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_38",
+      "content": "Meta-strategy: Prioritize the most restrictive clues (e.g., positional constraints) first using a constraint propagation hierarchy to streamline reasoning, minimize backtracking, and handle interdependent attributes effectively in multi-step logic puzzles.",
+      "original_id": "G5",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_39",
+      "content": "Clue anchoring: Explicitly reference applicable clues in every assignment, especially with multiple interdependent attributes like name, house number, food, and flower, to ensure traceability and completeness of deductions.",
+      "original_id": "G6",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_40",
+      "content": "Contradiction labeling: Explicitly reference specific clues and assumptions when identifying contradictions during deductions.",
+      "original_id": "G7",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_41",
+      "content": "Meta-struct: Internalize the 'structure-first' principle as a foundational mindset, ensuring grid/table creation precedes deduction for all problem types.",
+      "original_id": "G8",
+      "step": 1,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_42",
+      "content": "Structure-first: Create a formal grid/table immediately to track interdependent attributes, enforce uniqueness, ordering, adjacency, and cross-validation constraints systematically. Ensure iterative validation, explicit clue anchoring, and systematic reasoning for scalability, even in simple puzzles. This approach reduces reasoning gaps and provides a scaffold for traceable deductions.",
+      "original_id": "G0",
+      "step": 2,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_43",
+      "content": "Grid usage: Use a formal grid/table from the start to dynamically enforce all constraints (positional, uniqueness, adjacency) and propagate deductions systematically. This minimizes reasoning gaps, especially in puzzles with adjacency or exclusive constraints, ensuring consistency and traceability.",
+      "original_id": "G1",
+      "step": 2,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_44",
+      "content": "Structure-first: Build formal representation from the beginning to track attributes, enforce uniqueness/ordering constraints systematically, and integrate explicit clue referencing, iterative propagation, and visual anchoring of deductions to clues.",
+      "original_id": "G2",
+      "step": 2,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_45",
+      "content": "Iterative check: Apply constraint cross-checking and anchor each deduction to its source clue during intermediate steps, not only in final verification, to reduce untraceable errors in complex logic puzzles.",
+      "original_id": "G3",
+      "step": 2,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_46",
+      "content": "Iterative check: After assigning attributes, use the grid to validate all constraints dynamically (e.g., mark exclusivity). This prevents reasoning gaps by ensuring logical consistency at each step.",
+      "original_id": "G4",
+      "step": 2,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_47",
+      "content": "Meta-strategy: Prioritize the most restrictive clues (e.g., positional constraints) first using a constraint propagation hierarchy to streamline reasoning, minimize backtracking, and handle interdependent attributes effectively in multi-step logic puzzles.",
+      "original_id": "G5",
+      "step": 2,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_48",
+      "content": "Clue anchoring: During all deductions, label assignments with specific clues and attributes to ensure traceability, completeness, and cross-problem learning patterns. This is critical for multi-attribute puzzles.",
+      "original_id": "G6",
+      "step": 2,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_49",
+      "content": "Contradiction labeling: Explicitly reference specific clues and assumptions when identifying contradictions during deductions.",
+      "original_id": "G7",
+      "step": 2,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_50",
+      "content": "Structure-first: Internalize the principle as a foundational mindset. This ensures grid creation precedes deduction for all puzzle types, enhancing traceability, reducing cognitive load, and enabling generalization to complex scenarios.",
+      "original_id": "G8",
+      "step": 2,
+      "problem_count": 80
+    },
+    {
+      "id": "L0_51",
+      "content": "Positional visualization: In puzzles with positional constraints (e.g., 'right of'), explicitly represent spatial relationships in the grid to avoid oversight. Failed mapping here leads to untraceable errors, so formal representation is critical.",
+      "original_id": "G9",
+      "step": 2,
+      "problem_count": 80
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**: Begin by constructing a formal grid or table to systematically track attributes and constraints, and consistently validate all clues against current assignments after each step to maintain logical consistency and avoid contradictions.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**: Begin by constructing a formal grid/table to visualize interdependent attributes, systematically apply the most restrictive constraints first, and explicitly reference relevant clues during every assignment step to ensure logical consistency and traceability of deductions.  \n\nThis integrates structure creation, constraint prioritization, and clue anchoring as foundational steps for managing ambiguity and verifying validity in logic puzzles.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_2",
+      "content": "**L1 Pattern-Level Strategy**: Begin by creating a structured formal representation (such as a grid or table) to track attributes and constraints, and systematically apply and cross-check all relevant clues after each assignment to maintain consistency and enforce uniqueness and ordering requirements.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_3",
+      "content": "**L1 Pattern-Level Strategy**: Prioritize constructing a formal grid/table at the outset to organize attributes, enforce uniqueness/ordering constraints, and systematically cross-validate deductions against explicit clue references throughout the solving process, ensuring iterative consistency checks to prevent contradictions and errors in complex logic puzzles.",
+      "source_l0_ids": [
+        "L0_15",
+        "L0_16",
+        "L0_17",
+        "L0_18",
+        "L0_19"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_4",
+      "content": "**L1 Pattern-Level Strategy**: Use a structured grid/table from the beginning to systematically track assignments and validate constraints at each step, while explicitly referencing clues to ensure logical consistency, traceability, and efficient deduction in multi-attribute logic puzzles. Prioritize clues that impose the most restrictions to minimize backtracking and resolve interdependencies effectively.",
+      "source_l0_ids": [
+        "L0_20",
+        "L0_21",
+        "L0_22",
+        "L0_23",
+        "L0_24"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_5",
+      "content": "**L1 Pattern-Level Strategy**: Employ a structured grid/table representation from the outset to track interdependent attributes, and systematically validate all constraints (uniqueness, ordering, etc.) after each assignment step to ensure consistency and prevent contradictions.",
+      "source_l0_ids": [
+        "L0_25",
+        "L0_26",
+        "L0_27",
+        "L0_28",
+        "L0_29"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "Principle: Formalize and externalize constraints and relationships early through structured representation to enable systematic, traceable reasoning. This approach works because it transforms abstract logic into a manipulable framework, reducing mental overhead and ensuring every deduction is grounded in verifiable information. The benefits include greater accuracy, error detection, and the ability to scale reasoning to more complex problems.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L2_1",
+      "content": "Principle: Structure-first principle: Build formal representations (e.g., grids, tables) early to externalize complexity, enabling systematic validation and traceability of constraints across interdependent elements.  \nWhy it works: Externalizing relationships and constraints into explicit structures reduces cognitive load by transforming abstract reasoning into tangible, iterative checks.  \nBenefits: Prevents cascading errors, ensures logical consistency through continuous cross-validation, and scales to multi-layered problems by anchoring deductions to verifiable references.",
+      "source_l1_ids": [
+        "L1_3",
+        "L1_4",
+        "L1_5"
+      ],
+      "step": 2
+    }
+  ],
+  "stats": {
+    "total_l0": 52,
+    "total_l1": 6,
+    "total_l2": 2
+  }
+}

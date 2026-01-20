@@ -1,0 +1,50 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\
+    \ \n\nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\nThe last part of your final response should be in the following\
+    \ format:\n<answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n\
+    When solving problems, you MUST first carefully read and understand the helpful\
+    \ instructions and experiences:\n[G0]. Contradiction handling: When multiple constraints\
+    \ are interdependent, explicitly document contradictions and revisit assumptions\
+    \ iteratively to ensure robust reasoning.\n[G1]. Formal deduction: When solving\
+    \ constraint satisfaction puzzles, structure deductions formally (e.g., using\
+    \ tables) early to track attribute uniqueness and eliminate ambiguity.\n[G2].\
+    \ Positional testing: When multiple positional constraints are present, systematically\
+    \ test valid configurations, document contradictions explicitly, and use grids\
+    \ to track attribute assignments and discard invalid options iteratively.\n[G3].\
+    \ Clue interconnection: Document logical connections between interconnected clues\
+    \ (e.g., 'clue 4 + 9 implies pizza and stew are adjacent, and stew must be in\
+    \ house 4') with deductive chaining. Explicitly reference these connections during\
+    \ deductions to ensure logical coherence, avoid redundancy, and proactively identify\
+    \ contradictions or constraint violations.\n[G4]. Grid Usage: When solving logic\
+    \ puzzles with multiple categories and constraints, explicitly use a grid or matrix\
+    \ early to track attribute assignments and validate uniqueness cross-categorically.\
+    \ This supports error detection, conflict resolution, and reinforces adherence\
+    \ to step-by-step deduction models.\n[G5]. Deduction Documentation: Explicitly\
+    \ track deductions with clue references and logical implications to build verifiable\
+    \ reasoning paths for complex puzzles.\n[G6]. Positional Grid: Use deduction grids\
+    \ for spatial constraints to systematically test configurations and align assignments\
+    \ with uniqueness rules.\n[G7]. Case Analysis: Employ case analysis for spatial\
+    \ puzzles and document contradictions to resolve interdependent constraints systematically.\n\
+    [G8]. Grid Iteration: Use grids/tables iteratively early to enforce uniqueness\
+    \ constraints and detect conflicts immediately, reducing mental tracking errors."
+toolkits: {}

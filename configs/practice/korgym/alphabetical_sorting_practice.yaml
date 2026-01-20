@@ -1,0 +1,59 @@
+# @package _global_
+defaults:
+  - /eval/korgym/alphabetical_sorting_eval@evaluation
+  - _self_
+
+exp_id: "alphabetical_sorting_practice"
+
+# Practice Arguments
+practice:
+  epochs: 3
+  batch_size: 100
+  grpo_n: 5
+  rollout_concurrency: 4  # 降低到4避免速率限制
+  rollout_temperature: 0.8  # Lower for more consistent sorting
+  task_timeout: 300
+  do_eval: false
+  eval_strategy: "epoch"
+  
+  agent_objective: |
+    input: A list of words or items to be sorted
+    output: The same list sorted in alphabetical/lexicographic order
+  
+  learning_objective: |
+    Help the agent improve alphabetical sorting accuracy by extracting:
+    - L0 (Case-level): Specific sorting errors and correct comparison strategies
+    - L1 (Pattern-level): General lexicographic ordering rules and edge case handling
+    - L2 (Meta-level): Universal comparison and ordering principles
+  
+  num_experiences_per_query: 1
+  
+  # Hierarchical learning settings (must be under practice!)
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5
+    l2_aggregation_threshold: 3
+    max_l0_per_game: 1
+    max_l0_recent: 50
+    include_l0_in_prompt: true
+    experience_save_path: workspace/hierarchical_experiences/alphabetical_sorting_practice.json
+    agent_save_path: configs/agents/practice/alphabetical_sorting_practice_agent.yaml
+
+# Data Arguments  
+data:
+  practice_dataset_name: "KORGym-AlphabeticalSorting-Train-100"
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_name: "22-alphabetical_sorting"
+  game_host: "localhost"
+  game_port: 8776
+  level: 3
+  num_train_seeds: 100
+  eval_seeds_start: 1
+  eval_seeds_end: 50
+  train_seeds_start: 51
+  train_seeds_end: 150
+  max_rounds: 1
+

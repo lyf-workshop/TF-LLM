@@ -1,0 +1,20 @@
+# @package _global_
+# Post-training evaluation configuration for ZebraLogic test set (30 medium difficulty)
+# Uses the enhanced agent after Training-Free GRPO practice
+# Temperature 0.3 for evaluation
+# Uses official verification code
+defaults:
+  - /agents/practice/zebralogic_old@agent
+  - _self_
+
+exp_id: "zebralogic_practice_medium30_1212"
+
+data:
+  dataset: "ZebraLogic-Test-30-Medium"  # 30 medium difficulty test samples
+
+concurrency: 32  # Reduced concurrency to avoid API throttling
+pass_k: 32      # Generate 32 rollouts per question for pass@32 evaluationF:\youtu-agent\configs\agents\practice\zebralogic_grpo_hard20_3epochs_official_agent.yaml
+
+verify_filename: "logic.py"  # 使用官方验证代码
+verify_func_name: "verify_func"
+

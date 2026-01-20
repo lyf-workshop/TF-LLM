@@ -1,0 +1,56 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen2.5-72B-Instruct
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: wordle_agent
+  instructions: "You are an expert Wordle player. Guess the hidden word within 10\
+    \ attempts using feedback.\n\n\U0001F3AF CRITICAL: First check \"Word length:\
+    \ X\" in the prompt - your guess MUST match this length!\n\n\U0001F4CB Feedback\
+    \ Meaning:\n• GREEN (correct spot) → Keep in same position ✅\n• YELLOW (wrong\
+    \ spot) → Use in different position ⚠️\n• GRAY (not in word) → Never use again\
+    \ ❌\n\n\U0001F9E0 Strategy (Follow Each Round):\n1. First guess: Use common words\
+    \ with frequent letters (e, a, r, i, o, t, n, s, l, c)\n2. Analyze History feedback:\n\
+    \   - GREEN: Lock position, always reuse\n   - YELLOW: Try all other positions\
+    \ (avoid known wrong ones)\n   - GRAY: Eliminate completely\n3. Build constraints:\
+    \ What MUST be where, what CAN'T be where\n4. Each guess should use ALL confirmed\
+    \ info + test new positions\n5. Narrow down systematically - don't repeat eliminated\
+    \ letters\n\n\U0001F4A1 Tips:\n- Start broad (high-info words), end targeted (confirmed\
+    \ patterns)\n- Common patterns: -tion, -ing, -ed, -er, -ly, double letters\n-\
+    \ Don't waste guesses on words with gray letters\n\n\U0001F4E4 Output: Answer:\
+    \ word (lowercase, exact length, valid English word)\n\nWhen solving problems,\
+    \ you MUST first carefully read and understand the helpful instructions and experiences:\n\
+    [G0]. [L2-Meta] **L2 Meta-Strategy**: Principle: **Maximize initial information\
+    \ gain to set a strong foundation for iterative refinement.** This approach works\
+    \ by ensuring that the first action provides the most valuable feedback, which\
+    \ reduces uncertainty and guides subsequent actions more effectively. The benefits\
+    \ include faster convergence to a solution and more efficient use of resources,\
+    \ as each step builds on the insights gained from the previous one.\n[G1]. [L1-Pattern]\
+    \ **L1 Pattern-Level Strategy**: Choose an initial guess that maximizes information\
+    \ gain by using a word with a mix of common vowels and consonants, avoiding repeated\
+    \ letters, and focusing on high-frequency letters to refine subsequent guesses\
+    \ based on feedback.\n[G2]. [L1-Pattern] **L1 Pattern-Level Strategy**: Choose\
+    \ an initial guess that maximizes letter diversity and high-frequency letters\
+    \ to gather the most information possible in the first attempt. Use words with\
+    \ a mix of common letters, a good distribution of vowels and consonants, and avoid\
+    \ repeated letters to ensure a broad range of potential feedback. Examples include\
+    \ 'crane,' 'slate,' 'soare,' 'advent,' and 'raise.'\n[G3]. [L1-Pattern] **L1 Pattern-Level\
+    \ Strategy**: Choose a high-information opening word that maximizes letter diversity\
+    \ and includes high-frequency letters to gather the most initial feedback and\
+    \ information gain. Examples of such words include 'crane,' 'slate,' 'soare,'\
+    \ 'advent,' 'raise,' 'tree,' 'arise,' 'read,' and 'success.' This strategy ensures\
+    \ a broad range of potential feedback, setting a strong foundation for subsequent\
+    \ guesses.\n"
+toolkits: {}

@@ -1,0 +1,16 @@
+# @package _global_
+defaults:
+  - /agents/practice/logic_agent_zebralogic_structured@agent
+  - _self_
+
+exp_id: "easy_base_strupro"
+
+data:
+  dataset: "ZebraLogic-Easy-30"
+
+concurrency: 32
+pass_k: 5
+
+verify_filename: "logic.py"
+verify_func_name: "verify_func"
+

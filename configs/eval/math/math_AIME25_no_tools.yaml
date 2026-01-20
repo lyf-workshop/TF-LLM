@@ -1,0 +1,17 @@
+# @package _global_
+# 论文实验：AIME25评估配置（无工具版本baseline）
+defaults:
+  - /agents/practice/math_agent_no_tools@agent
+  - _self_
+
+exp_id: "math_AIME25_no_tools_baseline"
+
+data:
+  dataset: "AIME25"
+
+concurrency: 32                  # 并发数（可根据机器性能调整）
+pass_k: 32                       # pass@k评估
+
+verify_filename: "math.py"
+verify_func_name: "verify_func"
+

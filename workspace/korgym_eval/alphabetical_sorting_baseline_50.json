@@ -1,0 +1,363 @@
+{
+  "num_games": 50,
+  "average_score": 0.02,
+  "std_score": 0.13999999999999999,
+  "min_score": 0.0,
+  "max_score": 1.0,
+  "success_rate": 0.02,
+  "detailed_results": [
+    {
+      "seed": 10000,
+      "score": 0,
+      "success": false,
+      "action": "",
+      "response": "To solve this, let's first list out the letters in the 3x3 grid:\n\n```\ne z e\np i m\ni t o\n```\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right, using each cell"
+    },
+    {
+      "seed": 10001,
+      "score": 0,
+      "success": false,
+      "action": "misocoricm",
+      "response": "To solve this, let's first identify the letters in the 3x3 grid:\n```\nm i m\nr c s\no c o\n```\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right, visiting each ce"
+    },
+    {
+      "seed": 10002,
+      "score": 0,
+      "success": false,
+      "action": "important",
+      "response": "To solve this word path puzzle, I will follow these steps:\n\n1. **Read the grid**: \n   ```\n   e r p\n   d n o\n   a t i\n   ```\n\n2. **Think of common 9-letter words**: \n   - Some common 9-letter words are"
+    },
+    {
+      "seed": 10003,
+      "score": 0,
+      "success": false,
+      "action": "hurricane",
+      "response": "Let's approach this step-by-step:\n\n1. The grid is:\n```\nh i a\nu l t\nm i e\n```\n\n2. We need to find a 9-letter word that can be formed by moving only up, down, left, or right in the grid.\n\n3. Let's think"
+    },
+    {
+      "seed": 10004,
+      "score": 0,
+      "success": false,
+      "action": "filament",
+      "response": "To solve this, let's first list the letters in the grid and consider common 9-letter words that could fit the pattern.\n\nThe grid is:\n```\nf | a | c\nl | i | s\ne | m | i\n```\n\nWe need to find a 9-letter w"
+    },
+    {
+      "seed": 10005,
+      "score": 0,
+      "success": false,
+      "action": "important",
+      "response": "Let's approach this step-by-step:\n\n1. First, we need to identify a 9-letter word that can be formed using the letters in the grid.\n2. The grid looks like this:\n   ```\n   i c e\n   i d l\n   c n a\n   ```"
+    },
+    {
+      "seed": 10006,
+      "score": 0,
+      "success": false,
+      "action": "environment",
+      "response": "To solve this, let's first identify the letters in the 3x3 grid:\n```\ne i o\nt h p\nn a i\n```\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right. Let's consider c"
+    },
+    {
+      "seed": 10007,
+      "score": 0,
+      "success": false,
+      "action": "desultory",
+      "response": "To solve this, let's first list out the letters in the 3x3 grid:\nd i m\ne s u\nt a l\n\nNow, let's think of a 9-letter word that could fit this pattern. One possible word is \"disputable\".\n\nLet's check if "
+    },
+    {
+      "seed": 10008,
+      "score": 0,
+      "success": false,
+      "action": "celebrates",
+      "response": "To solve this, let's examine the grid and think of a 9-letter word that can be formed by moving only up, down, left, or right.\n\nGiven the grid:\n```\ne | l | p\nc | a | e\ns | o | m\n```\n\nLet's try to form"
+    },
+    {
+      "seed": 10009,
+      "score": 0,
+      "success": false,
+      "action": "revitalise",
+      "response": "To solve this, let's examine the 3x3 grid and try to find a 9-letter word that can be formed by moving only up, down, left, or right.\n\nThe grid is:\n```\nr e v\ni b l\nt a e\n```\n\nLet's try to find a valid"
+    },
+    {
+      "seed": 10010,
+      "score": 0,
+      "success": false,
+      "action": "handmaiden",
+      "response": "To solve this, let's first list out the letters in the grid:\n\nh n i\nu d k\nm a n\n\nNow, we need to find a 9-letter word that can be formed by moving up, down, left, or right only.\n\nLet's try some common"
+    },
+    {
+      "seed": 10011,
+      "score": 0,
+      "success": false,
+      "action": "southeastward",
+      "response": "To solve this, let's first list out the letters in the grid:\nl e d\nu h c\nd e s\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right, and using each cell exactly "
+    },
+    {
+      "seed": 10012,
+      "score": 0,
+      "success": false,
+      "action": "patriotic",
+      "response": "To solve this, let's first examine the 3x3 grid and see if we can find a valid 9-letter word by moving only up, down, left, and right.\n\nThe grid is:\n```\na | c | m\nr | t | u\np | i | c\n```\n\nLet's try to"
+    },
+    {
+      "seed": 10013,
+      "score": 0,
+      "success": false,
+      "action": "brainzilla",
+      "response": "To solve this, let's first examine the 3x3 grid:\n\n```\ni a n\nl i z\nb r a\n```\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right, and using each cell exactly onc"
+    },
+    {
+      "seed": 10014,
+      "score": 0,
+      "success": false,
+      "action": "boremater",
+      "response": "Let's approach this step-by-step:\n\n1. First, let's read the grid:\n   r a b\n   o t e\n   m e r\n\n2. Now, we need to find a 9-letter word that can be formed using adjacent cells (up/down/left/right).\n\n3. "
+    },
+    {
+      "seed": 10015,
+      "score": 0,
+      "success": false,
+      "action": "serenity",
+      "response": "To solve this, let's first identify the letters in the grid:\n\ns e r\ni t n\ns t a\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right. Let's try to trace the path"
+    },
+    {
+      "seed": 10016,
+      "score": 0,
+      "success": false,
+      "action": "whisper",
+      "response": "To solve this word path puzzle, let's examine the given 3x3 grid and see if we can find a valid 9-letter word by moving only up, down, left, or right.\n\nThe grid is:\n```\nw | p | i\nr | s | h\ne | c | k\n`"
+    },
+    {
+      "seed": 10017,
+      "score": 0,
+      "success": false,
+      "action": "yalentabt",
+      "response": "To solve this puzzle, let's first list out the letters in the grid:\ny l t\nl a n\nb t a\n\nWe need to find a 9-letter word that can be formed by moving up, down, left, or right through these letters witho"
+    },
+    {
+      "seed": 10018,
+      "score": 0,
+      "success": false,
+      "action": "unrinsedus",
+      "response": "To solve this, let's look for a 9-letter word that fits the given 3x3 grid. The grid looks like this:\n\n```\nr e u\nu d n\ns n i\n```\n\nWe need to find a word that can be formed by moving only up, down, lef"
+    },
+    {
+      "seed": 10019,
+      "score": 0,
+      "success": false,
+      "action": "reperpepd",
+      "response": "To solve this, let's first identify the 9-letter word that can be formed using the given 3x3 grid, moving only up, down, left, or right.\n\nThe grid is:\n```\nl | e | x\np | r | e\np | e | d\n```\n\nWe need to"
+    },
+    {
+      "seed": 10020,
+      "score": 0,
+      "success": false,
+      "action": "technician",
+      "response": "To solve this, let's first list out the letters in the 3x3 grid:\n\n```\ne t h\nt i n\ny c i\n```\n\nNow, let's think of a 9-letter word that can be formed using these letters by moving only up, down, left, o"
+    },
+    {
+      "seed": 10021,
+      "score": 0,
+      "success": false,
+      "action": "blightful",
+      "response": "To solve this, let's first list the letters in the grid and then try to find a 9-letter word that fits the given constraints.\n\nThe grid is:\n```\nu | b | l\nl | t | i\nb | h | g\n```\n\nWe need to find a pat"
+    },
+    {
+      "seed": 10022,
+      "score": 0,
+      "success": false,
+      "action": "amazing",
+      "response": "Let's solve the word path puzzle step by step:\n\n1. The 3x3 grid is:\n   ```\n   a | t | e\n   n | g | e\n   i | m | r\n   ```\n\n2. We need to find a 9-letter word that can be formed by moving only up, down,"
+    },
+    {
+      "seed": 10023,
+      "score": 0,
+      "success": false,
+      "action": "wordsearch",
+      "response": "To solve this, let's examine the grid and think of a 9-letter word that could fit the pattern:\n\nGiven board:\n```\nw | e | r\no | r | i\ns | k | f\n```\n\nWe need to find a 9-letter word that can be formed b"
+    },
+    {
+      "seed": 10024,
+      "score": 0,
+      "success": false,
+      "action": "",
+      "response": "To solve this, let's first list the letters in the grid:\n\nh e g\na r r\nm b u\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right from cell to cell. Let's try to "
+    },
+    {
+      "seed": 10025,
+      "score": 1,
+      "success": true,
+      "action": "recollect",
+      "response": "To solve this, let's examine the grid and think of a 9-letter word that can be formed by moving only up, down, left, and right.\n\nThe grid is:\n```\nr e t\no c c\nl l e\n```\n\nLet's try to find a valid 9-let"
+    },
+    {
+      "seed": 10026,
+      "score": 0,
+      "success": false,
+      "action": "uprising",
+      "response": "To solve this word path puzzle, let's first look at the 3x3 grid and try to identify a 9-letter word by tracing paths through the letters.\n\nThe grid is:\n```\nu r a\nl p l\nm s i\n```\n\nLet's try to find a "
+    },
+    {
+      "seed": 10027,
+      "score": 0,
+      "success": false,
+      "action": "intention",
+      "response": "To solve this, let's first identify the word. We need to find a 9-letter word that can be formed by moving only up, down, left, or right from a starting point in the 3x3 grid.\n\nThe grid is:\n```\ni | n "
+    },
+    {
+      "seed": 10028,
+      "score": 0,
+      "success": false,
+      "action": "",
+      "response": "To solve this, let's first examine the given 3x3 grid and try to trace a 9-letter word that fits the criteria.\n\nThe grid is:\n```\ns s r\ne e e\nd r p\n```\n\nWe need to find a 9-letter word where each lette"
+    },
+    {
+      "seed": 10029,
+      "score": 0,
+      "success": false,
+      "action": "vantage",
+      "response": "To solve this word path puzzle, let's first list the letters in the 3x3 grid:\n\n```\ne c n\ne n a\nv g e\n```\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right, us"
+    },
+    {
+      "seed": 10030,
+      "score": 0,
+      "success": false,
+      "action": "important",
+      "response": "To solve this puzzle, we need to find a 9-letter word that can be formed by moving only up, down, left, or right in the given 3x3 grid. Let's analyze the grid step-by-step:\n\n```\ni|o|p\nn|d|p\nt|e|a\n```\n"
+    },
+    {
+      "seed": 10031,
+      "score": 0,
+      "success": false,
+      "action": "biological",
+      "response": "To solve this word path puzzle, let's first examine the given 3x3 grid and think of a 9-letter word that can be formed using the letters in the grid.\n\nThe grid looks like this:\n```\nb i o\nd i s\ns l o\n`"
+    },
+    {
+      "seed": 10032,
+      "score": 0,
+      "success": false,
+      "action": "teindsayr",
+      "response": "To solve this, let's first list out the letters in the grid:\n\nt e r\ne i m\nd n e\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right, without going off the grid."
+    },
+    {
+      "seed": 10033,
+      "score": 0,
+      "success": false,
+      "action": "vandalize",
+      "response": "To solve this, let's start by examining the grid:\n\n```\na | v | a\nl | c | h\na | n | e\n```\n\nWe need to find a 9-letter word that can be formed using the letters in this grid, moving only up, down, left,"
+    },
+    {
+      "seed": 10034,
+      "score": 0,
+      "success": false,
+      "action": "wednesday",
+      "response": "To solve this, let's first list the letters in the grid:\nt e d\ni o l\ne x p\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right. Let's try to trace the path for "
+    },
+    {
+      "seed": 10035,
+      "score": 0,
+      "success": false,
+      "action": "renounce",
+      "response": "To solve this, let's examine the given 3x3 grid and see if we can form a 9-letter word by moving only up, down, left, or right.\n\nThe grid is:\n```\ny | c | f\ne | n | r\nu | q | e\n```\n\nLet's try to find a"
+    },
+    {
+      "seed": 10036,
+      "score": 0,
+      "success": false,
+      "action": "cornetness",
+      "response": "To solve this problem, let's start by examining the given 3x3 grid and looking for a 9-letter word that can be formed by moving only up, down, left, or right.\n\nThe grid is:\n```\nc | e | t\no | r | c\nn |"
+    },
+    {
+      "seed": 10037,
+      "score": 0,
+      "success": false,
+      "action": "inforgnis",
+      "response": "To solve this, let's first list out the letters in the 3x3 grid:\ni r o\nn p f\ng s f\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right. Let's try to trace possi"
+    },
+    {
+      "seed": 10038,
+      "score": 0,
+      "success": false,
+      "action": "contaminfe",
+      "response": "To solve this, let's examine the given 3x3 grid and check if there's a valid 9-letter word that can be formed by moving only up, down, left, or right.\n\nGiven grid:\n```\nc t i\ne a o\nf f n\n```\n\nLet's try"
+    },
+    {
+      "seed": 10039,
+      "score": 0,
+      "success": false,
+      "action": "",
+      "response": "To solve this, we need to find a 9-letter word that can be formed by moving only up, down, left, or right in the given 3x3 grid. The grid is:\n\n```\na | t | o\nt | s | v\ne | r | e\n```\n\nLet's try to find "
+    },
+    {
+      "seed": 10040,
+      "score": 0,
+      "success": false,
+      "action": "really",
+      "response": "To solve this, we need to find a 9-letter word that can be formed by moving only up, down, left, or right in the given 3x3 grid. Let's analyze the grid:\n\n```\nn | e | g\nd | l | e\na | r | y\n```\n\nLet's t"
+    },
+    {
+      "seed": 10041,
+      "score": 0,
+      "success": false,
+      "action": "",
+      "response": "To solve this, let's first list the letters in the grid:\nc e d\na m i\nl p s\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right, and using each letter exactly on"
+    },
+    {
+      "seed": 10042,
+      "score": 0,
+      "success": false,
+      "action": "storbred",
+      "response": "To solve this, let's first list the letters in the 3x3 grid:\na r d\nt b r\ns o a\n\nNow, we need to find a 9-letter word that can be formed by moving only up, down, left, or right, using each cell exactly"
+    },
+    {
+      "seed": 10043,
+      "score": 0,
+      "success": false,
+      "action": "environment",
+      "response": "To solve this, we need to find a 9-letter word that can be formed by moving only up, down, left, or right in the given 3x3 grid. Let's examine the grid and see if we can trace a valid path for a 9-let"
+    },
+    {
+      "seed": 10044,
+      "score": 0,
+      "success": false,
+      "action": "yesterday",
+      "response": "To solve this word path puzzle, let's first list out the letters in the 3x3 grid:\n```\ny s i\ny h r\np o c\n```\n\nNow, let's try to find a 9-letter word that can be formed by moving only up, down, left, an"
+    },
+    {
+      "seed": 10045,
+      "score": 0,
+      "success": false,
+      "action": "thermostats",
+      "response": "To solve this word path puzzle, let's first list the letters in the 3x3 grid:\nt c h\ne r e\nr t s\n\nWe need to find a 9-letter word that can be formed by moving only up, down, left, or right. Let's try t"
+    },
+    {
+      "seed": 10046,
+      "score": 0,
+      "success": false,
+      "action": "important",
+      "response": "To solve this, let's first examine the grid and see if we can find a 9-letter word by moving only up, down, left, or right.\n\nGiven grid:\n```\nn | g | t\nw | o | h\nn | i | g\n```\n\nLet's try to trace a pat"
+    },
+    {
+      "seed": 10047,
+      "score": 0,
+      "success": false,
+      "action": "correspond",
+      "response": "To solve this, let's first look at the given 3x3 grid and try to find a 9-letter word that can be formed by moving only up, down, left, or right.\n\nGiven grid:\n```\ne | c | r\nr | a | o\ns | c | w\n```\n\nWe"
+    },
+    {
+      "seed": 10048,
+      "score": 0,
+      "success": false,
+      "action": "staircase",
+      "response": "To solve this word path puzzle, let's first examine the grid and think of a 9-letter word that fits the pattern provided:\n\nGrid:\n```\na | i | c\nt | e | o\na | s | s\n```\n\nWe need to find a 9-letter word "
+    },
+    {
+      "seed": 10049,
+      "score": 0,
+      "success": false,
+      "action": "resilient",
+      "response": "To solve this, we need to find a 9-letter word that can be formed by moving only up, down, left, or right in the given 3x3 grid. Let's trace possible paths and see if we can find a valid 9-letter word"
+    }
+  ],
+  "experiment_id": "alphabetical_sorting_baseline_50",
+  "agent_config": "practice/alphabetical_sorting_qwen_simple",
+  "dataset_name": "KORGym-AlphabeticalSorting-Eval-50"
+}

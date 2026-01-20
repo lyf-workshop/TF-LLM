@@ -1,0 +1,40 @@
+# @package _global_
+# Practice configuration for ZebraLogic with Logic Error Extractor
+# Uses the new error extractor that identifies specific logic errors from structured reasoning
+defaults:
+  # load the evaluation config file (baseline)
+  - /eval/logic/logic_zebralogic_test@evaluation
+  - _self_
+
+exp_id: "logic_practice_zebralogic_error_extractor"
+
+# Practice Arguments
+practice:
+  epochs: 3                          # 3 epochs
+  batch_size: 20                     # Batch size 20
+  grpo_n: 5                          # Group size 5
+  rollout_concurrency: 32            # Concurrency 32
+  rollout_temperature: 0.7           # Temperature 0.7 for learning
+  task_timeout: 1200                 # 10 minutes timeout
+  do_eval: false                     # Disable evaluation during practice
+  agent_objective: |
+    input: A logic puzzle that requires deductive reasoning and constraint satisfaction
+    output: A step-by-step reasoning process that leads to the correct solution
+  learning_objective: |
+    Help the agent to improve logical reasoning capability by extracting general problem-solving strategies,
+    identifying common reasoning errors (contradictions, constraint violations, reasoning gaps),
+    and learning from concrete error examples extracted from structured reasoning processes.
+  num_experiences_per_query: 1
+  verify_module: "utu.practice.verify.logic_error_extractor"  # Use new error extractor
+
+# Data Arguments
+data:
+  practice_dataset_name: "ZebraLogic-Train-20-Hard"  # Use training set
+
+# Agent configuration overrides
+evaluation:
+  agent:
+    max_turns: 30                    # Limit max turns to prevent infinite loops
+
+
+

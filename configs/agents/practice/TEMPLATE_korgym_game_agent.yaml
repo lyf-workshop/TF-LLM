@@ -1,0 +1,172 @@
+# KORGym Game Agent Configuration Template
+# ============================================
+#
+# 用途：为KORGym游戏创建Agent配置
+#
+# 使用方法：
+# 1. 复制此文件并重命名（例如：my_game_agent.yaml）
+# 2. 修改下面带 [MODIFY] 标记的部分
+# 3. 根据游戏类型编写合适的instructions
+# 4. 在eval配置中引用此Agent
+
+# @package _global_
+defaults:
+  - /model/base@model  # 使用基础模型配置
+  - _self_
+
+agent:
+  name: your_game_agent  # [MODIFY] Agent名称
+  
+  instructions: |-
+    # [MODIFY] 编写详细的游戏策略说明
+    
+    You are an expert at playing [GAME_NAME] for KORGym games.
+    Your goal is to [DESCRIBE_GOAL].
+    
+    Game Rules:
+    - [RULE_1]
+    - [RULE_2]
+    - [RULE_3]
+    
+    Strategy:
+    1. [STRATEGY_STEP_1]
+    2. [STRATEGY_STEP_2]
+    3. [STRATEGY_STEP_3]
+    
+    Output Format:
+    - Format: Answer: YOUR_ANSWER
+    - [SPECIFIC_FORMAT_REQUIREMENTS]
+
+max_turns: 50  # Agent最大对话轮数（单轮游戏用50，多轮游戏用100）
+
+model:
+  model_settings:
+    temperature: 0.3  # [MODIFY] LLM温度
+                      # - 确定性任务（排序）: 0.1-0.3
+                      # - 创造性任务（Wordle）: 0.5-0.7
+                      # - 推理任务（Word Puzzle）: 0.3-0.5
+    top_p: 0.95
+    extra_args:
+      timeout: 3000  # 请求超时（毫秒）
+
+# ============================================
+# 游戏类型示例
+# ============================================
+
+# 单轮推理游戏示例：Word Puzzle (Crossword)
+# -----------------------------------
+# agent:
+#   name: word_puzzle_agent
+#   instructions: |-
+#     You are an expert crossword puzzle solver for KORGym games.
+#     Your goal is to solve word puzzles by analyzing clues and finding correct words.
+#     
+#     Game Strategy:
+#     1. Read each clue carefully
+#     2. Consider word length constraints
+#     3. Think about common word patterns
+#     4. Cross-reference clues that share letters
+#     5. Use context clues and common knowledge
+#     
+#     Output Format:
+#     - Answer: ["word1", "word2", "word3", ...]
+#     - Ensure all words are lowercase
+# 
+# max_turns: 50
+# model:
+#   model_settings:
+#     temperature: 0.3
+
+# 单轮空间推理游戏示例：Word Path Puzzle (Alphabetical Sorting)
+# -----------------------------------
+# agent:
+#   name: alphabetical_sorting_agent
+#   instructions: |-
+#     You are an expert at solving Word Path Puzzles for KORGym games.
+#     Your goal is to find a 9-letter word in a 3x3 grid.
+#     
+#     Strategy:
+#     1. COUNT LETTERS: List all 9 letters and count frequency
+#     2. GENERATE CANDIDATES: Think of 5-10 common words using these letters
+#     3. VERIFY PATH: Check if letters form valid adjacent path
+#     
+#     Output Format:
+#     - Answer: "wordhere" (exactly 9 lowercase letters)
+# 
+# max_turns: 50
+# model:
+#   model_settings:
+#     temperature: 0.3
+
+# 多轮交互游戏示例：Wordle
+# -----------------------------------
+# agent:
+#   name: wordle_agent
+#   instructions: |-
+#     You are an expert Wordle player for KORGym games.
+#     Your goal is to guess the hidden word within 10 attempts.
+#     
+#     Game Rules:
+#     - Word length: 4-12 letters (check prompt for exact length)
+#     - Attempts: 10 tries
+#     - Feedback: green (correct position), yellow (wrong position), gray (not in word)
+#     
+#     Strategy:
+#     1. Check word length in the prompt
+#     2. Start with common words matching that length
+#     3. Analyze feedback from History
+#     4. Lock in green letters, try yellow letters in different positions
+#     5. Eliminate gray letters completely
+#     
+#     Output Format:
+#     - Answer: word (match the required length)
+# 
+# max_turns: 100  # 多轮游戏需要更多turns
+# model:
+#   model_settings:
+#     temperature: 0.5  # 多轮游戏需要更多探索
+
+# ============================================
+# 关键配置说明
+# ============================================
+
+# 1. instructions (最重要)
+#    - 清晰描述游戏规则和目标
+#    - 提供具体的策略步骤
+#    - 明确输出格式
+#    - 单轮游戏：一次性给出完整答案
+#    - 多轮游戏：解释如何利用历史信息
+
+# 2. max_turns
+#    - 单轮游戏：50（Agent的内部对话轮数，不是游戏轮数）
+#    - 多轮游戏：100（需要多次思考）
+
+# 3. temperature
+#    - 确定性任务（排序、计算）：0.1-0.3
+#    - 推理任务（填字、解谜）：0.3-0.5
+#    - 探索性任务（Wordle、2048）：0.5-0.7
+
+# 4. 模型选择
+#    - 在 defaults 中可以修改：
+#      defaults:
+#        - /model/qwen@model  # 使用Qwen模型
+#    - 或在model配置中直接指定：
+#      model:
+#        model_provider:
+#          type: chat.completions
+#          model: "Qwen/Qwen2.5-7B-Instruct"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,155 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Structure-first: When solving constraint satisfaction logic puzzles, prioritize creating a formal representation (e.g., grid/table) from the beginning to systematically track all attributes, relationships, and constraints, reducing risk of contradictions and promoting early constraint validation.",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_1",
+      "content": "Clue cross-check: When resolving exclusion-based clues, immediately cross-check against current assignments to avoid contradictions.",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_2",
+      "content": "Assumption Trace: Explicitly document how each clue is applied during inferences to enable better error traceability.",
+      "original_id": "G2",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_3",
+      "content": "Prioritize fixed clues: When solving constraint-based logic puzzles, prioritize clues that fix positions (like clue 5 and 4) first and then systematically apply adjacency and uniqueness constraints.",
+      "original_id": "G3",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_4",
+      "content": "Structure-first: When solving constraint satisfaction logic puzzles, prioritize creating a formal grid/table representation from the beginning to organize entity attributes (e.g., house positions, names, drink, phone), systematically enforce uniqueness/adjacency constraints, and reduce contradictions through early validation and improved traceability of deductions.",
+      "original_id": "G0",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_5",
+      "content": "Clue cross-check: When resolving exclusion-based clues, immediately cross-check against current assignments and all related constraints to avoid contradictions and ensure consistency across the puzzle state.",
+      "original_id": "G1",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_6",
+      "content": "Assumption Trace: Explicitly document how each clue is applied during inferences, including specific deductions and their logical transformations, to surface reasoning gaps, support systematic debugging, and cross-check against previously applied constraints.",
+      "original_id": "G2",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_7",
+      "content": "Prioritize fixed clues: When solving constraint-based logic puzzles, prioritize clues that fix positions (like clue 5 and 4) first and then systematically apply adjacency and uniqueness constraints.",
+      "original_id": "G3",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_8",
+      "content": "Verify Completeness: After making all assignments, systematically check if every attribute category (names, education, genres) is fully represented and uniquely assigned to prevent missing elements and ensure constraint satisfaction.",
+      "original_id": "G4",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_9",
+      "content": "Early Exclusion: Apply exclusion-based clues earlier in the deduction chain to prevent invalid assignments and reduce backtracking, improving the efficiency of constraint validation.",
+      "original_id": "G5",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_10",
+      "content": "Structure-first: When solving constraint satisfaction logic puzzles, prioritize creating a formal grid/table from the beginning to track assignments, enforce uniqueness/adjacency constraints, reduce contradictions, improve clarity, and support exportable L1/L2 strategies through early validation and traceable deductions.",
+      "original_id": "G0",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_11",
+      "content": "Clue cross-check: When resolving clues with positional or spatial relationships, immediately cross-check against current assignments and all related constraints to avoid contradictions and ensure consistency across the puzzle state, reinforcing traceability and robustness of deductions.",
+      "original_id": "G1",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_12",
+      "content": "Assumption Trace: Explicitly document how each clue is applied during inferences, including specific deductions and their logical transformations, to surface reasoning gaps, support systematic debugging, and cross-check against previously applied constraints.",
+      "original_id": "G2",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_13",
+      "content": "Prioritize fixed clues: When solving constraint-based logic puzzles, prioritize clues that fix positions (like clue 5 and 4) first and then systematically apply adjacency and uniqueness constraints.",
+      "original_id": "G3",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_14",
+      "content": "Verify Completeness: After making all assignments, systematically check if every attribute category (names, education, genres) is fully represented and uniquely assigned to prevent missing elements and ensure constraint satisfaction.",
+      "original_id": "G4",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_15",
+      "content": "Early Exclusion: Apply exclusion-based clues earlier in the deduction chain to prevent invalid assignments and reduce backtracking, improving the efficiency of constraint validation.",
+      "original_id": "G5",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_16",
+      "content": "Cross-Trace Integration: Systematically apply both clue cross-checking and assumption traces in early deduction steps for adjacency or relational constraints to enhance consistency and prevent reasoning gaps.",
+      "original_id": "G6",
+      "step": 2,
+      "problem_count": 30
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**: Begin by establishing a formal structure (e.g., grid/table) to organize entities and their attributes, then systematically apply and cross-validate constraints during each deduction step while explicitly documenting how clues inform assignments to ensure logical consistency and traceability.  \n\nThis strategy integrates the \"structure-first\" approach, emphasizes proactive constraint validation, and highlights the importance of tracking reasoning pathways to prevent contradictions and errors across similar logic puzzles.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**: Prioritize and apply fixed and exclusion-based constraints early in the deduction process, while systematically cross-checking each inference against all relevant constraints and verifying completeness of assignments to maintain consistency and reduce backtracking.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [],
+  "stats": {
+    "total_l0": 17,
+    "total_l1": 2,
+    "total_l2": 0
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Diverse Openers: Use a mix of common and unique letters in opening words, and adapt strategy based on feedback.",
+      "original_id": "G0",
+      "step": 2,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_1",
+      "content": "Initial Guess: Use a common opening word like 'crane' that contains a mix of vowels and consonants to maximize information gain and refine subsequent guesses based on feedback.",
+      "original_id": "G1",
+      "step": 2,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_2",
+      "content": "Initial Guess: Choose an initial guess that maximizes information gain by using a word with a mix of common vowels and consonants, avoiding repeated letters, and focusing on high-frequency letters (e.g., 'soarer').",
+      "original_id": "G2",
+      "step": 2,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_3",
+      "content": "Initial Guess: Choose a word with a mix of common vowels and consonants, such as 'CRANE' or 'SLATE', to maximize information gain in the first attempt.",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_4",
+      "content": "High-Info Opening Strategy: Choose a high-information opening word with a mix of common letters and a good distribution of vowels and consonants to maximize initial feedback and information gain. Examples include 'crane,' 'slate,' 'soare,' 'advent,' and 'raise.'",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_5",
+      "content": "Initial Guess Diversity: Always choose an initial guess that maximizes letter diversity and high-frequency letters to gather the most information possible in the first attempt. For 5-letter words, consider using words like 'cranes,' 'advent,' or 'raise.'",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_6",
+      "content": "High-Info Opening Strategy: Choose a high-information opening word with a mix of common letters and a good distribution of vowels and consonants to maximize initial feedback and information gain. Examples include 'crane,' 'slate,' 'soare,' 'advent,' and 'raise.'",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_7",
+      "content": "Initial Guess Diversity: Always choose an initial guess that maximizes letter diversity and high-frequency letters to gather the most information possible in the first attempt. For 5-letter words, consider using words like 'cranes,' 'advent,' or 'raise.'",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_8",
+      "content": "High-Info Opening Strategy: Choose a high-information opening word with a mix of common letters, a good distribution of vowels and consonants, and high-frequency letters to maximize initial feedback and information gain. Avoid words with repeated letters to ensure a broad range of potential feedback. Examples include 'crane,' 'slate,' 'soare,' 'advent,' 'raise,' 'tree,' 'arise,' 'read,' 'success,' and 'cranes.'",
+      "original_id": "G0",
+      "step": 1,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_9",
+      "content": "Initial Guess Diversity: Always choose an initial guess that maximizes letter diversity and high-frequency letters to gather the most information possible in the first attempt. For 5-letter words, consider using words like 'cranes,' 'advent,' or 'raise.'",
+      "original_id": "G1",
+      "step": 1,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_10",
+      "content": "High-Info Opening Strategy: Choose a high-information opening word with a mix of common letters and a good distribution of vowels and consonants to maximize initial feedback and information gain. Examples include 'crane,' 'slate,' 'soare,' 'advent,' and 'raise.'",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_11",
+      "content": "Initial Guess Diversity: Always choose an initial guess that maximizes letter diversity and high-frequency letters to gather the most information possible in the first attempt. For 5-letter words, consider using words like 'cranes,' 'advent,' or 'raise.'",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_12",
+      "content": "High-Info Opening Strategy: Choose a high-information opening word with a mix of common letters, a good distribution of vowels and consonants, and high-frequency letters to maximize initial feedback and information gain. Avoid words with repeated letters to ensure a broad range of potential feedback. Examples include 'crane,' 'slate,' 'soare,' 'advent,' 'raise,' 'tree,' 'arise,' 'read,' 'success,' and 'cranes.'",
+      "original_id": "G0",
+      "step": 1,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_13",
+      "content": "Initial Guess Diversity: Always choose an initial guess that maximizes letter diversity and high-frequency letters to gather the most information possible in the first attempt. For 5-letter words, consider using words like 'cranes,' 'advent,' or 'raise.'",
+      "original_id": "G1",
+      "step": 1,
+      "problem_count": 9
+    },
+    {
+      "id": "L0_14",
+      "content": "Unified High-Info Opening Strategy: For the first guess, the agent should choose a word that maximizes letter diversity and high-frequency letters to gather the most information possible. For 5-letter words, consider using words like 'crane,' 'slate,' 'soare,' 'advent,' 'raise,' 'tree,' 'arise,' 'read,' and 'success.' For 6-letter words, examples include 'soarer,' 'crates,' or 'adieu.' This strategy helps in gathering valuable feedback and setting a strong foundation for subsequent guesses.",
+      "original_id": "G0",
+      "step": 2,
+      "problem_count": 9
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**: Choose an initial guess that maximizes information gain by using a word with a mix of common vowels and consonants, avoiding repeated letters, and focusing on high-frequency letters to refine subsequent guesses based on feedback.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**: Choose an initial guess that maximizes letter diversity and high-frequency letters to gather the most information possible in the first attempt. Use words with a mix of common letters, a good distribution of vowels and consonants, and avoid repeated letters to ensure a broad range of potential feedback. Examples include 'crane,' 'slate,' 'soare,' 'advent,' and 'raise.'",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_2",
+      "content": "**L1 Pattern-Level Strategy**: Choose a high-information opening word that maximizes letter diversity and includes high-frequency letters to gather the most initial feedback and information gain. Examples of such words include 'crane,' 'slate,' 'soare,' 'advent,' 'raise,' 'tree,' 'arise,' 'read,' and 'success.' This strategy ensures a broad range of potential feedback, setting a strong foundation for subsequent guesses.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "**L2 Meta-Strategy**: Principle: **Maximize initial information gain to set a strong foundation for iterative refinement.** This approach works by ensuring that the first action provides the most valuable feedback, which reduces uncertainty and guides subsequent actions more effectively. The benefits include faster convergence to a solution and more efficient use of resources, as each step builds on the insights gained from the previous one.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 2
+    }
+  ],
+  "stats": {
+    "total_l0": 15,
+    "total_l1": 3,
+    "total_l2": 1
+  }
+}

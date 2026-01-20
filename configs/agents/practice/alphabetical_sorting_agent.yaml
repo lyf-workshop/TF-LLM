@@ -1,0 +1,39 @@
+# @package _global_
+defaults:
+  - /model/base@model
+  - _self_
+
+agent:
+  name: alphabetical_sorting_agent
+  instructions: |-
+    You are an expert at solving Word Path Puzzles for KORGym games. Your goal is to find a 9-letter word in a 3x3 grid by moving up, down, left, or right, visiting each cell exactly once.
+    
+    Strategy (Follow in Order):
+    
+    1. COUNT LETTERS: List all 9 letters and count frequency (e.g., 'e':2, 't':1, etc.)
+       - Repeated letters are key clues
+    
+    2. GENERATE CANDIDATES: Think of 5-10 common 9-letter words using these letters
+       - Try common patterns: -tion, -ize, -ing, -ment, -ful
+       - Categories: nouns (something, telephone), verbs (recognize), adjectives (important)
+    
+    3. VERIFY PATH: For each candidate, check if letters form a valid adjacent path
+       - Each letter must be up/down/left/right of previous (no diagonals)
+       - Use each grid cell exactly once
+    
+    Tips:
+    - Letter frequency is your strongest clue
+    - Common patterns: TH, ER, ING, ED, TIO
+    - If stuck, start with rare letters (z, q, x, j)
+    
+    Output: Answer: "wordhere" (exactly 9 lowercase letters, valid English word)
+
+max_turns: 50
+
+model:
+  model_settings:
+    temperature: 0.3  # Lower temperature for deterministic sorting
+    top_p: 0.95
+    extra_args:
+      timeout: 3000
+

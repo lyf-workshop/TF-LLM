@@ -1,0 +1,30 @@
+# @package _global_
+defaults:
+  - /agents/practice/word_puzzle_practice_agent@agent
+  - _self_
+
+exp_id: "word_puzzle_practice_eval"
+
+# Evaluation dataset configuration (same as baseline)
+data:
+  dataset: "KORGym-WordPuzzle-Eval-50"
+  type: "single"
+
+# Evaluation settings
+concurrency: 32
+pass_k: 1
+
+# Verification function settings
+verify_filename: "korgym.py"
+verify_func_name: "verify_func"
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_name: "8-word_puzzle"
+  game_host: "localhost"
+  game_port: 8775
+  level: 1  # ✅ 添加level参数
+  max_rounds: 1
+  timeout_per_game: 600
+

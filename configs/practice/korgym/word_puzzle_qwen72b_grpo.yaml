@@ -1,0 +1,64 @@
+# @package _global_
+defaults:
+  - /agents/practice/word_puzzle_qwen72b_agent@agent_config
+  - _self_
+
+exp_id: "word_puzzle_qwen72b_grpo"
+
+# Agent Configuration (overrides from word_puzzle_qwen72b_agent.yaml)
+agent_config:
+  model:
+    model_provider:
+      type: chat.completions
+      model: Qwen/Qwen2.5-72B-Instruct
+    model_settings:
+      temperature: 1.0
+      top_p: 0.95
+      max_tokens: 512
+      include_usage: true
+      extra_args:
+        timeout: 300
+  agent:
+    name: word_puzzle_qwen72b_agent
+  max_turns: 1
+
+# Practice Settings
+practice:
+  epochs: 2                    # 2 epochs for 100 training samples
+  batch_size: 25               # Process 25 samples per batch
+  grpo_n: 2                    # Generate 2 rollouts per sample
+  rollout_concurrency: 15      # Process 15 rollouts concurrently
+  rollout_temperature: 1.0     # Temperature for rollout sampling
+  task_timeout: 300            # 5 minutes timeout per game
+  do_eval: true                # Evaluate after training
+  rollout_data_truncate: -1    # Keep all rollouts
+  agent_objective: |
+    input: A crossword-like word puzzle with clues and a grid
+    output: All words that correctly fill the grid and match the clues
+  learning_objective: |
+    Help the agent improve word puzzle solving by learning:
+    1. How to use clue context effectively
+    2. How to leverage intersecting letters
+    3. Common word patterns and letter combinations
+    4. How to verify answers fit the grid
+    5. Strategies for handling ambiguous clues
+  num_experiences_per_query: 5
+
+# Practice Data Configuration
+data:
+  practice_dataset_name: "KORGym-WordPuzzle-Train-100"
+
+# Evaluation Configuration  
+evaluation:
+  exp_id: "word_puzzle_qwen72b_grpo"
+  agent: ${agent_config}
+  data:
+    dataset: "KORGym-WordPuzzle-Eval-120"
+  korgym: ${korgym}
+  
+# KORGym Configuration
+korgym:
+  enabled: true
+  game_name: "8-word_puzzle"
+  game_host: "localhost"
+  game_port: 8765

@@ -1,0 +1,38 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\
+    \ \n\nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\nThe last part of your final response should be in the following\
+    \ format:\n<answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n\
+    When solving problems, you MUST first carefully read and understand the helpful\
+    \ instructions and experiences:\n[G0]. Constraint prioritization: Prioritize absolute,\
+    \ ordinal, fixed-position, and multi-attribute linking constraints early while\
+    \ maintaining continuous uniqueness tracking to maximize constraint propagation,\
+    \ reduce search space complexity, and minimize backtracking.\n[G1]. Contradiction\
+    \ utilization: Use contradictions proactively as elimination tools by performing\
+    \ immediate verification of uniqueness and related constraints after each assignment,\
+    \ catching errors early rather than as reactive problem indicators.\n[G2]. Progressive\
+    \ verification: After each major deduction phase, systematically review all unused\
+    \ clues relevant to current assignments and verify fixed attribute bindings to\
+    \ ensure no constraints are overlooked.\n[G3]. Hypothesis documentation: Explicitly\
+    \ name specific clues that create contradictions when testing and eliminating\
+    \ hypotheses to make reasoning reproducible and systematic."
+toolkits: {}

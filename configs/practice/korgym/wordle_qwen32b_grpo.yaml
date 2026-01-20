@@ -1,0 +1,60 @@
+# @package _global_
+defaults:
+  - /agents/practice/wordle_agent@agent_config
+  - _self_
+
+exp_id: "wordle_qwen32b_grpo"
+
+# Agent Configuration (overrides from wordle_agent.yaml)
+agent_config:
+  model:
+    model_provider:
+      type: chat.completions
+      model: Qwen/Qwen2.5-32B-Instruct
+    model_settings:
+      temperature: 0.7
+      top_p: 0.95
+      include_usage: true
+      extra_args:
+        timeout: 300
+  agent:
+    name: wordle_agent
+  max_turns: 15
+
+# Practice Settings
+practice:
+  epochs: 3                    # 3 epochs for 100 training samples
+  batch_size: 50               # Process 50 samples per batch
+  grpo_n: 5                    # Generate 5 rollouts per sample
+  rollout_concurrency: 16      # Process 16 rollouts concurrently
+  rollout_temperature: 0.7     # Temperature for rollout sampling
+  task_timeout: 300            # 5 minutes timeout per game
+  do_eval: true                # Evaluate after training
+  rollout_data_truncate: 100   # Keep top 100 rollouts
+  agent_objective: |
+    input: A Wordle game with a secret word to guess
+    output: A sequence of strategic guesses using feedback to identify the secret word within 10 attempts
+  learning_objective: |
+    Help the agent improve Wordle-playing strategy by learning effective word selection, letter elimination, and pattern recognition techniques.
+  num_experiences_per_query: 1
+
+# Practice Data Configuration
+data:
+  practice_dataset_name: "KORGym-Wordle-Train-100"
+
+# Evaluation Configuration  
+evaluation:
+  exp_id: "wordle_qwen32b_grpo"  # 确保生成的agent配置文件名正确
+  agent: ${agent_config}         # 使用与训练相同的agent配置
+  data:
+    dataset: "KORGym-Wordle-Eval-120"
+  korgym: ${korgym}              # 传递KORGym配置到evaluation
+  
+# KORGym Configuration
+korgym:
+  enabled: true              # 必须设置为true才能启用KORGym！
+  game_name: "33-wordle"
+  game_host: "localhost"
+  game_port: 8765
+  max_attempts: 10
+

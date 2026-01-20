@@ -1,0 +1,39 @@
+# @package _global_
+# Enhanced Practice configuration for ZebraLogic with Error Analysis
+# Uses ZebraLogic-Train-100 dataset with Training-Free GRPO and detailed error analysis:
+# - 3 epochs
+# - Batch size 80 (adjusted to dataset size)
+# - Group size 5 (grpo_n=5)
+# - Rollout temperature 0.7
+# - Enhanced error detection and analysis
+defaults:
+  # load the evaluation config file (baseline)
+  - /eval/logic/logic_zebralogic_test@evaluation
+  - _self_
+
+exp_id: "logic_practice_zebralogic_error_analysis"
+
+# Practice Arguments
+practice:
+  epochs: 3                          # 3 epochs
+  batch_size: 80                     # Batch size 80 (adjusted to match dataset size)
+  grpo_n: 5                          # Group size 5
+  rollout_concurrency: 128           # Parallel rollout processes
+  rollout_temperature: 0.7           # Temperature 0.7 for learning
+  task_timeout: 1800                 # 30 minutes timeout per task
+  do_eval: false                     # Disable evaluation during practice
+  agent_objective: |
+    input: A logic puzzle that requires deductive reasoning and constraint satisfaction
+    output: A step-by-step reasoning process that leads to the correct solution
+  learning_objective: |
+    Help the agent to improve logical reasoning capability by extracting general problem-solving strategies,
+    identifying common reasoning errors, and learning from constraint violations and logical inconsistencies.
+  num_experiences_per_query: 1
+  verify_module: "utu.practice.verify.logic_with_error_analysis"  # Use enhanced verifier with error analysis
+
+# Data Arguments  
+data:
+  practice_dataset_name: "ZebraLogic-Train-100"  # Use training set (80 samples available, high difficulty)
+
+
+

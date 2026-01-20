@@ -1,0 +1,30 @@
+# @package _global_
+defaults:
+  - /agents/practice/wordle_agent@agent
+  - _self_
+
+exp_id: "wordle_baseline_eval"
+
+# Evaluation dataset configuration
+data:
+  dataset: "KORGym-Wordle-Eval-50"
+  type: "single"
+
+# Evaluation settings
+concurrency: 2
+pass_k: 1
+
+# Verification function settings
+verify_filename: "korgym.py"
+verify_func_name: "verify_func"
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_name: "33-wordle"
+  game_host: "localhost"
+  game_port: 8777
+  level: 5  # 单词长度（4-12，推荐5）
+  max_rounds: 10  # ✅ 与游戏代码一致（第113行 attempts=10）
+  timeout_per_game: 600
+

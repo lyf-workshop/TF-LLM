@@ -1,0 +1,33 @@
+# @package _global_
+# Practice configuration for paper experiment reproduction
+# Uses DAPO-100 dataset with settings from the paper:
+# - 3 epochs
+# - Single batch per epoch (batch_size=100)
+# - Group size 5 (grpo_n=5)
+# - Rollout temperature 0.7
+defaults:
+  # load the evaluation config file 
+  - /eval/math/math_paper_exp_AIME24@evaluation
+  - _self_
+
+exp_id: "math_practice_paper_exp"
+
+# Practice Arguments
+practice:
+  epochs: 3                          # 3 epochs as per paper
+  batch_size: 100                    # Single batch per epoch (100 samples)
+  grpo_n: 5                          # Group size 5 as per paper
+  rollout_concurrency: 128           # Parallel rollout processes
+  rollout_temperature: 0.7           # Temperature 0.7 for learning as per paper
+  task_timeout: 1800                 # 30 minutes timeout per task
+  do_eval: false                     # Disable evaluation during practice
+  agent_objective: |
+    input: A math question that could falls into any areas of mathematics
+    output: A step-by-step reasoning process that leads to the final answer
+  learning_objective: |
+    Help the agent to improve the solving capability on math questions by extracting general and concise guidelines.
+  num_experiences_per_query: 1
+
+# Data Arguments  
+data:
+  practice_dataset_name: "DAPO-100"  # Use sampled DAPO-100 dataset

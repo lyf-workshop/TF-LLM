@@ -1,0 +1,59 @@
+# KORGym Hierarchical Learning Configuration
+# Test configuration for 2048 game
+
+defaults:
+  - practice: base
+  - agent: practice/logic_agent_hierarchical_learning_clean
+  - eval: logic/easy_base_hierarchical_clean
+
+exp_id: korgym_2048_hierarchical_test
+
+# KORGym Game Settings
+korgym:
+  enabled: true
+  game_name: "3-2048"  # Start with 2048 as a test game
+  game_host: "localhost"
+  game_port: 8775
+  level: 4  # Difficulty level (1-5)
+  num_seeds: 10  # Number of different game instances
+  max_rounds: 100  # Max rounds for multi-turn games
+
+# Data configuration
+data:
+  practice_dataset_name: KORGym-2048-Test  # Will be created dynamically
+  eval_dataset_name: KORGym-2048-Eval
+  batch_size: 5
+  num_epochs: 3
+
+# Evaluation settings
+evaluation:
+  data:
+    dataset: KORGym-2048-Eval
+    pass_k: 1  # Single attempt per game
+
+# Hierarchical learning settings
+hierarchical_learning:
+  enabled: true
+  l1_aggregation_threshold: 5  # Every 5 L0 → 1 L1
+  l2_aggregation_threshold: 3   # Every 3 L1 → 1 L2
+  max_l0_per_game: 3          # Max L0 per game instance
+  max_l0_recent: 30           # Keep most recent 30 L0s
+  
+  experience_save_path: workspace/hierarchical_experiences/korgym_2048_test.json
+  agent_save_path: configs/agents/practice/korgym_2048_test_agent.yaml
+
+# GRPO settings
+group_size: 5
+num_batches: 2
+
+
+
+
+
+
+
+
+
+
+
+

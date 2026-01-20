@@ -1,0 +1,43 @@
+# @package _global_
+# Optimized Practice configuration for ZebraLogic with Error Analysis
+# This configuration is optimized to reduce timeout issues:
+# - Reduced timeout (10 minutes instead of 30)
+# - Lower concurrency to reduce resource contention
+# - Smaller batch size for faster iteration
+# - Max turns limit to prevent infinite loops
+defaults:
+  # load the evaluation config file (baseline)
+  - /eval/logic/logic_zebralogic_test@evaluation
+  - _self_
+
+exp_id: "logic_practice_zebralogic_optimized"
+
+# Practice Arguments
+practice:
+  epochs: 3                          # 3 epochs
+  batch_size: 20                  # Reduced batch size (from 80)
+  grpo_n: 5                          # Group size 5
+  rollout_concurrency: 32             # Reduced concurrency (from 128) to prevent resource contention
+  rollout_temperature: 0.7           # Temperature 0.7 for learning
+  task_timeout: 1200                  # 10 minutes timeout (reduced from 30)
+  do_eval: false                     # Disable evaluation during practice
+  agent_objective: |
+    input: A logic puzzle that requires deductive reasoning and constraint satisfaction
+    output: A step-by-step reasoning process that leads to the correct solution
+  learning_objective: |
+    Help the agent to improve logical reasoning capability by extracting general problem-solving strategies,
+    identifying common reasoning errors, and learning from constraint violations and logical inconsistencies.
+  num_experiences_per_query: 1
+  verify_module: "utu.practice.verify.logic_with_error_analysis_v2"  # Use official ZebraLogic verification
+
+# Data Arguments  utu\practice\verify\logic_with_error_analysis_v2.py
+data:
+  practice_dataset_name: "ZebraLogic-Train-20-Hard"  # Use training set
+
+# Agent configuration overrides to prevent timeouts
+evaluation:
+  agent:
+    max_turns: 30                    # Limit max turns to prevent infinite loops (default might be higher)
+
+
+

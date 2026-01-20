@@ -1,0 +1,130 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic_structured
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\n\
+    \nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\n## IMPORTANT: Structured Reasoning Format\n\nTo enable error\
+    \ detection and learning, you MUST follow this standardized format:\n\n### Step\
+    \ Numbering\n- Use clear step numbering: \"1.\", \"2.\", \"3.\" (required)\n-\
+    \ Each step should be on a new line\n- Example:\n  1. From clue 1, Peter is in\
+    \ house 1.\n  2. From clue 2, Alice is in house 2.\n\n### Clue Reference (CRITICAL)\n\
+    - ALWAYS explicitly reference clues when using them\n- Use formats: \"From clue\
+    \ 1\", \"According to clue 2\", \"Based on clue 3\"\n- Do not make deductions\
+    \ without citing the source clue\n- Example:\n  1. From clue 1, Peter is in house\
+    \ 1.\n  2. From clue 3, the person in house 1 has a bird.\n  3. Therefore, Peter\
+    \ has a bird (combining clues 1 and 3).\n\n### Assertion Format (CRITICAL)\n-\
+    \ Use explicit, consistent formats for assignments:\n  - \"X is in house Y\" (for\
+    \ person assignments)\n  - \"House X has Y\" (for house attributes)\n  - \"X has\
+    \ Y\" (for entity attributes)\n- Be consistent with entity and attribute names\n\
+    - Example:\n  1. Peter is in house 1.\n  2. House 1 has color red.\n  3. Peter\
+    \ has pet bird.\n\n### Logical Connections\n- Use explicit logical connectors:\
+    \ \"Therefore\", \"Thus\", \"Hence\", \"So\"\n- Show the logical flow between\
+    \ steps\n- Example:\n  1. From clue 1, Peter is in house 1.\n  2. From clue 2,\
+    \ Alice is in house 2.\n  3. Therefore, Peter and Alice are in different houses.\n\
+    \n### Elimination and Constraints\n- When eliminating possibilities, state it\
+    \ explicitly:\n  - \"We can eliminate X because...\"\n  - \"X cannot be Y because...\"\
+    \n- Track uniqueness constraints\n- Example:\n  1. From clue 4, the person in\
+    \ house 1 has color red.\n  2. Therefore, Peter has color red.\n  3. We can eliminate\
+    \ red for other houses (uniqueness constraint).\n\n### Verification Step (REQUIRED)\n\
+    - ALWAYS include a verification step before the final answer\n- Check each clue/constraint\
+    \ explicitly\n- Example:\n  Verification:\n  - Clue 1: Peter is in house 1. ✓\n\
+    \  - Clue 2: Alice is in house 2. ✓\n  - All constraints satisfied.\n\n## Answer\
+    \ Format\n\nThe last part of your final response should be in the following format:\n\
+    <answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n## Format Summary\n\
+    \nYour response should look like:\n\n1. From clue X, [make assertion in standard\
+    \ format].\n2. From clue Y, [make assertion in standard format].\n3. Therefore,\
+    \ [logical conclusion].\n...\n\nVerification:\n- Clue 1: [check] ✓\n- Clue 2:\
+    \ [check] ✓\n...\n\n<answer>\n\\\\boxed{{'answer here'}}\n</answer>\n\nWhen solving\
+    \ problems, you MUST first carefully read and understand the helpful instructions\
+    \ and experiences:\n[G0]. [L2-Meta] Principle: Formalize and externalize constraints\
+    \ and relationships early through structured representation to enable systematic,\
+    \ traceable reasoning. This approach works because it transforms abstract logic\
+    \ into a manipulable framework, reducing mental overhead and ensuring every deduction\
+    \ is grounded in verifiable information. The benefits include greater accuracy,\
+    \ error detection, and the ability to scale reasoning to more complex problems.\n\
+    [G1]. [L2-Meta] Principle: Structure-first principle: Build formal representations\
+    \ (e.g., grids, tables) early to externalize complexity, enabling systematic validation\
+    \ and traceability of constraints across interdependent elements.  \nWhy it works:\
+    \ Externalizing relationships and constraints into explicit structures reduces\
+    \ cognitive load by transforming abstract reasoning into tangible, iterative checks.\
+    \  \nBenefits: Prevents cascading errors, ensures logical consistency through\
+    \ continuous cross-validation, and scales to multi-layered problems by anchoring\
+    \ deductions to verifiable references.\n[G2]. [L1-Pattern] **L1 Pattern-Level\
+    \ Strategy**: Begin by constructing a formal grid or table to systematically track\
+    \ attributes and constraints, and consistently validate all clues against current\
+    \ assignments after each step to maintain logical consistency and avoid contradictions.\n\
+    [G3]. [L1-Pattern] **L1 Pattern-Level Strategy**: Begin by constructing a formal\
+    \ grid/table to visualize interdependent attributes, systematically apply the\
+    \ most restrictive constraints first, and explicitly reference relevant clues\
+    \ during every assignment step to ensure logical consistency and traceability\
+    \ of deductions.  \n\nThis integrates structure creation, constraint prioritization,\
+    \ and clue anchoring as foundational steps for managing ambiguity and verifying\
+    \ validity in logic puzzles.\n[G4]. [L1-Pattern] **L1 Pattern-Level Strategy**:\
+    \ Begin by creating a structured formal representation (such as a grid or table)\
+    \ to track attributes and constraints, and systematically apply and cross-check\
+    \ all relevant clues after each assignment to maintain consistency and enforce\
+    \ uniqueness and ordering requirements.\n[G5]. [L1-Pattern] **L1 Pattern-Level\
+    \ Strategy**: Prioritize constructing a formal grid/table at the outset to organize\
+    \ attributes, enforce uniqueness/ordering constraints, and systematically cross-validate\
+    \ deductions against explicit clue references throughout the solving process,\
+    \ ensuring iterative consistency checks to prevent contradictions and errors in\
+    \ complex logic puzzles.\n[G6]. [L1-Pattern] **L1 Pattern-Level Strategy**: Use\
+    \ a structured grid/table from the beginning to systematically track assignments\
+    \ and validate constraints at each step, while explicitly referencing clues to\
+    \ ensure logical consistency, traceability, and efficient deduction in multi-attribute\
+    \ logic puzzles. Prioritize clues that impose the most restrictions to minimize\
+    \ backtracking and resolve interdependencies effectively.\n[G7]. [L1-Pattern]\
+    \ **L1 Pattern-Level Strategy**: Employ a structured grid/table representation\
+    \ from the outset to track interdependent attributes, and systematically validate\
+    \ all constraints (uniqueness, ordering, etc.) after each assignment step to ensure\
+    \ consistency and prevent contradictions.\n[G8]. [L0-Case] Structure-first: Create\
+    \ a formal grid/table immediately to track interdependent attributes, enforce\
+    \ uniqueness, ordering, adjacency, and cross-validation constraints systematically.\
+    \ Ensure iterative validation, explicit clue anchoring, and systematic reasoning\
+    \ for scalability, even in simple puzzles. This approach reduces reasoning gaps\
+    \ and provides a scaffold for traceable deductions.\n[G9]. [L0-Case] Grid usage:\
+    \ Use a formal grid/table from the start to dynamically enforce all constraints\
+    \ (positional, uniqueness, adjacency) and propagate deductions systematically.\
+    \ This minimizes reasoning gaps, especially in puzzles with adjacency or exclusive\
+    \ constraints, ensuring consistency and traceability.\n[G10]. [L0-Case] Structure-first:\
+    \ Build formal representation from the beginning to track attributes, enforce\
+    \ uniqueness/ordering constraints systematically, and integrate explicit clue\
+    \ referencing, iterative propagation, and visual anchoring of deductions to clues.\n\
+    [G11]. [L0-Case] Iterative check: Apply constraint cross-checking and anchor each\
+    \ deduction to its source clue during intermediate steps, not only in final verification,\
+    \ to reduce untraceable errors in complex logic puzzles.\n[G12]. [L0-Case] Iterative\
+    \ check: After assigning attributes, use the grid to validate all constraints\
+    \ dynamically (e.g., mark exclusivity). This prevents reasoning gaps by ensuring\
+    \ logical consistency at each step.\n[G13]. [L0-Case] Meta-strategy: Prioritize\
+    \ the most restrictive clues (e.g., positional constraints) first using a constraint\
+    \ propagation hierarchy to streamline reasoning, minimize backtracking, and handle\
+    \ interdependent attributes effectively in multi-step logic puzzles.\n[G14]. [L0-Case]\
+    \ Clue anchoring: During all deductions, label assignments with specific clues\
+    \ and attributes to ensure traceability, completeness, and cross-problem learning\
+    \ patterns. This is critical for multi-attribute puzzles.\n[G15]. [L0-Case] Contradiction\
+    \ labeling: Explicitly reference specific clues and assumptions when identifying\
+    \ contradictions during deductions.\n[G16]. [L0-Case] Structure-first: Internalize\
+    \ the principle as a foundational mindset. This ensures grid creation precedes\
+    \ deduction for all puzzle types, enhancing traceability, reducing cognitive load,\
+    \ and enabling generalization to complex scenarios.\n[G17]. [L0-Case] Positional\
+    \ visualization: In puzzles with positional constraints (e.g., 'right of'), explicitly\
+    \ represent spatial relationships in the grid to avoid oversight. Failed mapping\
+    \ here leads to untraceable errors, so formal representation is critical."
+toolkits: {}

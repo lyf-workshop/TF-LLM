@@ -1,0 +1,125 @@
+# @package _global_
+# Alphabetical Sorting - 100局训练配置
+# 快速但有效的训练规模
+
+exp_id: alphabetical_sorting_qwen_100
+
+# Model configuration
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen2.5-7B-Instruct
+  model_settings:
+    temperature: 1.0
+    top_p: 0.95
+    max_tokens: 4096
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+
+# Agent configuration
+agent:
+  type: simple
+  agent:
+    name: alphabetical_sorting_qwen_100_agent
+    instructions: |
+      You are an expert word puzzle solver. Your task is to find a hidden 9-letter word in a 3x3 grid.
+      
+      GAME RULES:
+      - A 3x3 grid contains 9 letters
+      - These letters form a valid 9-letter English word
+      - The word is placed following a DFS path (moving up/down/left/right between adjacent cells)
+      - Letters are placed consecutively along this path
+      - You need to identify the correct word
+      
+      SOLVING STRATEGY:
+      1. Examine all 9 letters in the grid
+      2. Consider possible starting positions
+      3. Try to form valid English words by connecting adjacent cells
+      4. Remember: you can only move up, down, left, or right (not diagonally)
+      5. Each cell can only be used once in the path
+      6. The path must use all 9 letters
+      
+      ANALYSIS APPROACH:
+      1. List all the letters you see
+      2. Think about common 9-letter English words
+      3. Check if letters can form these words following adjacent paths
+      4. Consider letter frequency and common patterns
+      5. Verify that your answer uses all 9 letters exactly once
+      
+      CRITICAL OUTPUT FORMAT:
+      - Your answer MUST be a single English word
+      - Format: Answer: word
+      - Use lowercase letters
+      - Do NOT include quotes, brackets, or extra formatting
+      - Do NOT provide multiple words - only ONE word
+      
+      IMPORTANT:
+      - The word must be exactly 9 letters long
+      - The word must use all letters from the grid
+      - The letters must be connected following a valid adjacent path
+      
+      Example format (do NOT copy this word, it's just a format example):
+      Answer: harmonize
+  toolkits: {}
+
+# Practice Arguments - 100局配置
+practice:
+  epochs: 2          # 2轮训练
+  batch_size: 25     # 每批25个游戏
+  grpo_n: 2          # 每个游戏2次采样 (25 × 2 × 2轮 = 100局)
+  rollout_concurrency: 15  # 高并发
+  rollout_temperature: 1.0
+  task_timeout: 1800
+  do_eval: false
+  agent_objective: |
+    input: A 3x3 grid containing 9 letters of a hidden word
+    output: The 9-letter English word formed by connecting adjacent letters
+  learning_objective: |
+    Help the agent improve word puzzle solving by extracting strategies for pattern recognition, path finding, and word identification.
+  num_experiences_per_query: 1
+  
+  # Hierarchical learning settings
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5
+    l2_aggregation_threshold: 3
+    max_l0_per_game: 1
+    max_l0_recent: 30
+    include_l0_in_prompt: true
+    experience_save_path: workspace/hierarchical_experiences/alphabetical_sorting_100.json
+    agent_save_path: workspace/agents/alphabetical_sorting_100_enhanced.yaml
+
+# KORGym Game Settings
+korgym:
+  enabled: true
+  game_name: "22-alphabetical_sorting"
+  game_host: "localhost"
+  game_port: 8775
+  level: 4
+  num_seeds: 100     # 100个不同的游戏seed
+  max_rounds: 100
+
+# Data configuration
+data:
+  practice_dataset_name: KORGym-AlphabeticalSorting-Train-100
+  eval_dataset_name: KORGym-AlphabeticalSorting-Eval-120
+  processer: KORGym
+
+# Evaluation settings
+evaluation:
+  agent: ${agent}
+  data:
+    dataset: KORGym-AlphabeticalSorting-Eval-120
+    processer: KORGym
+    pass_k: 1
+  batch_size: 10
+
+
+
+
+
+
+
+

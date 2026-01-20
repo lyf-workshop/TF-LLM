@@ -1,0 +1,84 @@
+# @package _global_
+# Training-Free GRPO with Hierarchical Experience Learning (L0/L1/L2)
+# For ZebraLogic Medium difficulty problems
+# Uses logic_agent_hierarchical_learning with L0/L1/L2 experience layers
+# Uses logic_error_extractor for structured error analysis
+defaults:
+  # load the evaluation config file (baseline with hierarchical learning agent)
+  - /eval/logic/easy_base_hierarchical@evaluation
+  - _self_
+
+exp_id: "medium_reasoning_hierarchical_num1_6"
+
+# Practice Arguments
+practice:
+  epochs: 3                          # 3 epochs
+  batch_size: 80                     # 20 problems per epoch (Medium-20 dataset)
+  grpo_n: 5                          # Group size 5
+  rollout_concurrency: 32            # Reduced concurrency to prevent resource contention
+  rollout_temperature: 0.7           # Temperature 0.7 for diverse reasoning during learning
+  task_timeout: 600                  # 10 minutes timeout per task
+  do_eval: false                     # Disable evaluation during practice
+  agent_objective: |
+    input: A logic puzzle that requires deductive reasoning and constraint satisfaction
+    output: A structured, step-by-step reasoning process with explicit clue references and assertions, applying learned L0/L1/L2 experiences
+  learning_objective: |
+    Help the agent improve logical reasoning through hierarchical experience learning (L0/L1/L2).
+    
+    L0 (Case-Specific): Learn from specific mistakes in individual problems
+    - Example: "In problem #42, I confused AND vs OR logic in clue 3"
+    
+    L1 (Pattern-Level): Extract generalizable strategies from multiple L0 cases
+    - Example: "Use grid/table from the start to track assignments and enforce uniqueness constraints"
+    
+    L2 (Meta-Strategy): Abstract cross-task thinking patterns from multiple L1 patterns
+    - Example: "Structure-first principle: Build formal representation before searching"
+    
+    Extract experiences from:
+    - Contradictions in reasoning (L0 → L1)
+    - Constraint violations (uniqueness, ordering, etc.) (L0 → L1)
+    - Reasoning gaps and missing clue references (L0 → L1)
+    - Unused clues and incomplete verification (L0 → L1)
+    - General problem-solving patterns (L1 → L2)
+    - Reward-based comparison of correct and incorrect solutions
+  num_experiences_per_query: 1
+  verify_module: "utu.practice.verify.logic_error_extractor"  # Use error extractor for detailed analysis
+  
+  # Hierarchical Learning Specific Settings
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5      # Generate L1 after 5 L0 experiences
+    l2_aggregation_threshold: 3      # Generate L2 after 3 L1 experiences
+    max_l0_per_problem: 1            # Keep top 1 L0 per problem (avoid overfitting)
+    max_l1_total: 50                 # Max 50 L1 experiences
+    max_l2_total: 10                 # Max 10 L2 experiences
+    include_l0_in_prompt: true       # Include recent L0 in prompt
+    max_l0_recent: 10                # Include only 10 most recent L0
+    l1_confidence_threshold: 0.7     # Minimum confidence to add L1
+    l2_confidence_threshold: 0.8     # Minimum confidence to add L2
+    experience_save_path: "workspace/hierarchical_experiences/medium_reasoning_hierarchical_num6.json"
+  
+  # Critique settings for hierarchical experience generation
+  critique_model:
+    model_provider:
+      type: chat.completions
+      model: Qwen/Qwen3-14B
+    temperature: 0.3
+  
+  critique_prompt_template: "configs/prompts/hierarchical_critique.yaml"
+  save_frequency: 10                 # Save every 10 problems
+
+# Data Arguments
+data:
+  practice_dataset_name: "ZebraLogic-MediumLower-100"  # Use 30 medium training problems
+
+# Agent configuration overrides
+evaluation:
+  agent:
+    max_turns: 50                    # Allow enough turns for structured reasoning
+  config_path: "agents/practice/logic_agent_hierarchical_learning.yaml"  # Use hierarchical learning agent
+
+# Output Settings
+output:
+  save_agent_config: true
+  agent_save_path: "configs/agents/practice/medium_reasoning_hierarchical_num1_6_agent.yaml"

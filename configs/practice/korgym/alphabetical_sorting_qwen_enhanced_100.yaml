@@ -1,0 +1,134 @@
+# @package _global_
+# Alphabetical Sorting - Enhanced Agent with 100-game training
+# 使用优化的agent指令
+
+exp_id: alphabetical_sorting_qwen_enhanced_100
+
+# Model configuration (inherited from agent config)
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen2.5-7B-Instruct
+  model_settings:
+    temperature: 0.7  # 降低温度
+    top_p: 0.95
+    max_tokens: 4096
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+
+# Agent configuration - 使用优化的指令
+agent:
+  type: simple
+  agent:
+    name: alphabetical_sorting_qwen_enhanced_100_agent
+    instructions: |
+      You are an expert at solving word path puzzles. You will see a 3x3 grid with 9 letters.
+      
+      YOUR TASK: Find the ONE 9-letter English word hidden in the grid.
+      
+      HOW THE WORD IS HIDDEN:
+      - The word starts at one cell and follows a path through adjacent cells
+      - Adjacent means up/down/left/right (NOT diagonal)
+      - The path visits each cell exactly once, using all 9 letters
+      - The letters appear in order along this path
+      
+      STEP-BY-STEP SOLUTION PROCESS:
+      
+      Step 1: READ THE GRID
+      - Carefully note all 9 letters in the 3x3 grid
+      - Write them down: [list the 9 letters]
+      
+      Step 2: THINK OF 9-LETTER WORDS
+      - What 9-letter English words can you make from these letters?
+      - Common patterns: -ize, -tion, -ing, -able, etc.
+      - Think of: actions, objects, adjectives, etc.
+      
+      Step 3: CHECK EACH CANDIDATE WORD
+      For each word you think of:
+      a) Does it have exactly 9 letters? (COUNT CAREFULLY!)
+      b) Does it use only the letters from the grid?
+      c) Can you trace a valid path? (Try different starting positions)
+      d) Does the path only use adjacent cells (up/down/left/right)?
+      e) Does it use each letter exactly once?
+      
+      Step 4: VERIFY YOUR ANSWER
+      - Count the letters in your answer: it MUST be 9
+      - Double-check the path is valid
+      - Make sure it's a real English word
+      
+      CRITICAL REQUIREMENTS:
+      ✓ Your answer MUST be EXACTLY 9 letters
+      ✓ Your answer MUST be a valid English word
+      ✓ Format: Answer: wordhere (lowercase, no spaces)
+      ✓ Do NOT add quotes, brackets, or punctuation
+      
+      COMMON MISTAKES TO AVOID:
+      ✗ Answering with 7 or 8 letter words (COUNT!)
+      ✗ Making up non-existent words
+      ✗ Using letters not in the grid
+      ✗ Ignoring the path constraint
+      
+      Remember: Take your time, count carefully, and verify your answer!
+  toolkits: {}
+
+# Practice Arguments - 100局配置
+practice:
+  epochs: 2          # 2轮训练
+  batch_size: 25     # 每批25个游戏
+  grpo_n: 2          # 每个游戏2次采样
+  rollout_concurrency: 15
+  rollout_temperature: 0.7  # 与agent温度一致
+  task_timeout: 1800
+  do_eval: false
+  agent_objective: |
+    input: A 3x3 grid containing 9 letters of a hidden word
+    output: The 9-letter English word formed by connecting adjacent letters
+  learning_objective: |
+    Help the agent improve word puzzle solving by extracting strategies for pattern recognition, path finding, and word identification.
+  num_experiences_per_query: 1
+  
+  # Hierarchical learning settings
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5
+    l2_aggregation_threshold: 3
+    max_l0_per_game: 1
+    max_l0_recent: 30
+    include_l0_in_prompt: true
+    experience_save_path: workspace/hierarchical_experiences/alphabetical_sorting_enhanced_100.json
+    agent_save_path: workspace/agents/alphabetical_sorting_enhanced_100_agent.yaml
+
+# KORGym Game Settings
+korgym:
+  enabled: true
+  game_name: "22-alphabetical_sorting"
+  game_host: "localhost"
+  game_port: 8775
+  level: 4
+  num_seeds: 100
+  max_rounds: 100
+
+# Data configuration
+data:
+  practice_dataset_name: KORGym-AlphabeticalSorting-Train-100
+  eval_dataset_name: KORGym-AlphabeticalSorting-Eval-120
+  processer: KORGym
+
+# Evaluation settings
+evaluation:
+  agent: ${agent}
+  data:
+    dataset: KORGym-AlphabeticalSorting-Eval-120
+    processer: KORGym
+    pass_k: 1
+  batch_size: 10
+
+
+
+
+
+
+
+

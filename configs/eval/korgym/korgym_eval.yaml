@@ -1,0 +1,29 @@
+# @package _global_
+defaults:
+  - /agents/practice/korgym_agent@agent
+  - _self_
+
+exp_id: "korgym_baseline_eval"
+
+# Evaluation dataset configuration
+# This will use seeds 1-50 for consistent evaluation
+data:
+  dataset: "KORGym-Eval-50"  # 50 game instances with seeds 1-50
+  type: "single"
+
+# Evaluation settings
+concurrency: 32  # Parallel evaluation processes
+pass_k: 1  # Single attempt per game instance
+
+# Verification function settings
+verify_filename: "korgym.py"
+verify_func_name: "verify_func"
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_host: "localhost"
+  game_port: 8775
+  max_rounds: 100  # Maximum rounds for multi-turn games
+  timeout_per_game: 600  # 10 minutes timeout per game
+

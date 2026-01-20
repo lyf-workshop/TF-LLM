@@ -1,0 +1,234 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Constraint validation: Validate interdependent positional clues immediately during assignment to avoid logical contradictions.",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_1",
+      "content": "Grid initialization: Use a grid/table to track attributes per house from the beginning for better uniqueness enforcement.",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_2",
+      "content": "Grid cross-referencing: Validate clue relationships proactively during assignment using a grid-based method.",
+      "original_id": "G2",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_3",
+      "content": "Track alternatives: Explicitly document alternative placements for positional constraints.",
+      "original_id": "G3",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_4",
+      "content": "Positional constraints: Explicitly reference all clues related to relative positions simultaneously.",
+      "original_id": "G4",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_5",
+      "content": "Interdependency handling: Integrate interdependent clues early in deduction processes.",
+      "original_id": "G5",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_6",
+      "content": "Structure-First Principle: Build a formal grid/table to track all attributes from the start.",
+      "original_id": "G6",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_7",
+      "content": "Uniqueness tracking: Use centralized tracking to enforce uniqueness constraints explicitly.",
+      "original_id": "G7",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_8",
+      "content": "Assumption logging: Document assumptions immediately and test them against all constraints.",
+      "original_id": "G8",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_9",
+      "content": "Constraint validation: Validate interdependent positional clues immediately.",
+      "original_id": "G0",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_10",
+      "content": "Grid initialization: Use a grid/table starting with deterministic clues.",
+      "original_id": "G1",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_11",
+      "content": "Grid cross-referencing: Proactively validate clue relationships during assignment.",
+      "original_id": "G2",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_12",
+      "content": "Track alternatives: Explicitly document alternative placements for adjacency constraints.",
+      "original_id": "G3",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_13",
+      "content": "Positional constraints: Explicitly reference all relative position clues.",
+      "original_id": "G4",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_14",
+      "content": "Proactive Validation: Enforce positional constraints during assignment.",
+      "original_id": "G9",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_15",
+      "content": "Constraint-Driven Reasoning: Systematically validate all clues at each deduction step.",
+      "original_id": "G10",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_16",
+      "content": "Proactive Cross-Referencing: Standardize real-time cross-checking of all constraints.",
+      "original_id": "G11",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_17",
+      "content": "Clue validation: Explicitly check positional relationships during attribute application.",
+      "original_id": "G12",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_18",
+      "content": "Constraint Validation as a Meta-Strategy: Explicitly map interdependent clues to the grid.",
+      "original_id": "G13",
+      "step": 1,
+      "problem_count": 29
+    },
+    {
+      "id": "L0_19",
+      "content": "Constraint validation: Validate interdependent positional clues immediately.",
+      "original_id": "G0",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_20",
+      "content": "Grid initialization: Use a grid/table starting with deterministic clues.",
+      "original_id": "G1",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_21",
+      "content": "Grid cross-referencing: Proactively validate clue relationships.",
+      "original_id": "G2",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_22",
+      "content": "Track alternatives: Explicitly document alternative placements.",
+      "original_id": "G3",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_23",
+      "content": "Positional constraints: Explicitly reference all relative position clues.",
+      "original_id": "G4",
+      "step": 2,
+      "problem_count": 28
+    },
+    {
+      "id": "L0_24",
+      "content": "Chain Tracking: Systematically represent interdependent attribute chains in the grid.",
+      "original_id": "G14",
+      "step": 2,
+      "problem_count": 28
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**: Use a structured tracking system, such as a grid, to simultaneously validate and cross-reference interdependent positional constraints during the assignment process, ensuring consistency and reducing logical errors.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**: Establish a structured framework (e.g., grid/table) early to track all attributes and constraints, then systematically validate each deduction against interdependent rules and uniqueness requirements while documenting assumptions for immediate cross-checking.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_2",
+      "content": "**L1 Pattern-Level Strategy**: Begin with deterministic information to establish a foundation, and consistently apply and validate all positional and relational constraints during each step of the assignment process to maintain logical consistency.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "Principle: Formalize problem structure early through explicit representation (e.g., grids, tables) to create a dynamic validation framework that cross-checks constraints and assumptions in real-time. This approach works because externalizing relationships and dependencies into a structured format enables immediate detection of contradictions and ensures systematic adherence to rules. The benefits include maintaining cognitive clarity under complexity, preventing cascading errors, and accelerating resolution through proactive verification.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 2
+    }
+  ],
+  "stats": {
+    "total_l0": 25,
+    "total_l1": 3,
+    "total_l2": 1
+  }
+}

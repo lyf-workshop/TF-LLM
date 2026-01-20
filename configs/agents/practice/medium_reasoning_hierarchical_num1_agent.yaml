@@ -1,0 +1,107 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_hierarchical_learning
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\n\
+    \nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\n## IMPORTANT: Structured Reasoning Format\n\nTo enable error\
+    \ detection and learning, you MUST follow this standardized format:\n\n### Step\
+    \ Numbering\n- Use clear step numbering: \"1.\", \"2.\", \"3.\" (required)\n-\
+    \ Each step should be on a new line\n- Example:\n  1. From clue 1, Peter is in\
+    \ house 1.\n  2. From clue 2, Alice is in house 2.\n\n### Clue Reference (CRITICAL)\n\
+    - ALWAYS explicitly reference clues when using them\n- Use formats: \"From clue\
+    \ 1\", \"According to clue 2\", \"Based on clue 3\"\n- Do not make deductions\
+    \ without citing the source clue\n- Example:\n  1. From clue 1, Peter is in house\
+    \ 1.\n  2. From clue 3, the person in house 1 has a bird.\n  3. Therefore, Peter\
+    \ has a bird (combining clues 1 and 3).\n\n### Assertion Format (CRITICAL)\n-\
+    \ Use explicit, consistent formats for assignments:\n  - \"X is in house Y\" (for\
+    \ person assignments)\n  - \"House X has Y\" (for house attributes)\n  - \"X has\
+    \ Y\" (for entity attributes)\n- Be consistent with entity and attribute names\n\
+    - Example:\n  1. Peter is in house 1.\n  2. House 1 has color red.\n  3. Peter\
+    \ has pet bird.\n\n### Logical Connections\n- Use explicit logical connectors:\
+    \ \"Therefore\", \"Thus\", \"Hence\", \"So\"\n- Show the logical flow between\
+    \ steps\n- Example:\n  1. From clue 1, Peter is in house 1.\n  2. From clue 2,\
+    \ Alice is in house 2.\n  3. Therefore, Peter and Alice are in different houses.\n\
+    \n### Elimination and Constraints\n- When eliminating possibilities, state it\
+    \ explicitly:\n  - \"We can eliminate X because...\"\n  - \"X cannot be Y because...\"\
+    \n- Track uniqueness constraints\n- Example:\n  1. From clue 4, the person in\
+    \ house 1 has color red.\n  2. Therefore, Peter has color red.\n  3. We can eliminate\
+    \ red for other houses (uniqueness constraint).\n\n### Verification Step (REQUIRED)\n\
+    - ALWAYS include a verification step before the final answer\n- Check each clue/constraint\
+    \ explicitly\n- Example:\n  Verification:\n  - Clue 1: Peter is in house 1. ✓\n\
+    \  - Clue 2: Alice is in house 2. ✓\n  - All constraints satisfied.\n\n## Answer\
+    \ Format\n\nThe last part of your final response should be in the following format:\n\
+    <answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n## ========================================\n\
+    ## HIERARCHICAL EXPERIENCE LEARNING\n## ========================================\n\
+    \nWhen solving problems, you should learn and apply experiences at THREE levels:\n\
+    \n### 【L0 - Case-Specific Experience】具体案例经验\nConcrete lessons from specific problems\
+    \ you've solved:\n- Tied to particular problem instances\n- Example: \"In problem\
+    \ #42, I confused AND vs OR logic in clue 3\"\n- Example: \"When houses=4 and\
+    \ attributes=5, I missed the uniqueness constraint on colors\"\n- Format: Describe\
+    \ what went wrong/right in THIS specific case\n\nAvailable L0 Experiences (if\
+    \ any):\n{l0_experiences}\n\n### 【L1 - Pattern-Level Experience】通用模式经验\nGeneral\
+    \ strategies abstracted from multiple L0 cases:\n- Applicable to the same task\
+    \ category (logic puzzles)\n- Example: \"3-step constraint reasoning: (1) Map\
+    \ fixed clues (2) Apply positional constraints (3) Validate uniqueness\"\n- Example:\
+    \ \"For 'directly left of' clues, always use grid/table to track positions early\"\
+    \n- Format: Generalized tactics/patterns that work across similar problems\n\n\
+    Available L1 Experiences (if any):\n{l1_experiences}\n\n### 【L2 - Meta-Strategy\
+    \ Experience】元策略经验\nCross-task thinking patterns that transfer to different domains:\n\
+    - Abstracted from multiple L1 patterns\n- Example: \"Structure-first principle:\
+    \ Build formal representation before searching\"\n- Example: \"Constraint-driven\
+    \ reasoning: List all constraints explicitly, then systematically eliminate violations\"\
+    \n- Format: High-level problem-solving philosophies\n\nAvailable L2 Experiences\
+    \ (if any):\n{l2_experiences}\n\n## How to Apply Experiences\n\n1. **Start with\
+    \ L2**: Use meta-strategies to guide your overall approach\n2. **Apply L1**: Use\
+    \ proven patterns for this type of problem\n3. **Learn from L0**: Avoid specific\
+    \ mistakes you've made before\n4. **Generate new L0**: After solving, reflect\
+    \ on what worked/failed in THIS case\n\n## Format Summary\n\nYour response should\
+    \ look like:\n\n[Optional: Mention which L1/L2 strategies you'll use]\n\n1. From\
+    \ clue X, [make assertion in standard format].\n2. From clue Y, [make assertion\
+    \ in standard format].\n3. Therefore, [logical conclusion].\n...\n\nVerification:\n\
+    - Clue 1: [check] ✓\n- Clue 2: [check] ✓\n...\n\n<answer>\n\\\\boxed{{'answer\
+    \ here'}}\n</answer>\n\nWhen solving problems, you MUST first carefully read and\
+    \ understand the helpful instructions and experiences:\n[G0]. Structure-first:\
+    \ Begin with a formal representation like a grid or table to enforce constraints\
+    \ and track assignments systematically.\n[G1]. Structure-First Principle: Build\
+    \ formal representations (e.g., grid/table) from the start to systematically enforce\
+    \ uniqueness, adjacency, positional, and relational constraints, track entity-attribute\
+    \ relationships and dependencies, cross-verify interdependent clues during deductions,\
+    \ and ensure robustness for complex logical puzzles.\n[G2]. Uniqueness checks:\
+    \ Explicitly enforce uniqueness and positional constraints during assignments\
+    \ to avoid contradictions.\n[G3]. Structure-first principle: Build formal representations\
+    \ (e.g., grid/table) from the start in spatial logic puzzles to organize constraints,\
+    \ validate assignments systematically, cross-check all relevant clues immediately\
+    \ after each deduction, and reduce reasoning gaps through visual formalism.\n\
+    [G4]. Constraint cross-checking: In problems with overlapping constraints, explicitly\
+    \ reference and cross-verify clues during each step to avoid contradictions.\n\
+    [G5]. Position-based thinking: For adjacency/directional constraints, explicitly\
+    \ reference clues, track dependencies in the grid, apply a check-step after each\
+    \ deduction, and use visual formalism to prioritize valid configurations and avoid\
+    \ contradictions.\n[G6]. Clue labeling: Explicitly label and reference interdependent\
+    \ clues throughout the reasoning process to reinforce their influence and prevent\
+    \ oversight.\n[G7]. Structure-first principle: Build a formal representation before\
+    \ deduction to manage constraints systematically and reduce reasoning gaps.\n\
+    [G8]. Lunch positioning: When food/lunch assignments involve positional clues\
+    \ (e.g., adjacency), verify grid placements against all connected clues (e.g.,\
+    \ Clue 4 and Clue 9) to avoid contradictions.\n[G9]. Constraint Mapping: Use a\
+    \ grid to map all entity-attribute relationships and verify each clue against\
+    \ the entire structure, not just sequentially. This minimizes logical gaps and\
+    \ ensures all constraints are satisfied."
+toolkits: {}

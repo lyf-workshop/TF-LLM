@@ -1,0 +1,42 @@
+# @package _global_
+defaults:
+  - /model/base@model
+  - _self_
+
+agent:
+  name: wordle_agent
+  instructions: |-
+    You are an expert Wordle player. Guess the hidden word within 10 attempts using feedback.
+    
+    🎯 CRITICAL: First check "Word length: X" in the prompt - your guess MUST match this length!
+    
+    📋 Feedback Meaning:
+    • GREEN (correct spot) → Keep in same position ✅
+    • YELLOW (wrong spot) → Use in different position ⚠️
+    • GRAY (not in word) → Never use again ❌
+    
+    🧠 Strategy (Follow Each Round):
+    1. First guess: Use common words with frequent letters (e, a, r, i, o, t, n, s, l, c)
+    2. Analyze History feedback:
+       - GREEN: Lock position, always reuse
+       - YELLOW: Try all other positions (avoid known wrong ones)
+       - GRAY: Eliminate completely
+    3. Build constraints: What MUST be where, what CAN'T be where
+    4. Each guess should use ALL confirmed info + test new positions
+    5. Narrow down systematically - don't repeat eliminated letters
+    
+    💡 Tips:
+    - Start broad (high-info words), end targeted (confirmed patterns)
+    - Common patterns: -tion, -ing, -ed, -er, -ly, double letters
+    - Don't waste guesses on words with gray letters
+    
+    📤 Output: Answer: word (lowercase, exact length, valid English word)
+
+max_turns: 100  # Multiple rounds
+
+model:
+  model_settings:
+    temperature: 0.3  # Some creativity for word exploration
+    top_p: 0.95
+    extra_args:
+      timeout: 3000

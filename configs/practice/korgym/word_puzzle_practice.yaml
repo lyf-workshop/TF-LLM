@@ -1,0 +1,59 @@
+# @package _global_
+defaults:
+  - /eval/korgym/word_puzzle_eval@evaluation
+  - _self_
+
+exp_id: "word_puzzle_practice"
+
+# Practice Arguments
+practice:
+  epochs: 3
+  batch_size: 100
+  grpo_n: 5
+  rollout_concurrency: 4  # 降低到4避免速率限制
+  rollout_temperature: 0.7
+  task_timeout: 600
+  do_eval: false
+  eval_strategy: "epoch"
+  
+  agent_objective: |
+    input: A crossword puzzle with clues for multiple words
+    output: A list of words that correctly answer all the clues in order
+  
+  learning_objective: |
+    Help the agent improve crossword puzzle solving by extracting:
+    - L0 (Case-level): Specific successful word-finding strategies and common mistakes
+    - L1 (Pattern-level): General clue interpretation and word deduction patterns
+    - L2 (Meta-level): Universal puzzle-solving principles applicable to word games
+  
+  num_experiences_per_query: 1
+  
+  # Hierarchical learning settings (must be under practice!)
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5
+    l2_aggregation_threshold: 3
+    max_l0_per_game: 1
+    max_l0_recent: 50
+    include_l0_in_prompt: true
+    experience_save_path: workspace/hierarchical_experiences/word_puzzle_practice.json
+    agent_save_path: configs/agents/practice/word_puzzle_practice_agent.yaml
+
+# Data Arguments  
+data:
+  practice_dataset_name: "KORGym-WordPuzzle-Train-100"
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_name: "8-word_puzzle"
+  game_host: "localhost"
+  game_port: 8775
+  level: 3
+  num_train_seeds: 100
+  eval_seeds_start: 1
+  eval_seeds_end: 50
+  train_seeds_start: 51
+  train_seeds_end: 150
+  max_rounds: 1
+

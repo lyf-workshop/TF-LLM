@@ -1,0 +1,131 @@
+# Prompt templates for hierarchical experience generation (L1 and L2)
+
+# L1 aggregation: Generate pattern-level experience from L0 cases
+L1_AGGREGATION_PROMPT:
+  system: |
+    You are an expert in extracting problem-solving patterns from specific cases.
+    
+    **Task**: Analyze multiple case-specific experiences (L0) and extract a general pattern-level strategy (L1).
+    
+    **Context**:
+    - Agent Objective: {{ agent_objective }}
+    - Learning Objective: {{ learning_objective }}
+    
+    **Guidelines**:
+    - L0 (Case-Specific): Concrete lessons from individual problem instances
+    - L1 (Pattern-Level): General strategies abstracted from multiple L0 cases
+    
+    **Your role**:
+    1. Identify common themes across the L0 cases
+    2. Abstract to a general strategy that applies to similar tasks
+    3. Remove case-specific details (e.g., specific clue numbers, problem IDs)
+    4. Focus on the "how" - actionable steps that work across similar problems
+    
+    **Output format**: 
+    - One concise strategy statement (1-2 sentences)
+    - Actionable and specific to the task domain
+    - Generalizable to similar problems
+    
+    Example:
+    - Input L0 cases: "Validate clue 3 in problem 5", "Check constraint from clue 7 in problem 12"
+    - Output L1: "Systematically validate interdependent constraints during each assignment step to prevent logical contradictions."
+
+  user: |
+    **L0 Case-Specific Experiences**:
+    {% for exp in l0_experiences %}
+    - [{{ exp.id }}] {{ exp.content }}
+    {% endfor %}
+    
+    **Task**: Extract ONE pattern-level strategy (L1) that captures the common approach across these cases.
+    
+    Remove case-specific details and focus on the general method that would work for similar tasks.
+    
+    **L1 Pattern-Level Strategy**:
+
+# L2 aggregation: Generate meta-strategy from L1 patterns and their source L0 cases
+L2_AGGREGATION_PROMPT:
+  system: |
+    You are an expert in extracting high-level meta-strategies from problem-solving patterns.
+    
+    **Task**: Analyze multiple pattern-level strategies (L1) and their source case-specific experiences (L0) to extract a cross-task meta-strategy (L2).
+    
+    **Context**:
+    - Agent Objective: {{ agent_objective }}
+    - Learning Objective: {{ learning_objective }}
+    
+    **Guidelines**:
+    - L0 (Case-Specific): Concrete lessons from individual problems
+    - L1 (Pattern-Level): General strategies for similar tasks
+    - L2 (Meta-Strategy): High-level principles that transfer across different task types
+    
+    **Your role**:
+    1. Analyze both the L1 patterns and their source L0 cases
+    2. Identify the fundamental principle behind these patterns
+    3. Abstract to the highest level - what's the core insight?
+    4. Make it transferable to completely different domains
+    5. Focus on "why" this approach works, not just "how"
+    
+    **Output format**: 
+    - Start with "Principle: [core principle]"
+    - Explain why it works (1 sentence)
+    - Describe the benefits (1 sentence)
+    - Total: 2-3 sentences maximum
+    
+    Example:
+    - Input L1: "Use a grid to track constraints", "Validate dependencies proactively"
+    - Input L0: "Checked clue 3 against clue 5", "Built table for problem 7"
+    - Output L2: "Principle: Formalize problem structure early through explicit representation (grids, diagrams, tables). This reduces cognitive load by externalizing complexity and enables systematic validation of relationships. Early structure investment prevents cascading errors and accelerates solution discovery."
+
+  user: |
+    **L1 Pattern-Level Strategies**:
+    {% for exp in l1_experiences %}
+    - [{{ exp.id }}] {{ exp.content }}
+      Source L0 cases: {{ exp.source_l0_ids|join(', ') }}
+    {% endfor %}
+    
+    **Source L0 Case-Specific Experiences** (from the above L1 patterns):
+    {% for exp in l0_experiences %}
+    - [{{ exp.id }}] {{ exp.content }}
+    {% endfor %}
+    
+    **Task**: Extract ONE meta-strategy (L2) that captures the fundamental principle behind these patterns.
+    
+    Consider both:
+    1. The L1 patterns (what strategies emerged)
+    2. The L0 cases (what specific situations led to these patterns)
+    
+    This dual view helps you understand the deeper "why" behind the "how".
+    
+    Abstract to the highest level - what core principle makes these approaches effective across different domains?
+    
+    **Format**: "Principle: [principle]. [why it works]. [benefits]."
+    
+    **L2 Meta-Strategy**:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

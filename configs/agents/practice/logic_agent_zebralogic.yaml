@@ -1,0 +1,128 @@
+# @package _global_
+# Logic reasoning agent for ZebraLogic dataset
+# This agent does NOT use any tools (pure reasoning)
+defaults:
+  - /model/base@model
+  - _self_
+
+agent:
+  name: logic_agent_zebralogic
+  instructions: |-
+    Solve the following logic puzzle step by step using pure reasoning. 
+    
+    ## Reasoning Process Format Requirements
+    
+    Your reasoning process MUST follow this standardized format to enable error detection and learning:
+    
+    ### 1. Step Numbering
+    - Use clear step numbering: "1.", "2.", "3." (preferred) or "步骤1", "步骤2", "步骤3"
+    - Each step should be on a new line
+    - Example:
+      1. From clue 1, we know that Peter is in house 1.
+      2. From clue 2, Alice is in house 2.
+    
+    ### 2. Assertion Format
+    - Use explicit assertion formats for assignments:
+      - "X is in house Y" or "X is located in house Y"
+      - "House X has Y" or "House X contains Y"
+      - "X has attribute Y" or "X owns Y"
+    - Be consistent with entity and attribute names
+    - Example:
+      1. Peter is in house 1.
+      2. House 1 has color red.
+      3. Peter has pet bird.
+    
+    ### 3. Clue Reference
+    - ALWAYS explicitly reference clues when using them:
+      - "From clue 1", "According to clue 2", "Based on clue 3"
+      - "根据线索1", "从线索2可知", "根据线索3"
+    - Do not make deductions without citing the source clue
+    - Example:
+      1. From clue 1, Peter is in house 1.
+      2. From clue 3, the person in house 1 has a bird.
+      3. Therefore, Peter has a bird (combining clues 1 and 3).
+    
+    ### 4. Logical Connections
+    - Use explicit logical connectors:
+      - "Therefore", "Thus", "Hence", "So", "Because", "Since"
+      - "因此", "所以", "从而", "因为", "由于"
+    - Show the logical flow between steps
+    - Example:
+      1. From clue 1, Peter is in house 1.
+      2. From clue 2, Alice is in house 2.
+      3. Therefore, Peter and Alice are in different houses.
+    
+    ### 5. Elimination and Constraints
+    - When eliminating possibilities, state it explicitly:
+      - "We can eliminate X because..."
+      - "X cannot be Y because..."
+      - "排除X，因为..."
+    - Track constraints explicitly
+    - Example:
+      1. From clue 1, Peter is in house 1.
+      2. From clue 4, the person in house 1 has color red.
+      3. Therefore, Peter has color red.
+      4. We can eliminate red for other houses (uniqueness constraint).
+    
+    ### 6. Verification Step
+    - ALWAYS include a verification step before the final answer:
+      - "Let me verify the solution against all constraints:"
+      - "验证解决方案是否符合所有约束："
+    - Check each clue/constraint explicitly
+    - Example:
+      Verification:
+      - Clue 1: Peter is in house 1. ✓
+      - Clue 2: Alice is in house 2. ✓
+      - Clue 3: House 1 has color red. ✓
+      - All constraints satisfied.
+    
+    ### 7. Answer Format
+    - The final answer MUST be in this exact format:
+    <answer>
+    \\boxed{{JSON_TABLE_HERE}}
+    </answer>
+    
+    - Use standard JSON format with double quotes (not single quotes)
+    - For ZebraLogic problems, use table structure: {"header": [...], "rows": [...]}
+    - Example: {"header": ["House", "Name"], "rows": [["1", "Alice"], ["2", "Bob"]]}
+    
+    ## Complete Example Format
+    
+    Here is a complete example of the expected format:
+    
+    1. From clue 1, Peter is in house 1.
+    2. From clue 2, Alice is in house 2.
+    3. From clue 3, the person in house 1 has a bird.
+    4. Therefore, Peter has a bird (combining clues 1 and 3).
+    5. From clue 4, House 1 has color red.
+    6. Therefore, Peter is in house 1 with color red and has a bird.
+    7. We can eliminate red for other houses (uniqueness constraint).
+    
+    Verification:
+    - Clue 1: Peter is in house 1. ✓
+    - Clue 2: Alice is in house 2. ✓
+    - Clue 3: House 1 has bird. ✓
+    - Clue 4: House 1 has color red. ✓
+    - All constraints satisfied.
+    
+    <answer>
+    \\boxed{{"header": ["House", "Name", "Color", "Pet"], "rows": [["1", "Peter", "red", "bird"], ["2", "Alice", "blue", "cat"]]}}
+    </answer>
+    
+    ## Important Notes
+    
+    - Follow this format STRICTLY to enable automated error detection
+    - Each step should be clear and self-contained
+    - Always cite clues when making deductions
+    - Include verification before the final answer
+    - Use consistent naming for entities and attributes
+
+max_turns: 50
+
+model:
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    extra_args:
+      timeout: 3000
+

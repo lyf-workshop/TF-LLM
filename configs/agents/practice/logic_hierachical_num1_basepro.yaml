@@ -1,0 +1,69 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 600
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\
+    \ \n\nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\nThe last part of your final response should be in the following\
+    \ format:\n<answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n\
+    When solving problems, you MUST first carefully read and understand the helpful\
+    \ instructions and experiences:\n[G0]. [L1-Pattern] **L1 Pattern-Level Strategy**:\
+    \ Begin by establishing a formal structure (e.g., grid/table) to organize entities\
+    \ and their attributes, then systematically apply and cross-validate constraints\
+    \ during each deduction step while explicitly documenting how clues inform assignments\
+    \ to ensure logical consistency and traceability.  \n\nThis strategy integrates\
+    \ the \"structure-first\" approach, emphasizes proactive constraint validation,\
+    \ and highlights the importance of tracking reasoning pathways to prevent contradictions\
+    \ and errors across similar logic puzzles.\n[G1]. [L1-Pattern] **L1 Pattern-Level\
+    \ Strategy**: Prioritize and apply fixed and exclusion-based constraints early\
+    \ in the deduction process, while systematically cross-checking each inference\
+    \ against all relevant constraints and verifying completeness of assignments to\
+    \ maintain consistency and reduce backtracking.\n[G2]. [L0-Case] Prioritize fixed\
+    \ clues: When solving constraint-based logic puzzles, prioritize clues that fix\
+    \ positions (like clue 5 and 4) first and then systematically apply adjacency\
+    \ and uniqueness constraints.\n[G3]. [L0-Case] Verify Completeness: After making\
+    \ all assignments, systematically check if every attribute category (names, education,\
+    \ genres) is fully represented and uniquely assigned to prevent missing elements\
+    \ and ensure constraint satisfaction.\n[G4]. [L0-Case] Early Exclusion: Apply\
+    \ exclusion-based clues earlier in the deduction chain to prevent invalid assignments\
+    \ and reduce backtracking, improving the efficiency of constraint validation.\n\
+    [G5]. [L0-Case] Structure-first: When solving constraint satisfaction logic puzzles,\
+    \ prioritize creating a formal grid/table from the beginning to track assignments,\
+    \ enforce uniqueness/adjacency constraints, reduce contradictions, improve clarity,\
+    \ and support exportable L1/L2 strategies through early validation and traceable\
+    \ deductions.\n[G6]. [L0-Case] Clue cross-check: When resolving clues with positional\
+    \ or spatial relationships, immediately cross-check against current assignments\
+    \ and all related constraints to avoid contradictions and ensure consistency across\
+    \ the puzzle state, reinforcing traceability and robustness of deductions.\n[G7].\
+    \ [L0-Case] Assumption Trace: Explicitly document how each clue is applied during\
+    \ inferences, including specific deductions and their logical transformations,\
+    \ to surface reasoning gaps, support systematic debugging, and cross-check against\
+    \ previously applied constraints.\n[G8]. [L0-Case] Prioritize fixed clues: When\
+    \ solving constraint-based logic puzzles, prioritize clues that fix positions\
+    \ (like clue 5 and 4) first and then systematically apply adjacency and uniqueness\
+    \ constraints.\n[G9]. [L0-Case] Verify Completeness: After making all assignments,\
+    \ systematically check if every attribute category (names, education, genres)\
+    \ is fully represented and uniquely assigned to prevent missing elements and ensure\
+    \ constraint satisfaction.\n[G10]. [L0-Case] Early Exclusion: Apply exclusion-based\
+    \ clues earlier in the deduction chain to prevent invalid assignments and reduce\
+    \ backtracking, improving the efficiency of constraint validation.\n[G11]. [L0-Case]\
+    \ Cross-Trace Integration: Systematically apply both clue cross-checking and assumption\
+    \ traces in early deduction steps for adjacency or relational constraints to enhance\
+    \ consistency and prevent reasoning gaps."
+toolkits: {}

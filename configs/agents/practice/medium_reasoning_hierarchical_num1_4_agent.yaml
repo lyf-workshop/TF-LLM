@@ -1,0 +1,157 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 600
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\
+    \ \n\nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\nThe last part of your final response should be in the following\
+    \ format:\n<answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n\
+    When solving problems, you MUST first carefully read and understand the helpful\
+    \ instructions and experiences:\n[G0]. [L2-Meta] Principle: Prioritize constraint\
+    \ validation through structured, real-time tracking to maintain logical coherence.\
+    \ Formalizing interdependencies early enhances clarity, reduces error propagation,\
+    \ and supports systematic elimination of infeasible solutions.\n[G1]. [L1-Pattern]\
+    \ Use a structured tracking method, such as a grid, to enforce and validate constraints\
+    \ in real-time during assignment, ensuring consistency by cross-referencing interdependent\
+    \ clues and eliminating conflicting possibilities early.\n[G2]. [L1-Pattern] Apply\
+    \ systematic constraint enforcement by immediately validating assignments and\
+    \ interdependencies, using structured tracking methods like grids or tables to\
+    \ maintain consistency and avoid contradictions across all attributes.\n[G3].\
+    \ [L1-Pattern] Use a grid to systematically track and cross-check all constraints\
+    \ and interdependencies during assignments, ensuring consistency and preventing\
+    \ contradictions by validating relationships and exclusions in real time.\n[G4].\
+    \ [L0-Case] Constraint validation: Validate interdependent positional clues immediately\
+    \ during assignment to avoid logical contradictions.\n[G5]. [L0-Case] Grid initialization:\
+    \ Use a grid/table to track attributes per house from the beginning, starting\
+    \ with deterministic clues to enforce constraints during deduction and avoid contradictions.\n\
+    [G6]. [L0-Case] Grid cross-referencing: Proactively validate clue relationships\
+    \ (e.g., verifying clue 12 against Blue Master's placement) during assignment\
+    \ using a grid-based method. This ensures systematic exclusion of duplicates and\
+    \ prevents reasoning gaps caused by delayed verification.\n[G7]. [L0-Case] Track\
+    \ alternatives: Explicitly document alternative placements for adjacency-based\
+    \ positional constraints (e.g., 'next to') and eliminate them based on prior assignments\
+    \ to reinforce systematic validation and reduce guesswork.\n[G8]. [L0-Case] Positional\
+    \ constraints: Explicitly reference all clues related to relative positions (e.g.,\
+    \ 'left of', 'right of') simultaneously to maintain consistency.\n[G9]. [L0-Case]\
+    \ Interdependency handling: When multiple clues define the same entity, explicitly\
+    \ document and cross-check these interdependencies in the grid. This aligns with\
+    \ constraint validation strategies and prevents conflicts during deductions.\n\
+    [G10]. [L0-Case] Structure-First Principle: When solving complex logic puzzles\
+    \ with positional and interdependent constraints, initialize and maintain a grid/table\
+    \ structure upfront to enforce uniqueness, map interdependencies, and validate\
+    \ constraints dynamically at each reasoning step. This ensures transparency of\
+    \ assumptions, prevents backtracking, and avoids uneven constraint distribution\
+    \ or overlooked connections.\n[G11]. [L0-Case] Uniqueness Tracking: Centrally\
+    \ monitor unassigned values for attributes like names, education, and genres to\
+    \ prevent duplicates, while linking to L2 meta-strategies for methodical constraint\
+    \ enforcement.\n[G12]. [L0-Case] Assumption logging: When inferring positional\
+    \ relationships (e.g., 'Peter left of Arnold' from Clues 6 and 7), document assumptions\
+    \ in the grid and reference the specific clues being applied. This transparency\
+    \ prevents unverified deductions and aligns with L1 pattern-level strategies for\
+    \ constraint tracking.\n[G13]. [L0-Case] Proactive Validation: Enforce positional\
+    \ constraints like 'cat not in House 1' (clue 10) during assignment to prevent\
+    \ backtracking and contradictions.\n[G14]. [L0-Case] Constraint-Driven Reasoning:\
+    \ Systematically validate all clues at each deduction step, integrating interdependent\
+    \ clues (e.g., clue 6 and 7) and cross-referencing assignments with all constraints\
+    \ in real time to prevent future errors.\n[G15]. [L0-Case] Proactive Cross-Referencing:\
+    \ Standardize real-time cross-checking of all constraints (e.g., G2 and G5) during\
+    \ assignments to eliminate invalid configurations early, minimizing backtracking\
+    \ in complex puzzles.\n[G16]. [L0-Case] Clue 12 validation: Explicitly check positional\
+    \ relationships in clue 12 (e.g., master's degree placement) during the step where\
+    \ the attribute is applied, not just in final verification, to avoid conflicts\
+    \ with prior constraints.\n[G17]. [L0-Case] Constraint Validation as a Meta-Strategy:\
+    \ Explicitly map interdependent clues (e.g., spaghetti to city vacations) to the\
+    \ grid during assignment rather than deferring to post-hoc checks. This enhances\
+    \ L1 grid cross-referencing and reduces reasoning gaps in complex puzzles by systematizing\
+    \ real-time validation.\n[G18]. [L0-Case] Chain Tracking: Systematically represent\
+    \ interdependent attribute chains (e.g., name → drink → food) in the grid from\
+    \ the start to build structured relationships and improve future deduction accuracy\
+    \ in complex puzzles.\n\nWhen solving problems, you MUST first carefully read\
+    \ and understand the helpful instructions and experiences:\n[G0]. [L2-Meta] Principle:\
+    \ Formalize and validate constraints systematically through explicit representation\
+    \ and rigorous traceability. This approach works by externalizing complexity into\
+    \ a structured framework, enabling proactive detection of contradictions and ensuring\
+    \ logical consistency across interdependent elements. The benefits include reducing\
+    \ cognitive overload, minimizing errors from misinterpretation, and creating a\
+    \ reversible problem-solving pathway for efficient backtracking.\n[G1]. [L1-Pattern]\
+    \ **L1 Pattern-Level Strategy**:  \nEstablish a formal structure (e.g., grid/table)\
+    \ immediately to organize constraints, systematically cross-validate assignments\
+    \ against all interdependent clues at each step, and explicitly reference specific\
+    \ constraints during reasoning to ensure logical consistency and prevent misinterpretations\
+    \ or conflicts.  \n\nThis integrates the structure-first approach, systematic\
+    \ backtracking, early constraint validation, and precise clue tracking into a\
+    \ cohesive method for solving logic puzzles.\n[G2]. [L1-Pattern] **L1 Pattern-Level\
+    \ Strategy**: Implement a structure-first approach by creating a formal grid/table\
+    \ to track assignments, systematically apply and cross-verify all constraints\
+    \ against each clue during every step, and explicitly reference clues in reasoning\
+    \ to ensure completeness and avoid misinterpretations.  \n\nThis strategy emphasizes\
+    \ building a formal framework early, integrating constraint validation with clue\
+    \ analysis, and maintaining rigorous traceability of logical dependencies to resolve\
+    \ contradictions and enforce uniqueness or adjacency requirements.\n[G3]. [L1-Pattern]\
+    \ **L1 Pattern-Level Strategy**:  \nEstablish a structured framework (e.g., grid/table)\
+    \ early to enforce constraints, systematically validate each assignment against\
+    \ all clues and interdependent rules, and explicitly reference clues during reasoning\
+    \ to ensure completeness and avoid contradictions.  \n\nThis integrates the structure-first\
+    \ approach, proactive constraint checking, and rigorous clue alignment into a\
+    \ cohesive method for solving logic puzzles.\n[G4]. [L1-Pattern] **L1 Pattern-Level\
+    \ Strategy**: Employ a structure-first approach by creating a formal grid or table\
+    \ early in the problem-solving process, and consistently reference specific clues\
+    \ during each assignment to validate constraints, detect contradictions, and ensure\
+    \ logical consistency across all dependencies.\n[G5]. [L1-Pattern] **L1 Pattern-Level\
+    \ Strategy**: Begin by constructing a formal grid or table to represent all attributes\
+    \ and relationships, and immediately apply deterministic and positional clues\
+    \ to anchor assignments. Use adjacency chains and explicit constraint cross-verification\
+    \ during each step to enforce uniqueness, exclusions, and logical consistency,\
+    \ ensuring that all assignments align with multiple clues from the start.\n[G6].\
+    \ [L0-Case] Adjacency Chains: Use sequential dependencies (e.g., A → left of B,\
+    \ C → between D and E) and explicitly integrate exclusions (e.g., 'not in House\
+    \ 4') during initial grid construction to enforce complex constraints and prevent\
+    \ misallocation.\n[G7]. [L0-Case] Structure-first principle: Build a formal grid/table\
+    \ immediately with all attributes to enforce uniqueness, adjacency, and exclusion\
+    \ constraints systematically. Anchor deterministic clues (e.g., Arnold/House 3,\
+    \ Tea/House 2) upfront, integrate explicit clue references (e.g., Clue 1, 5, 8)\
+    \ during assignments, and use adjacency chains (G6) to resolve complex positional\
+    \ relationships, enabling higher-level pattern recognition and consistency across\
+    \ L0/L1/L2 learning.\n[G8]. [L0-Case] Backtrack method: Systematically trace contradictions\
+    \ using specific clue references (e.g., Clue 8 and 10) and reassign values, anchoring\
+    \ resolution to explicit L0-level misassignments to ensure systematic and accurate\
+    \ conflict resolution.\n[G9]. [L0-Case] Cross-Verify Early: Apply positional constraints\
+    \ immediately during assignments and validate against all other clues, even when\
+    \ deterministic clues appear to align, to prevent conflicts and ensure logical\
+    \ consistency.\n[G10]. [L0-Case] Clue referencing: Anchor every reasoning step\
+    \ to specific clues (e.g., Clue 3, 8, 10), explicitly citing their logic during\
+    \ deductions to ensure traceability, prevent assumption-based errors, and enable\
+    \ hierarchical L0/L1 learning.\n[G11]. [L0-Case] Literal parsing: Interpret ambiguous\
+    \ relational phrases (e.g., 'loves the spaghetti eater') as direct references\
+    \ to people, not preferences, and pair with cross-verification (G2) immediately\
+    \ to resolve conflicts and ensure consistency.\n[G12]. [L0-Case] Deterministic\
+    \ initialization: Start the grid with unambiguous clues (e.g., specific assignments\
+    \ or strict positional relationships) to reduce ambiguity and enable early constraint\
+    \ verification.\n[G13]. [L0-Case] Adjacency Chains: Use sequential dependencies\
+    \ (e.g., A → left of B, C → between D and E) and explicitly integrate exclusions\
+    \ (e.g., 'not in House 4') during initial grid construction to enforce complex\
+    \ constraints and prevent misallocation.\n[G14]. [L0-Case] Adjacency checks: When\
+    \ resolving adjacency constraints (e.g., Clue 5 or 7), immediately cross-check\
+    \ for conflicting assignments (e.g., Clue 6 for Arnold’s height, Clue 1 for Alice’s\
+    \ mother) to avoid contradictions, as seen in Attempt 1’s misassignment of Aniya.\n\
+    [G15]. [L0-Case] Clue-Driven Grid Construction: Initialize the grid with deterministic\
+    \ clues (G5) and label each assignment with its source clue (G3) to ensure traceability\
+    \ and reinforce the structure-first principle (G0), allowing cross-task generalization\
+    \ through consistent application of positional reasoning chains."
+toolkits: {}

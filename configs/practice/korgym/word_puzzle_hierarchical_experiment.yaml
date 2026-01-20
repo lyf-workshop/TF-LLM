@@ -1,0 +1,73 @@
+# Word Puzzle Hierarchical Learning Experiment
+# 完整实验：基线 → 训练 → 对比评估
+
+defaults:
+  - practice: base
+  - agent: practice/logic_agent_hierarchical_learning_clean
+  - eval: logic/easy_base_hierarchical_clean
+
+exp_id: word_puzzle_hierarchical_exp
+
+# KORGym Game Settings
+korgym:
+  enabled: true
+  game_name: "8-word_puzzle"  # Word Puzzle (填字游戏)
+  game_host: "localhost"
+  game_port: 8775
+  level: 3  # 难度级别 (1-5, 3=中等)
+  num_seeds: 30  # 30 个不同的游戏实例
+  max_rounds: 50  # 多回合游戏的最大回合数
+
+# Data configuration
+data:
+  practice_dataset_name: KORGym-WordPuzzle-Train
+  eval_dataset_name: KORGym-WordPuzzle-Eval
+  batch_size: 5  # 每批 5 个游戏
+  num_epochs: 3  # 3 轮训练
+
+# Evaluation settings
+evaluation:
+  data:
+    dataset: KORGym-WordPuzzle-Eval
+    pass_k: 1  # 每个游戏尝试 1 次
+
+# Hierarchical learning settings
+practice:
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5  # 每 5 个 L0 → 1 个 L1
+    l2_aggregation_threshold: 3  # 每 3 个 L1 → 1 个 L2
+    max_l0_per_game: 1          # 每个游戏最多 1 个 L0
+    max_l0_recent: 30           # Prompt 中保留最近 30 个 L0
+    include_l0_in_prompt: true  # 在 Prompt 中包含 L0
+    
+    experience_save_path: workspace/hierarchical_experiences/word_puzzle_exp.json
+    agent_save_path: configs/agents/practice/word_puzzle_exp_agent.yaml
+
+# GRPO settings
+group_size: 5  # 每组 5 个游戏
+num_batches: 6  # 6 批 (总共 30 个游戏)
+
+# Agent settings
+agent:
+  agent:
+    name: word_puzzle_agent
+    instructions: |
+      You are an expert at solving word puzzles and crossword games.
+      
+      Analyze the game board and clues carefully:
+      1. Read all clues for both horizontal and vertical entries
+      2. Start with clues that seem most certain
+      3. Use letter patterns and word lengths to deduce answers
+      4. Cross-reference intersecting words to verify answers
+      5. Consider common word patterns and vocabulary
+      
+      Output Format:
+      Your final answer must be in this format:
+      Answer: ["word1", "word2", "word3", ...]
+      
+      List all words in the order they appear in the clues.
+
+
+
+

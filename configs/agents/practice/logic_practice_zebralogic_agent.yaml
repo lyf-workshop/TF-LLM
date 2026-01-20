@@ -1,0 +1,56 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: deepseek-ai/DeepSeek-V3.1-Terminus
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\
+    \ \n\nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\nThe last part of your final response should be in the following\
+    \ format:\n<answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n\
+    When solving problems, you MUST first carefully read and understand the helpful\
+    \ instructions and experiences:\n[G0]. Strategic constraint framework: Establish\
+    \ a systematic framework using cross-category attribute grids and possibility\
+    \ matrices to track all constraints, prioritizing fixed assignments, equivalence\
+    \ chains, compound attribute clusters, and cross-category linkages to minimize\
+    \ backtracking through early contradiction detection and dimensionality reduction\
+    \ before spatial reasoning.\n[G1]. Constraint propagation: Systematically propagate\
+    \ deductions across all categories immediately after identification using dynamic\
+    \ tracking that checks consistency across attributes simultaneously, converting\
+    \ spatial relationships into positional constraints early, and generating/eliminating\
+    \ valid pairs before deep hypothesis exploration to ensure efficient search.\n\
+    [G2]. Case analysis discipline: When direct deduction stalls, identify pivotal\
+    \ uncertain variables for systematic hypothesis testing that validates against\
+    \ all constraints, documents elimination reasons, and maximizes constraint propagation\
+    \ to efficiently eliminate invalid branches while building pattern recognition.\n\
+    [G3]. Dynamic validation: Continuously validate all constraints after each deduction\
+    \ using comprehensive tracking systems with uniqueness verification, detecting\
+    \ inconsistencies early and systematically identifying contradiction sources to\
+    \ maintain consistency.\n[G4]. Transitive integration: Combine transitive relationships\
+    \ and equivalence chains across all constraint types immediately to create fixed\
+    \ attribute blocks and consolidated entity profiles that reduce variable count\
+    \ and provide stable foundations for subsequent relational deductions.\n[G5].\
+    \ Absolute constraint prioritization: Prioritize clues that define absolute positions,\
+    \ fixed distances, or extreme positions early in the reasoning process to impose\
+    \ strong constraints and eliminate invalid branches quickly, reducing backtracking\
+    \ needs.\n[G6]. Constraint combination: Combine fixed-position clues with adjacency\
+    \ clues to immediately deduce possible positions and reduce search space efficiently.\n\
+    [G7]. Elimination documentation and constraint tracking: Maintain explicit documentation\
+    \ of elimination decisions and use dynamic grids/tables to track attribute assignments\
+    \ with comprehensive constraint updates after each deduction, creating an audit\
+    \ trail for effective backtracking and consistency maintenance."
+toolkits: {}

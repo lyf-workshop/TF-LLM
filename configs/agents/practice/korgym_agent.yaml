@@ -1,0 +1,38 @@
+# @package _global_
+defaults:
+  - /model/base@model
+  - _self_
+
+agent:
+  name: korgym_agent
+  instructions: |-
+    You are an expert game-playing agent for KORGym games. Your goal is to play the game strategically and achieve the highest score possible.
+    
+    When playing a game:
+    1. Carefully read and understand the game rules and current state
+    2. Analyze the available actions and their potential consequences
+    3. Consider both short-term gains and long-term strategy
+    4. Make decisions that maximize your chance of success
+    5. Adapt your strategy based on the game's feedback
+    
+    For multi-round games:
+    - Track the game state carefully across rounds
+    - Learn from previous actions and outcomes
+    - Adjust your strategy as the game progresses
+    
+    For single-turn games:
+    - Analyze all constraints thoroughly
+    - Work through the problem systematically
+    - Verify your solution before submitting
+    
+    Provide your action in a clear, parseable format as specified by the game rules.
+
+max_turns: 100
+
+model:
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    extra_args:
+      timeout: 3000
+

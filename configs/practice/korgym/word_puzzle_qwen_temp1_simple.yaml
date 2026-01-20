@@ -1,0 +1,115 @@
+# @package _global_
+# Word Puzzle Hierarchical Learning - Qwen2.5-7B-Instruct (Temperature 1.0)
+# 完全自包含的配置，不依赖其他文件
+
+exp_id: word_puzzle_qwen_temp1_hierarchical
+
+# Model configuration
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen2.5-7B-Instruct
+  model_settings:
+    temperature: 1.0
+    top_p: 0.95
+    max_tokens: 8192
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+
+# Agent configuration
+agent:
+  type: simple
+  agent:
+    name: word_puzzle_qwen_temp1_agent
+    instructions: |
+      You are an expert crossword puzzle solver. Your task is to analyze the clues and fill in ALL the words in the crossword grid.
+      
+      GAME RULES:
+      - You will receive a list of clues (horizontal and vertical)
+      - Each clue corresponds to ONE word in the grid
+      - Words intersect at certain letters
+      - You MUST provide a guess for EVERY word, even if uncertain
+      
+      SOLVING STRATEGY:
+      1. Read ALL clues carefully first
+      2. Start with clues you're most confident about
+      3. Use word length constraints from the grid
+      4. Consider how words intersect (shared letters must match)
+      5. Use context and common vocabulary patterns
+      6. For uncertain words, make your best educated guess based on:
+         - Letter patterns from intersecting words
+         - Common crossword vocabulary
+         - Word length from the grid
+      
+      CRITICAL OUTPUT FORMAT REQUIREMENTS:
+      - Your answer MUST be a valid Python list of strings
+      - Format: Answer: ["word1", "word2", "word3", ...]
+      - The list MUST contain EXACTLY as many words as there are clues
+      - Words should be in the SAME ORDER as the clues provided
+      - Use ONLY the exact words (no extra text, no explanations in the list)
+      - Keep case sensitivity as shown in typical crossword answers
+      
+      IMPORTANT:
+      - Do NOT leave any position empty
+      - Do NOT add extra words
+      - Do NOT include numbers, punctuation, or extra formatting in the word list
+      - Even if you're unsure, provide your best guess for every word
+      
+      Example format (do NOT copy these words, they are just format examples):
+      Answer: ["FRESH", "BUFF", "ROGUES", "BRAGS", "TROY"]
+  toolkits: {}
+
+# Practice Arguments
+practice:
+  epochs: 3          # 3轮训练
+  batch_size: 10     # 每批10个游戏
+  grpo_n: 5          # 每个游戏5次采样 (10 × 5 = 50局/轮)
+  rollout_concurrency: 5
+  rollout_temperature: 1.0
+  task_timeout: 1800
+  do_eval: false
+  agent_objective: |
+    input: A crossword puzzle with clues for horizontal and vertical entries
+    output: A list of words that correctly fill all positions in the puzzle
+  learning_objective: |
+    Help the agent improve crossword puzzle solving by extracting strategies for understanding clues, pattern recognition, and word relationships.
+  num_experiences_per_query: 1
+  
+  # Hierarchical learning settings
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5
+    l2_aggregation_threshold: 3
+    max_l0_per_game: 1
+    max_l0_recent: 30
+    include_l0_in_prompt: true
+    experience_save_path: workspace/hierarchical_experiences/word_puzzle_qwen_temp1.json
+    agent_save_path: workspace/agents/word_puzzle_qwen_temp1_enhanced.yaml
+
+# KORGym Game Settings
+korgym:
+  enabled: true
+  game_name: "8-word_puzzle"
+  game_host: "localhost"
+  game_port: 8775
+  level: 4
+  num_seeds: 50      # 50个不同的游戏seed (每轮会复用)
+  max_rounds: 50
+
+# Data configuration
+data:
+  practice_dataset_name: KORGym-WordPuzzle-Qwen-Temp1-Train
+  eval_dataset_name: KORGym-WordPuzzle-Qwen-Temp1-Eval
+  processer: KORGym  # 使用 KORGym 专用的 processer
+
+# Evaluation settings
+evaluation:
+  agent: ${agent}
+  data:
+    dataset: KORGym-WordPuzzle-Qwen-Temp1-Eval
+    processer: KORGym  # 使用 KORGym 专用的 processer
+    pass_k: 1
+  batch_size: 5
+

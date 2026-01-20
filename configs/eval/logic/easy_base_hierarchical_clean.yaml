@@ -1,0 +1,43 @@
+# @package _global_
+# Baseline evaluation for hierarchical learning (before training)
+# Uses clean logic_agent_hierarchical_learning (no pre-trained experience)
+defaults:
+  - /agents/practice/logic_agent_hierarchical_learning_clean@agent
+  - _self_
+
+exp_id: "easy_base_hierarchical_clean"
+
+data:
+  dataset: "ZebraLogic-Easy-30"
+
+concurrency: 32
+pass_k: 5
+
+verify_filename: "logic.py"
+verify_func_name: "verify_func"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

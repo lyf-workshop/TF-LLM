@@ -1,0 +1,19 @@
+# @package _global_
+# Evaluation configuration for ZebraLogic after practice
+# Uses the enhanced agent after Training-Free GRPO practice
+# Temperature 0.3 for evaluation
+defaults:
+  - /agents/practice/logic_practice_zebralogic_agent@agent
+  - _self_
+
+exp_id: "logic_practice_zebralogic_test_eval"
+
+data:
+  dataset: "ZebraLogic-Test-30"  # Test set (30 samples, medium difficulty)
+
+concurrency: 128
+pass_k: 32
+
+verify_filename: "logic.py"
+verify_func_name: "verify_func"
+

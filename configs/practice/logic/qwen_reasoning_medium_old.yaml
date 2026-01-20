@@ -1,0 +1,54 @@
+# @package _global_
+# Training-Free GRPO configuration for structured ZebraLogic reasoning
+# Uses logic_agent_zebralogic_structured (no pre-trained experience)
+# Uses standard logic.py verifier (without detailed error extraction)
+defaults:
+  # load the evaluation config file (baseline)
+  - /eval/logic/qwen_easy_baseline@evaluation
+  - _self_
+
+exp_id: "qwen_reasoning_medium_normalverify_1_num1"
+
+# Practice Arguments
+practice:
+  epochs: 3                          # 3 epochs
+  batch_size: 20                     # 20 hard problems per epoch
+  grpo_n: 5                          # Group size 5
+  rollout_concurrency: 32            # Reduced concurrency to prevent resource contention
+  rollout_temperature: 0.7           # Temperature 0.7 for diverse reasoning during learning
+  task_timeout: 600                 # 20 minutes timeout per task
+  do_eval: false                     # Disable evaluation during practice
+  agent_objective: |
+    input: A logic puzzle that requires deductive reasoning and constraint satisfaction
+    output: A structured, step-by-step reasoning process with explicit clue references and assertions
+  learning_objective: |
+    Help the agent improve logical reasoning by learning from correct and incorrect solutions.
+    Extract general problem-solving strategies through reward-based comparison.
+  num_experiences_per_query: 1
+  verify_module: "utu.practice.verify.logic"  # Use standard logic verifier (no error extraction)
+
+# Data Arguments
+data:
+  practice_dataset_name: "ZebraLogic-Medium-20"  # Use 20 hard training problems
+
+# Agent configuration overrides
+evaluation:
+  agent:
+    max_turns: 50                    # Allow enough turns for structured reasoning
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

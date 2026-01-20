@@ -1,0 +1,422 @@
+{
+  "agent_config": "practice/word_puzzle_qwen_temp1",
+  "game_name": "8-word_puzzle",
+  "num_games": 50,
+  "level": 4,
+  "avg_score": 0.04923321123321125,
+  "std_score": 0.056597644586601374,
+  "max_score": 0.16666666666666666,
+  "min_score": 0.0,
+  "score_distribution": {
+    "0.0": 26,
+    "0.0-0.2": 24,
+    "0.2-0.4": 0,
+    "0.4-0.6": 0,
+    "0.6-0.8": 0,
+    "0.8-1.0": 0
+  },
+  "total_time": 268.4367072582245,
+  "avg_time_per_game": 5.36873414516449,
+  "results": [
+    {
+      "seed": 0,
+      "score": 0.0,
+      "success": false,
+      "response_time": 5.956594944000244,
+      "action": "[\"NEW\", \"CLOTH\", \"ROGUES\", \"BRAGS\", \"HELLES\", \"RAILS\", \"GILBERT\", \"BRIGITTE\", \"MARAMI\", \"PAUSE\", \"STUN\", \"IRREVOCABLE\", \"SPENSER\", \"HEAVIEST\"]",
+      "response": "Answer: [\"NEW\", \"CLOTH\", \"ROGUES\", \"BRAGS\", \"HELLES\", \"RAILS\", \"GILBERT\", \"BRIGITTE\", \"MARAMI\", \"PAUSE\", \"STUN\", \"IRREVOCABLE\", \"SPENSER\", \"HEAVIEST\"]"
+    },
+    {
+      "seed": 1,
+      "score": 0.0,
+      "success": false,
+      "response_time": 32.90862154960632,
+      "action": "[\"ABRASION\", \"TRIVET\", \"ROGUES\", \"BRAGS\", \"HECTOR\", \"RACK\", \"ANDRIA\", \"EDNA\"]",
+      "response": "Answer: [\"ABRASION\", \"TRIVET\", \"ROGUES\", \"BRAGS\", \"HECTOR\", \"RACK\", \"ANDRIA\", \"EDNA\"]"
+    },
+    {
+      "seed": 2,
+      "score": 0.14285714285714285,
+      "success": true,
+      "response_time": 13.578856229782104,
+      "action": "[\"CAFE\", \"MOOD\", \"AIN'S\", \"REBOOT\", \"UNARMED\", \"SNOOZING\"]",
+      "response": "Answer: [\"CAFE\", \"MOOD\", \"AIN'S\", \"REBOOT\", \"UNARMED\", \"SNOOZING\"]"
+    },
+    {
+      "seed": 3,
+      "score": 0.16666666666666666,
+      "success": true,
+      "response_time": 5.059258937835693,
+      "action": "[\"CAFE\", \"MORAL\", \"SHOULDER\", \"REBOOT\", \"FIve\", \" Straight\", \"DAYDREAM\", \"LASER\", \" PELE\", \"SWORD\", \"UNION\", \"BIT\"]",
+      "response": "Answer: [\"CAFE\", \"MORAL\", \"SHOULDER\", \"REBOOT\", \"FIve\", \" Straight\", \"DAYDREAM\", \"LASER\", \" PELE\", \"SWORD\", \"UNION\", \"BIT\"]"
+    },
+    {
+      "seed": 4,
+      "score": 0.0,
+      "success": false,
+      "response_time": 3.89455509185791,
+      "action": "[\"NEW\", \"TRI\", \"ROGUES\", \"BRAGS\", \"PLEIADES\", \"RACK\", \"HEROS\", \"BOO\", \"MORRIS\", \"PAUSE\", \"CONFUSE\", \"FINISH\", \"SPENSER\"]",
+      "response": "Answer: [\"NEW\", \"TRI\", \"ROGUES\", \"BRAGS\", \"PLEIADES\", \"RACK\", \"HEROS\", \"BOO\", \"MORRIS\", \"PAUSE\", \"CONFUSE\", \"FINISH\", \"SPENSER\"]"
+    },
+    {
+      "seed": 5,
+      "score": 0.14285714285714285,
+      "success": true,
+      "response_time": 1.0066921710968018,
+      "action": "[\"CAFETERIA\", \"MOOD\", \"ACHE\", \"REBOOT\", \"BULGE\", \"STRAIGHTFACE\", \"DAYDREAM\"]",
+      "response": "Answer: [\"CAFETERIA\", \"MOOD\", \"ACHE\", \"REBOOT\", \"BULGE\", \"STRAIGHTFACE\", \"DAYDREAM\"]"
+    },
+    {
+      "seed": 6,
+      "score": 0.14285714285714285,
+      "success": true,
+      "response_time": 1.2767014503479004,
+      "action": "[\"CAFETERIA\", \"MOOD\", \"STRAIN\", \"REBOOT\", \"EIGHTPACK\", \"STRAIGHT\", \"DAYDREAM\"]",
+      "response": "Answer: [\"CAFETERIA\", \"MOOD\", \"STRAIN\", \"REBOOT\", \"EIGHTPACK\", \"STRAIGHT\", \"DAYDREAM\"]"
+    },
+    {
+      "seed": 7,
+      "score": 0.16666666666666666,
+      "success": true,
+      "response_time": 1.1065425872802734,
+      "action": "[\"CAFFEINE\", \"MOOD\", \"AIL\", \"REBOOT\", \"TWELVE\", \"SERIOUSLY\"]",
+      "response": "Answer: [\"CAFFEINE\", \"MOOD\", \"AIL\", \"REBOOT\", \"TWELVE\", \"SERIOUSLY\"]"
+    },
+    {
+      "seed": 8,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.660043478012085,
+      "action": "[\"they\", \"fa\", \"preg\", \"part\", \"huff\", \"spac\", \"bed\", \"scones\", \"okay\"]",
+      "response": "Answer: [\"they\", \"fa\", \"preg\", \"part\", \"huff\", \"spac\", \"bed\", \"scones\", \"okay\"]"
+    },
+    {
+      "seed": 9,
+      "score": 0.07142857142857142,
+      "success": true,
+      "response_time": 0.9783244132995605,
+      "action": "[\"they\", \"clunker\", \"pregnancy\", \"of\", \"blow\", \"spacious\", \"bed\", \"croissants\", \"okay\", \"lead\", \"fooled\", \"polevaulters\", \"treats\", \"alma\"]",
+      "response": "Answer: [\"they\", \"clunker\", \"pregnancy\", \"of\", \"blow\", \"spacious\", \"bed\", \"croissants\", \"okay\", \"lead\", \"fooled\", \"polevaulters\", \"treats\", \"alma\"]"
+    },
+    {
+      "seed": 10,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.48015379905700684,
+      "action": "[\"HEELS\", \"DECENT\", \"TIERRA\", \"TWITCH\", \"LIBERTE\", \"AUDIE\", \"CLOSER\"]",
+      "response": "Answer: [\"HEELS\", \"DECENT\", \"TIERRA\", \"TWITCH\", \"LIBERTE\", \"AUDIE\", \"CLOSER\"]"
+    },
+    {
+      "seed": 11,
+      "score": 0.0,
+      "success": false,
+      "response_time": 2.180574893951416,
+      "action": "[\"SWELL\", \"INKED\", \"FAST\", \"SINGIN\", \"GOOGLY\", \"Johnny\", \"ONCE\", \"COW\"]",
+      "response": "Answer: [\"SWELL\", \"INKED\", \"FAST\", \"SINGIN\", \"GOOGLY\", \"Johnny\", \"ONCE\", \"COW\"]"
+    },
+    {
+      "seed": 12,
+      "score": 0.07692307692307693,
+      "success": true,
+      "response_time": 37.53642511367798,
+      "action": "[\"prize\", \"cloaks\", \"there\", \"perplex\", \"callous\", \"oleo\", \"period\", \"sews\", \"slam\", \"echepol\", \"lloyd\", \"afraid\", \"kazak\"]",
+      "response": "Answer: [\"prize\", \"cloaks\", \"there\", \"perplex\", \"callous\", \"oleo\", \"period\", \"sews\", \"slam\", \"echepol\", \"lloyd\", \"afraid\", \"kazak\"]"
+    },
+    {
+      "seed": 13,
+      "score": 0.125,
+      "success": true,
+      "response_time": 0.9134857654571533,
+      "action": "[\"DYEVIL\", \"SWIRLED\", \"IM威名\", \"REGGAE\", \"ICEPLANT\", \"OBSERVE\", \"ISLAND\", \"APPLY\"]",
+      "response": "Answer: [\"DYEVIL\", \"SWIRLED\", \"IM威名\", \"REGGAE\", \"ICEPLANT\", \"OBSERVE\", \"ISLAND\", \"APPLY\"]"
+    },
+    {
+      "seed": 14,
+      "score": 0.0,
+      "success": false,
+      "response_time": 1.3269469738006592,
+      "action": "[\"HEELS\", \"DECENT\", \"TORONTO\", \"TWITPIC\", \"LIBERTY\", \"AUDI\", \"NEAR\"]",
+      "response": "Answer: [\"HEELS\", \"DECENT\", \"TORONTO\", \"TWITPIC\", \"LIBERTY\", \"AUDI\", \"NEAR\"]"
+    },
+    {
+      "seed": 15,
+      "score": 0.0,
+      "success": false,
+      "response_time": 2.107989549636841,
+      "action": "[\"DYEVIL\", \"COVERED\", \"IM😀:\"., \"JDEAN\", \"SNOW\"]",
+      "response": "Answer: [\"DYEVIL\", \"COVERED\", \"IM😀:\".$, \"JDEAN\", \"SNOW\"]"
+    },
+    {
+      "seed": 16,
+      "score": 0.07692307692307693,
+      "success": true,
+      "response_time": 1.9533727169036865,
+      "action": "[\"prize\", \"loose\", \"please\", \"confuse\", \"callous\", \"jvc\", \"q\", \"sew\", \"ripe\", \"eagle\", \"sheen\", \"khan\"]",
+      "response": "Answer: [\"prize\", \"loose\", \"please\", \"confuse\", \"callous\", \"jvc\", \"q\", \"sew\", \"ripe\", \"eagle\", \"sheen\", \"khan\"]"
+    },
+    {
+      "seed": 17,
+      "score": 0.0,
+      "success": false,
+      "response_time": 35.694319009780884,
+      "action": "[\"HEELS\", \"RESPECTABLE\", \"CNRTL\", \"TWITTER\", \"LIBERTY\", \"HEARING\"]",
+      "response": "Answer: [\"HEELS\", \"RESPECTABLE\", \"CNRTL\", \"TWITTER\", \"LIBERTY\", \"HEARING\"]"
+    },
+    {
+      "seed": 18,
+      "score": 0.0,
+      "success": false,
+      "response_time": 1.5490896701812744,
+      "action": "[\"HEELS\", \"SDE\", \"TOUSSAINTS\", \"FACEBOOK\", \"LIBERTY\", \"EAR\", \"NARROW\"]",
+      "response": "Answer: [\"HEELS\", \"SDE\", \"TOUSSAINTS\", \"FACEBOOK\", \"LIBERTY\", \"EAR\", \"NARROW\"]"
+    },
+    {
+      "seed": 19,
+      "score": 0.0,
+      "success": false,
+      "response_time": 1.263808012008667,
+      "action": "[\"HEELS\", \"DECENT\", \"TOUCAN\", \"TWITCH\", \"LIBERTE\"]",
+      "response": "Answer: [\"HEELS\", \"DECENT\", \"TOUCAN\", \"TWITCH\", \"LIBERTE\"]"
+    },
+    {
+      "seed": 20,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.5009565353393555,
+      "action": "[\"ADVERSE\", \"IRITATION\", \"SKETCH\", \"CUISINE\", \"BEAR\"]",
+      "response": "Answer: [\"ADVERSE\", \"IRITATION\", \"SKETCH\", \"CUISINE\", \"BEAR\"]"
+    },
+    {
+      "seed": 21,
+      "score": 0.125,
+      "success": true,
+      "response_time": 1.8470938205718994,
+      "action": "[\"ICEBOATS\", \"MARATHON\", \"EXERCISE\", \"PRODUCE\", \"PLAYSTATION\", \"AMARULA\", \"SHIVAH\", \"WEDDING\"]",
+      "response": "Answer: [\"ICEBOATS\", \"MARATHON\", \"EXERCISE\", \"PRODUCE\", \"PLAYSTATION\", \"AMARULA\", \"SHIVAH\", \"WEDDING\"]"
+    },
+    {
+      "seed": 22,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.3743908405303955,
+      "action": "[\"DISASTER\", \"IRRITATION\", \"SKETCH\", \"C.ToolTip\", \"AXE\"]",
+      "response": "Answer: [\"DISASTER\", \"IRRITATION\", \"SKETCH\", \"C.ToolTip\", \"AXE\"]"
+    },
+    {
+      "seed": 23,
+      "score": 0.06666666666666667,
+      "success": true,
+      "response_time": 2.3082940578460693,
+      "action": "[\"CAKE\", \"UNITE\", \"CHAOS\", \"FEA\", \"ENTHUSIASTIC\", \"DISENFRANCHISE\", \"STOCKING\", \"TAUT\", \"TRAP\", \"STROLL\", \"HOLS\", \"TIPTOE\", \"PERENNIAL\", \"ECONOMIC\", \"PHONICS\"]",
+      "response": "Answer: [\"CAKE\", \"UNITE\", \"CHAOS\", \"FEA\", \"ENTHUSIASTIC\", \"DISENFRANCHISE\", \"STOCKING\", \"TAUT\", \"TRAP\", \"STROLL\", \"HOLS\", \"TIPTOE\", \"PERENNIAL\", \"ECONOMIC\", \"PHONICS\"]"
+    },
+    {
+      "seed": 24,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.7642314434051514,
+      "action": "[\"SWELL\", \"SIGN\", \"ENDS\", \"SLEIGH\", \"ENTHUSED\", \"HARRY\", \"ONCE\", \"MUZZLE\", \"STACY\", \"RETIREES\", \"ROMANS\"]",
+      "response": "Answer: [\"SWELL\", \"SIGN\", \"ENDS\", \"SLEIGH\", \"ENTHUSED\", \"HARRY\", \"ONCE\", \"MUZZLE\", \"STACY\", \"RETIREES\", \"ROMANS\"]"
+    },
+    {
+      "seed": 25,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.9367289543151855,
+      "action": "[\"CALAMITY\", \"IRRITATION\", \"SKETCH\", \"COURT\", \"BYARD\"]",
+      "response": "Answer: [\"CALAMITY\", \"IRRITATION\", \"SKETCH\", \"COURT\", \"BYARD\"]"
+    },
+    {
+      "seed": 26,
+      "score": 0.06666666666666667,
+      "success": true,
+      "response_time": 1.1629247665405273,
+      "action": "[\"CAKE\", \"LABOR\", \"CHAOS\", \"FEA\", \"ENThusiASTIC\", \"BOYCOTT\", \"KIM\", \"SECURE\", \"NET\", \"SAunter\", \"OmitS\", \"STRIDE\", \"UNSEASONAL\", \"INexpensive\", \"PHONICS\"]",
+      "response": "Answer: [\"CAKE\", \"LABOR\", \"CHAOS\", \"FEA\", \"ENThusiASTIC\", \"BOYCOTT\", \"KIM\", \"SECURE\", \"NET\", \"SAunter\", \"OmitS\", \"STRIDE\", \"UNSEASONAL\", \"INexpensive\", \"PHONICS\"]"
+    },
+    {
+      "seed": 27,
+      "score": 0.07692307692307693,
+      "success": true,
+      "response_time": 0.6528446674346924,
+      "action": "[\"PRIZE\", \"CLOTHES\", \"ALSO\", \"MARTIQUES\", \"CALLOUS\", \"BTN\", \"DOTS\", \"TEARS\", \"WOULD\", \"RARITY\", \"HLAND\", \"ALDEN\"]",
+      "response": "Answer: [\"PRIZE\", \"CLOTHES\", \"ALSO\", \"MARTIQUES\", \"CALLOUS\", \"BTN\", \"DOTS\", \"TEARS\", \"WOULD\", \"RARITY\", \"HLAND\", \"ALDEN\"]"
+    },
+    {
+      "seed": 28,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.4733924865722656,
+      "action": "[\"APOCALYPSIS\", \"SURE\", \"LAZY\", \"CONICAL\", \"RAM\"]",
+      "response": "Answer: [\"APOCALYPSIS\", \"SURE\", \"LAZY\", \"CONICAL\", \"RAM\"]"
+    },
+    {
+      "seed": 29,
+      "score": 0.14285714285714285,
+      "success": true,
+      "response_time": 1.4700920581817627,
+      "action": "[\"RESTY\", \"WISH\", \"SCOUR\", \"SURGE\", \"OPEN\", \"MACRAMÉ\", \"AARP\"]",
+      "response": "Answer: [\"RESTY\", \"WISH\", \"SCOUR\", \"SURGE\", \"OPEN\", \"MACRAMÉ\", \"AARP\"]"
+    },
+    {
+      "seed": 30,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.706151008605957,
+      "action": "[\"RESTY\", \"WISH\", \"CACOON\", \"SHOCK\", \"APOPTIC\", \"RETICULATURE\", \"OLDER\"]",
+      "response": "Answer: [\"RESTY\", \"WISH\", \"CACOON\", \"SHOCK\", \"APOPTIC\", \"RETICULATURE\", \"OLDER\"]"
+    },
+    {
+      "seed": 31,
+      "score": 0.08333333333333333,
+      "success": true,
+      "response_time": 0.7695081233978271,
+      "action": "[\"ANXIOUS\", \"WHISPER\", \"SNARKY\", \"SHOCK\", \"APART\", \"CREPping\", \"AARP\", \"BOTTLE\", \"SMOKING\", \"CONCERN\", \"DOWNLOADS\", \"DIRTCAKE\"]",
+      "response": "Answer: [\"ANXIOUS\", \"WHISPER\", \"SNARKY\", \"SHOCK\", \"APART\", \"CREPping\", \"AARP\", \"BOTTLE\", \"SMOKING\", \"CONCERN\", \"DOWNLOADS\", \"DIRTCAKE\"]"
+    },
+    {
+      "seed": 32,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.6172094345092773,
+      "action": "[\"RESTY\", \"WISH\", \"CASTIGATE\", \"SHOCK\", \"OPEN\", \"RUFFLE\"]",
+      "response": "Answer: [\"RESTY\", \"WISH\", \"CASTIGATE\", \"SHOCK\", \"OPEN\", \"RUFFLE\"]"
+    },
+    {
+      "seed": 33,
+      "score": 0.125,
+      "success": true,
+      "response_time": 0.8797996044158936,
+      "action": "[\"RESTY\", \"WISH\", \"SCREM\", \"SHOCK\", \"ORIEN\", \"LACEY\", \"AARP\", \"CASE\"]",
+      "response": "Answer: [\"RESTY\", \"WISH\", \"SCREM\", \"SHOCK\", \"ORIEN\", \"LACEY\", \"AARP\", \"CASE\"]"
+    },
+    {
+      "seed": 34,
+      "score": 0.0,
+      "success": false,
+      "response_time": 1.118001937866211,
+      "action": "[\"SWELL\", \"SIGNS\", \"FINES\", \"SNOWFAIRE\", \"ENTHUSIASTIC\", \"BUKER\", \"ONCE\", \"GOAT\", \"STONER\", \"RETIREES\"]",
+      "response": "Answer: [\"SWELL\", \"SIGNS\", \"FINES\", \"SNOWFAIRE\", \"ENTHUSIASTIC\", \"BUKER\", \"ONCE\", \"GOAT\", \"STONER\", \"RETIREES\"]"
+    },
+    {
+      "seed": 35,
+      "score": 0.0,
+      "success": false,
+      "response_time": 4.283415079116821,
+      "action": "[\"CAKE\", \"UNIA\", \"CHAOS\", \"FWEIST\", \"ENTHUSIAST\", \"BOYCOTT\", \"BUNCO\", \"SECURE\", \"NETTED\", \"SAunter\", \"HOLDS\", \"GALLOP\", \"UNSEASONAL\", \"MINIMAL\", \"SIGHTING\"]",
+      "response": "Answer: [\"CAKE\", \"UNIA\", \"CHAOS\", \"FWEIST\", \"ENTHUSIAST\", \"BOYCOTT\", \"BUNCO\", \"SECURE\", \"NETTED\", \"SAunter\", \"HOLDS\", \"GALLOP\", \"UNSEASONAL\", \"MINIMAL\", \"SIGHTING\"]"
+    },
+    {
+      "seed": 36,
+      "score": 0.0,
+      "success": false,
+      "response_time": 2.369580030441284,
+      "action": "[\"SWELL\", \"INKED\", \"LAST\", \"SILENT\", \"YIPPEE\", \"ARTHUR\", \"ONCE\", \"COCONUT\", \"STACY\", \"RETIRING\", \"GAAL\"]",
+      "response": "Answer: [\"SWELL\", \"INKED\", \"LAST\", \"SILENT\", \"YIPPEE\", \"ARTHUR\", \"ONCE\", \"COCONUT\", \"STACY\", \"RETIRING\", \"GAAL\"]"
+    },
+    {
+      "seed": 37,
+      "score": 0.0,
+      "success": false,
+      "response_time": 1.3822674751281738,
+      "action": "[\"ELEGANT\", \"SPIRIT\", \"COOKIE\", \"DOG\", \"Plover\"]",
+      "response": "Answer: [\"ELEGANT\", \"SPIRIT\", \"COOKIE\", \"DOG\", \"Plover\"]"
+    },
+    {
+      "seed": 38,
+      "score": 0.0,
+      "success": false,
+      "response_time": 11.411073446273804,
+      "action": "[\"CAKE\", \"SSTA\", \"RGBA\", \"FILM\", \"LOVE\", \"OILS\"]",
+      "response": "Answer: [\"CAKE\", \"SSTA\", \"RGBA\", \"FILM\", \"LOVE\", \"OILS\"]"
+    },
+    {
+      "seed": 39,
+      "score": 0.07692307692307693,
+      "success": true,
+      "response_time": 40.357630252838135,
+      "action": "[\"ICEBOATS\", \"MARATHON\", \"REQUIE\", \"CORNELIUS\", \"PLAYSTATION\", \"DIESEL\", \"SHEVAH\", \"WALLOF\", \"DICK'S\", \"POTT\", \"TATTERED\", \"CHEETOS\"]",
+      "response": "Answer: [\"ICEBOATS\", \"MARATHON\", \"REQUIE\", \"CORNELIUS\", \"PLAYSTATION\", \"DIESEL\", \"SHEVAH\", \"WALLOF\", \"DICK'S\", \"POTT\", \"TATTERED\", \"CHEETOS\"]"
+    },
+    {
+      "seed": 40,
+      "score": 0.125,
+      "success": true,
+      "response_time": 1.8126840591430664,
+      "action": "[\"SIGH\", \"MINER\", \"REWARDED\", \"LICENSE\", \"UNEASY\", \"GULLIBLE\", \"SPAN\", \"DECIDE\"]",
+      "response": "Answer: [\"SIGH\", \"MINER\", \"REWARDED\", \"LICENSE\", \"UNEASY\", \"GULLIBLE\", \"SPAN\", \"DECIDE\"]"
+    },
+    {
+      "seed": 41,
+      "score": 0.0,
+      "success": false,
+      "response_time": 3.4812171459198,
+      "action": "[\"CAKE\", \"UNIA\", \"CHAOS\", \"FEA_W\", \"INT\", \"EMBARGO\", \"KIRK\", \"SECURE\", \"TRAP\", \"STROLL\", \"HOLDS\", \"STRIDE\", \"YEARROUND\", \"CHEAP\", \"SIGHTS\"]",
+      "response": "Answer: [\"CAKE\", \"UNIA\", \"CHAOS\", \"FEA_W\", \"INT\", \"EMBARGO\", \"KIRK\", \"SECURE\", \"TRAP\", \"STROLL\", \"HOLDS\", \"STRIDE\", \"YEARROUND\", \"CHEAP\", \"SIGHTS\"]"
+    },
+    {
+      "seed": 42,
+      "score": 0.0,
+      "success": false,
+      "response_time": 0.5672848224639893,
+      "action": "[\"SKATES\", \"MARATHON\", \"BEEP\", \"MONDELEZ\", \"PLAYSTATION\", \"SAKE\"]",
+      "response": "Answer: [\"SKATES\", \"MARATHON\", \"BEEP\", \"MONDELEZ\", \"PLAYSTATION\", \"SAKE\"]"
+    },
+    {
+      "seed": 43,
+      "score": 0.1111111111111111,
+      "success": true,
+      "response_time": 0.8673381805419922,
+      "action": "[\"ICEBOATS\", \"MARATHON\", \"AREREQUIRED\", \"MONDELEZ\", \"PLAYSTATION\", \"SODAIMIAMI\", \"ANDGETMARRIED\", \"DADADA\", \"DINERTINO\"]",
+      "response": "Answer: [\"ICEBOATS\", \"MARATHON\", \"AREREQUIRED\", \"MONDELEZ\", \"PLAYSTATION\", \"SODAIMIAMI\", \"ANDGETMARRIED\", \"DADADA\", \"DINERTINO\"]"
+    },
+    {
+      "seed": 44,
+      "score": 0.0,
+      "success": false,
+      "response_time": 2.493793487548828,
+      "action": "[\"ORKER\", \"CAKE\", \"NOSE\", \"ANNOYING\", \"CAT食品\", \"LOOKUP\", \"WRAPS\", \"INVENTOR\", \"KICKS\", \"AIRPORT\", \",",
+      "response": "Answer: [\"ORKER\", \"CAKE\", \"NOSE\", \"ANNOYING\", \"CAT食品\", \"LOOKUP\", \"WRAPS\", \"INVENTOR\", \"KICKS\", \"AIRPORT\", \",{\n            \"NAME\": \"AL\",\n            \"RECORD\": \"34\",\n            \"HOURS\": \"WORLDRECORDHOLDER\"\n        }[NAME], \"BINGO\"]"
+    },
+    {
+      "seed": 45,
+      "score": 0.06666666666666667,
+      "success": true,
+      "response_time": 1.105360984802246,
+      "action": "[\"AQUARIUM\", \"CLOUDS\", \"MOM\", \"SMARTIES\", \"SPLAT\", \"WINDS\", \"CRAMMED\", \"BLEND\", \"HAPSY\", \"REFLECT\", \"CLIQUE\", \"COUNTED\", \"ALIEN\", \"TRANSFER\", \"SUM\"]",
+      "response": "Answer: [\"AQUARIUM\", \"CLOUDS\", \"MOM\", \"SMARTIES\", \"SPLAT\", \"WINDS\", \"CRAMMED\", \"BLEND\", \"HAPSY\", \"REFLECT\", \"CLIQUE\", \"COUNTED\", \"ALIEN\", \"TRANSFER\", \"SUM\"]"
+    },
+    {
+      "seed": 46,
+      "score": 0.08333333333333333,
+      "success": true,
+      "response_time": 2.474586009979248,
+      "action": "[\"AQUARIUM\", \"CLOUDS\", \"MOM\", \"SMARTIES\", \"SNAPPY\", \"WINDS\", \"CRAMMED\", \"BRENDING\", \"PORTENT\", \"MEDITATE\", \"CLIQUE\", \"COUNTED\"]",
+      "response": "Answer: [\"AQUARIUM\", \"CLOUDS\", \"MOM\", \"SMARTIES\", \"SNAPPY\", \"WINDS\", \"CRAMMED\", \"BRENDING\", \"PORTENT\", \"MEDITATE\", \"CLIQUE\", \"COUNTED\"]"
+    },
+    {
+      "seed": 47,
+      "score": 0.06666666666666667,
+      "success": true,
+      "response_time": 5.870659589767456,
+      "action": "[\"AQUARIUM\", \"STRATUS\", \"MOMMA\", \"SMARTIES\", \"BUSTED\", \"WINDS\", \"CRAMMED\", \"BREAD\", \"FEATHER\", \"PRACTICE\", \"CLIQUE\", \"RELIED\", \"ALIKE\", \"TRANSFER\", \"SUMS\"]",
+      "response": "Answer: [\"AQUARIUM\", \"STRATUS\", \"MOMMA\", \"SMARTIES\", \"BUSTED\", \"WINDS\", \"CRAMMED\", \"BREAD\", \"FEATHER\", \"PRACTICE\", \"CLIQUE\", \"RELIED\", \"ALIKE\", \"TRANSFER\", \"SUMS\"]"
+    },
+    {
+      "seed": 48,
+      "score": 0.06666666666666667,
+      "success": true,
+      "response_time": 1.1944561004638672,
+      "action": "[\"AQUARIUM\", \"CIRRUS\", \"MOM\", \"SMARTIES\", \"POP\", \"WINDS\", \"CRAMMED\", \"BLENDS\", \"OMEN\", \"MEDITATE\", \"CLIQUE\", \"COUNTED\", \"JIJILIKE\", \"TRANSFER\", \"SUMS\"]",
+      "response": "Answer: [\"AQUARIUM\", \"CIRRUS\", \"MOM\", \"SMARTIES\", \"POP\", \"WINDS\", \"CRAMMED\", \"BLENDS\", \"OMEN\", \"MEDITATE\", \"CLIQUE\", \"COUNTED\", \"JIJILIKE\", \"TRANSFER\", \"SUMS\"]"
+    },
+    {
+      "seed": 49,
+      "score": 0.06666666666666667,
+      "success": true,
+      "response_time": 1.069572925567627,
+      "action": "[\"AQUARIUM\", \"CUMULUS\", \"MOM\", \"SMARTIES\", \"SNAP\", \"SOURCES\", \"CRAM\", \"BLEACH\", \"OMEN\", \"MEDITATE\", \"CLIQUE\", \"COUNT\", \"ALIKE\", \"TRANSFER\", \"SUM\"]",
+      "response": "Answer: [\"AQUARIUM\", \"CUMULUS\", \"MOM\", \"SMARTIES\", \"SNAP\", \"SOURCES\", \"CRAM\", \"BLEACH\", \"OMEN\", \"MEDITATE\", \"CLIQUE\", \"COUNT\", \"ALIKE\", \"TRANSFER\", \"SUM\"]"
+    }
+  ]
+}

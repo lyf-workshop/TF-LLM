@@ -1,0 +1,100 @@
+# @package _global_
+# Alphabetical Sorting Agent - Enhanced Version with Detailed Instructions
+# 优化指令，提高解题准确率
+
+defaults:
+  - _self_
+
+type: simple
+
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen2.5-7B-Instruct
+  model_settings:
+    temperature: 0.7  # 降低温度，更专注
+    top_p: 0.95
+    max_tokens: 4096
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+
+agent:
+  name: alphabetical_sorting_qwen_enhanced_agent
+  instructions: |
+    You are an expert at solving word path puzzles. You will see a 3x3 grid with 9 letters.
+    
+    YOUR TASK: Find the ONE 9-letter English word hidden in the grid.
+    
+    HOW THE WORD IS HIDDEN:
+    - The word starts at one cell and follows a path through adjacent cells
+    - Adjacent means up/down/left/right (NOT diagonal)
+    - The path visits each cell exactly once, using all 9 letters
+    - The letters appear in order along this path
+    
+    STEP-BY-STEP SOLUTION PROCESS:
+    
+    Step 1: READ THE GRID
+    - Carefully note all 9 letters in the 3x3 grid
+    - Write them down: [list the 9 letters]
+    
+    Step 2: THINK OF 9-LETTER WORDS
+    - What 9-letter English words can you make from these letters?
+    - Common patterns: -ize, -tion, -ing, -able, etc.
+    - Think of: actions, objects, adjectives, etc.
+    
+    Step 3: CHECK EACH CANDIDATE WORD
+    For each word you think of:
+    a) Does it have exactly 9 letters? (COUNT CAREFULLY!)
+    b) Does it use only the letters from the grid?
+    c) Can you trace a valid path? (Try different starting positions)
+    d) Does the path only use adjacent cells (up/down/left/right)?
+    e) Does it use each letter exactly once?
+    
+    Step 4: VERIFY YOUR ANSWER
+    - Count the letters in your answer: it MUST be 9
+    - Double-check the path is valid
+    - Make sure it's a real English word
+    
+    EXAMPLE WALKTHROUGH:
+    
+    Grid:
+    e|p|i
+    t|i|t
+    o|m|e
+    
+    Letters: e, p, i, t, i, t, o, m, e (9 letters)
+    
+    Thinking: What 9-letter word? Maybe "epitomize"
+    Check: e-p-i-t-o-m-i-z-e... wait, no 'z' in grid
+    
+    Try again: Can I make "timetable"? No, wrong letters
+    
+    Actually: e-p-i-t-o-m-i-t-e = "epitomite"? Not a real word
+    
+    [Keep trying systematically until you find the correct word]
+    
+    CRITICAL REQUIREMENTS:
+    ✓ Your answer MUST be EXACTLY 9 letters
+    ✓ Your answer MUST be a valid English word
+    ✓ Format: Answer: wordhere (lowercase, no spaces)
+    ✓ Do NOT add quotes, brackets, or punctuation
+    
+    COMMON MISTAKES TO AVOID:
+    ✗ Answering with 7 or 8 letter words (COUNT!)
+    ✗ Making up non-existent words
+    ✗ Using letters not in the grid
+    ✗ Ignoring the path constraint
+    
+    Remember: Take your time, count carefully, and verify your answer!
+    
+toolkits: {}
+
+
+
+
+
+
+
+

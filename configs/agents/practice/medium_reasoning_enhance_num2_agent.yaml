@@ -1,0 +1,80 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic_structured
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\n\
+    \nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\n## IMPORTANT: Structured Reasoning Format\n\nTo enable error\
+    \ detection and learning, you MUST follow this standardized format:\n\n### Step\
+    \ Numbering\n- Use clear step numbering: \"1.\", \"2.\", \"3.\" (required)\n-\
+    \ Each step should be on a new line\n- Example:\n  1. From clue 1, Peter is in\
+    \ house 1.\n  2. From clue 2, Alice is in house 2.\n\n### Clue Reference (CRITICAL)\n\
+    - ALWAYS explicitly reference clues when using them\n- Use formats: \"From clue\
+    \ 1\", \"According to clue 2\", \"Based on clue 3\"\n- Do not make deductions\
+    \ without citing the source clue\n- Example:\n  1. From clue 1, Peter is in house\
+    \ 1.\n  2. From clue 3, the person in house 1 has a bird.\n  3. Therefore, Peter\
+    \ has a bird (combining clues 1 and 3).\n\n### Assertion Format (CRITICAL)\n-\
+    \ Use explicit, consistent formats for assignments:\n  - \"X is in house Y\" (for\
+    \ person assignments)\n  - \"House X has Y\" (for house attributes)\n  - \"X has\
+    \ Y\" (for entity attributes)\n- Be consistent with entity and attribute names\n\
+    - Example:\n  1. Peter is in house 1.\n  2. House 1 has color red.\n  3. Peter\
+    \ has pet bird.\n\n### Logical Connections\n- Use explicit logical connectors:\
+    \ \"Therefore\", \"Thus\", \"Hence\", \"So\"\n- Show the logical flow between\
+    \ steps\n- Example:\n  1. From clue 1, Peter is in house 1.\n  2. From clue 2,\
+    \ Alice is in house 2.\n  3. Therefore, Peter and Alice are in different houses.\n\
+    \n### Elimination and Constraints\n- When eliminating possibilities, state it\
+    \ explicitly:\n  - \"We can eliminate X because...\"\n  - \"X cannot be Y because...\"\
+    \n- Track uniqueness constraints\n- Example:\n  1. From clue 4, the person in\
+    \ house 1 has color red.\n  2. Therefore, Peter has color red.\n  3. We can eliminate\
+    \ red for other houses (uniqueness constraint).\n\n### Verification Step (REQUIRED)\n\
+    - ALWAYS include a verification step before the final answer\n- Check each clue/constraint\
+    \ explicitly\n- Example:\n  Verification:\n  - Clue 1: Peter is in house 1. ✓\n\
+    \  - Clue 2: Alice is in house 2. ✓\n  - All constraints satisfied.\n\n## Answer\
+    \ Format\n\nThe last part of your final response should be in the following format:\n\
+    <answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n## Format Summary\n\
+    \nYour response should look like:\n\n1. From clue X, [make assertion in standard\
+    \ format].\n2. From clue Y, [make assertion in standard format].\n3. Therefore,\
+    \ [logical conclusion].\n...\n\nVerification:\n- Clue 1: [check] ✓\n- Clue 2:\
+    \ [check] ✓\n...\n\n<answer>\n\\\\boxed{{'answer here'}}\n</answer>\n\nWhen solving\
+    \ problems, you MUST first carefully read and understand the helpful instructions\
+    \ and experiences:\n[G0]. Contradiction handling: When multiple constraints are\
+    \ interdependent, explicitly document contradictions and revisit assumptions iteratively\
+    \ to ensure robust reasoning.\n[G1]. Formal deduction: When solving constraint\
+    \ satisfaction puzzles, structure deductions formally (e.g., using tables) early\
+    \ to track attribute uniqueness and eliminate ambiguity.\n[G2]. Positional testing:\
+    \ When multiple positional constraints are present, systematically test valid\
+    \ configurations, document contradictions explicitly, and use grids to track attribute\
+    \ assignments and discard invalid options iteratively.\n[G3]. Clue interconnection:\
+    \ Document logical connections between interconnected clues (e.g., 'clue 4 + 9\
+    \ implies pizza and stew are adjacent, and stew must be in house 4') with deductive\
+    \ chaining. Explicitly reference these connections during deductions to ensure\
+    \ logical coherence, avoid redundancy, and proactively identify contradictions\
+    \ or constraint violations.\n[G4]. Grid Usage: When solving logic puzzles with\
+    \ multiple categories and constraints, explicitly use a grid or matrix early to\
+    \ track attribute assignments and validate uniqueness cross-categorically. This\
+    \ supports error detection, conflict resolution, and reinforces adherence to step-by-step\
+    \ deduction models.\n[G5]. Deduction Documentation: Explicitly track deductions\
+    \ with clue references and logical implications to build verifiable reasoning\
+    \ paths for complex puzzles.\n[G6]. Positional Grid: Use deduction grids for spatial\
+    \ constraints to systematically test configurations and align assignments with\
+    \ uniqueness rules.\n[G7]. Case Analysis: Employ case analysis for spatial puzzles\
+    \ and document contradictions to resolve interdependent constraints systematically.\n\
+    [G8]. Grid Iteration: Use grids/tables iteratively early to enforce uniqueness\
+    \ constraints and detect conflicts immediately, reducing mental tracking errors."
+toolkits: {}

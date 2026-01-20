@@ -1,0 +1,97 @@
+# KORGym Game Practice Evaluation Configuration Template (训练后评估)
+# ============================================
+# 
+# 用途：评估训练后Agent的性能
+# 
+# 使用方法：
+# 1. 复制此文件并重命名（例如：my_game_practice_eval.yaml）
+# 2. 修改下面带 [MODIFY] 标记的部分
+# 3. 确保对应的practice_agent.yaml已生成（训练完成后自动生成）
+# 4. 运行评估：uv run python scripts/run_eval.py --config_name korgym/my_game_practice_eval
+
+# @package _global_
+defaults:
+  - /agents/practice/YOUR_GAME_practice_agent@agent  # [MODIFY] 修改为训练生成的Agent配置名
+  - _self_
+
+# [MODIFY] 实验ID（唯一标识符）
+exp_id: "your_game_practice_eval"
+
+# Evaluation dataset configuration (使用与baseline相同的数据集)
+data:
+  dataset: "KORGym-YourGame-Eval-50"  # [MODIFY] 与baseline_eval使用相同的数据集名称
+  type: "single"
+
+# Evaluation settings
+concurrency: 32  # 并发数（多轮游戏建议用4-8）
+pass_k: 1
+
+# Verification function settings
+verify_filename: "korgym.py"
+verify_func_name: "verify_func"
+
+# KORGym specific settings (应该与baseline_eval完全一致)
+korgym:
+  enabled: true
+  
+  # [MODIFY] 游戏设置（必须与baseline_eval一致）
+  game_name: "X-your_game"  # 游戏ID
+  game_host: "localhost"
+  game_port: 8775  # [MODIFY] 游戏端口
+  
+  # [MODIFY] 游戏参数（必须与baseline_eval和practice一致）
+  level: 3  # 游戏难度/参数
+  max_rounds: 1  # 最大回合数
+  timeout_per_game: 600
+
+# ============================================
+# 重要提醒
+# ============================================
+
+# 1. 训练后评估配置必须与基线评估配置保持一致：
+#    - 相同的 dataset (使用相同的50个评估样本)
+#    - 相同的 level (确保评估难度一致)
+#    - 相同的 max_rounds
+#    - 相同的 game_port
+#
+#    这样才能公平对比训练前后的性能提升！
+
+# 2. Agent配置：
+#    - 使用训练后生成的 {game}_practice_agent.yaml
+#    - 该文件在训练完成后自动生成在 configs/agents/practice/
+#    - 包含从训练中提取的L0/L1/L2分层经验
+
+# 3. 命名规范：
+#    - baseline_eval: 基线评估（训练前）
+#    - practice_eval: 训练后评估
+#    - 例如：word_puzzle_baseline_eval, word_puzzle_practice_eval
+
+# 4. 运行顺序：
+#    Step 1: 基线评估
+#      uv run python scripts/run_eval.py --config_name korgym/your_game_eval
+#    
+#    Step 2: 训练
+#      uv run python scripts/run_training_free_GRPO.py --config_name korgym/your_game_practice
+#    
+#    Step 3: 训练后评估
+#      uv run python scripts/run_eval.py --config_name korgym/your_game_practice_eval
+#    
+#    Step 4: 对比结果
+#      uv run python scripts/view_korgym_results.py --compare \
+#        your_game_baseline_eval \
+#        your_game_practice_eval
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

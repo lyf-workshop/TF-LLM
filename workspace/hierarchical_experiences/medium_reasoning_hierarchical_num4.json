@@ -1,0 +1,300 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Structure-first principle: Build a formal grid/table immediately to enforce uniqueness and adjacency constraints",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_1",
+      "content": "Backtrack method: When contradictions arise, test alternate configurations systematically instead of assuming prior steps were correct.",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_2",
+      "content": "Cross-Verify Early: Apply positional constraints immediately and validate against all other clues to prevent conflicts.",
+      "original_id": "G2",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_3",
+      "content": "Clue referencing: Explicitly reference each clue in every step to ensure completeness and avoid constraint violations.",
+      "original_id": "G3",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_4",
+      "content": "Literal parsing: Interpret ambiguous phrases (e.g., 'loves the spaghetti eater') as references to people, not preferences, to avoid misallocation.",
+      "original_id": "G4",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_5",
+      "content": "Structure-first principle: Build a formal grid/table immediately to enforce uniqueness and adjacency constraints",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_6",
+      "content": "Backtrack method: When contradictions arise, test alternate configurations systematically instead of assuming prior steps were correct.",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_7",
+      "content": "Cross-Verify Early: Apply positional constraints immediately and validate against all other clues to prevent conflicts.",
+      "original_id": "G2",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_8",
+      "content": "Clue referencing: Explicitly reference each clue in every step to ensure completeness and avoid constraint violations.",
+      "original_id": "G3",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_9",
+      "content": "Literal parsing: Interpret ambiguous phrases (e.g., 'loves the spaghetti eater') as references to people, not preferences, to avoid misallocation.",
+      "original_id": "G4",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_10",
+      "content": "Structure-first principle: Build a formal grid/table immediately to enforce uniqueness and adjacency constraints",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_11",
+      "content": "Backtrack method: When contradictions arise, test alternate configurations systematically instead of assuming prior steps were correct.",
+      "original_id": "G1",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_12",
+      "content": "Cross-Verify Early: Apply positional constraints immediately and validate against all other clues to prevent conflicts.",
+      "original_id": "G2",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_13",
+      "content": "Clue referencing: Explicitly reference each clue in every step to ensure completeness and avoid constraint violations.",
+      "original_id": "G3",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_14",
+      "content": "Literal parsing: Interpret ambiguous phrases (e.g., 'loves the spaghetti eater') as references to people, not preferences, to avoid misallocation.",
+      "original_id": "G4",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_15",
+      "content": "Structure-first principle: Build a formal grid/table immediately to enforce uniqueness, adjacency, and attribute constraints at every step, while integrating explicit clue referencing during assignments to validate all dependencies systematically and enable higher-level pattern recognition for positional/relational clues.",
+      "original_id": "G0",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_16",
+      "content": "Backtrack method: Systematically trace contradictions using specific clue references (e.g., Clue 8 and 10) and reassign values, anchoring resolution to explicit L0-level misassignments to ensure systematic and accurate conflict resolution.",
+      "original_id": "G1",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_17",
+      "content": "Cross-Verify Early: Apply positional constraints immediately during assignments and validate against all other clues, even when deterministic clues appear to align, to prevent conflicts and ensure logical consistency.",
+      "original_id": "G2",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_18",
+      "content": "Clue referencing: Anchor every reasoning step to specific clues (e.g., Clue 3, 8, 10), explicitly citing their logic during deductions to ensure traceability, prevent assumption-based errors, and enable hierarchical L0/L1 learning.",
+      "original_id": "G3",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_19",
+      "content": "Literal parsing: Interpret ambiguous relational phrases (e.g., 'loves the spaghetti eater') as direct references to people, not preferences, and pair with cross-verification (G2) immediately to resolve conflicts and ensure consistency.",
+      "original_id": "G4",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_20",
+      "content": "Deterministic initialization: Start the grid with unambiguous clues (e.g., specific assignments or strict positional relationships) to reduce ambiguity and enable early constraint verification.",
+      "original_id": "G5",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_21",
+      "content": "Adjacency Chains: Use sequential dependencies (e.g., A → left of B, C → between D and E) and explicitly integrate exclusions (e.g., 'not in House 4') during initial grid construction to enforce complex constraints and prevent misallocation.",
+      "original_id": "G6",
+      "step": 1,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_22",
+      "content": "Structure-first principle: Build a formal grid/table immediately with all attributes to enforce uniqueness, adjacency, and exclusion constraints systematically. Anchor deterministic clues (e.g., Arnold/House 3, Tea/House 2) upfront, integrate explicit clue references (e.g., Clue 1, 5, 8) during assignments, and use adjacency chains (G6) to resolve complex positional relationships, enabling higher-level pattern recognition and consistency across L0/L1/L2 learning.",
+      "original_id": "G0",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_23",
+      "content": "Backtrack method: Systematically trace contradictions using specific clue references (e.g., Clue 8 and 10) and reassign values, anchoring resolution to explicit L0-level misassignments to ensure systematic and accurate conflict resolution.",
+      "original_id": "G1",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_24",
+      "content": "Cross-Verify Early: Apply positional constraints immediately during assignments and validate against all other clues, even when deterministic clues appear to align, to prevent conflicts and ensure logical consistency.",
+      "original_id": "G2",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_25",
+      "content": "Clue referencing: Anchor every reasoning step to specific clues (e.g., Clue 3, 8, 10), explicitly citing their logic during deductions to ensure traceability, prevent assumption-based errors, and enable hierarchical L0/L1 learning.",
+      "original_id": "G3",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_26",
+      "content": "Literal parsing: Interpret ambiguous relational phrases (e.g., 'loves the spaghetti eater') as direct references to people, not preferences, and pair with cross-verification (G2) immediately to resolve conflicts and ensure consistency.",
+      "original_id": "G4",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_27",
+      "content": "Deterministic initialization: Start the grid with unambiguous clues (e.g., specific assignments or strict positional relationships) to reduce ambiguity and enable early constraint verification.",
+      "original_id": "G5",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_28",
+      "content": "Adjacency Chains: Use sequential dependencies (e.g., A → left of B, C → between D and E) and explicitly integrate exclusions (e.g., 'not in House 4') during initial grid construction to enforce complex constraints and prevent misallocation.",
+      "original_id": "G6",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_29",
+      "content": "Adjacency checks: When resolving adjacency constraints (e.g., Clue 5 or 7), immediately cross-check for conflicting assignments (e.g., Clue 6 for Arnold’s height, Clue 1 for Alice’s mother) to avoid contradictions, as seen in Attempt 1’s misassignment of Aniya.",
+      "original_id": "G7",
+      "step": 2,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_30",
+      "content": "Clue-Driven Grid Construction: Initialize the grid with deterministic clues (G5) and label each assignment with its source clue (G3) to ensure traceability and reinforce the structure-first principle (G0), allowing cross-task generalization through consistent application of positional reasoning chains.",
+      "original_id": "G8",
+      "step": 2,
+      "problem_count": 30
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**:  \nEstablish a formal structure (e.g., grid/table) immediately to organize constraints, systematically cross-validate assignments against all interdependent clues at each step, and explicitly reference specific constraints during reasoning to ensure logical consistency and prevent misinterpretations or conflicts.  \n\nThis integrates the structure-first approach, systematic backtracking, early constraint validation, and precise clue tracking into a cohesive method for solving logic puzzles.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**: Implement a structure-first approach by creating a formal grid/table to track assignments, systematically apply and cross-verify all constraints against each clue during every step, and explicitly reference clues in reasoning to ensure completeness and avoid misinterpretations.  \n\nThis strategy emphasizes building a formal framework early, integrating constraint validation with clue analysis, and maintaining rigorous traceability of logical dependencies to resolve contradictions and enforce uniqueness or adjacency requirements.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_2",
+      "content": "**L1 Pattern-Level Strategy**:  \nEstablish a structured framework (e.g., grid/table) early to enforce constraints, systematically validate each assignment against all clues and interdependent rules, and explicitly reference clues during reasoning to ensure completeness and avoid contradictions.  \n\nThis integrates the structure-first approach, proactive constraint checking, and rigorous clue alignment into a cohesive method for solving logic puzzles.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_3",
+      "content": "**L1 Pattern-Level Strategy**: Employ a structure-first approach by creating a formal grid or table early in the problem-solving process, and consistently reference specific clues during each assignment to validate constraints, detect contradictions, and ensure logical consistency across all dependencies.",
+      "source_l0_ids": [
+        "L0_15",
+        "L0_16",
+        "L0_17",
+        "L0_18",
+        "L0_19"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_4",
+      "content": "**L1 Pattern-Level Strategy**: Begin by constructing a formal grid or table to represent all attributes and relationships, and immediately apply deterministic and positional clues to anchor assignments. Use adjacency chains and explicit constraint cross-verification during each step to enforce uniqueness, exclusions, and logical consistency, ensuring that all assignments align with multiple clues from the start.",
+      "source_l0_ids": [
+        "L0_20",
+        "L0_21",
+        "L0_22",
+        "L0_23",
+        "L0_24"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "Principle: Formalize and validate constraints systematically through explicit representation and rigorous traceability. This approach works by externalizing complexity into a structured framework, enabling proactive detection of contradictions and ensuring logical consistency across interdependent elements. The benefits include reducing cognitive overload, minimizing errors from misinterpretation, and creating a reversible problem-solving pathway for efficient backtracking.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 0
+    }
+  ],
+  "stats": {
+    "total_l0": 31,
+    "total_l1": 5,
+    "total_l2": 1
+  }
+}

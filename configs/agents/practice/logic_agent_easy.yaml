@@ -1,0 +1,63 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen3-14B
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: logic_agent_zebralogic
+  instructions: "Solve the following logic puzzle step by step using pure reasoning.\
+    \ \n\nThink through the problem carefully:\n1. Identify all the clues and constraints\n\
+    2. Set up the logical relationships\n3. Use deductive reasoning to eliminate impossibilities\n\
+    4. Work systematically through the possibilities\n5. Verify your solution against\
+    \ all constraints\n\nThe last part of your final response should be in the following\
+    \ format:\n<answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\n\
+    When solving problems, you MUST first carefully read and understand the helpful\
+    \ instructions and experiences:\n[G0]. Clue Integration: When multiple clues are interdependent\
+    \ (e.g., child names and house assignments), explicitly cross-reference them during\
+    \ early deductions to preempt contradictions and ensure traceable reasoning.\n\
+    [G1]. Constraint Prioritization: Assign fixed attributes early and cross-check\
+    \ against all constraints in real-time to avoid contradictions and reduce backtracking.\n\
+    [G2]. Remaining Options Tracking: Systematically track unassigned options for\
+    \ each attribute category at each step to support uniqueness checks, avoid reasoning\
+    \ gaps, and reinforce methodological consistency.\n[G3]. Structured Grid Use:\
+    \ Maintain a table/grid from the first step to track attributes per house, enforce\
+    \ uniqueness checks, validate spatial relationships, and cross-reference interdependent\
+    \ constraints iteratively to reduce ambiguity and prevent contradictions.\n[G4].\
+    \ Clue Validation: Validate each deduction against all constraints at every reasoning\
+    \ step to enforce complete constraint satisfaction and ensure traceable reasoning.\n\
+    [G5]. Grid Tracking: Use a structured table or grid to systematically assign attributes\
+    \ and verify uniqueness/order constraints.\n[G6]. Constraint Prioritization: Address\
+    \ adjacency, ordering, and fixed attribute constraints early to eliminate invalid\
+    \ configurations and reduce backtracking.\n[G7]. Visual Grid: Use a grid/table\
+    \ early to systematically map interdependent constraints (e.g., 'Eric < Alice',\
+    \ 'Pizza and Stew adjacent'), validate sequences like *cooking → knitting → Bob*,\
+    \ and enforce uniqueness/positional relationships to prevent reasoning gaps.\n\
+    [G8]. Logical Rules: Formalize interdependent clues and positional relationships\
+    \ (e.g., 'Eric's house > Fish's house' as mathematical expressions) as logical\
+    \ rules and cross-reference them incrementally to ensure constraint saturation\
+    \ and avoid missed dependencies.\n[G9]. Alternative Testing: Explicitly test all\
+    \ possible assignments, document eliminations, and cross-reference them with constraints.\n\
+    [G10]. Uniqueness Check: Enforce unique assignments for names, hobbies, and other\
+    \ attributes at each step to avoid contradictions.\n[G11]. Positional Constraints:\
+    \ Prioritize integrating positional constraints early in logic puzzles to reduce\
+    \ invalid configurations and minimize backtracking.\n[G12]. Grid Integration:\
+    \ Prioritize creating a structured grid early to enforce uniqueness checks, track\
+    \ spatial relationships, and cross-reference interdependent clues.\n[G13]. Rule\
+    \ Formalization: Explicitly define positional constraints as inequalities (e.g.,\
+    \ 'Eric.house < April.house') and use a grid from the first step to track attributes\
+    \ incrementally, ensuring systematic validation of interdependent clues and eliminating\
+    \ reasoning gaps.\n[G14]. Rule Formalization: Formalize interdependent clues as\
+    \ logical rules and apply them incrementally to ensure constraint saturation and\
+    \ clarity."
+toolkits: {}

@@ -1,0 +1,63 @@
+# @package _global_
+defaults:
+  - /eval/korgym/korgym_eval@evaluation  # Reference the evaluation config
+  - _self_
+
+exp_id: "korgym_practice"
+
+# Practice Arguments
+practice:
+  epochs: 2  # Run 2 epochs to cover 100 training samples
+  batch_size: 50  # 50 samples per batch, 2 batches total for 100 samples
+  grpo_n: 3  # Rollouts per GRPO group (for experience extraction)
+  rollout_concurrency: 32  # Parallel rollout processes
+  rollout_temperature: 0.7  # LLM temperature during rollouts
+  task_timeout: 600  # Timeout per game (10 minutes)
+  do_eval: false  # Disable evaluation during training to save time
+  eval_strategy: "epoch"  # Evaluate at end of each epoch (unused if do_eval is false)
+  
+  # Agent objective for KORGym games
+  agent_objective: |
+    input: A game state with available actions and game rules
+    output: Strategic action selection to maximize game score and achieve success
+  
+  # Learning objective for hierarchical experience extraction
+  learning_objective: |
+    Help the agent improve game-playing strategies by extracting:
+    - L0 (Case-level): Specific successful/failed tactics from individual game rounds
+    - L1 (Pattern-level): General strategic patterns across similar game types
+    - L2 (Meta-level): Universal game-playing principles applicable across different game categories
+  
+  num_experiences_per_query: 1  # Number of L0 experiences to extract per game
+
+# Data Arguments  
+data:
+  practice_dataset_name: "KORGym-Train-100"  # 100 training samples (different seeds from eval)
+
+# KORGym specific settings for training
+korgym:
+  enabled: true
+  game_name: "8-word_puzzle"  # Start with word puzzle (puzzle category)
+  game_host: "localhost"
+  game_port: 8775
+  level: 3  # Difficulty level (1-5, start with medium)
+  num_train_seeds: 100  # Seeds 51-150 for training (non-overlapping with eval seeds 1-50)
+  eval_seeds_start: 1  # Evaluation seeds start from 1
+  eval_seeds_end: 50  # Evaluation seeds end at 50
+  train_seeds_start: 51  # Training seeds start from 51
+  train_seeds_end: 150  # Training seeds end at 150
+  max_rounds: 100  # Max rounds for multi-turn games
+
+# Hierarchical learning settings
+hierarchical_learning:
+  enabled: true
+  l1_aggregation_threshold: 5  # Every 5 L0 experiences → 1 L1 experience
+  l2_aggregation_threshold: 3  # Every 3 L1 experiences → 1 L2 experience
+  max_l0_per_game: 1  # Extract 1 L0 experience per game round
+  max_l0_recent: 50  # Keep most recent 50 L0 experiences in agent prompt
+  include_l0_in_prompt: true  # Include L0 experiences in agent instructions
+  
+  # Save paths for experiences and enhanced agent config
+  experience_save_path: workspace/hierarchical_experiences/korgym_practice.json
+  agent_save_path: configs/agents/practice/korgym_practice_agent.yaml
+

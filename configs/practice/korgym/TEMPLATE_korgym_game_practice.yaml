@@ -1,0 +1,183 @@
+# KORGym Game Practice Configuration Template (训练配置)
+# ============================================
+#
+# 用途：为KORGym游戏配置分层经验学习训练
+#
+# 使用方法：
+# 1. 复制此文件到 configs/practice/ 并重命名（例如：my_game_practice.yaml）
+# 2. 修改下面带 [MODIFY] 标记的部分
+# 3. 确保已创建对应的baseline_eval配置
+# 4. 运行训练：uv run python scripts/run_training_free_GRPO.py --config_name korgym/my_game_practice
+
+# @package _global_
+defaults:
+  - /eval/korgym/YOUR_GAME_eval@evaluation  # [MODIFY] 引用对应的baseline_eval配置
+  - _self_
+
+# [MODIFY] 实验ID（唯一标识符）
+exp_id: "your_game_practice"
+
+# Practice Arguments
+practice:
+  # Rollout配置
+  epochs: 2  # 训练轮数（建议2-3轮）
+  batch_size: 50  # 每批处理的样本数
+  grpo_n: 3  # 每个问题生成的rollout数量（建议3-5）
+  rollout_concurrency: 4  # 并发数（建议4，避免API速率限制）
+  rollout_temperature: 0.7  # LLM温度（0.5-0.8）
+  task_timeout: 600  # 每个任务超时（秒）
+  do_eval: false  # 是否在训练中评估
+  eval_strategy: "epoch"  # 评估策略
+  
+  # [MODIFY] Agent目标和学习目标
+  agent_objective: |
+    input: Game state and prompt
+    output: Valid action/answer for the game
+  
+  learning_objective: |
+    Help the agent improve game-playing performance by extracting:
+    - L0 (Case-level): Specific successful/failed strategies from individual games
+    - L1 (Pattern-level): General game-playing patterns and tactics
+    - L2 (Meta-level): Universal problem-solving principles
+  
+  num_experiences_per_query: 1
+  
+  # Hierarchical learning settings (必须在practice下！)
+  hierarchical_learning:
+    enabled: true  # ✅ 启用分层经验学习
+    l1_aggregation_threshold: 5  # 每5个L0聚合成1个L1
+    l2_aggregation_threshold: 3  # 每3个L1聚合成1个L2
+    max_l0_per_game: 1  # 每个游戏最多提取1个L0经验
+    max_l0_recent: 50  # prompt中最多包含50个最近的L0
+    include_l0_in_prompt: true  # 是否在prompt中包含L0经验
+    
+    # [MODIFY] 保存路径
+    experience_save_path: workspace/hierarchical_experiences/your_game_practice.json
+    agent_save_path: configs/agents/practice/your_game_practice_agent.yaml
+
+# Data Arguments  
+data:
+  practice_dataset_name: "KORGym-YourGame-Train-100"  # [MODIFY] 训练数据集名称
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  
+  # [MODIFY] 游戏设置（必须与eval配置一致）
+  game_name: "X-your_game"
+  game_host: "localhost"
+  game_port: 8775  # [MODIFY] 
+  level: 3  # [MODIFY] 必须与eval一致
+  
+  # 数据集配置
+  num_train_seeds: 100
+  eval_seeds_start: 1
+  eval_seeds_end: 50
+  train_seeds_start: 51
+  train_seeds_end: 150
+  
+  max_rounds: 1  # [MODIFY] 必须与eval一致
+
+# ============================================
+# 配置示例
+# ============================================
+
+# 单轮游戏示例：Word Puzzle
+# -----------------------------------
+# exp_id: "word_puzzle_practice"
+# defaults:
+#   - /eval/korgym/word_puzzle_eval@evaluation
+# 
+# practice:
+#   epochs: 3
+#   batch_size: 100
+#   rollout_concurrency: 4
+#   rollout_temperature: 0.7
+#   
+#   agent_objective: |
+#     input: A crossword puzzle with clues for multiple words
+#     output: A list of words that correctly answer all the clues
+#   
+#   learning_objective: |
+#     Help the agent improve crossword puzzle solving by extracting:
+#     - L0: Specific word-finding strategies and mistakes
+#     - L1: General clue interpretation patterns
+#     - L2: Universal puzzle-solving principles
+#   
+#   hierarchical_learning:
+#     experience_save_path: workspace/hierarchical_experiences/word_puzzle_practice.json
+#     agent_save_path: configs/agents/practice/word_puzzle_practice_agent.yaml
+# 
+# data:
+#   practice_dataset_name: "KORGym-WordPuzzle-Train-100"
+# 
+# korgym:
+#   game_name: "8-word_puzzle"
+#   game_port: 8775
+#   level: 3
+#   max_rounds: 1
+
+# 多轮游戏示例：Wordle
+# -----------------------------------
+# exp_id: "wordle_practice"
+# defaults:
+#   - /eval/korgym/wordle_eval@evaluation
+# 
+# practice:
+#   epochs: 2
+#   batch_size: 50
+#   rollout_concurrency: 4
+#   rollout_temperature: 0.7
+#   
+#   agent_objective: |
+#     input: Wordle game state with previous guesses and feedback
+#     output: A strategic word guess
+#   
+#   learning_objective: |
+#     Help the agent improve Wordle gameplay by extracting:
+#     - L0: Specific guess sequences and feedback interpretation
+#     - L1: Opening strategies and constraint satisfaction
+#     - L2: Deductive reasoning principles
+#   
+#   hierarchical_learning:
+#     experience_save_path: workspace/hierarchical_experiences/wordle_practice.json
+#     agent_save_path: configs/agents/practice/wordle_practice_agent.yaml
+# 
+# data:
+#   practice_dataset_name: "KORGym-Wordle-Train-100"
+# 
+# korgym:
+#   game_name: "33-wordle"
+#   game_port: 8777
+#   level: 5  # 单词长度
+#   max_rounds: 10  # ✅ 关键：与game_lib.py的attempts一致
+
+# ============================================
+# 关键注意事项
+# ============================================
+
+# ⚠️ 常见错误1：hierarchical_learning位置错误
+# ❌ 错误：
+# practice:
+#   epochs: 2
+# hierarchical_learning:  # 在顶层
+#   enabled: true
+#
+# ✅ 正确：
+# practice:
+#   epochs: 2
+#   hierarchical_learning:  # 在practice下
+#     enabled: true
+
+# ⚠️ 常见错误2：level不一致
+# 训练和评估必须使用相同的level，否则结果不可比
+
+# ⚠️ 常见错误3：max_rounds不匹配
+# 多轮游戏的max_rounds必须与game_lib.py中的attempts一致
+
+# ⚠️ 常见错误4：并发数过高
+# 使用大模型时，rollout_concurrency建议设为4，避免429错误
+
+# ⚠️ 常见错误5：数据集名称不匹配
+# 训练数据集名称必须与prepare_korgym_data.py生成的一致
+

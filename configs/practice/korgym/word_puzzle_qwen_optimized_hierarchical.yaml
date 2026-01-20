@@ -1,0 +1,55 @@
+# Word Puzzle Hierarchical Learning - Qwen2.5-7B-Instruct (Optimized)
+# 使用标准优化配置 (Temperature 0.3 + Enhanced Prompt)
+
+defaults:
+  - practice: base
+  - agent: practice/word_puzzle_qwen_optimized  # 使用优化版配置
+  - _self_
+
+exp_id: word_puzzle_qwen_optimized_hierarchical
+
+# KORGym Game Settings (Paper Aligned)
+korgym:
+  enabled: true
+  game_name: "8-word_puzzle"  # Word Problem
+  game_host: "localhost"
+  game_port: 8775
+  level: 4  # 论文默认 level 4
+  num_seeds: 50  # 论文使用 50 个不同的游戏实例
+  max_rounds: 50  # 单回合游戏，此参数不影响
+
+# Data configuration
+data:
+  practice_dataset_name: KORGym-WordPuzzle-Qwen-Optimized-Train
+  eval_dataset_name: KORGym-WordPuzzle-Qwen-Optimized-Eval
+  batch_size: 5  # 每批 5 个游戏
+  num_epochs: 10  # 10 轮训练（50 个游戏总共）
+
+# Evaluation settings
+evaluation:
+  agent: ${agent}  # 使用上面定义的agent配置
+  data:
+    dataset: KORGym-WordPuzzle-Qwen-Optimized-Eval
+    pass_k: 1
+  batch_size: 5
+
+# Hierarchical learning settings
+practice:
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5   # 每 5 个 L0 → 1 个 L1
+    l2_aggregation_threshold: 3   # 每 3 个 L1 → 1 个 L2
+    max_l0_per_game: 1            # 每个游戏最多 1 个 L0
+    max_l0_recent: 30             # Prompt 中保留最近 30 个 L0
+    include_l0_in_prompt: true    # 在 Prompt 中包含 L0
+    
+    experience_save_path: workspace/hierarchical_experiences/word_puzzle_qwen_optimized.json
+    agent_save_path: workspace/agents/word_puzzle_qwen_optimized_enhanced.yaml
+
+# GRPO settings
+group_size: 5   # 每组 5 个游戏
+num_batches: 10 # 10 批（总共 50 个游戏）
+
+# Agent settings are inherited from word_puzzle_qwen_optimized.yaml
+# (Temperature 0.3, Enhanced Prompt, max_tokens 8192)
+
