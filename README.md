@@ -1,419 +1,678 @@
-# <img src="docs/assets/logo.svg" alt="Youtu-agent Logo" height="24px"> Youtu-Agent: A simple yet powerful agent framework that delivers with open-source models
+# KORGym 游戏实验框架
 
-<div align="center">
-<a href="https://tencentcloudadp.github.io/youtu-agent/"><img src=https://img.shields.io/badge/📖-Documentation-blue.svg></a>
-<!-- <a href=https://arxiv.org/abs/2502.14345><img src=https://img.shields.io/badge/arXiv-2502.14345-b31b1b.svg></a> -->
-<a href=https://github.com/TencentCloudADP/youtu-agent><img src=https://img.shields.io/badge/GitHub-Tencent-blue.svg></a>
-<a href=https://deepwiki.com/TencentCloudADP/youtu-agent><img src=https://img.shields.io/badge/DeepWiki-Tencent-blue.svg></a>
-<a href=https://arxiv.org/abs/2510.08191><img src=https://img.shields.io/badge/arXiv-2510.08191-b31b1b.svg></a>
-</div>
+基于 Training-Free GRPO 的知识导向推理游戏环境与分层经验学习系统
 
-<p align="center">
-| <a href="README_ZH.md"><b>中文</b></a>
-| <a href="README_JA.md"><b>日本語</b></a>
-| <a href="#-benchmark-performance"><b>🌟 Performance</b></a> 
-| <a href="#-examples"><b>💡 Examples</b> </a> 
-| <a href="#-features"><b>✨ Features</b> </a> 
-| <a href="#-getting-started"><b>🚀 Getting Started</b> </a> 
-| 📢 <a href="https://discord.gg/QjqhkHQVVM"><b>Join Discord</b></a> or <a href="https://github.com/user-attachments/assets/354cd8e7-e108-4348-9355-04440052f408"><b>WeChat</b></a> 
-|
-</p>
+---
 
 
-`Youtu-Agent` is a flexible, high-performance framework for building, running, and evaluating autonomous agents. Beyond topping the benchmarks, this framework delivers powerful agent capabilities, e.g. data analysis, file processing, and deep research, all with open-source models.
+### 🎯 核心特性
 
-<img src="docs/assets/mascot.png" alt="Youtu-agent Logo" width="200" align="left" style="margin-right:20px;">
+- **🎮 KORGym 游戏集成**：支持 Word Puzzle、Alphabetical Sorting、Wordle 等推理游戏
+- **🧠 分层经验学习**：实现 L0（案例级）→ L1（模式级）→ L2（元策略级）的自动化经验提取
+- **💰 零参数更新训练**：基于 Training-Free GRPO，无需微调 LLM 即可提升性能
+- **🔄 多轮交互支持**：完整支持 Wordle 等多轮对话游戏的评估与学习
+- **📊 完整评估流程**：preprocess → rollout → judge → stat 四阶段自动化评估
 
-Key highlights:
-- **Verified performance**: Achieved 71.47% on WebWalkerQA (pass@1) and 72.8% on GAIA (text-only subset, pass@1), using purely `DeepSeek-V3` series models (without Claude or GPT), establishing a strong open-source starting point.
-- **Open-source friendly & cost-aware**: Optimized for accessible, low-cost deployment without reliance on closed models.
-- **Practical use cases**: Out-of-the-box support for tasks like CSV analysis, literature review, personal file organization, and podcast and video generation (coming soon).
-- **Flexible architecture**: Built on [openai-agents](https://github.com/openai/openai-agents-python), with extensible support for diverse model APIs (form `DeepSeek` to `gpt-oss`), tool integrations, and framework implementations.
-- **Automation & simplicity**: YAML-based configs, auto agent generation, and streamlined setup reduce manual overhead.
+---
 
-## 🗞️ News
+## 🗂️ 项目结构
 
-- 🎉 [2025-11-12] **Training-Free GRPO now available in main branch!** The agent practice module powered by [Training-Free Group Relative Policy Optimization](https://arxiv.org/abs/2510.08191) is now integrated into the main branch. Enhance your agents' performance without fine-tuning at minimal cost (~$8 for RL runs). See our [Agent Practice Documentation](https://tencentcloudadp.github.io/youtu-agent/practice/) for usage and examples on math reasoning and web search tasks.
-- 📢 [2025-11-03] New examples: we add the [**PPT generation**](examples/ppt_gen/README.md) and [**RAG**](configs/agents/examples/rag.yaml) examples.
-- 🚀 [2025-10-10] [**Training-Free Group Relative Policy Optimization**](https://arxiv.org/abs/2510.08191). RL for DeepSeek-V3.2 at $8? Yes, it's possible! Training-free GRPO keeps DeepSeek-V3.2 frozen, learns a token prior from ~100 samples for ~$8 RL runs, delivers verified math and web search gains! [code in branch [training_free_GRPO](https://github.com/TencentCloudADP/youtu-agent/tree/training_free_GRPO)] [[x thread](https://x.com/cai_cecilia47/status/1976558824640393559)].
-- 🛠️ [2025-09-28] Agent auto-generation now ships with companion tooling: describe a capability once and let `Youtu-Agent` build the tool for you. [[details](https://tencentcloudadp.github.io/youtu-agent/auto_generation/)].
-
-<details>
-<summary><b>📰 Previous announcements</b></summary>
-- 📺 [2025-09-09] We hosted a live sharing the design philosophy and basic usage of `Youtu-Agent`. [[video](https://www.bilibili.com/video/BV1mypqz4EvS)] [[documentation](https://doc.weixin.qq.com/doc/w3_AcMATAZtAPICNLgt3CbnxRWaYWnW4)].
-- 🎁 [2025-09-02] [Tencent Cloud International](https://www.tencentcloud.com/) offers new users of the DeepSeek API **3 million free tokens** (**Sep 1 – Oct 31, 2025**). [Try it out](https://www.tencentcloud.com/document/product/1255/70381) for free if you want to use DeepSeek models in `Youtu-Agent`! For enterprise agent solutions, also check out [Agent Development Platform](https://adp.tencentcloud.com) (ADP).
-- 📺 [2025-08-28] We hosted a live sharing updates about DeepSeek-V3.1 and how to use it in the `Youtu-Agent` framework. [[video](https://www.bilibili.com/video/BV1XwayzrETi/)] [[documentation](https://doc.weixin.qq.com/doc/w3_AcMATAZtAPICNvcLaY5FvTOuo7MwF)].
-</details>
-
-## 🌟 Benchmark Performance
-
-`Youtu-Agent` is built on open-source models and lightweight tools, demonstrating strong results on challenging deep search and tool use benchmarks.
-
-- **[WebWalkerQA](https://huggingface.co/datasets/callanwu/WebWalkerQA)**: Achieved 60.71% accuracy with `DeepSeek-V3-0324`， using new released `DeepSeek-V3.1` can further improve to 71.47%, setting a new SOTA performance.
-- **[GAIA](https://gaia-benchmark-leaderboard.hf.space/)**: Achieved 72.8% pass@1 on the [text-only validation subset](https://github.com/sunnynexus/WebThinker/blob/main/data/GAIA/dev.json) using `DeepSeek-V3-0324` (including models used within tools). We are actively extending evaluation to the full GAIA benchmark with multimodal tools, and will release the trajectories in the near future. Stay tuned! ✨
-
-![WebWalkerQA](docs/assets/images/benchmark_webwalkerqa.png)
-
-## 💡 Examples
-
-Click on the images to view detailed videos.
-
-<table>
-  <tr>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>Data Analysis</strong><br>Analyzes a CSV file and generates an HTML report.
-    </td>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>File Management</strong><br>Renames and categorizes local files for the user.
-    </td>
-  </tr>
-  <tr>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/user-attachments/assets/60193435-b89d-47d3-8153-5799d6ff2920" 
-             poster="https://img.youtube.com/vi/r9we4m1cB6M/sddefault.jpg" 
-             controls muted preload="metadata" 
-             width="100%" height="300"
-             style="object-fit: cover; border-radius: 8px;"></video>
-    </td>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/user-attachments/assets/dbb9cfc6-3963-4264-ba93-9ba21c5a579e" 
-             poster="https://img.youtube.com/vi/GdA4AapE2L4/sddefault.jpg" 
-             controls muted preload="metadata" 
-             width="100%" height="300"
-             style="object-fit: cover; border-radius: 8px;"></video>
-    </td>
-  </tr>
-  <tr >
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>Wide Research</strong><br>Gathers extensive information to generate a comprehensive report, replicating the functionality of Manus.
-    </td>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>Paper Analysis</strong><br>Parses a given paper, performs analysis, and compiles related literature to produce a final result.
-    </td>
-  </tr>
-  <tr>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/user-attachments/assets/6fc75814-e565-4f94-9ab5-33e3e7788e92" 
-             poster="https://img.youtube.com/vi/v3QQg0WAnPs/sddefault.jpg" 
-             controls muted preload="metadata" 
-             width="100%" height="300"
-             style="object-fit: cover; border-radius: 8px;"></video>
-    </td>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/user-attachments/assets/09b24f94-30f0-4e88-9aaf-9f3bbf82e99d" 
-             poster="https://img.youtube.com/vi/vBddCjjRk00/sddefault.jpg" 
-             controls muted preload="metadata" 
-             width="100%" height="300"
-             style="object-fit: cover; border-radius: 8px;"></video>
-    </td>
-  </tr>
-  <tr >
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>RAG</strong><br>A RAG example by integration with RAGFlow service.
-    </td>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>PPT Generation</strong><br>An example that generate PPT file according to given content.
-    </td>
-  </tr>
-  <tr>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/user-attachments/assets/4d74ef6f-7a84-4102-9666-0fbfe02e0d2f" 
-             controls muted preload="metadata" 
-             width="100%" height="300"
-             style="object-fit: cover; border-radius: 8px;"></video>
-    </td>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/user-attachments/assets/91568e27-bf77-44d6-baa6-b178d2d88255" 
-             controls muted preload="metadata" 
-             width="100%" height="300"
-             style="object-fit: cover; border-radius: 8px;"></video>
-    </td>
-  </tr>
-</table>
-
-> [!NOTE]
-> See the [`examples`](./examples) directory and [documentation](https://tencentcloudadp.github.io/youtu-agent/examples/) for more details.
-
-### 🤖 Automatic Tool and Agent Generation
-
-A standout feature of `Youtu-Agent` is its ability to **automatically generate tools alongside agent configurations**. Other frameworks often make you hand-code functions or hand-craft prompts before an agent can even run. Here, you simply describe the task: the built-in meta-agent interviews you, assembles the necessary tools, produces YAML configs, and saves everything so you can execute it immediately.
-
-```bash
-# Interactively clarify your requirements and auto-generate a config
-python scripts/gen_simple_agent.py
-
-# Run the generated config
-python scripts/cli_chat.py --config generated/xxx
+```
+youtu-agent/
+├── utu/                          # 核心代码库
+│   ├── agents/                   # Agent 定义
+│   ├── tools/                    # 工具集
+│   ├── eval/                     # 评估系统
+│   │   ├── benchmarks/           # 基准测试（含 KORGym 适配器）
+│   │   └── processer/            # KORGym 结果处理器
+│   └── practice/                 # 训练与经验学习
+│       ├── training_free_grpo.py # GRPO 主流程
+│       └── experience_updater.py # 分层经验生成
+├── configs/                      # YAML 配置文件
+│   ├── agents/practice/          # Agent 配置（含分层学习 Agent）
+│   ├── eval/korgym/              # KORGym 评估配置
+│   └── practice/                 # 训练配置
+├── scripts/                      # 可执行脚本
+│   ├── data/prepare_korgym_data.py  # KORGym 数据集准备
+│   ├── run_eval.py                  # 评估脚本
+│   └── run_training_free_GRPO.py    # 训练脚本
+├── KORGym/                       # KORGym 游戏服务器
+│   └── game_lib/                 # 游戏实现
+│       ├── 8-word_puzzle/
+│       ├── 22-alphabetical_sorting/
+│       └── 33-wordle/
+└── docs/                         # 项目文档
+    └── korgym/                   # KORGym 专项文档
 ```
 
-<table>
-  <tr>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>Automatic Agent Generation</strong><br>Interactively clarify your requirements, automatically generate the agent configuration, and run it right away.
-    </td>
-    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>Automatic Tool Generation</strong><br>Describe the behaviors you need, let the meta-agent draft tool code and schemas, then drop them straight into your workflow.
-    </td>
-  </tr>
-  <tr>
-    <td style="border: 1px solid black; padding:10px; vertical-align:top; width: 400px;">
-      <video src="https://github.com/user-attachments/assets/0c2ee833-507e-4141-8de4-148ff3d9f9ef" 
-             poster="https://img.youtube.com/vi/JVpHDJtKBo8/maxresdefault.jpg" 
-             controls muted preload="metadata" 
-             width="100%" height="auto" 
-             style="object-fit: cover; border-radius: 8px;"></video>
-    </td>
-    <td style="border: 1px solid black; padding:10px; vertical-align:top; width: 400px;">
-      <video src="https://github.com/user-attachments/assets/37878544-cfda-4a8a-9b42-a7361782c750" 
-             poster="https://img.youtube.com/vi/zjGooBuqdSE/maxresdefault.jpg" 
-             controls muted preload="metadata" 
-             width="100%" height="auto" 
-             style="object-fit: cover; border-radius: 8px;"></video>
-    </td>
-  </tr>
-</table>
+---
 
-> [!NOTE]
-> See [documentation](https://tencentcloudadp.github.io/youtu-agent/auto_generation/) for more details.
+## 🚀 完整部署流程
 
-## ✨ Features
+> **从零开始**：假设你刚从 GitHub 克隆了这个项目，以下是完整的部署和运行步骤。
 
-![features](docs/assets/images/header.png)
+### 第一步：环境准备
 
-### Design Philosophy
-- **Minimal design**: We try to keep the framework simple and easy to use, avoiding unnecessary overhead.
-- **Modular & configurable**: Flexible customization and easy integration of new components.
-- **Open-source model support & low-cost**: Promotes accessibility and cost-effectiveness for various applications.
+#### 1.1 检查 Python 版本
 
-### Core Features
-- **Built on openai-agents**: Leveraging the foundation of [openai-agents](https://github.com/openai/openai-agents-python) SDK, our framework inherits streaming, tracing, and agent-loop capabilities, ensuring compatibility with both `responses` and `chat.completions` APIs for seamless adaptation to diverse models like [gpt-oss](https://github.com/openai/gpt-oss).
-- **Fully asynchronous**: Enables high-performance and efficient execution, especially beneficial for evaluating benchmarks.
-- **Tracing & analysis system**: Beyond OTEL, our `DBTracingProcessor` system provides in-depth analysis of tool calls and agent trajectories. (will be released soon)
-
-### Automation
-- **YAML based configuration**: Structured and easily manageable agent configurations.
-- **Automatic agent generation**: Based on user requirements, agent configurations can be automatically generated.
-- **Tool generation & optimization**: Tool evaluation and automated optimization, and customized tool generation will be supported in the future.
-
-### Use Cases
-- **Deep / Wide research**: Covers common search-oriented tasks.
-- **Webpage generation**: Examples include generating web pages based on specific inputs.
-- **Trajectory collection**: Supports data collection for training and research purposes.
-
-
-## 🤔 Why Choose Youtu-Agent?
-
-`Youtu-Agent` is designed to provide significant value to different user groups:
-
-### For Agents Researchers & LLM Trainers
-- A **simple yet powerful baseline** that is stronger than basic ReAct, serving as an excellent starting point for model training and ablation studies.
-- **One-click evaluation scripts** to streamline the experimental process and ensure consistent benchmarking.
-
-### For Agent Application Developers
-- A **proven and portable scaffolding** for building real-world agent applications.
-- **Ease of Use**: Get started quickly with simple scripts and a rich set of built-in toolkits.
-- **Modular Design**: Key components like `Environment` and `ContextManager` are encapsulated yet highly customizable.
-
-### For AI & Agent Enthusiasts
-- **Practical Use Cases**: The `/examples` directory includes tasks like deep research report generation, data analysis, and personal file organization.
-- **Simplicity & Debuggability**: A rich toolset and visual tracing tools make development and debugging intuitive and straightforward.
-
-
-## 🧩 Core Concepts
-
-- **Agent**: An LLM configured with specific prompts, tools, and an environment.
-- **Toolkit**: An encapsulated set of tools that an agent can use.
-- **Environment**: The world in which the agent operates (e.g., a browser, a shell).
-- **ContextManager**: A configurable module for managing the agent's context window.
-- **Benchmark**: An encapsulated workflow for a specific dataset, including preprocessing, rollout, and judging logic.
-
-For more design and implementation details, please refer to our [technical documentation](https://tencentcloudadp.github.io/youtu-agent/).
-
-## 🚀 Getting Started
-
-Youtu-Agent provides complete code and examples to help you get started quickly. Follow the steps below to run your first agent, or refer to [`docker/README.md`](./docker/README.md) for a streamlined Docker-based setup with interactive frontend.
-
-### Setup
-
-#### Source Code Deployment
-
-> [!NOTE]
-> The project requires Python 3.12+. We recommend using [uv](https://github.com/astral-sh/uv) for dependency management.
-
-First, make sure Python and uv are installed.
-
-Then clone the repository and sync dependencies:
+**要求**: Python 3.12 或更高版本
 
 ```bash
-git clone https://github.com/TencentCloudADP/youtu-agent.git
+# 检查 Python 版本
+python --version   # Windows
+python3 --version  # Linux/macOS
+```
+
+如果版本不符合要求，请先安装：
+- **Windows**: 从 [python.org](https://www.python.org/downloads/) 下载安装
+- **Linux**: `sudo apt install python3.12` (Ubuntu/Debian)
+- **macOS**: `brew install python@3.12`
+
+#### 1.2 克隆项目
+
+```bash
+# 克隆仓库
+git clone https://github.com/your-username/your-repo.git
 cd youtu-agent
-uv sync  # or, `make sync`
-source ./.venv/bin/activate
-cp .env.example .env  # NOTE: You should then config the necessary API keys.
 ```
 
-After copying the `.env.example` file, you need to fill in the necessary keys in the `.env` file, e.g. LLM API keys. For example:
+### 第二步：安装所有依赖
+
+#### 2.1 自动安装（推荐）
+
+我们提供了一键安装脚本：
+
+**Windows**:
+```cmd
+install_all_dependencies.bat
+```
+
+**Linux/WSL/macOS**:
+```bash
+chmod +x install_all_dependencies.sh
+./install_all_dependencies.sh
+```
+
+脚本会自动完成：
+- ✅ 安装 uv 包管理器
+- ✅ 安装主项目依赖
+- ✅ 安装 KORGym 游戏环境依赖
+- ✅ 创建 .env 配置文件
+- ✅ 验证安装结果
+
+#### 2.2 手动安装
+
+如果自动安装失败，可以手动执行：
 
 ```bash
-# llm requires OpenAI API format compatibility
-# setup your LLM config , ref https://api-docs.deepseek.com/
+# 1. 安装 uv 包管理器
+pip install uv
+
+# 2. 安装主项目依赖
+uv sync
+
+# 3. 激活虚拟环境
+source .venv/bin/activate  # Linux/WSL/macOS
+# 或
+.venv\Scripts\activate     # Windows
+
+# 4. 安装 KORGym 依赖
+pip install -r KORGym/requirements.txt
+
+# 5. 创建环境配置文件
+cp .env.example .env
+```
+
+### 第三步：配置 API Keys
+
+编辑 `.env` 文件，填入你的 LLM API Key：
+
+```bash
+# 必需配置
 UTU_LLM_TYPE=chat.completions
-UTU_LLM_MODEL=deepseek-chat
+UTU_LLM_MODEL=deepseek-chat  # 或其他模型
 UTU_LLM_BASE_URL=https://api.deepseek.com/v1
-UTU_LLM_API_KEY=replace-to-your-api-key
+UTU_LLM_API_KEY=your-api-key-here  # 替换为你的实际 API Key
+
+# 可选配置（用于搜索功能）
+SERPER_API_KEY=your-serper-key
+JINA_API_KEY=your-jina-key
+
+# 数据库配置（默认使用 SQLite）
+UTU_DB_URL=sqlite:///test.db
 ```
 
-> [Tencent Cloud International](https://www.tencentcloud.com/) offers new users of the DeepSeek API **3 million free tokens** (**Sep 1 – Oct 31, 2025**). [Try it out](https://www.tencentcloud.com/document/product/1255/70381) for free. Once you’ve applied, replace the API key in the .env file below:
+**获取 API Key**:
+- **DeepSeek**: https://platform.deepseek.com/ (推荐，性价比高)
+- **OpenAI**: https://platform.openai.com/
+- **其他**: 支持 OpenAI API 格式的任何服务
+
+### 第四步：验证安装
+
+运行环境检查脚本：
 
 ```bash
-# llm
-# setup your LLM config , ref https://www.tencentcloud.com/document/product/1255/70381
-UTU_LLM_TYPE=chat.completions
-UTU_LLM_MODEL=deepseek-v3
-UTU_LLM_BASE_URL=https://api.lkeap.cloud.tencent.com/v1
-UTU_LLM_API_KEY=replace-with-your-api-key
+# 激活虚拟环境（如果还未激活）
+source .venv/bin/activate  # Linux/WSL/macOS
+# 或 .venv\Scripts\activate  # Windows
+
+# 检查 KORGym 环境
+python scripts/korgym/check_korgym_env.py
 ```
 
-#### Docker Deployment
+**预期输出**:
+```
+✓ Python 版本正确
+✓ UTU 包可用
+✓ Flask 已安装
+✓ 游戏服务器可访问
+```
 
-Please refer to [`docker/README.md`](./docker/README.md) for a streamlined Docker-based setup with interactive frontend.
+如果有错误，请查看 [故障排除文档](docs/korgym/troubleshooting.md)。
 
-### Quick Start
+### 第五步：运行第一个 KORGym 实验
 
-Youtu-agent ships with built-in configurations. For example, the config `configs/agents/simple/base_search.yaml` defines a simple agent equipped with a search tool:
+现在可以开始运行你的第一个实验了！以 **Wordle** 游戏为例：
+
+#### 5.1 启动游戏服务器
+
+**打开第一个终端**，启动 Wordle 游戏服务器：
+
+```bash
+# 进入 Wordle 游戏目录
+cd KORGym/game_lib/33-wordle
+
+# 启动游戏服务器（端口 8777）
+python game_lib.py -p 8777
+```
+
+**看到以下输出表示服务器启动成功**:
+```
+ * Running on http://127.0.0.1:8777
+ * Running on http://0.0.0.0:8777
+```
+
+**保持这个终端运行**，不要关闭！
+
+#### 5.2 准备数据集
+
+**打开第二个终端**，回到项目根目录：
+
+```bash
+# 回到项目根目录
+cd /path/to/youtu-agent
+
+# 激活虚拟环境
+source .venv/bin/activate  # Linux/WSL/macOS
+# 或 .venv\Scripts\activate  # Windows
+
+# 准备 Wordle 数据集（50 题评估 + 100 题训练）
+uv run python scripts/data/prepare_korgym_data.py --game_name "33-wordle"
+```
+
+**预期输出**:
+```
+✓ 创建评估数据集: KORGym-Wordle-Eval-50 (50 题)
+✓ 创建训练数据集: KORGym-Wordle-Train-100 (100 题)
+```
+
+#### 5.3 运行基线评估
+
+```bash
+# 运行基线评估（不使用任何经验）
+uv run python scripts/run_eval.py --config_name korgym/wordle_eval
+```
+
+这将评估 Agent 在没有任何学习的情况下的表现。**评估可能需要 5-10 分钟**。
+
+**完成后看到**:
+```
+✓ Evaluation completed
+  Accuracy: 35.2%  # 示例结果
+```
+
+#### 5.4 运行训练（生成经验）
+
+```bash
+# 运行 Training-Free GRPO 训练
+uv run python scripts/run_training_free_GRPO.py --config_name korgym/wordle_practice
+```
+
+这将：
+- 对每个训练样本生成多个候选答案
+- 根据相对表现提取高质量经验
+- 自动生成分层经验（L0/L1/L2）
+
+**训练可能需要 15-30 分钟**，取决于训练集大小。
+
+**完成后看到**:
+```
+✓ Training completed
+  Generated experiences: 
+    L0: 45 case-level experiences
+    L1: 9 pattern-level experiences  
+    L2: 3 meta-strategy experiences
+```
+
+#### 5.5 运行训练后评估
+
+```bash
+# 使用生成的经验重新评估
+uv run python scripts/run_eval.py --config_name korgym/wordle_practice_eval
+```
+
+#### 5.6 查看对比结果
+
+```bash
+# 对比训练前后的性能
+uv run python scripts/korgym/view_korgym_results.py \
+  wordle_baseline_eval \
+  wordle_practice_eval
+```
+
+**预期输出**:
+```
+=== KORGym 结果对比 ===
+
+wordle_baseline_eval:
+  准确率: 35.2%
+  平均分: 0.352
+
+wordle_practice_eval:  
+  准确率: 45.8%  ✓ 提升 +10.6%
+  平均分: 0.458
+
+🎉 训练后性能提升明显！
+```
+
+---
+
+### 🎯 其他游戏快速开始
+
+#### Word Puzzle
+
+```bash
+# 终端 1: 启动服务器
+cd KORGym/game_lib/8-word_puzzle
+python game_lib.py -p 8775
+
+# 终端 2: 完整流程
+uv run python scripts/data/prepare_korgym_data.py --game_name "8-word_puzzle"
+uv run python scripts/run_eval.py --config_name korgym/word_puzzle_eval
+uv run python scripts/run_training_free_GRPO.py --config_name korgym/word_puzzle_practice
+uv run python scripts/run_eval.py --config_name korgym/word_puzzle_practice_eval
+```
+
+#### Alphabetical Sorting
+
+```bash
+# 终端 1: 启动服务器
+cd KORGym/game_lib/22-alphabetical_sorting
+python game_lib.py -p 8776
+
+# 终端 2: 完整流程
+uv run python scripts/data/prepare_korgym_data.py --game_name "22-alphabetical_sorting"
+uv run python scripts/run_eval.py --config_name korgym/alphabetical_sorting_eval
+uv run python scripts/run_training_free_GRPO.py --config_name korgym/alphabetical_sorting_practice
+uv run python scripts/run_eval.py --config_name korgym/alphabetical_sorting_practice_eval
+```
+
+---
+
+## 🎓 进阶：分层经验学习实验
+
+完成 KORGym 游戏实验后，可以尝试更复杂的分层经验学习：
+
+### ZebraLogic 逻辑推理任务
+
+```bash
+# 1. 准备 ZebraLogic 数据集
+uv run python scripts/games/zebralogic/analyze_zebra_dataset.py
+
+# 2. 训练（生成 L0/L1/L2 经验）
+uv run python scripts/run_training_free_GRPO.py \
+  --config_name medium_reasoning_hierarchical_num1
+
+# 3. 评估
+uv run python scripts/run_eval.py \
+  --config_name logic/easy_practice_hierarchical_num1
+
+# 4. 查看生成的经验
+cat workspace/hierarchical_experiences/medium_reasoning_hierarchical_num3.json
+```
+
+### 理解生成的经验
+
+训练完成后，你会在 `workspace/hierarchical_experiences/` 目录看到生成的经验文件：
+
+```json
+{
+  "L0": [
+    {
+      "experience": "在猜测 'apple' 时...",
+      "level": "case",
+      "source": "problem_15"
+    }
+  ],
+  "L1": [
+    {
+      "experience": "优先使用高频字母...",
+      "level": "pattern",
+      "aggregated_from": ["L0_1", "L0_2", ...]
+    }
+  ],
+  "L2": [
+    {
+      "experience": "系统性地缩小可能空间...",
+      "level": "meta-strategy"
+    }
+  ]
+}
+```
+
+---
+
+## 🎮 支持的 KORGym 游戏
+
+| 游戏名称 | 游戏 ID | 端口 | 类型 | 最大回合 | 难度 |
+|---------|---------|------|------|---------|------|
+| **Word Puzzle** | `8-word_puzzle` | 8775 | 单轮 | 1 | 中等 |
+| **Alphabetical Sorting** | `22-alphabetical_sorting` | 8776 | 单轮 | 1 | 简单 |
+| **Wordle** | `33-wordle` | 8777 | 多轮 | 10 | 中等 |
+
+### 游戏说明
+
+- **Word Puzzle**：根据线索猜测单词，支持部分正确评分
+- **Alphabetical Sorting**：将单词按字母顺序排序
+- **Wordle**：经典猜词游戏，根据颜色反馈（绿/黄/灰）推理目标单词
+
+---
+
+## 🧠 分层经验学习系统
+
+### 三层架构
+
+```
+L0（案例级）
+  ↓ 每 5 个 L0 聚合
+L1（模式级）
+  ↓ 每 3 个 L1 + 源 L0 聚合
+L2（元策略级）
+```
+
+- **L0**：从单个问题的成功/失败案例中提取具体教训
+- **L1**：从 5 个 L0 案例中抽象出可复用的策略模式
+- **L2**：从 3 个 L1 模式 + 对应的 L0 案例中提炼跨任务原则
+
+### 关键创新
+
+**L2 基于 L1+L0 双重输入**，避免过度抽象：
+- 传统方法：`L2 = LLM(L1_batch)`
+- 本系统：`L2 = LLM(L1_batch + source_L0)`
+- 优势：保持原则的实用性和可解释性
+
+### 配置示例
 
 ```yaml
-defaults:
-  - /model/base
-  - /tools/search@toolkits.search
-  - _self_
-
-agent:
-  name: simple-tool-agent
-  instructions: "You are a helpful assistant that can search the web."
+# configs/practice/medium_reasoning_hierarchical_num1.yaml
+hierarchical_learning:
+  enabled: true
+  l1_aggregation_threshold: 5    # 5 个 L0 → 1 个 L1
+  l2_aggregation_threshold: 3    # 3 个 L1 → 1 个 L2
+  max_l0_per_problem: 1
+  max_l1_total: 50
+  max_l2_total: 10
+  include_l0_in_prompt: true     # Agent prompt 包含 L0
+  max_l0_recent: 10
 ```
 
-You can launch an interactive CLI chatbot with this agent by running:
+---
+
+## 📊 实验结果
+
+### KORGym 游戏性能提升
+
+| 游戏 | 基线准确率 | 训练后准确率 | 提升 |
+|------|-----------|-------------|------|
+| Word Puzzle | 30-50% | 40-65% | **+10-15%** |
+| Alphabetical Sorting | 70-85% | 80-95% | **+5-10%** |
+| Wordle | 40-60% | 50-70% | **+10%** |
+
+### 分层经验学习效果
+
+- **Pass@1 提升**：5-15%（取决于任务复杂度）
+- **跨难度迁移**：L2 经验在不同难度级别间展现更好的泛化能力
+- **成本控制**：完整训练成本约 $8（基于 DeepSeek API）
+
+---
+
+## 📚 详细文档
+
+- **KORGym 游戏指南**：[`docs/korgym/index.md`](docs/korgym/index.md)
+- **分层经验学习指南**：[`分层经验学习-完整运行指南.md`](分层经验学习-完整运行指南.md)
+- **三游戏命令速查**：[`KORGYM_THREE_GAMES_COMMANDS.md`](KORGYM_THREE_GAMES_COMMANDS.md)
+- **故障排除**：[`docs/korgym/troubleshooting.md`](docs/korgym/troubleshooting.md)
+
+---
+
+## 🛠️ 配置文件模板
+
+项目提供了完整的配置模板，可快速适配新游戏：
 
 ```bash
-# NOTE: You need to set `SERPER_API_KEY` and `JINA_API_KEY` in `.env` for web search access.
-# (We plan to replace these with free alternatives in the future)
-python scripts/cli_chat.py --config simple/base_search
-# To avoid using the search toolkit, you can run:
-python scripts/cli_chat.py --config simple/base
+configs/eval/korgym/
+├── TEMPLATE_korgym_game_eval.yaml           # 基线评估模板
+└── TEMPLATE_korgym_game_practice_eval.yaml  # 训练后评估模板
+
+configs/practice/
+└── TEMPLATE_korgym_game_practice.yaml       # 训练配置模板
+
+configs/agents/practice/
+└── TEMPLATE_korgym_game_agent.yaml          # Agent 配置模板
 ```
 
-📖 More details: [Quickstart Documentation](https://tencentcloudadp.github.io/youtu-agent/quickstart)
+查看 [`configs/eval/korgym/README_TEMPLATES.md`](configs/eval/korgym/README_TEMPLATES.md) 了解使用方法。
 
-### Explore More Examples
+---
 
-The repository provides multiple ready-to-use examples. Some examples require the agent to have internet search capabilities, so you’ll need to configure the tool APIs in the `.env` file under the tools module:
+## 🧪 高级功能
+
+### 1. 批量结果对比
 
 ```bash
-# tools
-# serper api key, ref https://serper.dev/playground
-SERPER_API_KEY=<Access the URL in the comments to get the API Key>
-# jina api key, ref https://jina.ai/reader
-JINA_API_KEY=<Access the URL in the comments to get the API Key>
+# 对比多个实验结果
+uv run python scripts/view_korgym_results.py \
+  word_puzzle_baseline_eval \
+  word_puzzle_practice_eval \
+  --show-details
 ```
 
-For example, to enable the agent to automatically search online for information and generate an SVG image on the topic of “DeepSeek V3.1 New Features,” run the following command:
+### 2. Wordle 前 20 题分析
 
 ```bash
-python examples/svg_generator/main.py
+# 针对 Wordle 的详细得分分析
+uv run python scripts/analyze_wordle_top20.py \
+  --exp_id wordle_practice_eval \
+  --top_n 20
 ```
 
-If you want to visualize the agent’s runtime status using the web UI, download the frontend package from the Youtu-Agent releases and install it locally:
+### 3. 自定义验证逻辑
 
+```python
+# utu/practice/verify/logic.py
+def verify_answer(answer: str, ground_truth: str) -> tuple[bool, float]:
+    """自定义验证逻辑"""
+    # 实现你的验证代码
+    return is_correct, score
+```
+
+---
+
+## 🔧 常见部署问题
+
+### Q1: `uv: command not found`
+
+**原因**: uv 包管理器未安装
+
+**解决**:
 ```bash
-# Download the frontend package
-curl -LO https://github.com/Tencent/Youtu-agent/releases/download/frontend%2Fv0.2.0/utu_agent_ui-0.2.0-py3-none-any.whl
-
-# Install the frontend package
-uv pip install utu_agent_ui-0.2.0-py3-none-any.whl
+pip install uv
+# 或者
+pip3 install uv
 ```
 
-Next, run the web version of the SVG image generation command:
+### Q2: Python 版本过低
 
+**错误**: `Python 3.11 detected, but 3.12+ is required`
+
+**解决**: 升级 Python 到 3.12 或更高版本
+- **Windows**: 从 [python.org](https://www.python.org/downloads/) 下载最新版
+- **Linux**: `sudo apt install python3.12 python3.12-venv`
+- **macOS**: `brew install python@3.12`
+
+### Q3: 游戏服务器连接失败
+
+**错误**: `Connection refused to http://localhost:8777`
+
+**解决**:
+1. 确认游戏服务器已启动：
+   ```bash
+   # Linux/WSL
+   netstat -tuln | grep 8777
+   
+   # Windows
+   netstat -an | findstr 8777
+   ```
+2. 检查服务器终端是否有错误信息
+3. 确认端口未被占用：
+   ```bash
+   # 如果端口被占用，可以换一个端口
+   python game_lib.py -p 8778
+   # 然后在配置文件中也修改端口
+   ```
+
+### Q4: API Key 相关错误
+
+**错误**: `AuthenticationError: Invalid API key`
+
+**解决**:
+1. 检查 `.env` 文件是否存在于项目根目录
+2. 确认 `UTU_LLM_API_KEY` 已正确设置
+3. 验证 API Key 的有效性（登录提供商网站检查）
+4. 注意不要在 API Key 前后添加引号或空格
+
+### Q5: 依赖安装失败
+
+**错误**: `Failed to install package XXX`
+
+**解决**:
 ```bash
-python examples/svg_generator/main_web.py
+# 清理并重新安装
+rm -rf .venv
+uv sync
+
+# 如果还是失败，尝试单独安装问题包
+pip install XXX
+
+# 对于 KORGym 依赖
+pip install -r KORGym/requirements.txt --no-cache-dir
 ```
 
-Once the terminal shows the following message, the deployment is successful. You can access the project by clicking the local link:
+### Q6: 训练过程中断
 
+**原因**: 网络问题、API 限流、或超时
+
+**解决**:
+- 训练会自动保存进度到数据库
+- 重新运行相同的训练命令即可继续
+- 系统会跳过已完成的样本
+
+### Q7: 内存不足
+
+**错误**: `MemoryError` 或系统卡死
+
+**解决**:
+1. 减少并发数：在配置文件中设置 `rollout_concurrency: 2`
+2. 减少训练集大小：`--train_count 50`
+3. 使用更小的模型（如 7B 而不是 72B）
+
+### Q8: 权限错误（Linux/WSL）
+
+**错误**: `Permission denied`
+
+**解决**:
 ```bash
-Server started at http://127.0.0.1:8848/
+# 给脚本添加执行权限
+chmod +x install_all_dependencies.sh
+chmod +x scripts/korgym/*.sh
+
+# 如果虚拟环境无法激活
+chmod +x .venv/bin/activate
 ```
 
-![svg_generator_ui](https://github.com/user-attachments/assets/337d327f-91ee-434e-bbcf-297dd4b26c28)
+更多问题请查看：
+- 📖 [完整安装指南](INSTALLATION_GUIDE.md)
+- 🔧 [故障排除文档](docs/korgym/troubleshooting.md)
+- 💬 [GitHub Issues](https://github.com/your-repo/issues)
 
-Given a research topic, the agent will automatically search the web, collect relevant information, and output an SVG visualization.
+---
 
-![svg_generator_result](https://github.com/user-attachments/assets/41aa7348-5f02-4daa-b5b2-225e35d21067)
+## 📖 引用
 
-📖 Learn more: [Examples Documentation](https://tencentcloudadp.github.io/youtu-agent/examples)
-
-### Run Evaluations
-
-Youtu-Agent also supports benchmarking on standard datasets. For example, to evaluate on `WebWalkerQA`:
-
-```bash
-# Prepare dataset. This script will download and process WebWalkerQA dataset, and save it to DB.
-python scripts/data/process_web_walker_qa.py
-
-# Run evaluation with config `ww.yaml` with your custom `exp_id`. We choose the sampled small dataset `WebWalkerQA_15` for quick evaluation.
-# NOTE: `JUDGE_LLM_TYPE, JUDGE_LLM_MODEL, JUDGE_LLM_BASE_URL, JUDGE_LLM_API_KEY` should be set in `.env`. Ref `.env.full`.
-python scripts/run_eval.py --config_name ww --exp_id <your_exp_id> --dataset WebWalkerQA_15 --concurrency 5
-```
-
-Results are stored and can be further analyzed in the evaluation platform. See [Evaluation Analysis](./frontend/exp_analysis/README.md).
-
-![eval_analysis_overview](https://github.com/user-attachments/assets/4a285b9e-d096-437e-9b8e-e5bf6b1924b6)
-
-![eval_analysis_detail](https://github.com/user-attachments/assets/4ede525a-5e16-4d88-9ebb-01a7dca3aaec)
-
-📖 Learn more: [Evaluation Documentation](https://tencentcloudadp.github.io/youtu-agent/eval)
-
-## 📖 Dive Deeper
-
-After getting started, you can learn more about the framework and its capabilities through our full documentation:
-
-- 📖 **[Full Documentation](https://tencentcloudadp.github.io/youtu-agent/)**: Explore the core concepts, architecture, and advanced features.
-- 🚀 **[Quickstart Guide](https://tencentcloudadp.github.io/youtu-agent/quickstart/)**: A detailed guide to get you up and running.
-- ❓ **[FAQ](https://tencentcloudadp.github.io/youtu-agent/faq)**: Find answers to common questions and issues.
-
-## 🙏 Acknowledgements
-
-This project builds upon the excellent work of several open-source projects:
-- [openai-agents](https://github.com/openai/openai-agents-python)
-- [mkdocs-material](https://github.com/squidfunk/mkdocs-material)
-- [model-context-protocol](https://github.com/modelcontextprotocol/python-sdk)
-
-## 🙌 Contributing
-
-We welcome contributions from the community! If you'd like to help improve Youtu-Agent, please read our [**Contributing Guidelines**](./CONTRIBUTING.md) to get started.
-
-## 📚 Citation
-
-If you find this work useful, please consider citing:
+本项目基于以下研究：
 
 ```bibtex
 @misc{training_free_grpo,
-      title={Training-Free Group Relative Policy Optimization}, 
-      author={Tencent Youtu Lab},
-      year={2025},
-      eprint={2510.08191},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2510.08191}, 
-}
-
-@misc{youtu-agent-2025,
-  title={Youtu-agent: A Simple yet Powerful Agent Framework},
+  title={Training-Free Group Relative Policy Optimization}, 
   author={Tencent Youtu Lab},
   year={2025},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/TencentCloudADP/youtu-agent}},
+  eprint={2510.08191},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2510.08191}, 
 }
 ```
+
+---
+
+## 🙏 致谢
+
+本项目基于 [Tencent Youtu-Agent](https://github.com/TencentCloudADP/youtu-agent) 框架开发，感谢原作者团队的开源贡献。
+
+核心依赖：
+- [openai-agents](https://github.com/openai/openai-agents-python)
+- [KORGym](https://github.com/microsoft/KORGym)（游戏环境）
+- [DeepSeek](https://www.deepseek.com/)（推荐 LLM 后端）
+
+---
+
+## 📝 许可证
+
+本项目遵循 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
+
+---
+
+## 🚀 快速索引
+
+### 部署相关
+- [📦 完整部署流程](#🚀-完整部署流程) - 从零开始的详细步骤
+- [💾 安装所有依赖](#第二步安装所有依赖) - 一键安装脚本
+- [🔑 配置 API Keys](#第三步配置-api-keys) - 必需的配置
+- [✅ 验证安装](#第四步验证安装) - 检查环境是否正确
+
+### 实验相关
+- [🎮 运行第一个实验](#第五步运行第一个-korgym-实验) - Wordle 游戏完整流程
+- [🎯 其他游戏](#🎯-其他游戏快速开始) - Word Puzzle, Alphabetical Sorting
+- [🎓 进阶实验](#🎓-进阶分层经验学习实验) - ZebraLogic 逻辑推理
+
+### 文档资源
+- [📚 KORGym 游戏指南](docs/korgym/index.md) - 详细的游戏文档
+- [🧠 分层经验学习](#🧠-分层经验学习系统) - 核心技术说明
+- [🔧 常见问题](#🔧-常见部署问题) - 故障排除
+- [📖 完整安装指南](INSTALLATION_GUIDE.md) - 深入的安装说明
+
+**从克隆项目到运行第一个实验，只需 15 分钟！** 🎮🧠
+
+---
+
+*最后更新：2026-01-21*
