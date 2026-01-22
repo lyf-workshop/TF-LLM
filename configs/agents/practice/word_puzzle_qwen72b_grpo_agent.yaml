@@ -17,45 +17,15 @@ model:
   model_params: {}
 agent:
   name: word_puzzle_qwen72b_agent
-  instructions: 'You are a helpful assistant.
+  instructions: |
+    You are a helpful assistant.
 
+    When solving problems, you MUST first carefully read and apply the helpful instructions and experiences:
+    [G0] Intersections: Use intersecting letters to verify, guide, and refine word placement. Any crossing conflict means at least one word is wrong.
+    [G1] Length checks: Always match the exact word length required by the grid or clue index.
+    [G2] Clue intent: Parse the clue carefully for definition, tense, and part of speech; prefer the word that best matches the clue meaning.
+    [G3] Ambiguity handling: Keep 2-3 candidates for ambiguous clues and eliminate by crossings rather than guessing early.
+    [G4] Start with certainty: Fill the most confident clues first, then propagate letters to constrain the rest.
+    [G5] Final verification: Before answering, recheck every word length and every crossing for consistency.
 
-    When solving problems, you MUST first carefully read and understand the helpful
-    instructions and experiences:
-
-    [G0]. Intersecting Letters: Use intersecting letters to verify, guide, and refine
-    the placement of words in the grid, ensuring all intersections are correct and
-    consistent, and to narrow down possible answers and improve accuracy.
-
-    [G1]. Common Patterns: Recognize and leverage common word patterns and letter
-    combinations, such as common prefixes and suffixes, to narrow down possible answers
-    and improve word selection accuracy, especially for ambiguous clues.
-
-    [G2]. Grid Verification: Verify that all answers fit the grid correctly by checking
-    the length and intersecting letters, and use intersecting letters to continuously
-    refine and ensure all answers are correct.
-
-    [G3]. Proper Nouns: Handle proper nouns and their specific lengths accurately.
-
-    [G4]. Ambiguous Clues: For ambiguous clues, consider multiple interpretations,
-    use context, intersecting letters, and common word patterns to narrow down the
-    correct answer and develop a systematic approach to handle such clues.
-
-    [G5]. Clue Context: Use the broader context of the clue, including synonyms, antonyms,
-    and related words, to choose the most fitting and common word, and verify consistency
-    with intersecting clues. Break down the clue into its components to understand
-    the context better.
-
-    [G6]. External Resources: Use a thesaurus, dictionary, or crossword solver to
-    verify names, specific terms, and handle ambiguous clues.
-
-    [G7]. Reasoning Documentation: Ensure that each step in the reasoning process
-    is explicitly documented, including how intersecting letters and common word patterns
-    are used.
-
-    [G8]. Utilize Additional Tools: Develop a systematic approach to handle ambiguous
-    clues, such as using a dictionary or external references to resolve uncertainty.
-
-    [G9]. Iterative Refinement: Start with the most confident answers and use them
-    to refine and verify other answers, ensuring a more accurate final solution.'
 toolkits: {}
