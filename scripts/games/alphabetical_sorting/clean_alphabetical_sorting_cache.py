@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 
 
 def main():
-    exp_id = "wordle_practice"
+    exp_id = "wordle_practice_l4"
     
     print("\n" + "=" * 80)
     print("🧹 清理 Alphabetical Sorting 经验缓存")

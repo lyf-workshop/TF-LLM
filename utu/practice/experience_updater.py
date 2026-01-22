@@ -20,10 +20,11 @@ logger = get_logger(__name__)
 
 
 class ExperienceUpdater:
-    def __init__(self, config: AgentConfig, agent_objective: str, learning_objective: str):
+    def __init__(self, config: AgentConfig, agent_objective: str, learning_objective: str, is_korgym: bool = False):
         self.config = config
         self.agent_objective = agent_objective
         self.learning_objective = learning_objective
+        self.is_korgym = is_korgym  # 标记是否为 KORGym 游戏
         self.prompts = FileUtils.load_prompts("practice/experience.yaml")
         self.llm = SimplifiedAsyncOpenAI(**config.model.model_provider.model_dump())
 
@@ -89,11 +90,18 @@ class ExperienceUpdater:
         all_rollouts_to_process = []
         for rollouts in problems_to_rollouts.values():
             if given_ground_truth:
-                # only for those partially correct
                 scores = [each.reward for each in rollouts]
                 avg_score = sum(scores) / len(scores)
-                if avg_score > 0 and avg_score < 1:
+                
+                # KORGym 游戏：处理所有样本（包括全对和全错）
+                # 因为 KORGym 游戏（如 Wordle）是 0/1 二值评分，筛选会过滤掉大部分样本
+                if self.is_korgym:
                     all_rollouts_to_process.extend(rollouts)
+                    logger.debug(f"KORGym mode: Processing all samples (avg_score={avg_score:.2f})")
+                # 其他任务：仅处理部分正确的样本
+                else:
+                    if avg_score > 0 and avg_score < 1:
+                        all_rollouts_to_process.extend(rollouts)
             else:
                 all_rollouts_to_process.extend(rollouts)
 
@@ -177,11 +185,17 @@ class ExperienceUpdater:
         all_rollouts = []
         for rollouts in problem_to_summarized_rollouts.values():
             if given_ground_truth:
-                # only for those partially correct
                 scores = [each["reward"] for each in rollouts]
                 avg_score = sum(scores) / len(scores)
-                if avg_score > 0 and avg_score < 1:
+                
+                # KORGym 游戏：处理所有样本（包括全对和全错）
+                if self.is_korgym:
                     all_rollouts.append(rollouts)
+                    logger.debug(f"KORGym mode: Processing all samples in group advantage (avg_score={avg_score:.2f})")
+                # 其他任务：仅处理部分正确的样本
+                else:
+                    if avg_score > 0 and avg_score < 1:
+                        all_rollouts.append(rollouts)
             else:
                 all_rollouts.append(rollouts)
 
@@ -259,8 +273,8 @@ class ExperienceUpdater:
     ) -> dict[str, str]:
         """Group update experiences based on critiques."""
         semaphore = asyncio.Semaphore(concurrency)
-        max_retries = 5
-        base_delay = 2.0  # Base delay in seconds
+        max_retries = 10
+        base_delay = 10.0  # Base delay in seconds
 
         async def group_update_with_semaphore(new_experience: dict):
             async with semaphore:

@@ -1,0 +1,59 @@
+# @package _global_
+defaults:
+  - /eval/korgym/wordle_eval@evaluation
+  - _self_
+
+exp_id: "wordle_practice_20_l4_1"
+
+# Practice Arguments
+practice:
+  epochs: 3
+  batch_size: 20  # 修改为20题
+  grpo_n: 5
+  rollout_concurrency: 32  # 降低并发数，适配小数据集
+  rollout_temperature: 0.7
+  task_timeout: 600
+  do_eval: false
+  eval_strategy: "epoch"
+  
+  agent_objective: |
+    input: Wordle game state with previous guesses and color feedback (green/yellow/gray)
+    output: A strategic 5-letter word guess that maximizes information gain and chance of success
+  
+  learning_objective: |
+    Help the agent improve Wordle gameplay by extracting:
+    - L0 (Case-level): Specific successful guess sequences and feedback interpretation strategies
+    - L1 (Pattern-level): General opening strategies, information maximization, and constraint satisfaction patterns
+    - L2 (Meta-level): Universal deductive reasoning and strategic exploration principles
+  
+  num_experiences_per_query: 1
+  
+  # Hierarchical learning settings (must be under practice!)
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5
+    l2_aggregation_threshold: 3
+    max_l0_per_game: 1
+    max_l0_recent: 20  # 适配20题数据集
+    include_l0_in_prompt: true
+    experience_save_path: workspace/hierarchical_experiences/wordle_practice_20_l4_1.json
+    agent_save_path: configs/agents/practice/wordle_practice_20_agent_l4_1.yaml
+
+# Data Arguments  
+data:
+  practice_dataset_name: "KORGym-Wordle-Train-20"  # 使用20题数据集
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_name: "33-wordle"
+  game_host: "localhost"
+  game_port: 8777
+  level: 4  # 单词长度（4-12，推荐5）
+  num_train_seeds: 20  # 修改为20题
+  eval_seeds_start: 1
+  eval_seeds_end: 50
+  train_seeds_start: 51
+  train_seeds_end: 70  # 20个种子：51-70
+  max_rounds: 10  # ✅ 与游戏代码一致（第113行 attempts=10）
+

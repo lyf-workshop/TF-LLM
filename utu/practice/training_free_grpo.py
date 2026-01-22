@@ -116,8 +116,15 @@ class TrainingFreeGRPO:
             )
 
         # 4. Create experience updater
+        # 检测是否为 KORGym 游戏，使用专门的提取逻辑
+        is_korgym = hasattr(self.config, 'korgym') and self.config.korgym and self.config.korgym.enabled
+        if is_korgym:
+            logger.info("✅ Detected KORGym game - using specialized experience extraction (no 0/1 filtering)")
         self.experience_updater = ExperienceUpdater(
-            self.config.evaluation.agent, self.config.practice.agent_objective, self.config.practice.learning_objective
+            self.config.evaluation.agent, 
+            self.config.practice.agent_objective, 
+            self.config.practice.learning_objective,
+            is_korgym=is_korgym  # 传入 KORGym 标志
         )
         
         # 5. Create hierarchical experience manager if enabled
