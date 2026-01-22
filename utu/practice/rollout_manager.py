@@ -11,6 +11,7 @@ from ..eval.benchmarks.base_benchmark import BaseBenchmark
 from ..eval.data import EvaluationSample
 from ..utils import get_logger
 from .data_manager import TrainingFreeGRPODataManager
+from .mistake_bank import MistakeBank
 from .utils import TaskRecorder
 
 logger = get_logger(__name__, "INFO")
@@ -183,6 +184,13 @@ class RolloutManager(BaseBenchmark):
             result = await task
             if result is not None:
                 results.append(result)
+
+        # Update mistake bank based on judged results (for curriculum-like sampling in next epoch).
+        try:
+            bank = MistakeBank(exp_id=self.config.exp_id)
+            bank.update_from_judged_samples(results)
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning(f"Failed to update mistake bank: {e}")
 
         logger.info(f"Successfully judged {len(results)} samples in batch. Updated to db.")
         return results

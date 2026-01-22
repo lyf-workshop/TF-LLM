@@ -4,6 +4,7 @@ Hierarchical Experience Manager for L0/L1/L2 experience learning.
 
 import json
 import os
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List
@@ -103,10 +104,15 @@ class HierarchicalExperienceManager:
         """
         # Convert traditional experiences to L0
         for exp_id, content in step_experiences.items():
+            scope_key = self._extract_scope_key(content)
+            # Cautious dedup: only skip if it's extremely similar within the same scope.
+            if self._is_too_similar_to_recent_l0(content, scope_key=scope_key, threshold=0.95, window=50):
+                continue
             l0_exp = {
                 'id': f"L0_{len(self.l0_experiences)}",
                 'content': content,
                 'original_id': exp_id,
+                'scope_key': scope_key,
                 'step': step,
                 'problem_count': problem_count
             }
@@ -122,6 +128,56 @@ class HierarchicalExperienceManager:
         
         # Save after processing
         self.save_experiences()
+
+    def _extract_scope_key(self, content: str) -> str | None:
+        if not content:
+            return None
+        patterns = [
+            r"game_name\s*[:=]\s*([A-Za-z0-9_\- ]+)",
+            r"Game Name\s*:\s*([A-Za-z0-9_\- ]+)",
+            r"context=([A-Za-z0-9_\- ]+)",
+            r"problem\s*[:=]\s*([A-Za-z0-9_\- ]+)",
+            r"question\s*[:=]\s*([A-Za-z0-9_\- ]+)",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, content, re.IGNORECASE)
+            if match:
+                return match.group(1).strip().lower()
+        return None
+
+    def _is_too_similar_to_recent_l0(
+        self,
+        content: str,
+        scope_key: str | None,
+        threshold: float = 0.95,
+        window: int = 50,
+    ) -> bool:
+        if not content or not self.l0_experiences or not scope_key:
+            return False
+        recent = self.l0_experiences[-window:] if window > 0 else self.l0_experiences
+        content_tokens = self._tokenize(content)
+        for exp in recent:
+            if exp.get("scope_key") != scope_key:
+                continue
+            existing = exp.get("content", "")
+            if not existing:
+                continue
+            if self._jaccard(content_tokens, self._tokenize(existing)) >= threshold:
+                return True
+        return False
+
+    def _tokenize(self, text: str) -> set[str]:
+        cleaned = []
+        for ch in (text or "").lower():
+            cleaned.append(ch if ch.isalnum() else " ")
+        return {w for w in "".join(cleaned).split() if w}
+
+    def _jaccard(self, a: set[str], b: set[str]) -> float:
+        if not a and not b:
+            return 1.0
+        if not a or not b:
+            return 0.0
+        return len(a & b) / len(a | b)
     
     async def _try_generate_l1(self, step: int):
         """Try to generate L1 from accumulated L0 experiences."""
@@ -296,4 +352,3 @@ class HierarchicalExperienceManager:
             List of recent L0 experiences
         """
         return self.l0_experiences[-limit:] if self.l0_experiences else []
-

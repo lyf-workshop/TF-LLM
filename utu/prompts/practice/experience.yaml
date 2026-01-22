@@ -75,6 +75,14 @@ SINGLE_ROLLOUT_SUMMARY_TEMPLATE_UP: |
   {{ question }}
   </Working Agent Input>
 
+  <Reward>
+  {{ reward }}
+  </Reward>
+
+  <Working Agent Response>
+  {{ response }}
+  </Working Agent Response>
+
   <Ground Truth>
   {{ answer }}
   </Ground Truth>
@@ -83,7 +91,7 @@ SINGLE_ROLLOUT_SUMMARY_TEMPLATE_UP: |
   {{ critique }}
   </Critique>
 
-  <Trajectory
+  <Trajectory>
   {{ trajectory }}
   </Trajectory>
 
@@ -101,7 +109,7 @@ SINGLE_QUERY_GROUP_ADVANTAGE_SP: |
   Now, your task is to review the performance of the agent across multiple trajectories, and extract high-level experiences that can guide future behavior that align with the ultimate learning objective.
 
   <Your Input>
-  - Agent Input: [The specific input task that provided to the working agent, where reward ranges from 0 to 1 with 1 being the best]
+  - Agent Input: [The specific input task that provided to the working agent; reward can be sparse (0/1) or any numeric scale, where higher is better]
   - Ground Truth (Optional): [If available, provide the ground truth answer to the agent input]
   - Trajectories: A JSON-like list of multiple trajectories, each representing an attempt by the agent to solve the input task.
   </Your Input>

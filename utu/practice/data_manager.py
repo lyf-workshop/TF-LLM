@@ -1,4 +1,6 @@
 import random
+import os
+import time
 from typing import Literal
 
 from sqlmodel import select
@@ -7,6 +9,7 @@ from ..config import EvalConfig
 from ..db import DatasetSample, EvaluationSample
 from ..eval import DBDataManager
 from ..utils import SQLModelUtils, get_logger
+from .mistake_bank import MistakeBank
 
 logger = get_logger(__name__)
 random.seed(42)
@@ -38,15 +41,72 @@ class TrainingFreeGRPODataManager(DBDataManager):
             ).all()
             logger.info(f"Loaded {len(datapoints)} samples from {self.config.data.dataset}.")
 
-            # shuffle FIRST if needed (to enable random sampling when truncating)
-            if shuffle:
-                random.shuffle(datapoints)
-                logger.info("Shuffled the original datapoints for random sampling.")
+            desired_total = truncate or len(datapoints)
 
-            # truncate the dataset AFTER shuffling (so we get random samples)
-            if truncate:
-                datapoints = datapoints[:truncate]
-                logger.info(f"Randomly sampled {truncate} samples from {self.config.data.dataset}.")
+            # Bias sampling towards recent/high-value failures from the mistake bank (if any).
+            # If no mistake bank exists yet, this falls back to uniform sampling.
+            bank = MistakeBank(exp_id=self.config.exp_id)
+            bank.load()
+            failed_records = {k: rec for k, rec in bank.records.items() if rec.status == "failed"}
+
+            if failed_records:
+                now_ts = time.time()
+                priority = []
+                rest = []
+                for dp in datapoints:
+                    key = MistakeBank.problem_key(dp.dataset, int(dp.index))
+                    (priority if key in failed_records else rest).append(dp)
+
+                # High-value failures first (recent + low reward + repeated failures).
+                priority.sort(
+                    key=lambda dp: bank.score_for_sampling(
+                        failed_records[MistakeBank.problem_key(dp.dataset, int(dp.index))],
+                        now_ts=now_ts,
+                    ),
+                    reverse=True,
+                )
+                if shuffle:
+                    random.shuffle(rest)
+
+                # How much of the epoch should focus on mistakes (0.0~1.0).
+                # Default: 0.3 (only effective once a mistake bank exists).
+                try:
+                    focus_ratio = float(os.getenv("UTU_MISTAKE_FOCUS_RATIO", "0.3"))
+                except Exception:
+                    focus_ratio = 0.3
+                focus_ratio = max(0.0, min(1.0, focus_ratio))
+                focus_n = int(desired_total * focus_ratio)
+
+                sampled: list[DatasetSample] = []
+
+                # Sample mistakes first (with replacement if needed).
+                if focus_n > 0:
+                    if len(priority) >= focus_n:
+                        sampled.extend(priority[:focus_n])
+                    else:
+                        sampled.extend(priority)
+                        while len(sampled) < focus_n and priority:
+                            sampled.append(random.choice(priority))
+
+                # Fill the rest from non-mistakes (without replacement).
+                remaining_n = max(0, desired_total - len(sampled))
+                if remaining_n > 0:
+                    sampled.extend(rest[:remaining_n])
+
+                # If still short (rare), backfill from priority with replacement.
+                while len(sampled) < desired_total and priority:
+                    sampled.append(random.choice(priority))
+
+                datapoints = sampled[:desired_total]
+                logger.info(
+                    f"Mistake-bank sampling enabled: focus_ratio={focus_ratio}, "
+                    f"selected={len(datapoints)}, priority_pool={len(priority)}, rest_pool={len(rest)}"
+                )
+            else:
+                # Uniform sampling: shuffle first (to enable random sampling when truncating)
+                if shuffle:
+                    random.shuffle(datapoints)
+                datapoints = datapoints[:desired_total]
 
             samples = []
             logger.info(f"Duplicate {self.config.pass_k} times for each sample.")
