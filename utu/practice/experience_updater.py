@@ -7,6 +7,8 @@ import copy
 import json
 import re
 from collections import defaultdict
+from dataclasses import dataclass
+from typing import Any, Iterable
 
 from agents import custom_span
 from tqdm import tqdm
@@ -17,6 +19,14 @@ from ..utils import FileUtils, SimplifiedAsyncOpenAI, get_logger
 from .utils import TaskRecorder
 
 logger = get_logger(__name__)
+
+
+@dataclass(frozen=True)
+class _RolloutGroupStats:
+    min_reward: float
+    max_reward: float
+    mean_reward: float
+    has_reward_contrast: bool
 
 
 class ExperienceUpdater:
@@ -76,26 +86,25 @@ class ExperienceUpdater:
         rollouts: list[EvaluationSample],
         concurrency: int,
         given_ground_truth: bool,
-    ) -> dict[str, list[str]]:
-        """Summarize each rollout's trajectory."""
+    ) -> dict[str, list[dict[str, Any]]]:
+        """Summarize each rollout's trajectory.
+
+        This method is designed to be environment-agnostic:
+        - Do not assume rewards are in (0, 1). Rewards can be 0/1 (sparse) or > 1.
+        - Learn from all-success and all-failure groups as well.
+        - Summarize only a representative subset per problem to enable counterfactual
+          comparisons (best vs worst) while controlling cost.
+        """
         # group by problems
         problems_to_rollouts = defaultdict(list)
         for rollout in rollouts:
-            # ✅ 添加空值检查：trajectories可能为None
-            if rollout.trajectories and len(rollout.trajectories) > 0:
-                problems_to_rollouts[rollout.raw_question].append(rollout)
+            if not rollout.raw_question:
+                continue
+            problems_to_rollouts[rollout.raw_question].append(rollout)
 
-        # only summarize the group whose rollouts are partially correct
-        all_rollouts_to_process = []
-        for rollouts in problems_to_rollouts.values():
-            if given_ground_truth:
-                # only for those partially correct
-                scores = [each.reward for each in rollouts]
-                avg_score = sum(scores) / len(scores)
-                if avg_score > 0 and avg_score < 1:
-                    all_rollouts_to_process.extend(rollouts)
-            else:
-                all_rollouts_to_process.extend(rollouts)
+        all_rollouts_to_process: list[EvaluationSample] = []
+        for grouped_rollouts in problems_to_rollouts.values():
+            all_rollouts_to_process.extend(self._select_representative_rollouts(grouped_rollouts, max_items=4))
 
         semaphore = asyncio.Semaphore(concurrency)
 
@@ -112,16 +121,7 @@ class ExperienceUpdater:
                                 agent_objective=self.agent_objective,
                                 learning_objective=self.learning_objective,
                             )
-                            # ✅ 添加安全检查：处理trajectories为None或空的情况
-                            trajectory_data = "No trajectory available"
-                            if item.trajectories:
-                                try:
-                                    traj_list = json.loads(item.trajectories)
-                                    if traj_list and len(traj_list) > 0:
-                                        trajectory_data = traj_list[0].get("trajectory", "No trajectory in first entry")
-                                except (json.JSONDecodeError, KeyError, IndexError) as e:
-                                    logger.warning(f"Failed to parse trajectories for question '{item.raw_question[:50]}...': {e}")
-                                    trajectory_data = "Trajectory parsing failed"
+                            trajectory_data = self._extract_trajectory_for_prompt(item)
                             
                             up = FileUtils.get_jinja_template_str(
                                 self.prompts["SINGLE_ROLLOUT_SUMMARY_TEMPLATE_UP"]
@@ -130,6 +130,8 @@ class ExperienceUpdater:
                                 trajectory=trajectory_data,
                                 answer=item.correct_answer if given_ground_truth else "[REDACTED]",
                                 critique=item.reasoning or "[No critique provided]",
+                                reward=item.reward,
+                                response=item.response or "",
                             )
                             response = await self.llm.query_one(
                                 messages=[
@@ -168,22 +170,22 @@ class ExperienceUpdater:
 
     async def _group_advantage(
         self,
-        problem_to_summarized_rollouts: dict[str, list[dict]],
+        problem_to_summarized_rollouts: dict[str, list[dict[str, Any]]],
         concurrency: int,
         given_ground_truth: bool,
         num_experiences: int,
-    ) -> dict[str, dict]:
-        """Generate critique for each query based on summarized rollouts."""
-        all_rollouts = []
-        for rollouts in problem_to_summarized_rollouts.values():
-            if given_ground_truth:
-                # only for those partially correct
-                scores = [each["reward"] for each in rollouts]
-                avg_score = sum(scores) / len(scores)
-                if avg_score > 0 and avg_score < 1:
-                    all_rollouts.append(rollouts)
-            else:
-                all_rollouts.append(rollouts)
+    ) -> list[dict[str, Any]]:
+        """Generate experiences for each query based on summarized rollouts.
+
+        Environment-agnostic behavior:
+        - Learn from all-failure, all-success, and mixed groups.
+        - Prefer counterfactual comparisons (best vs worst) when rewards differ.
+        """
+        all_rollouts: list[list[dict[str, Any]]] = []
+        for grouped in problem_to_summarized_rollouts.values():
+            selected = self._select_counterfactual_summaries(grouped, max_items=4)
+            if selected:
+                all_rollouts.append(selected)
 
         semaphore = asyncio.Semaphore(concurrency)
 
@@ -194,12 +196,9 @@ class ExperienceUpdater:
                 for attempt in range(max_retries):
                     try:
                         with custom_span("single query group advantage"):
-                            formatted_trajectories = "\n\n".join(
-                                [
-                                    f"Attempt {i + 1} (Reward {each['reward'] if given_ground_truth else '[REDACTED]'}):\n"
-                                    f"{each['trajectory_summary']}"
-                                    for i, each in enumerate(rollouts_per_problem)
-                                ]
+                            formatted_trajectories = self._format_counterfactual_trajectories(
+                                rollouts_per_problem=rollouts_per_problem,
+                                given_ground_truth=given_ground_truth,
                             )
                             sp = FileUtils.get_jinja_template_str(self.prompts["SINGLE_QUERY_GROUP_ADVANTAGE_SP"]).render(
                                 agent_objective=self.agent_objective,
@@ -421,3 +420,124 @@ class ExperienceUpdater:
             formatted_res.append(curr_str)
 
         return "\n\n".join(formatted_res)
+
+    def _safe_reward(self, reward: Any) -> float:
+        try:
+            if reward is None:
+                return 0.0
+            return float(reward)
+        except Exception:
+            return 0.0
+
+    def _group_stats(self, rollouts: Iterable[EvaluationSample | dict[str, Any]]) -> _RolloutGroupStats:
+        rewards = [
+            self._safe_reward(getattr(r, "reward", None) if not isinstance(r, dict) else r.get("reward")) for r in rollouts
+        ]
+        if not rewards:
+            return _RolloutGroupStats(min_reward=0.0, max_reward=0.0, mean_reward=0.0, has_reward_contrast=False)
+        min_r = min(rewards)
+        max_r = max(rewards)
+        mean_r = sum(rewards) / len(rewards)
+        return _RolloutGroupStats(
+            min_reward=min_r,
+            max_reward=max_r,
+            mean_reward=mean_r,
+            has_reward_contrast=(max_r - min_r) > 1e-9,
+        )
+
+    def _select_representative_rollouts(self, rollouts: list[EvaluationSample], max_items: int = 4) -> list[EvaluationSample]:
+        if not rollouts:
+            return []
+        if len(rollouts) <= max_items:
+            return rollouts
+
+        rewards = [self._safe_reward(r.reward) for r in rollouts]
+        best_idx = max(range(len(rollouts)), key=lambda i: rewards[i])
+        worst_idx = min(range(len(rollouts)), key=lambda i: rewards[i])
+        selected_indices = [best_idx] if best_idx == worst_idx else [best_idx, worst_idx]
+        for i in range(len(rollouts)):
+            if len(selected_indices) >= max_items:
+                break
+            if i not in selected_indices:
+                selected_indices.append(i)
+        return [rollouts[i] for i in selected_indices]
+
+    def _select_counterfactual_summaries(self, summaries: list[dict[str, Any]], max_items: int = 4) -> list[dict[str, Any]]:
+        if not summaries:
+            return []
+        if len(summaries) <= max_items:
+            return summaries
+        rewards = [self._safe_reward(s.get("reward")) for s in summaries]
+        best_idx = max(range(len(summaries)), key=lambda i: rewards[i])
+        worst_idx = min(range(len(summaries)), key=lambda i: rewards[i])
+        selected_indices = [best_idx] if best_idx == worst_idx else [best_idx, worst_idx]
+        for i in range(len(summaries)):
+            if len(selected_indices) >= max_items:
+                break
+            if i not in selected_indices:
+                selected_indices.append(i)
+        return [summaries[i] for i in selected_indices]
+
+    def _format_counterfactual_trajectories(self, rollouts_per_problem: list[dict[str, Any]], given_ground_truth: bool) -> str:
+        if not rollouts_per_problem:
+            return ""
+        rewards = [self._safe_reward(each.get("reward")) for each in rollouts_per_problem]
+        best_reward = max(rewards) if rewards else 0.0
+        worst_reward = min(rewards) if rewards else 0.0
+        has_contrast = (best_reward - worst_reward) > 1e-9
+
+        lines: list[str] = []
+        lines.append(
+            f"Group Stats: n={len(rollouts_per_problem)}, best={best_reward}, worst={worst_reward}, contrast={has_contrast}"
+        )
+        lines.append("")
+
+        best_idx = max(range(len(rollouts_per_problem)), key=lambda i: rewards[i])
+        worst_idx = min(range(len(rollouts_per_problem)), key=lambda i: rewards[i])
+
+        for i, each in enumerate(rollouts_per_problem):
+            if i == best_idx and i == worst_idx:
+                label = "ONLY"
+            elif i == best_idx:
+                label = "BEST"
+            elif i == worst_idx:
+                label = "WORST"
+            else:
+                label = "OTHER"
+
+            reward_str = each.get("reward") if given_ground_truth else "[REDACTED]"
+            lines.append(f"[{label}] Attempt {i + 1} (Reward {reward_str}):")
+            lines.append(each.get("trajectory_summary", ""))
+            lines.append("")
+
+        if not has_contrast:
+            lines.append(
+                "Note: Rewards are identical across attempts. Extract robust success patterns (if all succeed) "
+                "or root-cause failure modes + recovery strategies (if all fail), focusing on the learning objective."
+            )
+        return "\n".join(lines).strip()
+
+    def _extract_trajectory_for_prompt(self, item: EvaluationSample, max_chars: int = 8000) -> str:
+        """Extract a human-readable trajectory string from various trajectory encodings."""
+        if not item.trajectories:
+            return "No trajectory available"
+        try:
+            parsed = json.loads(item.trajectories)
+        except Exception as e:
+            logger.warning(f"Failed to parse trajectories JSON: {e}")
+            return "Trajectory parsing failed"
+
+        extracted: Any = parsed
+        if isinstance(parsed, list) and parsed:
+            first = parsed[0]
+            if isinstance(first, dict) and "trajectory" in first:
+                extracted = first.get("trajectory")
+
+        try:
+            text = json.dumps(extracted, ensure_ascii=False, indent=2)
+        except Exception:
+            text = str(extracted)
+
+        if len(text) > max_chars:
+            text = text[: max_chars - 20] + "\n... [truncated]"
+        return text
