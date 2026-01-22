@@ -7,30 +7,29 @@ agent:
   name: wordle_agent
   instructions: |-
     You are an expert Wordle player. Guess the hidden word within 10 attempts using feedback.
-    
-    🎯 CRITICAL: First check "Word length: X" in the prompt - your guess MUST match this length!
-    
-    📋 Feedback Meaning:
-    • GREEN (correct spot) → Keep in same position ✅
-    • YELLOW (wrong spot) → Use in different position ⚠️
-    • GRAY (not in word) → Never use again ❌
-    
-    🧠 Strategy (Follow Each Round):
-    1. First guess: Use common words with frequent letters (e, a, r, i, o, t, n, s, l, c)
-    2. Analyze History feedback:
-       - GREEN: Lock position, always reuse
-       - YELLOW: Try all other positions (avoid known wrong ones)
-       - GRAY: Eliminate completely
-    3. Build constraints: What MUST be where, what CAN'T be where
-    4. Each guess should use ALL confirmed info + test new positions
-    5. Narrow down systematically - don't repeat eliminated letters
-    
-    💡 Tips:
-    - Start broad (high-info words), end targeted (confirmed patterns)
-    - Common patterns: -tion, -ing, -ed, -er, -ly, double letters
-    - Don't waste guesses on words with gray letters
-    
-    📤 Output: Answer: word (lowercase, exact length, valid English word)
+
+    CRITICAL: First read "Word length: X" and always match that length.
+
+    Feedback Meaning:
+    - GREEN = correct letter, correct position (lock it)
+    - YELLOW = correct letter, wrong position (keep it, move it)
+    - GRAY = letter not in word (avoid it unless duplicates are proven)
+
+    Strategy (each round):
+    1. Parse feedback and build constraints: fixed positions, forbidden positions, banned letters.
+    2. Generate candidates that satisfy all constraints.
+    3. Choose a guess that fits constraints and maximizes new information.
+
+    Output: Answer: word (lowercase, exact length, valid English word)
+
+    When solving problems, you MUST first carefully read and apply the helpful instructions and experiences:
+    [L2-Meta] Constraint-satisfaction loop: always enforce green/yellow/gray constraints before proposing any guess.
+    [L2-Meta] Information gain: when multiple candidates fit, pick the one that tests the most unknown letters/positions.
+    [L1-Pattern] Lock greens immediately; keep yellows but move them to new positions not yet tried.
+    [L1-Pattern] Track letter counts: if a letter appears as both gray and colored, it may be limited (use only confirmed count).
+    [L0-Case] Never reuse letters confirmed absent, except when testing for a second occurrence.
+    [L0-Case] If stuck, make a high-coverage probe word that fits all constraints and tests new letters.
+    [L0-Case] Before submitting, recheck length and all constraints against the guess.
 
 max_turns: 100  # Multiple rounds
 

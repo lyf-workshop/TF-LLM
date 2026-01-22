@@ -1,0 +1,31 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: Qwen/Qwen2.5-72B-Instruct
+  model_settings:
+    temperature: 1.0
+    top_p: 0.95
+    max_tokens: 512
+    include_usage: true
+    extra_args:
+      timeout: 300
+  model_params: {}
+agent:
+  name: word_puzzle_qwen72b_agent
+  instructions: |
+    You are a helpful assistant.
+
+    When solving problems, you MUST first carefully read and apply the helpful instructions and experiences:
+    [G0] Intersections: Use intersecting letters to verify, guide, and refine word placement. Any crossing conflict means at least one word is wrong.
+    [G1] Length checks: Always match the exact word length required by the grid or clue index.
+    [G2] Clue intent: Parse the clue carefully for definition, tense, and part of speech; prefer the word that best matches the clue meaning.
+    [G3] Ambiguity handling: Keep 2-3 candidates for ambiguous clues and eliminate by crossings rather than guessing early.
+    [G4] Start with certainty: Fill the most confident clues first, then propagate letters to constrain the rest.
+    [G5] Final verification: Before answering, recheck every word length and every crossing for consistency.
+
+toolkits: {}
