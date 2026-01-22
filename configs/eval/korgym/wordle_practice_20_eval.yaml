@@ -1,0 +1,32 @@
+# @package _global_
+defaults:
+  - /agents/practice/wordle_practice_20_l4_agent@agent
+  - _self_
+
+exp_id: "wordle_practice_eval_20_7"
+
+# Evaluation dataset configuration (same as baseline)
+data:
+  dataset: "KORGym-Wordle-Eval-50"
+  type: "single"
+
+# Evaluation settings
+concurrency: 1  # ⚠️ 多轮游戏必须用低并发（2-4），避免 API 限流 (429 错误)
+pass_k: 1
+
+# Verification function settings
+verify_filename: "korgym.py"
+verify_func_name: "verify_func"
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_name: "33-wordle"
+  game_host: "localhost"
+  game_port: 8777
+  level: 4  # 单词长度（4-12，推荐5）
+  max_rounds: 10  # ✅ 与游戏代码一致（第113行 attempts=10）
+  timeout_per_game: 600
+
+
+

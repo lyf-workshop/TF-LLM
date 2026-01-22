@@ -131,3 +131,8 @@ echo "4. 运行第一个实验:"
 echo "   uv run python scripts/run_eval.py --config_name korgym/wordle_eval"
 echo ""
 
+
+
+
+
+

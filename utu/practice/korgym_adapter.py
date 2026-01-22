@@ -287,8 +287,9 @@ class KORGymAdapter:
             prompt = self.get_game_prompt(game_state)
             
             # Get agent's response
+            # ✅ Enable conversation history saving for multi-round reasoning
             start_time = time.time()
-            agent_result = await agent.run(prompt)
+            agent_result = await agent.run(prompt, save=True)
             response_time = time.time() - start_time
             total_time += response_time
             
