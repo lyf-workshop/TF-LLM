@@ -1,0 +1,66 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Initial Guess: Choose a common opening word with a mix of vowels and consonants, such as 'crane', to maximize information gain and refine subsequent guesses based on feedback.",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_1",
+      "content": "Initial Guess: Choose a common opening word with a mix of vowels and consonants, such as 'crane', to maximize information gain and refine subsequent guesses based on feedback.",
+      "original_id": "G0",
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_2",
+      "content": "Initial Guess: Choose a common opening word with a mix of vowels and consonants, such as 'crane', to maximize information gain. Use a predefined list of optimal opening words that cover a mix of common and unique letters to quickly narrow down the possible solutions and guide subsequent guesses based on feedback.",
+      "original_id": "G0",
+      "step": 1,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_3",
+      "content": "Initial Guess 6-Letter: Use a predefined list of high-entropy words with a mix of common and less common letters to maximize information gain in 6-letter Wordle games.",
+      "original_id": "G1",
+      "step": 1,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_4",
+      "content": "Initial Guess: Choose a consistent set of information-rich opening words with a mix of vowels and consonants, such as 'crane' or 'soare', to maximize information gain. Focus on using a word that maximizes the number of different letters, especially high-frequency letters, to gather the most information from the first attempt. Use a predefined list of optimal opening words that cover a mix of common and unique letters to quickly narrow down the possible solutions and guide subsequent guesses based on feedback. For 6-letter games, words like 'cranes' or 'audit' are effective opening choices.",
+      "original_id": "G0",
+      "step": 2,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_5",
+      "content": "Initial Guess 6-Letter: Use a predefined list of high-entropy words with a mix of common and less common letters to maximize information gain in 6-letter Wordle games.",
+      "original_id": "G1",
+      "step": 2,
+      "problem_count": 8
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**: Choose an initial guess from a predefined list of high-entropy words that contain a mix of common and unique letters to maximize information gain and quickly narrow down the possible solutions. For longer word games, use words that extend this principle by including a diverse set of letters to cover more ground in the first guess.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [],
+  "stats": {
+    "total_l0": 6,
+    "total_l1": 1,
+    "total_l2": 0
+  }
+}
