@@ -6,7 +6,7 @@ type: simple
 model:
   model_provider:
     type: chat.completions
-    model: Qwen/Qwen2.5-72B-Instruct
+    model: qwen2.5-72b-instruct
   model_settings:
     temperature: 0.3
     top_p: 0.95

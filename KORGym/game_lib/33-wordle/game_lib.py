@@ -105,7 +105,7 @@ def generate(seed: int, bank_getter=None) -> dict:
       - score：当前得分（猜中为1，否则为0；未结束时默认为0）
     """
     random.seed(seed)
-    level = random.randint(4, 12)
+    level = random.randint(4, 10)
     secret_word = generate_secret_word(seed, level, bank_getter)
     item = {
         "epoch": 1,

@@ -3,7 +3,7 @@ defaults:
   - /agents/practice/wordle_agent@agent
   - _self_
 
-exp_id: "wordle_baseline_eval"
+exp_id: "wordle_baseline_eval_6"
 
 # Evaluation dataset configuration
 data:
@@ -11,7 +11,7 @@ data:
   type: "single"
 
 # Evaluation settings
-concurrency: 2
+concurrency: 6
 pass_k: 1
 
 # Verification function settings

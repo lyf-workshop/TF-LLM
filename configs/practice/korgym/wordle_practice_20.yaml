@@ -3,7 +3,7 @@ defaults:
   - /eval/korgym/wordle_eval@evaluation
   - _self_
 
-exp_id: "wordle_practice_20_l4_1"
+exp_id: "wordle_practice_20_l4_2"
 
 # Practice Arguments
 practice:
@@ -11,7 +11,7 @@ practice:
   batch_size: 20  # 修改为20题
   grpo_n: 5
   rollout_concurrency: 32  # 降低并发数，适配小数据集
-  rollout_temperature: 0.7
+  rollout_temperature: 0.8
   task_timeout: 600
   do_eval: false
   eval_strategy: "epoch"
@@ -36,8 +36,8 @@ practice:
     max_l0_per_game: 1
     max_l0_recent: 20  # 适配20题数据集
     include_l0_in_prompt: true
-    experience_save_path: workspace/hierarchical_experiences/wordle_practice_20_l4_1.json
-    agent_save_path: configs/agents/practice/wordle_practice_20_agent_l4_1.yaml
+    experience_save_path: workspace/hierarchical_experiences/wordle_practice_20_l4_2.json
+    agent_save_path: configs/agents/practice/wordle_practice_20_agent_l4_2.yaml
 
 # Data Arguments  
 data:

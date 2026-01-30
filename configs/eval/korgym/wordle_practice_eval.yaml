@@ -28,3 +28,13 @@ korgym:
   max_rounds: 10  # ✅ 与游戏代码一致（第113行 attempts=10）
   timeout_per_game: 600
 
+# Experience filtering configuration (NEW!)
+experience_filter:
+  enabled: true              # 启用经验筛选
+  strategy: "static"         # 使用静态筛选策略
+  max_l2: 2                 # 最多保留 3 条 L2（元策略）
+  max_l1: 3                 # 最多保留 5 条 L1（模式级）
+  max_l0: 0                 # 不保留 L0（案例级）
+  # 以下为动态检索配置（未来扩展）
+  retrieval_top_k: 5
+  retrieval_min_score: 0.0

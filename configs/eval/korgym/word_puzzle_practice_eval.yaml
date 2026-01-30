@@ -3,7 +3,7 @@ defaults:
   - /agents/practice/word_puzzle_practice_agent@agent
   - _self_
 
-exp_id: "word_puzzle_practice_eval"
+exp_id: "word_puzzle_practice_eval_3"
 
 # Evaluation dataset configuration (same as baseline)
 data:
@@ -28,3 +28,12 @@ korgym:
   max_rounds: 1
   timeout_per_game: 600
 
+experience_filter:
+  enabled: true              # 启用经验筛选
+  strategy: "static"         # 使用静态筛选策略
+  max_l2: 2                 # 最多保留 3 条 L2（元策略）
+  max_l1: 3                 # 最多保留 5 条 L1（模式级）
+  max_l0: 0                 # 不保留 L0（案例级）
+  # 以下为动态检索配置（未来扩展）
+  retrieval_top_k: 5
+  retrieval_min_score: 0.0

@@ -1,0 +1,279 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Opening strategy: Use high-information starting words like 'raise', 'stare', or 'crane' to maximize early letter coverage and reduce uncertainty.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_1",
+      "content": "Opening strategy: Prioritize high-frequency vowels and common consonants in the first guess to maximize information gain.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_2",
+      "content": "High-frequency testing: Use early guesses to test high-frequency letters in multiple positions to maximize information gain.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_3",
+      "content": "Constraint refinement: Progressively refine known constraints while introducing new candidate letters in each round to accelerate convergence.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_4",
+      "content": "Constraint tracking: Maintain a clear record of confirmed and eliminated letters to guide logical, efficient guesses.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_5",
+      "content": "Exclusion tracking: Maintain a strict exclusion list of letters not in the word and avoid reintroducing them unless new evidence arises.",
+      "original_id": "G5",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_6",
+      "content": "Letter efficiency: Avoid repeating invalid or gray-marked letters to improve efficiency and reduce wasted attempts.",
+      "original_id": "G6",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_7",
+      "content": "Constraint model: Maintain a dynamic constraint model for each position and rotate confirmed letters into new positions to deduce correct placement.",
+      "original_id": "G7",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_8",
+      "content": "Duplicate handling: When feedback for a letter is conflicting (e.g., green and yellow), consider duplicates and test placements to refine constraints.",
+      "original_id": "G8",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_9",
+      "content": "Opening strategy: Prioritize high-frequency vowels and common consonants (e.g., e, a, r, t, o, i, s, l, n, c) in the first guess to maximize information gain and coverage. Words like 'listen', 'raise', or 'stare' are optimal.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_10",
+      "content": "Constraint refinement: Progressively refine known constraints while introducing new candidate letters in each round. Treat all green/yellow/gray feedback as hard constraints for subsequent guesses.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_11",
+      "content": "Constraint tracking: Maintain a clear record of fixed (green) and excluded (gray) letters per position. Apply positional feedback consistently to update constraints and guide efficient progress.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_12",
+      "content": "Exclusion tracking: Immediately enforce exclusion rules upon receiving feedback, and build subsequent guesses only from allowed letters and valid positions to maintain efficiency.",
+      "original_id": "G5",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_13",
+      "content": "Letter efficiency: Avoid repeating invalid or gray-marked letters unless new evidence suggests they might be correct, to improve efficiency and reduce wasted attempts.",
+      "original_id": "G6",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_14",
+      "content": "Long-word opening: For longer Wordle games, prioritize initial guesses like 'sauntered' or 'stratagem' to maximize information gain and reduce ambiguity early.",
+      "original_id": "G9",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_15",
+      "content": "Yellow-letter testing: When a letter is marked yellow (present but misplaced), test it in all other valid positions before introducing new letters to reduce search space efficiently.",
+      "original_id": "G10",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_16",
+      "content": "Feedback stabilization: When partial feedback is available, reuse confirmed letters in different positions to accelerate solution convergence.",
+      "original_id": "G11",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_17",
+      "content": "Extended opening: For longer Wordle variants, use diverse high-frequency letter patterns to reduce search space early.",
+      "original_id": "G12",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_18",
+      "content": "Opening word examples: Use high-information opening words like 'beac', 'seam', or 'stare' to accelerate progress by covering multiple vowels and common consonants.",
+      "original_id": "G13",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_19",
+      "content": "Opening strategy: Prioritize high-frequency vowels and common consonants (e.g., e, a, r, t, o, i, s, l, n, c) in the first guess to maximize both letter diversity and positional variety. Use unique and high-entropy starter words like 'raise', 'stare', or 'crane' to reduce uncertainty early.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_20",
+      "content": "Yellow-letter testing: When a letter is marked yellow (present but misplaced), prioritize testing it in other valid positions while introducing new letters to avoid stagnation and reduce search space efficiently.",
+      "original_id": "G10",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_21",
+      "content": "Constraint tracking: Maintain an explicit list of valid and invalid letters and their positions to improve efficiency and enforce feedback consistently.",
+      "original_id": "G14",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_22",
+      "content": "Entropy maximization: Use high-entropy dictionary words as initial guesses to maximize early information gain and accelerate solution convergence.",
+      "original_id": "G15",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_23",
+      "content": "All-yellow feedback strategy: When all letters are yellow, focus on permuting known letters instead of introducing new ones to reduce the search space.",
+      "original_id": "G16",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_24",
+      "content": "Yellow-letter positioning: Once a letter is marked yellow (present but misplaced), avoid reusing it in the same position unless necessary for positional testing to refine constraints efficiently.",
+      "original_id": "G17",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_25",
+      "content": "Constraint-driven strategy: Once some constraints are known, each new guess should test remaining unknowns while preserving confirmed positions. Avoid unnecessary changes to already verified placements unless contradicted by feedback.",
+      "original_id": "G18",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**:  \nMaximize information gain through strategic initial guesses that cover high-frequency letters and multiple positions, while systematically refining constraints and tracking confirmed/eliminated possibilities to accelerate solution convergence.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**:  \nSystematically track and update letter inclusion/exclusion constraints across all positions, prioritize information-rich initial guesses using high-frequency letters, and iteratively test and refine placements to maximize deduction efficiency and minimize uncertainty.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_2",
+      "content": "**L1 Pattern-Level Strategy**:  \nSystematically track and enforce positional and exclusionary constraints from feedback, while strategically selecting guesses that maximize new information and minimize redundant or invalid letter usage.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_3",
+      "content": "**L1 Pattern-Level Strategy**:  \nPrioritize information-rich initial moves that maximize letter and positional diversity, and iteratively refine guesses by reusing confirmed letters in new positions to systematically narrow down the solution space.",
+      "source_l0_ids": [
+        "L0_15",
+        "L0_16",
+        "L0_17",
+        "L0_18",
+        "L0_19"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "Principle: **Iteratively maximize information gain while maintaining and refining a constraint-based model of the problem space.**  \nThis works because it balances exploration (gathering new information) with exploitation (applying known constraints), enabling efficient narrowing of possibilities.  \nThe benefit is accelerated convergence to the solution while minimizing wasted effort and reducing uncertainty in complex, constrained environments.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 0
+    }
+  ],
+  "stats": {
+    "total_l0": 26,
+    "total_l1": 4,
+    "total_l2": 1
+  }
+}

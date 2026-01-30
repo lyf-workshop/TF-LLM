@@ -3,7 +3,7 @@ defaults:
   - /eval/korgym/wordle_eval@evaluation
   - _self_
 
-exp_id: "wordle_practice_l4"
+exp_id: "wordle_practice_2"
 
 # Practice Arguments
 practice:
@@ -36,8 +36,8 @@ practice:
     max_l0_per_game: 1
     max_l0_recent: 50
     include_l0_in_prompt: true
-    experience_save_path: workspace/hierarchical_experiences/wordle_practice_l4.json
-    agent_save_path: configs/agents/practice/wordle_practice_agent_l4.yaml
+    experience_save_path: workspace/hierarchical_experiences/wordle_practice_2.json
+    agent_save_path: configs/agents/practice/wordle_practice_agent_2.yaml
 
 # Data Arguments  
 data:

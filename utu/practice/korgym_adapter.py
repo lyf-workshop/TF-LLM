@@ -267,7 +267,10 @@ class KORGymAdapter:
     
     async def play_multiple_rounds(self, agent, seed: int) -> Dict:
         """
-        Play a multi-turn game.
+        Play a multi-turn game with compact history format.
+        
+        Uses a compact history representation (e.g., "apple → G:a@0 Y:p@1 N:p@2 N:l@3 N:e@4")
+        instead of full conversation history to keep prompts short and efficient.
         
         Args:
             agent: The agent to play the game
@@ -281,15 +284,45 @@ class KORGymAdapter:
         trajectory = []
         responses = []
         total_time = 0
+        compact_history = []  # Compact history for prompt context
         
         for round_num in range(1, self.max_rounds + 1):
-            # Get current state prompt
-            prompt = self.get_game_prompt(game_state)
+            # ⚠️ CRITICAL FIX: Don't use game server's verbose history!
+            # Build our own prompt with compact history only
+            
+            # Get game info (without history) from game state
+            game_title = f"{self.game_name.title()} Game"
+            attempt_info = f"Attempt: {round_num} of {self.max_rounds}"
+            word_length = f"Word length: {game_state.get('level', len(game_state.get('secret_word', '')))}"
+            
+            # Build base prompt manually (without game server's verbose history)
+            base_prompt_lines = [
+                "You are a good game player, I'll give you a game board and rules.",
+                "Your task is:",
+                "- First, give your answer according to the game board and rules.",
+                "- Second, output the answer in the required format. The last line of your response should be in the following format: 'Answer: $YOUR_ANSWER' (without quotes), where YOUR_ANSWER is your final answer to the question, e.g., 'Answer: happy'",
+                "You need to guess a specific location-based word according to the information provided below. You have several attempts, and each guess result will be recorded in the History for future reference. Please provide your guess for this round based on the following information, e.g., 'Answer: happy'.",
+                game_title,
+                attempt_info,
+                word_length,
+            ]
+            
+            # Build compact history section for prompt
+            if compact_history:
+                base_prompt_lines.append("History (Compact Format):")
+                for i, entry in enumerate(compact_history, 1):
+                    base_prompt_lines.append(f"{i}. {entry}")
+                base_prompt_lines.append("\nNote: G=Green (correct spot), Y=Yellow (wrong spot), N=Gray (not in word)")
+            else:
+                base_prompt_lines.append("History:")
+            
+            prompt = "\n".join(base_prompt_lines)
             
             # Get agent's response
-            # ✅ Enable conversation history saving for multi-round reasoning
+            # ⚠️ IMPORTANT: save=False to prevent full conversation history accumulation
+            # We manually manage compact history instead
             start_time = time.time()
-            agent_result = await agent.run(prompt, save=True)
+            agent_result = await agent.run(prompt, save=False)
             response_time = time.time() - start_time
             total_time += response_time
             
@@ -301,6 +334,11 @@ class KORGymAdapter:
             # Verify action and update state
             game_state = self.verify_action(game_state)
             trajectory.append(dict(game_state))
+            
+            # Extract compact feedback and add to history
+            compact_feedback = self._extract_compact_feedback(game_state, action)
+            if compact_feedback:
+                compact_history.append(compact_feedback)
             
             # Check if game ended
             if game_state.get('is_end', False):
@@ -317,6 +355,7 @@ class KORGymAdapter:
             'rounds': round_num,
             'response_time': total_time,
             'trajectory': trajectory,
+            'compact_history': compact_history,  # Save compact history for analysis
             'round_id': f"{self.game_name}_seed{seed}_{int(time.time())}"
         }
     
@@ -335,6 +374,67 @@ class KORGymAdapter:
             return await self.play_single_round(agent, seed)
         else:
             return await self.play_multiple_rounds(agent, seed)
+    
+    def _extract_compact_feedback(self, game_state: Dict, action: str) -> str:
+        """
+        Extract compact feedback from game state for history tracking.
+        
+        Converts verbose feedback into compact format:
+        - Wordle: "apple → G:a@0 Y:p@1 N:p@2 N:l@3 N:e@4"
+        - Other games: may use different formats
+        
+        Args:
+            game_state: Current game state after verification
+            action: The action taken this round
+            
+        Returns:
+            Compact feedback string
+        """
+        # For Wordle-like games, extract from history
+        if 'history' in game_state and game_state['history']:
+            last_entry = game_state['history'][-1]
+            guess = last_entry.get('guess', action)
+            feedback = last_entry.get('feedback', '')
+            
+            # Parse verbose feedback into compact format
+            # Example feedback: "The letter a located at idx=0 is in the word and in the correct spot,"
+            compact_parts = []
+            for line in feedback.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                
+                # Extract letter and position
+                if 'located at idx=' in line:
+                    # Extract letter (after "The letter ")
+                    letter_start = line.find('The letter ') + len('The letter ')
+                    letter_end = line.find(' located at')
+                    letter = line[letter_start:letter_end] if letter_end > letter_start else '?'
+                    
+                    # Extract position
+                    idx_start = line.find('idx=') + 4
+                    idx_end = line.find(' ', idx_start)
+                    if idx_end == -1:
+                        idx_end = line.find(',', idx_start)
+                    if idx_end == -1:
+                        idx_end = len(line)
+                    position = line[idx_start:idx_end]
+                    
+                    # Determine color
+                    if 'correct spot' in line:
+                        color = 'G'  # Green
+                    elif 'wrong spot' in line:
+                        color = 'Y'  # Yellow
+                    else:
+                        color = 'N'  # Gray/None
+                    
+                    compact_parts.append(f"{color}:{letter}@{position}")
+            
+            if compact_parts:
+                return f"{guess} → {' '.join(compact_parts)}"
+        
+        # Fallback: just return the action
+        return f"{action} → [no detailed feedback]"
     
     def _extract_action(self, response: str) -> str:
         """

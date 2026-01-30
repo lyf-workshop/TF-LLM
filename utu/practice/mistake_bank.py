@@ -113,14 +113,28 @@ class MistakeRecord:
 
 
 class MistakeBank:
-    """Persistent mistake bank for a single experiment (base exp_id)."""
+    """Persistent mistake bank for a single experiment (base exp_id).
+    
+    Args:
+        exp_id: Experiment identifier
+        root_dir: Root directory for mistake bank files
+        success_threshold: Reward threshold for considering a sample as success.
+            Default 0.5 works for binary (0/1) and normalized (0.0-1.0) rewards.
+            Adjust for other reward ranges (e.g., 0.9 for partial-credit games).
+    """
 
-    def __init__(self, exp_id: str, root_dir: str | Path | None = None):
+    def __init__(
+        self, 
+        exp_id: str, 
+        root_dir: str | Path | None = None,
+        success_threshold: float = 0.5
+    ):
         self.exp_id = exp_id
         self.root_dir = Path(root_dir) if root_dir is not None else (DIR_ROOT / "workspace" / "mistake_bank")
         self.path = self.root_dir / f"{exp_id}.json"
         self.records: dict[str, MistakeRecord] = {}
         self._loaded = False
+        self.success_threshold = success_threshold  # 可配置的成功阈值
 
     def load(self) -> None:
         if self._loaded:
@@ -214,7 +228,7 @@ class MistakeBank:
 
             is_correct = getattr(s, "correct", None)
             if raw_reward is not None:
-                is_success = reward_value >= 0.5
+                is_success = reward_value >= self.success_threshold  # 使用可配置阈值
             else:
                 is_success = bool(is_correct)
 

@@ -1,0 +1,179 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Initial Feedback: Use a structured approach to eliminate impossible letters and positions based on feedback to narrow down possibilities and make informed guesses.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_1",
+      "content": "Feedback Integration: Systematically track and update constraints from feedback to guide subsequent guesses and form a focused, strategic approach.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_2",
+      "content": "Feedback Refinement: Consider multiple occurrences of the same letter and systematically explore different positions for letters known to be in the word but in the wrong spots.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_3",
+      "content": "Feedback Interpretation: Systematically deduce the positions of known letters and consider multiple instances of the same letter. Use a structured approach to explore different combinations to maximize information gain.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_4",
+      "content": "Initial Information Gathering: Use common English words to maximize feedback about letters and their positions. Systematically interpret feedback to place known letters, ensuring all constraints are satisfied.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_5",
+      "content": "Dynamic Adjustment: Dynamically adjust the guess by exploring different permutations of known letters and introducing new letters to gather more information, using a systematic approach to deduce the correct positions and satisfy known constraints.",
+      "original_id": "G5",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_6",
+      "content": "Repeated Letters: When interpreting feedback, consider the possibility of repeated letters and their positions, checking if a letter marked as in the word but in the wrong spot appears again and deduce its correct positions systematically.",
+      "original_id": "G6",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_7",
+      "content": "Feedback Refinement: Consider multiple occurrences of the same letter and systematically explore different positions for letters known to be in the word but in the wrong spots, while trying new combinations and placements to gather more information and narrow down the correct word more efficiently.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_8",
+      "content": "Feedback Interpretation: Systematically deduce the positions of known letters and consider multiple instances of the same letter. Use a structured approach to explore different combinations to maximize information gain, including tracking the correct and incorrect positions of letters and making strategic choices to avoid repeating the same incorrect placements.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_9",
+      "content": "Initial Information Gathering: Use common English words that cover a wide range of common letters to maximize feedback about letters and their positions. Systematically interpret feedback to place known letters, ensuring all constraints are satisfied and refining guesses to deduce the correct positions of known letters.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_10",
+      "content": "L0 (Case-level): Specific Successful Guess Sequence: In a game where 'CRANE' was the solution, the sequence 'RAISE', 'CRIME', 'CRANE' effectively narrowed down the correct word by systematically placing known letters and exploring different positions.",
+      "original_id": "G7",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_11",
+      "content": "L1 (Pattern-level): Strategic Opening Words: Start with words like 'CRANE' or 'RAISE' that cover a wide range of common letters to maximize initial feedback and systematically explore and confirm the positions of known letters to efficiently narrow down the correct word.",
+      "original_id": "G8",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_12",
+      "content": "L2 (Meta-level): Universal Deductive Reasoning: Apply a systematic approach to deduce the correct word by integrating feedback, considering multiple occurrences of letters, and dynamically adjusting guesses to explore different permutations and introduce new letters to gather more information.",
+      "original_id": "G9",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_13",
+      "content": "Feedback Integration: Systematically track and update constraints for each letter (green, yellow, and gray) to guide subsequent guesses, focusing on placing known correct letters and adjusting the positions of yellow letters to form a focused, strategic approach. Use logical deduction to eliminate impossible positions and maximize information gain.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_14",
+      "content": "Initial Information Gathering: Use high-information words that cover a variety of common letters to maximize initial feedback. Systematically interpret feedback to place known letters, ensuring all constraints are satisfied and refining guesses to deduce the correct positions of known letters, especially handling double letters and repeated patterns, and avoid invalid guesses.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 8
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**: Systematically integrate and update constraints from feedback to eliminate impossible letters and positions, while exploring different combinations of known letters to maximize information gain and guide subsequent guesses.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**:\n\"Systematically explore and refine letter positions by considering multiple occurrences of the same letter, dynamically adjusting guesses to maximize information gain, and using common English words for initial information gathering to ensure all constraints are satisfied and the correct word is deduced efficiently.\"",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_2",
+      "content": "**L1 Pattern-Level Strategy**:\n\n\"Start with high-information words to maximize initial feedback, then systematically integrate and update constraints based on color feedback (green, yellow, gray) to guide subsequent guesses, focusing on placing known correct letters and adjusting the positions of yellow letters to efficiently narrow down the correct word.\"",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "**Principle: Systematic Iterative Refinement and Constraint Propagation.** This approach works by continuously updating and refining constraints based on feedback, which ensures that each step builds upon the previous one, leading to a more focused and efficient search. The benefits include reduced cognitive load, faster convergence to the correct solution, and the ability to handle complex and dynamic problem spaces effectively.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 2
+    }
+  ],
+  "stats": {
+    "total_l0": 15,
+    "total_l1": 3,
+    "total_l2": 1
+  }
+}

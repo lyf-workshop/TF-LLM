@@ -9,6 +9,7 @@ from ...agents import get_agent
 from ...config import ConfigLoader, EvalConfig
 from ...utils import AgentsUtils, get_logger
 from ..data import DBDataManager, EvaluationSample
+from ..experience_filter import ExperienceFilter
 from ..processer import PROCESSER_FACTORY, BaseProcesser
 
 logger = get_logger(__name__, "INFO")
@@ -38,12 +39,30 @@ class BaseBenchmark:
         _samples = self.dataset.load()
         if len(_samples) == 0:
             raise ValueError(f"No samples found for data config '{self.config.data}'! Please check the data config.")
+        
+        # Initialize experience filter
+        self.experience_filter = None
+        self._experience_filter_applied = False
+        if hasattr(self.config, 'experience_filter') and self.config.experience_filter.enabled:
+            logger.info(f"Experience filtering enabled: strategy={self.config.experience_filter.strategy}")
+            if self.config.experience_filter.experience_source:
+                logger.info(f"  Experience source: {self.config.experience_filter.experience_source}")
+            if self.config.experience_filter.strategy == "llm_rerank":
+                logger.info(f"  LLM reranking: model={self.config.experience_filter.llm_rerank.model}, "
+                           f"top_k={self.config.experience_filter.llm_rerank.final_top_k}")
+            self.experience_filter = ExperienceFilter(self.config.experience_filter)
+        else:
+            logger.info("Experience filtering disabled or not configured")
 
     async def main(self):
         with trace(f"[{self.config.exp_id}] Evaluation", trace_id=gen_trace_id()):
             logger.info(
                 f"> Running with config: \n{json.dumps(self.config.model_dump(), indent=2, ensure_ascii=False)}"
             )
+            
+            # Apply experience filtering (async)
+            await self._apply_experience_filter()
+            
             self.preprocess()
             await self.rollout()
             await self.judge()
@@ -51,6 +70,58 @@ class BaseBenchmark:
             await self.stat()
             logger.info("> Cleaning up...")
             await self.cleanup()
+    
+    async def _apply_experience_filter(self):
+        """Apply experience filtering to agent instructions (async operation)."""
+        if self.experience_filter and not self._experience_filter_applied:
+            if self.config.agent and self.config.agent.agent and self.config.agent.agent.instructions:
+                logger.info("Applying experience filtering to agent instructions...")
+                original_instructions = self.config.agent.agent.instructions
+                original_length = len(original_instructions)
+                
+                # Determine task context for LLM reranking
+                task_context = self._get_task_context()
+                
+                # Apply filtering (async)
+                start_time = time.time()
+                self.config.agent.agent.instructions = await self.experience_filter.apply(
+                    original_instructions,
+                    query=task_context
+                )
+                elapsed = time.time() - start_time
+                
+                filtered_length = len(self.config.agent.agent.instructions)
+                logger.info(f"Experience filtering completed in {elapsed:.2f}s: "
+                           f"{original_length} → {filtered_length} chars "
+                           f"(reduced by {original_length - filtered_length} chars)")
+                
+                self._experience_filter_applied = True
+    
+    def _get_task_context(self) -> str:
+        """Get task context description for LLM-based experience filtering.
+        
+        Returns:
+            Task context string
+        """
+        # For KORGym games, build context from game config
+        if hasattr(self.config, 'korgym') and self.config.korgym.enabled:
+            game_name = self.config.korgym.game_name
+            level = self.config.korgym.level
+            max_rounds = self.config.korgym.max_rounds
+            
+            if "wordle" in game_name.lower():
+                return (f"Wordle game: Guess a {level}-letter hidden word within {max_rounds} attempts. "
+                       f"Use feedback (GREEN=correct position, YELLOW=wrong position, GRAY=not in word) "
+                       f"to refine guesses through constraint satisfaction and information gain.")
+            elif "2048" in game_name:
+                return f"2048 game: Combine tiles to reach 2048 on a {level}x{level} grid."
+            elif "puzzle" in game_name.lower():
+                return f"Word puzzle game: Solve word-based puzzles at level {level}."
+            else:
+                return f"{game_name} game at level {level} with max {max_rounds} rounds."
+        
+        # Default context
+        return "General problem-solving task requiring strategic decision-making and constraint satisfaction."
 
     def preprocess(self) -> None:
         """Preprocess the dataset before rollout."""

@@ -103,11 +103,20 @@ class HierarchicalExperienceManager:
             problem_count: Number of problems in this step
         """
         # Convert traditional experiences to L0
+        added_count = 0
+        skipped_count = 0
+        
         for exp_id, content in step_experiences.items():
             scope_key = self._extract_scope_key(content)
-            # Cautious dedup: only skip if it's extremely similar within the same scope.
-            if self._is_too_similar_to_recent_l0(content, scope_key=scope_key, threshold=0.95, window=50):
+            
+            # Enhanced dedup: check for similarity
+            # - With scope: strict dedup within same scope (threshold=0.90)
+            # - Without scope: global dedup with lower threshold (threshold=0.85)
+            if self._is_too_similar_to_existing_l0(content, scope_key=scope_key):
+                skipped_count += 1
+                logger.debug(f"Skipped duplicate L0 from {exp_id} (scope={scope_key})")
                 continue
+            
             l0_exp = {
                 'id': f"L0_{len(self.l0_experiences)}",
                 'content': content,
@@ -117,8 +126,12 @@ class HierarchicalExperienceManager:
                 'problem_count': problem_count
             }
             self.l0_experiences.append(l0_exp)
+            added_count += 1
         
-        logger.info(f"Added {len(step_experiences)} L0 experiences from step {step}")
+        logger.info(
+            f"L0 processing: added {added_count}, skipped {skipped_count} duplicates "
+            f"(total L0: {len(self.l0_experiences)})"
+        )
         
         # Check if we should generate L1
         await self._try_generate_l1(step)
@@ -145,26 +158,68 @@ class HierarchicalExperienceManager:
                 return match.group(1).strip().lower()
         return None
 
-    def _is_too_similar_to_recent_l0(
+    def _is_too_similar_to_existing_l0(
         self,
         content: str,
         scope_key: str | None,
-        threshold: float = 0.95,
-        window: int = 50,
     ) -> bool:
-        if not content or not self.l0_experiences or not scope_key:
+        """Enhanced L0 deduplication with adaptive thresholds.
+        
+        Strategy:
+        - With scope: strict dedup within same scope (threshold=0.90, check recent 200)
+        - Without scope: global dedup with lower threshold (threshold=0.85, check all)
+        
+        Args:
+            content: L0 experience content
+            scope_key: Scope identifier (e.g., game name)
+            
+        Returns:
+            True if too similar to existing L0, False otherwise
+        """
+        if not content or not self.l0_experiences:
             return False
-        recent = self.l0_experiences[-window:] if window > 0 else self.l0_experiences
+        
         content_tokens = self._tokenize(content)
-        for exp in recent:
-            if exp.get("scope_key") != scope_key:
-                continue
-            existing = exp.get("content", "")
-            if not existing:
-                continue
-            if self._jaccard(content_tokens, self._tokenize(existing)) >= threshold:
-                return True
-        return False
+        
+        # Case 1: Has scope - strict dedup within same scope
+        if scope_key is not None:
+            threshold = 0.90  # More aggressive than before (was 0.95)
+            window = 200      # Larger window (was 50)
+            
+            recent = self.l0_experiences[-window:] if len(self.l0_experiences) > window else self.l0_experiences
+            
+            for exp in recent:
+                # Only compare within same scope
+                if exp.get("scope_key") != scope_key:
+                    continue
+                
+                existing = exp.get("content", "")
+                if not existing:
+                    continue
+                
+                similarity = self._jaccard(content_tokens, self._tokenize(existing))
+                if similarity >= threshold:
+                    logger.debug(f"Found similar L0 with scope '{scope_key}' (similarity={similarity:.3f})")
+                    return True
+            
+            return False
+        
+        # Case 2: No scope - global dedup with lower threshold
+        else:
+            threshold = 0.85  # Lower threshold for no-scope experiences
+            
+            # Check against ALL L0 experiences (no window limit)
+            for exp in self.l0_experiences:
+                existing = exp.get("content", "")
+                if not existing:
+                    continue
+                
+                similarity = self._jaccard(content_tokens, self._tokenize(existing))
+                if similarity >= threshold:
+                    logger.debug(f"Found similar L0 without scope (similarity={similarity:.3f})")
+                    return True
+            
+            return False
 
     def _tokenize(self, text: str) -> set[str]:
         cleaned = []

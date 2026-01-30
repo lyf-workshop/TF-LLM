@@ -1,0 +1,243 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Opening strategy: Start with high-entropy words containing distinct, common letters (e.g., 'stare', 'raise') to maximize information gain and reduce possible solutions early.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_1",
+      "content": "Feedback interpretation: Treat green letters as fixed in position, yellow letters as present but misplaced, and exclude gray letters from future guesses.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_2",
+      "content": "Information gain: Prioritize guesses that cover the most likely candidates under current constraints, especially in the first two moves by using diverse, high-frequency letters.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_3",
+      "content": "Constraint tracking: Maintain a matrix of valid letters per position based on feedback to guide subsequent guesses efficiently.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_4",
+      "content": "Feedback optimization: When partial feedback is received, avoid repeating confirmed letters in the same positions unless testing frequency; instead, introduce new letters to reduce uncertainty.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_5",
+      "content": "Late-game focus: Test permutations of confirmed letters when most constraints are satisfied to finalize the solution.",
+      "original_id": "G5",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_6",
+      "content": "Word validity awareness: Be aware of valid English word permutations to avoid invalid or near-miss guesses in later stages.",
+      "original_id": "G6",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_7",
+      "content": "Single letter test: Introduce a single new letter in unconstrained positions to test it rather than reusing known incorrect letters.",
+      "original_id": "G7",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_8",
+      "content": "Letter frequency tracking: Track letter counts and avoid inconsistent multiplicities until constraints are satisfied to maintain consistency with Wordle's rules.",
+      "original_id": "G8",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_9",
+      "content": "Feedback adaptation: Fix confirmed correct letters and vary remaining positions with untested letters to avoid redundancy and accelerate progress.",
+      "original_id": "G9",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_10",
+      "content": "Opening strategy: Use high-information opening words with unique, frequent letters (including vowels and consonants) to maximize coverage and accelerate early constraint satisfaction.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_11",
+      "content": "Feedback interpretation: Treat green letters as fixed in position, yellow letters as present but misplaced, and exclude gray letters from future guesses while actively placing confirmed letters into likely positions to accelerate constraint satisfaction.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_12",
+      "content": "Information gain: A good opening word should maximize information gain by including high-frequency letters (e.g., E, A, R, T) and ideally cover a range of positions to reveal both presence and position clues.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_13",
+      "content": "Constraint tracking: Maintain a dynamic grid of known-included letters, known-excluded letters, and possible positions for each included letter to guide subsequent guesses efficiently.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_14",
+      "content": "Feedback adaptation: Fix confirmed correct letters and vary remaining positions with untested letters to avoid redundancy and accelerate progress, while strictly enforcing established constraints.",
+      "original_id": "G9",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_15",
+      "content": "Entropy prioritization: When feedback is limited, prioritize high-entropy initial guesses to test broad ranges of common letters and maximize unique character coverage.",
+      "original_id": "G10",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_16",
+      "content": "Opening strategy: Use high-information, high-entropy opening words with unique, frequent letters (including vowels and consonants) to maximize coverage, accelerate constraint satisfaction, and maintain a dynamic model of present and absent letters across all positions.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_17",
+      "content": "Feedback interpretation: Treat green letters as fixed in position, systematically test yellow letters across different positions to resolve their correct placement, exclude gray letters from future guesses, and actively place confirmed letters into likely positions while maintaining a systematic record of known constraints to guide subsequent guesses efficiently.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_18",
+      "content": "Early diversity: Ensure initial guesses cover diverse vowels and consonants to avoid insufficient information gathering and inefficient search paths.",
+      "original_id": "G11",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_19",
+      "content": "Multiple occurrences: When feedback indicates multiple instances of a letter, prioritize testing its different positions in subsequent guesses to resolve multiplicity constraints.",
+      "original_id": "G12",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_20",
+      "content": "Entropy-based opening: A good opening strategy involves selecting a word with high entropy—such as one containing multiple unique, high-frequency vowels and consonants (e.g., 'tears', 'stare')—to maximize the number of distinct letters tested early and reveal as much information as possible.",
+      "original_id": "G13",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_21",
+      "content": "Pivot strategy: Once a green or yellow letter is identified, use it as a pivot point to explore its possible positions in subsequent guesses. If a letter is marked as present but misplaced, systematically try placing it in each untested position until the correct one is found.",
+      "original_id": "G14",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_22",
+      "content": "Positional tracking: Maintain a structured record of confirmed and excluded letters per position to avoid redundant guesses and ensure efficient pruning of the search space. This helps reduce the number of required attempts and increases the likelihood of success within the limit.",
+      "original_id": "G15",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 7
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**:  \nMaximize information gain by prioritizing diverse, high-frequency letter coverage in early moves, systematically track and apply positional constraints from feedback, and iteratively refine guesses to test unresolved uncertainties while avoiding redundant patterns.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**:  \nSystematically isolate and test uncertain variables by fixing known constraints, introducing one new possibility at a time while maintaining consistency with all prior feedback to maximize information gain and reduce solution space efficiently.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_2",
+      "content": "**L1 Pattern-Level Strategy**:  \nMaximize early information gain by selecting initial guesses that cover high-frequency letters and diverse positions, then iteratively refine subsequent guesses by systematically applying feedback to fix confirmed letters, eliminate invalid options, and explore remaining possibilities under established constraints.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "Principle: **Systematically reduce uncertainty by maximizing information gain through strategic exploration and constraint enforcement.**  \nThis works because it balances proactive testing of new possibilities with strict adherence to known constraints, ensuring each action contributes meaningfully to narrowing the solution space.  \nThe benefit is efficient problem-solving that minimizes redundant effort and accelerates convergence toward the correct solution across diverse domains.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 2
+    }
+  ],
+  "stats": {
+    "total_l0": 23,
+    "total_l1": 3,
+    "total_l2": 1
+  }
+}

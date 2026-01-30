@@ -623,13 +623,13 @@ chmod +x .venv/bin/activate
 
 ```bibtex
 @misc{training_free_grpo,
-  title={Training-Free Group Relative Policy Optimization}, 
-  author={Tencent Youtu Lab},
-  year={2025},
-  eprint={2510.08191},
-  archivePrefix={arXiv},
-  primaryClass={cs.CL},
-  url={https://arxiv.org/abs/2510.08191}, 
+      title={Training-Free Group Relative Policy Optimization}, 
+      author={Tencent Youtu Lab},
+      year={2025},
+      eprint={2510.08191},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2510.08191}, 
 }
 ```
 

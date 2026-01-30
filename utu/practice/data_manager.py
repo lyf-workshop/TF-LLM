@@ -54,13 +54,18 @@ class TrainingFreeGRPODataManager(DBDataManager):
                 priority = []
                 rest = []
                 for dp in datapoints:
-                    key = MistakeBank.problem_key(dp.dataset, int(dp.index))
+                    # Handle None index (use 0 as default)
+                    dp_index = int(dp.index) if dp.index is not None else 0
+                    key = MistakeBank.problem_key(dp.dataset, dp_index)
                     (priority if key in failed_records else rest).append(dp)
 
                 # High-value failures first (recent + low reward + repeated failures).
                 priority.sort(
                     key=lambda dp: bank.score_for_sampling(
-                        failed_records[MistakeBank.problem_key(dp.dataset, int(dp.index))],
+                        failed_records[MistakeBank.problem_key(
+                            dp.dataset, 
+                            int(dp.index) if dp.index is not None else 0
+                        )],
                         now_ts=now_ts,
                     ),
                     reverse=True,

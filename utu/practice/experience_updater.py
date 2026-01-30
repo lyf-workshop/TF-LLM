@@ -30,11 +30,10 @@ class _RolloutGroupStats:
 
 
 class ExperienceUpdater:
-    def __init__(self, config: AgentConfig, agent_objective: str, learning_objective: str, is_korgym: bool = False):
+    def __init__(self, config: AgentConfig, agent_objective: str, learning_objective: str):
         self.config = config
         self.agent_objective = agent_objective
         self.learning_objective = learning_objective
-        self.is_korgym = is_korgym  # 标记是否为 KORGym 游戏
         self.prompts = FileUtils.load_prompts("practice/experience.yaml")
         self.llm = SimplifiedAsyncOpenAI(**config.model.model_provider.model_dump())
 
