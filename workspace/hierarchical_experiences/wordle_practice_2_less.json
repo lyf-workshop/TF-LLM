@@ -1,0 +1,89 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Initial Feedback: Use a structured approach to eliminate impossible letters and positions based on feedback to narrow down possibilities and make informed guesses.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_1",
+      "content": "Feedback Integration: Systematically track and update constraints from feedback to guide subsequent guesses and form a focused, strategic approach.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_2",
+      "content": "Feedback Refinement: Consider multiple occurrences of the same letter and systematically explore different positions for letters known to be in the word but in the wrong spots.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_3",
+      "content": "Feedback Interpretation: Systematically deduce the positions of known letters and consider multiple instances of the same letter. Use a structured approach to explore different combinations to maximize information gain.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_4",
+      "content": "Initial Information Gathering: Use common English words to maximize feedback about letters and their positions. Systematically interpret feedback to place known letters, ensuring all constraints are satisfied.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_5",
+      "content": "Dynamic Adjustment: Dynamically adjust the guess by exploring different permutations of known letters and introducing new letters to gather more information, using a systematic approach to deduce the correct positions and satisfy known constraints.",
+      "original_id": "G5",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_6",
+      "content": "Repeated Letters: When interpreting feedback, consider the possibility of repeated letters and their positions, checking if a letter marked as in the word but in the wrong spot appears again and deduce its correct positions systematically.",
+      "original_id": "G6",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 8
+    },
+    {
+      "id": "L0_10",
+      "content": "L0 (Case-level): Specific Successful Guess Sequence: In a game where 'CRANE' was the solution, the sequence 'RAISE', 'CRIME', 'CRANE' effectively narrowed down the correct word by systematically placing known letters and exploring different positions.",
+      "original_id": "G7",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_11",
+      "content": "L1 (Pattern-level): Strategic Opening Words: Start with words like 'CRANE' or 'RAISE' that cover a wide range of common letters to maximize initial feedback and systematically explore and confirm the positions of known letters to efficiently narrow down the correct word.",
+      "original_id": "G8",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    },
+    {
+      "id": "L0_12",
+      "content": "L2 (Meta-level): Universal Deductive Reasoning: Apply a systematic approach to deduce the correct word by integrating feedback, considering multiple occurrences of letters, and dynamically adjusting guesses to explore different permutations and introduce new letters to gather more information.",
+      "original_id": "G9",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 7
+    }
+  ],
+  "stats": {
+    "total_l0": 10,
+    "total_l1": 0,
+    "total_l2": 0
+  }
+}

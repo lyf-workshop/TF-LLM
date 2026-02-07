@@ -33,19 +33,19 @@ def list_experiments():
             select(EvaluationSample.exp_id).distinct()
         ).all()
         
-        print("\n" + "=" * 70)
-        print("评估实验列表 (Evaluation Experiments)")
-        print("=" * 70)
+        # print("\n" + "=" * 70)
+        # print("评估实验列表 (Evaluation Experiments)")
+        # print("=" * 70)
         
-        if eval_exps:
-            for exp_id in sorted(eval_exps):
-                count = session.exec(
-                    select(EvaluationSample)
-                    .where(EvaluationSample.exp_id == exp_id)
-                ).all()
-                print(f"  - {exp_id} ({len(count)} samples)")
-        else:
-            print("  (无评估实验)")
+        # if eval_exps:
+        #     for exp_id in sorted(eval_exps):
+        #         count = session.exec(
+        #             select(EvaluationSample)
+        #             .where(EvaluationSample.exp_id == exp_id)
+        #         ).all()
+        #         print(f"  - {exp_id} ({len(count)} samples)")
+        # else:
+        #     print("  (无评估实验)")
         
         # 获取所有数据集
         datasets = session.exec(

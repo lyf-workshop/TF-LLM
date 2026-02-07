@@ -1,0 +1,1467 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Stable foundation: When solving crosswords, prioritize clues with high confidence answers first to build a stable base and reduce errors.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_1",
+      "content": "Intersection check: Use intersecting letters between horizontal and vertical entries to refine guesses and resolve ambiguities.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_2",
+      "content": "Clue breakdown: Break down complex or pun-based clues into components to improve interpretation accuracy.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_3",
+      "content": "External knowledge use: Leverage external databases for ambiguous clues, especially pop culture or regional terms.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_4",
+      "content": "Iterative solving: Solve high-confidence clues first and use overlapping letters to refine uncertain answers.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_5",
+      "content": "Fallback strategy: When external puzzle generation fails, the agent should implement a fallback such as generating a minimal example puzzle internally to continue practicing deduction techniques.",
+      "original_id": "G5",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_6",
+      "content": "Clue prioritization: When solving crossword clues, prioritize concise and commonly used answers that match expected word lengths to avoid over-interpreting.",
+      "original_id": "G6",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_7",
+      "content": "Reasoning documentation: Document the reasoning process explicitly when solving clues based on internal knowledge to identify gaps and improve generalization.",
+      "original_id": "G7",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_8",
+      "content": "Inter-clue validation: Incorporate inter-clue validation by cross-checking intersecting letters when possible to reduce cascading errors and improve robustness.",
+      "original_id": "G8",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_9",
+      "content": "Grid-aware solving: Validate letter overlaps between intersecting entries, starting with high-confidence answers to anchor the grid.",
+      "original_id": "G9",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_10",
+      "content": "Constraint propagation: When multiple answers intersect, anchor high-confidence answers first to deduce uncertain entries.",
+      "original_id": "G10",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_11",
+      "content": "Word length validation: Always validate potential answers against expected word lengths and ensure they align with intersecting entries.",
+      "original_id": "G11",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_12",
+      "content": "Cultural Clues: For culturally or contextually specific clues, consult external knowledge bases to verify relationships and roles.",
+      "original_id": "G12",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_13",
+      "content": "Idiomatic clues: When a clue contains idiomatic language or cultural references, prioritize contextual interpretation over direct synonym matching.",
+      "original_id": "G13",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_14",
+      "content": "Cryptic clue indicators: Identify and interpret cryptic clue indicators like hidden words, anagrams, and reversals for accurate solving.",
+      "original_id": "G14",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_15",
+      "content": "Clue decomposition: Break down multi-part or cryptic clues into components and consider multiple interpretations to reduce misinterpretation.",
+      "original_id": "G15",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_16",
+      "content": "Avoid multi-word guesses: Prefer single-word answers unless the clue explicitly indicates a phrase or multi-word solution.",
+      "original_id": "G16",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_17",
+      "content": "Candidate generation: When solving crossword puzzles without a visible grid, prioritize generating multiple candidate answers for ambiguous clues and systematically test them for consistency with others.",
+      "original_id": "G17",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_18",
+      "content": "Multiple Candidates: When solving cryptic or indirect clues, prioritize generating multiple candidate answers and select one based on intersecting letter constraints rather than choosing the first plausible option.",
+      "original_id": "G18",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_19",
+      "content": "Clue Context Check: When solving culturally specific or ambiguous clues, prioritize verifying the context rather than relying solely on name recognition.",
+      "original_id": "G19",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_20",
+      "content": "Clue Interpretation: Consider multiple interpretations for cryptic or multi-part clues, especially when answers may involve song titles, book characters, or idioms.",
+      "original_id": "G20",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_21",
+      "content": "Proper Noun Caution: Flag ambiguous proper nouns for later refinement instead of making speculative guesses.",
+      "original_id": "G21",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_22",
+      "content": "Ambiguous clues: Use factual recall and external validation for ambiguous or context-dependent clues to avoid errors like misnaming 'Barrie' instead of 'Barrett'.",
+      "original_id": "G22",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_23",
+      "content": "Error guidance: When a technical failure occurs, the agent should guide the user toward actionable next steps rather than providing a generic error message, such as suggesting a different seed, checking connectivity, or reporting the issue via a structured format.",
+      "original_id": "G23",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_24",
+      "content": "Graceful degradation: Transition smoothly to alternative interaction modes when core functionality fails, ensuring continued puzzle-solving support.",
+      "original_id": "G24",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_25",
+      "content": "Manual input fallback: When automatic generation fails, prompt the user for manual clues or layout to maintain progress.",
+      "original_id": "G25",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 56
+    },
+    {
+      "id": "L0_26",
+      "content": "Stable foundation: When solving crosswords, prioritize high-confidence answers first to anchor uncertain entries through overlapping letters, maintaining grid consistency and reducing errors.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_27",
+      "content": "Clue breakdown: Break down complex or pun-based clues into components to improve interpretation accuracy. Incorporate fallback strategies like external knowledge sources or pattern-matching techniques for ambiguous or less familiar clues.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_28",
+      "content": "External knowledge use: Leverage external databases for ambiguous or culturally specific clues, including slang, idioms, pop culture references, and general knowledge (e.g., dictionary, geography) to verify potential answers before finalizing them.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_29",
+      "content": "Iterative solving: Solve high-confidence clues first and use overlapping letters to iteratively deduce uncertain answers, improving consistency and reducing cascading errors.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_30",
+      "content": "Fallback strategy: When external puzzle generation fails, the agent should implement a retry or fallback strategy using internal defaults or alternate configurations (e.g., try a different seed or use a pre-defined template) to increase robustness and reduce dependency on user intervention.",
+      "original_id": "G5",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_31",
+      "content": "Inter-clue validation: Incorporate inter-clue validation by cross-referencing intersecting letters and clues to iteratively refine uncertain answers and reduce cascading errors.",
+      "original_id": "G8",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_32",
+      "content": "Grid-aware solving: Validate letter overlaps between intersecting entries and ensure consistency with existing answers when adding new ones.",
+      "original_id": "G9",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_33",
+      "content": "Constraint propagation: When multiple answers intersect, anchor high-confidence answers first to deduce uncertain entries, especially when clues are ambiguous or involve multi-layered meaning. This reduces error propagation and improves solution accuracy.",
+      "original_id": "G10",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_34",
+      "content": "Word length validation: Always validate potential answers against expected word lengths and use overlapping letter logic to iteratively refine guesses, especially for ambiguous or culturally specific clues.",
+      "original_id": "G11",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_35",
+      "content": "Cultural Clues: For culturally or contextually specific clues, verify the contextual accuracy of potential answers (e.g., whether a phrase was commonly associated with an event) rather than relying solely on name recognition.",
+      "original_id": "G12",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_36",
+      "content": "Idiomatic clues: When a clue contains idiomatic language, regional expressions, or cultural references, prioritize contextual interpretation over direct synonym matching and ensure alignment with common usage patterns in English-speaking regions, especially U.S. contexts.",
+      "original_id": "G13",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_37",
+      "content": "Conventional answer alignment: Always align answers with standard crossword conventions—keep answers concise, avoid unnecessary spaces or compound words unless required by the grid, and ensure lengths match expected patterns.",
+      "original_id": "G16",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_38",
+      "content": "Candidate generation: When solving crossword puzzles without a visible grid, prioritize generating multiple candidate answers for ambiguous clues and systematically test them for consistency with others, while explicitly checking for consistency between overlapping clues to avoid invalidating the solution.",
+      "original_id": "G17",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_39",
+      "content": "Multiple Candidates: When solving cryptic or indirect clues, prioritize generating multiple candidate answers and select one based on intersecting letter constraints (including word length and overlapping letters) rather than choosing the first plausible option.",
+      "original_id": "G18",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_40",
+      "content": "Contextual validation: When interpreting ambiguous or culturally specific clues, validate answers through contextual knowledge and consider alternative interpretations to avoid misidentification (e.g., recognizing 'Borat' as a character).",
+      "original_id": "G19",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_41",
+      "content": "Clue Interpretation: Consider multiple interpretations for cryptic or multi-part clues, especially when answers may involve song titles, book characters, idioms, and ensure alignment with known letter constraints and intersecting clues to reduce contradictions.",
+      "original_id": "G20",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_42",
+      "content": "Error guidance: When a technical failure occurs, the agent should implement a structured error-handling workflow that includes validating input parameters (e.g., checking if the seed is numeric), offering a retry mechanism with adjusted values, and providing clear guidance on next steps.",
+      "original_id": "G23",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_43",
+      "content": "Graceful degradation: When external dependencies such as game generation fail, the agent should adopt a principle of graceful degradation by offering multiple fallback options (e.g., suggesting alternative games, attempting with new seeds, or switching to manual puzzle-solving mode).",
+      "original_id": "G24",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_44",
+      "content": "Manual input fallback: When automatic generation fails, prompt the user for manual clues or layout to maintain progress, or offer a pre-defined solvable crossword as a fallback task.",
+      "original_id": "G25",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_45",
+      "content": "Gridless prioritization: When the crossword grid is unavailable, prioritize shorter and unambiguous clues to build a stable base for consistency checks with intersecting entries.",
+      "original_id": "G26",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_46",
+      "content": "Cultural music clues: When solving crossword clues involving music or pop culture, prioritize known artists and song titles that match the clue and expected word length.",
+      "original_id": "G27",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_47",
+      "content": "Proactive engagement: Use structured prompts or template-based puzzles to maintain momentum and improve resilience when complete user-provided inputs are unavailable.",
+      "original_id": "G28",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_48",
+      "content": "Semantic fluency: When solving crossword clues, prioritize semantic and cultural fluency by mapping familiar phrases, names, and idioms directly to likely answers.",
+      "original_id": "G29",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_49",
+      "content": "Idiomatic phrasing: When solving idiomatic or phrasal clues, avoid compound guesses and prioritize standard crossword equivalents.",
+      "original_id": "G30",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_50",
+      "content": "Brand clue handling: For brand/product-related clues, favor well-known names used in crosswords and consider formatting (e.g., hyphenation).",
+      "original_id": "G31",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_51",
+      "content": "Idiomatic interpretation: When encountering idiomatic or phrasal clues, consider both literal and figurative meanings to find precise solutions.",
+      "original_id": "G32",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_52",
+      "content": "Mechanism specificity: For clues involving mechanisms or processes, prioritize specific technical terms over vague descriptions to improve consistency and accuracy.",
+      "original_id": "G33",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_53",
+      "content": "Nuanced Descriptions: When solving clues involving emotional or physical descriptions, prioritize words that capture the exact nuance rather than broad synonyms to ensure accuracy.",
+      "original_id": "G34",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_54",
+      "content": "Cryptic validation: When solving cryptic-style clues, explore multiple interpretations and validate them through intersecting letters to ensure grid consistency.",
+      "original_id": "G35",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_55",
+      "content": "Conventional format adherence: Follow standard crossword conventions like word length and abbreviation rules to align with expected answer formats and reduce errors.",
+      "original_id": "G36",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_56",
+      "content": "Direct mapping prioritization: When solving ambiguous or idiomatic clues, prioritize those with direct known term mappings to build a foundation for verification.",
+      "original_id": "G37",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_57",
+      "content": "Cross-check feedback loop: Validate answers by ensuring compatibility with adjacent entries, especially in complex grids, using cross-checking to reduce errors and improve accuracy.",
+      "original_id": "G38",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_58",
+      "content": "Failure recovery: When encountering unhandled or failed input, the agent should acknowledge the failure and offer structured recovery options to guide meaningful next actions.",
+      "original_id": "G39",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_59",
+      "content": "Failure logging: Log the nature of failures internally to avoid repeating them in future interactions and improve long-term performance.",
+      "original_id": "G40",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_60",
+      "content": "Error recovery protocol: Integrate proactive error detection and recovery protocols. If a game fails to load after retries, switch to a simpler mode or provide a partial solution based on known patterns from previous puzzles.",
+      "original_id": "G41",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_61",
+      "content": "Phonetic Clue Handling: For pun-based or phonetic clues, prioritize interpreting them as wordplay rather than literal meaning to avoid misinterpretation.",
+      "original_id": "G42",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_62",
+      "content": "Length validation: Always verify the length of potential answers against the number of white squares in the grid. Long phrases may be semantically correct but structurally invalid in many crossword formats.",
+      "original_id": "G43",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_63",
+      "content": "Compound term caution: Avoid constructing overly long or concatenated phrases unless they are known abbreviations or rebus-style entries.",
+      "original_id": "G44",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_64",
+      "content": "Speculative reasoning: In the absence of valid input, generate plausible placeholder clues based on common crossword patterns to maintain engagement and test deduction capabilities.",
+      "original_id": "G45",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_65",
+      "content": "Phonetic clues: When solving cryptic or pun-based clues, prioritize phonetic similarity and wordplay over direct synonym mapping to avoid misinterpretation.",
+      "original_id": "G46",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_66",
+      "content": "Clue decomposition: When dealing with idiomatic or cryptic clues, prioritize breaking them into components (definition + wordplay) and consider common crossword abbreviations or expressions before attempting direct translation.",
+      "original_id": "G47",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_67",
+      "content": "Feedback validation: When solving intersecting crossword entries, implement a feedback mechanism to validate letter overlaps and refine earlier guesses based on later answers to ensure grid consistency.",
+      "original_id": "G48",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_68",
+      "content": "Phonetic and semantic balance: When solving cryptic-style or pun-based clues, prioritize both phonetic similarity and semantic accuracy.",
+      "original_id": "G49",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_69",
+      "content": "Error diagnostics: When encountering recurring or unknown errors, the agent should implement a basic diagnostic and logging mechanism to record the nature of the failure, which can later be used to refine error-handling policies or inform users about potential workarounds.",
+      "original_id": "G50",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_70",
+      "content": "Anagram awareness: When solving cryptic-style clues, detect anagrams and be aware of letter counts to improve accuracy and reduce ambiguity.",
+      "original_id": "G51",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_71",
+      "content": "Cultural knowledge with disambiguation: For pop culture or literature-based clues, use prior knowledge of well-known works and artists but apply contextual disambiguation when multiple interpretations are possible.",
+      "original_id": "G52",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_72",
+      "content": "Grid simulation: When solving crossword clues independently, prioritize validating answers against intersecting entries by simulating the grid and ensuring letter overlaps are consistent across directions.",
+      "original_id": "G53",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_73",
+      "content": "Educational fallback: When automatic puzzle generation fails, pivot to delivering structured educational content on solving strategies, clue types, and deduction techniques.",
+      "original_id": "G54",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_74",
+      "content": "Idiomatic interpretation: When solving cryptic or ambiguous clues, prioritize semantic and idiomatic interpretations over literal ones to align with standard crossword phrasing.",
+      "original_id": "G55",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_75",
+      "content": "Placeholder caution: Avoid fabricated or overly long placeholder words; instead, explore synonyms and valid English word options that match the clue and length constraints.",
+      "original_id": "G56",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_76",
+      "content": "Idiomatic recognition: When solving clues involving idioms or colloquial expressions, prioritize recognizing common phrases and their condensed forms to improve accuracy in culturally specific clues.",
+      "original_id": "G57",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_77",
+      "content": "TV Clue Verification: When encountering TV-related clues, prioritize verifying character relationships using known databases or scripts to avoid misassociations.",
+      "original_id": "G58",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_78",
+      "content": "Word form standardization: Prioritize word forms that align with standard crossword conventions (e.g., 'griffin' over 'gryphon') to ensure compatibility and reduce conflicts.",
+      "original_id": "G59",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_79",
+      "content": "Letter extraction: When cryptic clues specify letter positions (e.g., 'letters 3, 5 & 7'), extract only those characters to form the answer.",
+      "original_id": "G60",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_80",
+      "content": "Graceful degradation: When encountering system-level input failures, activate pre-defined fallback mechanisms to maintain task continuity and extract learning signals.",
+      "original_id": "G61",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_81",
+      "content": "Word length estimation: When solving crossword clues, always check if the proposed answer fits the expected number of letters based on the grid layout. If the grid is unknown, estimate word length by analyzing intersecting clues and shared letters.",
+      "original_id": "G62",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_82",
+      "content": "Single-word preference: Avoid using hyphenated or multi-word phrases as answers unless explicitly indicated by the clue or format. Standard crossword rules require single-word answers per clue.",
+      "original_id": "G63",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_83",
+      "content": "Clue independence: Prioritize interpreting each clue independently using semantic and contextual understanding, while also estimating word lengths and checking for overlaps with other entries—even in the absence of a visible grid.",
+      "original_id": "G64",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_84",
+      "content": "Avoid slang in idioms: When solving clues with idiomatic or pretentious phrasing, avoid informal guesses and prioritize standard crossword-friendly terms that fit intersecting constraints.",
+      "original_id": "G65",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_85",
+      "content": "Phrase completion strategy: For clues referencing common phrases, prioritize completing the full phrase even if it requires revisiting earlier answers to maintain grid coherence.",
+      "original_id": "G66",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_86",
+      "content": "Literary fact-checking: When encountering literary references in clues, verify the author and work using external sources or databases to prevent misattribution.",
+      "original_id": "G67",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_87",
+      "content": "Input clarity guidance: When ambiguity or invalid input is detected, prompt the user with structured, minimal-viable requirements (e.g., number of clues, word lengths, example format) rather than generic requests like 'provide a puzzle.'",
+      "original_id": "G68",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_88",
+      "content": "Scientific terminology: When faced with technical or scientific terms, favor well-established terminology over speculative or colloquial alternatives.",
+      "original_id": "G69",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_89",
+      "content": "Cultural spelling consistency: For culturally or historically specific clues (e.g., cities, myths), prefer full and conventional spellings over abbreviations or less common variants to maintain standard crossword norms.",
+      "original_id": "G70",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_90",
+      "content": "Idiomatic clues: When solving ambiguous or metaphorical clues, prioritize idiomatic and contextual interpretation over literal definitions to increase accuracy.",
+      "original_id": "G71",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_91",
+      "content": "External verification: Use external sources or synonym tools for ambiguous clues to explore alternatives and improve accuracy instead of relying on assumptions.",
+      "original_id": "G72",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_92",
+      "content": "Quote attribution: When solving a crossword clue involving a famous quote or line from media, prioritize mapping the quote to its known speaker or character rather than guessing based on vague associations.",
+      "original_id": "G73",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_93",
+      "content": "Dietary restriction clues: For clues about dietary restrictions like avoiding bread and pasta, consider modern health terms such as 'glutenfree' rather than generic alternatives.",
+      "original_id": "G74",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_94",
+      "content": "Contextual phrasing: When solving ambiguous or multi-word clues, apply contextual knowledge (e.g., fast-food terminology) to ensure the answer fits both the clue and letter constraints.",
+      "original_id": "G75",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_95",
+      "content": "Domain specificity: For clues involving brand names or specialized terms, prioritize domain-specific knowledge sources to avoid confusion with unrelated fields.",
+      "original_id": "G76",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_96",
+      "content": "Pop culture prioritization: When solving clues involving music or pop culture, prioritize real-world associations over abstract definitions to ensure accuracy.",
+      "original_id": "G77",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_97",
+      "content": "Ambiguous validation: Always validate ambiguous or unfamiliar answers using standard crossword conventions or external sources to confirm typical usage and length expectations.",
+      "original_id": "G78",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_98",
+      "content": "Cultural patterns: Prioritize clues with clear cultural or linguistic patterns (e.g., idioms, brand names, pop culture) to build a foundation for more ambiguous clues.",
+      "original_id": "G79",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_99",
+      "content": "Phonetic answers: When solving phonetic or wordplay clues, prioritize concise and standard crossword-friendly answers that match the expected letter count.",
+      "original_id": "G80",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_100",
+      "content": "Spelling accuracy: Ensure spelling and grammatical correctness for compound phrases or idioms in answers (e.g., 'lap up' instead of 'lapprove').",
+      "original_id": "G81",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_101",
+      "content": "Iterative refinement: Incorporate feedback mechanisms to iteratively refine answers based on shared letters between intersecting clues.",
+      "original_id": "G82",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_102",
+      "content": "External verification: Use external resources or built-in dictionaries to verify uncertain answers and ensure they fit typical crossword constraints.",
+      "original_id": "G83",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_103",
+      "content": "Idiomatic phrasing: When dealing with idiomatic or phrasal clues, prioritize short, commonly-used expressions that match typical crossword answer formats.",
+      "original_id": "G84",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 50
+    },
+    {
+      "id": "L0_104",
+      "content": "Stable foundation: When solving crosswords, prioritize high-confidence answers first to anchor uncertain entries through overlapping letters. This strategy helps maintain grid consistency, constrain possible solutions for ambiguous clues, and reduce the likelihood of contradictions later in the solving process.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_105",
+      "content": "External knowledge use: Leverage external databases for ambiguous or culturally specific clues, including slang, idioms, pop culture references, and general knowledge (e.g., dictionary, geography) to verify potential answers before finalizing them. Incorporate external tools or dictionary lookups for less familiar or potentially ambiguous clues, especially when multiple interpretations are possible.",
+      "original_id": "G3",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_106",
+      "content": "Iterative solving: Solve high-confidence clues first and use overlapping letters to iteratively deduce uncertain answers, improving consistency and reducing cascading errors. This systematic approach reduces the risk of inconsistencies and improves overall puzzle-solving efficiency when multiple clues remain unsolved.",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_107",
+      "content": "Multiple Candidates: When solving cryptic or indirect clues, prioritize generating multiple candidate answers and select one based on intersecting letter constraints (including word length and overlapping letters) rather than choosing the first plausible option. When multiple valid answers exist for a clue, leverage the number of letters and intersecting entries to refine the choice, reducing ambiguity and increasing accuracy in complex grids.",
+      "original_id": "G17",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_108",
+      "content": "Ambiguous clue validation: Use factual recall and external validation for ambiguous or context-dependent clues by applying fallback strategies like checking alternative interpretations (e.g., verifying if Sarah Palin fits the definition of a 'journalist') to ensure alignment with the clue’s intent.",
+      "original_id": "G22",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_109",
+      "content": "Error guidance: When a technical failure occurs, the agent should implement a structured error-handling workflow that includes validating input parameters (e.g., checking if the seed is numeric), offering a retry mechanism with adjusted values, logging detailed error information to support future diagnosis and learning, and providing clear guidance on next steps.",
+      "original_id": "G23",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_110",
+      "content": "Manual input fallback: When automatic generation fails, switch to manual input mode, use example puzzles, or prompt for user-provided clues to maintain engagement and progress.",
+      "original_id": "G25",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_111",
+      "content": "Idiomatic clues: When solving ambiguous or metaphorical clues, prioritize idiomatic and contextual interpretation over literal definitions to increase accuracy. For example, 'I'm ready for another customer!' maps better to 'READYFORSERVICE' than to a full sentence or phrase.",
+      "original_id": "G71",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_112",
+      "content": "Anchor high-confidence: When solving a crossword puzzle, always prioritize high-confidence answers first and use them to anchor and constrain other answers through shared letters and grid structure.",
+      "original_id": "G85",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_113",
+      "content": "Multiple interpretations: Avoid assuming a single interpretation for ambiguous or idiomatic clues; consider multiple possible meanings and validate them against intersecting entries if possible.",
+      "original_id": "G86",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_114",
+      "content": "External verification: Use external tools like dictionary APIs or fact-checkers to verify high-uncertainty answers before finalizing them.",
+      "original_id": "G87",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_115",
+      "content": "Feedback loop consistency: Maintain a feedback mechanism to periodically validate logical consistency among intersecting entries when solving crosswords without visible grids.",
+      "original_id": "G88",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_116",
+      "content": "Intersection refinement: When solving ambiguous or less familiar clues, prioritize using intersecting letters from already solved clues to narrow down possibilities and increase confidence in uncertain answers.",
+      "original_id": "G89",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_117",
+      "content": "Early constraint application: Always consider word length and letter overlaps during initial clue interpretation, not as an afterthought, to avoid later inconsistencies and reduce the need for backtracking.",
+      "original_id": "G90",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_118",
+      "content": "Fallback simulation: When game generation fails or inputs are incomplete, simulate a plausible crossword structure using available metadata (e.g., seed, game type, word count) to maintain engagement and refine solving strategies.",
+      "original_id": "G91",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_119",
+      "content": "Pop culture reference matching: When a clue contains a pop culture reference (e.g., 'ABBA title girl'), prioritize matching known songs or iconic figures associated with the artist, especially if the answer has a well-known title or name.",
+      "original_id": "G92",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_120",
+      "content": "Self-referential clues: When encountering self-referential or double-meaning clues (e.g., 'Airline flying irregularly'), consider using the word 'irregular' itself as a possible solution, as such clues often embed the answer within the phrasing.",
+      "original_id": "G93",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_121",
+      "content": "External validation: When solving ambiguous or less-known clues, the agent should selectively use external tools (e.g., web search or synonym databases) to confirm or reject hypotheses.",
+      "original_id": "G94",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_122",
+      "content": "Conventional alignment: When multiple plausible interpretations exist for a clue, prioritize answers that align with standard crossword conventions (e.g., abbreviations, acronyms, concise phrasing).",
+      "original_id": "G95",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_123",
+      "content": "Semantic nuance: When encountering ambiguous or culturally specific clues, the agent should prioritize semantic nuance and context over direct dictionary matches to ensure alignment with standard crossword conventions.",
+      "original_id": "G96",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_124",
+      "content": "Concise answers: When solving crossword clues, prioritize concise, single-word answers that align with standard crossword conventions, especially when dealing with numbered squares and potential overlaps with other entries.",
+      "original_id": "G97",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_125",
+      "content": "Answer validation: Always verify the spelling and length of proposed answers against both the clue and the assumed grid structure, and be prepared to revisit earlier answers if later ones conflict.",
+      "original_id": "G98",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_126",
+      "content": "Metaphorical clues: When faced with abstract or metaphorical clues, prioritize idiomatic and culturally familiar phrases that align with standard crossword conventions.",
+      "original_id": "G99",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_127",
+      "content": "Iterative validation: Incorporate iterative validation by checking overlapping letters between horizontal and vertical entries. Even if initial guesses are correct, conflicting intersections can indicate hidden errors.",
+      "original_id": "G100",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_128",
+      "content": "Metadata reconstruction: When encountering failed game generation, the agent should attempt to reconstruct the expected puzzle using available metadata (e.g., seed values) before seeking user support.",
+      "original_id": "G101",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_129",
+      "content": "Length and cross-check: When solving clues independently, always cross-check potential answers against the expected word length and ensure compatibility with intersecting entries to avoid conflicts and improve accuracy.",
+      "original_id": "G102",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_130",
+      "content": "Concise phrasing: Use standard crossword phrasing and abbreviations (e.g., 'THRU' for drive-thru, 'AGREE' for sees eye to eye), even when the full phrase seems more intuitive. Crossword puzzles favor concise and stylized answers.",
+      "original_id": "G103",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_131",
+      "content": "Conventional interpretation: When solving cryptic or ambiguous crossword clues, prioritize interpreting them through the lens of common crossword conventions rather than literal definitions.",
+      "original_id": "G104",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_132",
+      "content": "Grid-aware validation: When multiple clues share intersecting letters, always validate tentative answers against each other. A grid-aware strategy that simulates overlaps can significantly reduce error rates and improve overall consistency.",
+      "original_id": "G105",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_133",
+      "content": "Concise idiomatic answers: When solving ambiguous or idiomatic clues, prioritize concise, commonly seen crossword answers over direct or literal translations.",
+      "original_id": "G106",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_134",
+      "content": "Gridless constraint use: Always consider the structural constraints of the crossword grid, such as word length and overlapping letters, even if the grid itself is not visible. Use high-confidence answers to constrain possibilities for intersecting entries and refine guesses iteratively.",
+      "original_id": "G107",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_135",
+      "content": "Cryptic disambiguation: When solving cryptic or wordplay-based clues, prioritize separating definitions from wordplay elements first to construct accurate answers that align with standard crossword conventions.",
+      "original_id": "G108",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_136",
+      "content": "Tool validation: Use dictionary or synonym tools to confirm potential answers for unfamiliar or ambiguous clues before finalizing them.",
+      "original_id": "G109",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_137",
+      "content": "Input failure handling: When encountering input failures like missing or corrupted game states, implement a diagnostic routine including logging, retrying, and escalation to human intervention for improved resilience.",
+      "original_id": "G110",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_138",
+      "content": "Semantic-grid alignment: When multiple plausible answers exist for a clue, prioritize those that align with both semantic meaning and grid constraints by checking intersecting letters first.",
+      "original_id": "G111",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_139",
+      "content": "Single-word preference: When solving crossword clues, prioritize single-word answers even if the clue appears to suggest a phrase; always verify the number of letters required and ensure compatibility with intersecting entries.",
+      "original_id": "G112",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_140",
+      "content": "Internal consistency check: Avoid referencing external clues (e.g., 'see 33-down') unless the puzzle explicitly provides such cross-references; instead, use internal consistency checks between horizontal and vertical entries.",
+      "original_id": "G113",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_141",
+      "content": "Phrase completion: When solving cryptic or phrasal clues, prioritize completing the full phrase (e.g., 'and by sea') rather than guessing individual components to align with standard crossword conventions.",
+      "original_id": "G114",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_142",
+      "content": "Global validation: Always validate each proposed word against both its clue and intersecting entries to ensure grid-wide consistency and avoid contradictions from locally valid but globally inconsistent answers.",
+      "original_id": "G115",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_143",
+      "content": "Character-based clues: When dealing with character-based clues (e.g., actors or journalists), prioritize known roles and characters over generic names to increase accuracy.",
+      "original_id": "G116",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_144",
+      "content": "Movie title prioritization: When solving movie-related clues, consider full titles and cultural references rather than partial or incorrect variations to ensure alignment with standard crossword answers.",
+      "original_id": "G117",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_145",
+      "content": "Phonetic hotel chains: For wordplay-based hotel chain clues, prioritize phonetically similar terms that match the clue’s implied meaning and letter constraints.",
+      "original_id": "G118",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_146",
+      "content": "Internal validation: When encountering ambiguous or invalid inputs, the agent should first perform internal validation or consult known configurations to reduce user back-and-forth and improve efficiency.",
+      "original_id": "G119",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_147",
+      "content": "Idiomatic interpretation: When solving crossword clues involving cultural references or wordplay, prioritize idiomatic or metaphorical interpretations over literal ones.",
+      "original_id": "G120",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_148",
+      "content": "Inter-clue compatibility: Always verify candidate answers by checking their compatibility with intersecting clues, especially when multiple answers are uncertain.",
+      "original_id": "G121",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_149",
+      "content": "Error-handling pipeline: When encountering external system failures, implement a structured error-handling workflow that includes logging the issue, retrying with validated parameters, and offering fallback solutions.",
+      "original_id": "G122",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_150",
+      "content": "Phonetic validation: When solving cryptic-style clues involving phonetic puns or wordplay, consider multiple meanings and validate consistency with intersecting entries.",
+      "original_id": "G123",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_151",
+      "content": "Phonetic clue handling: When solving pun-based or homophonic clues, consider both the literal meaning and phonetic similarity to identify wordplay answers.",
+      "original_id": "G124",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_152",
+      "content": "Compact phrasing prioritization: When clues involve multi-word phrases or character names, prioritize using the most standard and compact form suitable for crossword grids (e.g., 'Borat' over longer alternatives).",
+      "original_id": "G125",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_153",
+      "content": "Fallback robustness: When the expected input (e.g., generated crossword puzzle) fails to materialize, transition immediately to a manual input mode and provide structured prompts for users to supply clues directly.",
+      "original_id": "G126",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_154",
+      "content": "Idiomatic interpretation: When solving crossword puzzles with metaphorical or idiomatic clues, prioritize identifying the core meaning rather than a literal interpretation. For example, 'Popped with a low blow' benefits from recognizing the phrase as a metaphor for emotional defeat, leading to a better fit like 'deflated.'",
+      "original_id": "G127",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_155",
+      "content": "Input continuity: When an external system fails to provide valid input (e.g., a crossword puzzle), the agent should proactively request a retry or ask for a specific puzzle to maintain task continuity and avoid unnecessary user interaction.",
+      "original_id": "G128",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_156",
+      "content": "Anchor-based solving: When solving crossword clues, prioritize high-confidence answers first and use them as anchors to deduce less familiar ones by leveraging intersecting letters and shared patterns.",
+      "original_id": "G129",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_157",
+      "content": "Validation refinement: Incorporate a step-by-step validation mechanism—such as checking letter overlaps or using external knowledge tools—to systematically verify and refine guesses when uncertainty arises.",
+      "original_id": "G130",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_158",
+      "content": "Quote validation: For ambiguous or culturally specific clues involving quotes, validate the speaker or source using external references to avoid misattribution.",
+      "original_id": "G131",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_159",
+      "content": "Intersecting validation: When solving ambiguous or idiomatic clues, prioritize validating the answer against intersecting entries to ensure consistency and reduce errors caused by isolated guesswork.",
+      "original_id": "G132",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_160",
+      "content": "Cultural clue validation: When encountering culturally or linguistically rich clues (e.g., song titles, book characters), leverage pre-existing knowledge but always confirm it fits both the clue definition and the spatial constraints of the crossword grid.",
+      "original_id": "G133",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_161",
+      "content": "Internal fallback: When external game environments fail, activate internal puzzle templates or rules-based solvers to maintain task continuity.",
+      "original_id": "G134",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_162",
+      "content": "Plausible simulation: When input is ambiguous or unresolvable, simulate a plausible version of the task using known patterns before seeking user clarification.",
+      "original_id": "G135",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_163",
+      "content": "Definition first: When solving cryptic-style clues with indicators like '*', prioritize identifying the definition part before attempting wordplay to anchor the solution and reduce guesswork.",
+      "original_id": "G136",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_164",
+      "content": "Brand verification: For brand/product-related clues, prioritize well-known names and verify against known product lines to avoid mispronunciations or misspellings (e.g., 'wham-o' instead of 'whamola').",
+      "original_id": "G137",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_165",
+      "content": "Cryptic interpretation: When solving cryptic or multi-layered clues, prioritize identifying double definitions, hidden words, or wordplay before defaulting to direct interpretations.",
+      "original_id": "G138",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_166",
+      "content": "Recovery protocol: When encountering unresolvable or incomplete inputs, implement a structured recovery protocol with retries, alternatives, or clarification queries instead of generic error messages.",
+      "original_id": "G139",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_167",
+      "content": "Concise phrase handling: When a clue appears to be a phrase or sentence, prioritize finding a concise synonym or abbreviation that fits the expected crossword format (typically 3–8 letters).",
+      "original_id": "G140",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_168",
+      "content": "Meta recovery: When a puzzle fails to generate or becomes unsolvable, the agent should default to meta-level recovery strategies like using common crossword patterns or constructing a minimal solvable subset manually.",
+      "original_id": "G141",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_169",
+      "content": "Confidence anchoring: When faced with ambiguous or multi-interpretation clues, prioritize high-confidence answers first and use them to constrain possible solutions for less certain ones.",
+      "original_id": "G142",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_170",
+      "content": "Grid structure awareness: Always consider the structure of the crossword grid—even when it's not visible—by validating word lengths and ensuring overlapping letters are consistent between horizontal and vertical entries.",
+      "original_id": "G143",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_171",
+      "content": "Grid-aware validation: Ensure word answers align with intersecting entries and incorporate a grid-aware step to check overlapping letter consistency before finalizing.",
+      "original_id": "G144",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_172",
+      "content": "Contextual disambiguation: For ambiguous or idiomatic clues, consider multiple interpretations and use contextual or length-based constraints to resolve them, especially when they interact with other grid entries.",
+      "original_id": "G145",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_173",
+      "content": "Partial validation: When solving crosswords with multiple intersecting entries, always validate partial answers using overlapping letters to ensure consistency across both horizontal and vertical directions.",
+      "original_id": "G146",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_174",
+      "content": "Multi-interpretation prioritization: When solving ambiguous or multi-layered clues, consider multiple interpretations and prioritize those that align with intersecting entries to ensure grid consistency.",
+      "original_id": "G147",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    },
+    {
+      "id": "L0_175",
+      "content": "Uncertainty validation: Incorporate external validation mechanisms when uncertainty arises. Even high-confidence answers should be confirmed via dictionary, database, or contextual checks if they impact intersecting clues.",
+      "original_id": "G148",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 52
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**:  \nPrioritize solving high-confidence clues first, use overlapping letters to iteratively refine uncertain answers, and decompose complex clues into manageable parts to improve accuracy and consistency across the puzzle.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**:  \nUse a constraint-driven, iterative solving approach by prioritizing high-confidence answers, validating interdependencies between clues and grid positions, and maintaining explicit reasoning to refine and correct deductions systematically.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_2",
+      "content": "**L1 Pattern-Level Strategy**:  \nUse contextual and structural analysis—such as intersecting constraints, word length validation, and identification of clue types (e.g., idiomatic, cryptic)—to iteratively anchor high-confidence answers and deduce uncertain entries in a coherent sequence.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "Principle: **Leverage structured, constraint-based reasoning with iterative refinement to manage uncertainty and build robust solutions.**  \nThis works because it systematically reduces ambiguity by anchoring decisions in known constraints and validating them against interdependent elements.  \nThe benefit is a scalable approach that minimizes errors, accelerates progress, and adapts to evolving information across complex problem domains.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 2
+    }
+  ],
+  "stats": {
+    "total_l0": 176,
+    "total_l1": 3,
+    "total_l2": 1
+  }
+}

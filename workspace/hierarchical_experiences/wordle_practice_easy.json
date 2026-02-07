@@ -1,0 +1,80 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Systematic Exploration: When multiple letters are confirmed, systematically explore remaining positions by trying different letters and avoiding repetition of previous guesses.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_1",
+      "content": "Position Adjustment: Systematically test and adjust the positions of known letters to narrow down possibilities when initial feedback indicates multiple correct letters but incorrect positions.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_2",
+      "content": "Initial Guesses: Choose words with high letter diversity for initial guesses to maximize information gain, and systematically test hypotheses in subsequent guesses by placing known correct letters in their correct positions.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_3",
+      "content": "Systematic Exploration: When multiple letters are confirmed, systematically explore remaining positions by trying different letters, avoiding repetition of previous guesses, and tracking exact positions to efficiently narrow down the correct word.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_4",
+      "content": "Initial Guesses: Start with a word containing common letters to gather broad feedback, and iteratively refine guesses by avoiding incorrect letters, placing green and yellow letters in the correct positions, and systematically exploring different positions for known letters to maximize information gain.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_5",
+      "content": "Systematic Exploration: When multiple letters are confirmed, systematically explore remaining positions by trying different letters, avoiding repetition of previous guesses, and tracking exact positions to efficiently narrow down the correct word. Maintain a list of known correct positions and use it to guide future guesses to fully utilize the information from each guess and avoid repeating guesses.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_6",
+      "content": "Initial Guesses: Start with a word containing a wide range of common letters to gather broad initial feedback, and iteratively refine guesses by placing known correct letters in their correct positions, avoiding incorrect letters, and systematically exploring different positions for known letters to maximize information gain and efficiently narrow down the possible words.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 3
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**: \n\n\"Start with high-diversity words to maximize initial information gain, then systematically explore and adjust the positions of confirmed letters while avoiding repetition of incorrect guesses to efficiently narrow down the correct word.\"",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 1
+    }
+  ],
+  "l2_experiences": [],
+  "stats": {
+    "total_l0": 7,
+    "total_l1": 1,
+    "total_l2": 0
+  }
+}

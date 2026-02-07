@@ -1,6 +1,6 @@
 # @package _global_
 defaults:
-  - /agents/practice/wordle_agent@agent
+  - /agents/practice/wordle_agent@agent  # Base agent (no experiences)
   - _self_
 
 exp_id: "wordle_eval_llm_rerank"

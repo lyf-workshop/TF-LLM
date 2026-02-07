@@ -1,9 +1,12 @@
 # @package _global_
-defaults:
-  - /agents/practice/wordle_practice_2_agent@agent
+defaults :
+  - /agents/practice/wordle_practice_easy_agent@agent  # ✅ Use base agent WITHOUT experiences
   - _self_
 
-exp_id: "wordle_practice_eval_20_43"
+# ⚠️ IMPORTANT: Use base wordle_agent (no experiences) when experience_filter is enabled
+# The experiences will be loaded from JSON and filtered by LLM
+
+exp_id: "wordle_practice_eval_20_54"
 
 # Evaluation dataset configuration (same as baseline)
 data:
@@ -31,7 +34,7 @@ korgym:
 # ===== LLM-Based Experience Filtering Configuration =====
 # This configuration demonstrates the new LLM reranking feature for intelligent experience selection
 experience_filter:
-  enabled: true
+  enabled: false
   strategy: "llm_rerank"  # Use LLM-based reranking (static | retrieval | llm_rerank)
   
   # External experience source (load from hierarchical experience JSON)
@@ -44,7 +47,7 @@ experience_filter:
     method: "static"  # static | bm25 | all
     max_l2: null      # Include all L2 (meta-strategy) experiences
     max_l1: null      # Include all L1 (pattern-level) experiences
-    max_l0: 30        # Limit L0 (case-level) to 30 to reduce noise
+    max_l0: 10        # Limit L0 (case-level) to 30 to reduce noise
   
   # Stage 2: LLM reranking
   llm_rerank:
@@ -52,7 +55,7 @@ experience_filter:
     model: "qwen3-32b"           # LLM model for reranking
     temperature: 0.1              # Low temperature for stable scoring
     max_candidates: 20            # Maximum experiences to evaluate with LLM
-    final_top_k: 8                # Final number of experiences to inject into agent
+    final_top_k: 5                # Final number of experiences to inject into agent
     include_reasoning: true       # Log LLM reasoning for scores
     scoring_criteria:             # Evaluation criteria
       - "relevance"               # How relevant to current task

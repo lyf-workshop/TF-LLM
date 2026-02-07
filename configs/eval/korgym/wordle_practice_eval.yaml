@@ -1,9 +1,9 @@
 # @package _global_
 defaults:
-  - /agents/practice/wordle_practice_agent@agent
+  - /agents/practice/wordle_practice_easy_agent@agent
   - _self_
 
-exp_id: "wordle_practice_eval"
+exp_id: "wordle_practice_eval_medium_4"
 
 # Evaluation dataset configuration (same as baseline)
 data:
@@ -11,7 +11,7 @@ data:
   type: "single"
 
 # Evaluation settings
-concurrency: 2
+concurrency: 6
 pass_k: 1
 
 # Verification function settings
@@ -30,7 +30,7 @@ korgym:
 
 # Experience filtering configuration (NEW!)
 experience_filter:
-  enabled: true              # 启用经验筛选
+  enabled: false              # 启用经验筛选
   strategy: "static"         # 使用静态筛选策略
   max_l2: 2                 # 最多保留 3 条 L2（元策略）
   max_l1: 3                 # 最多保留 5 条 L1（模式级）

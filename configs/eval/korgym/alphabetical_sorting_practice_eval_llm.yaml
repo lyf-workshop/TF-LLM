@@ -1,0 +1,65 @@
+# @package _global_
+defaults:
+  - /agents/practice/alphabetical_sorting_agent@agent  # ✅ 使用基础 agent（无经验）
+  - _self_
+
+# ⚠️ IMPORTANT: 使用关键词检索时，必须用不含经验的基础 agent
+# 经验会从 JSON 文件加载并通过 BM25 检索筛选后注入
+
+exp_id: "alphabetical_sorting_practice_eval_llm_14"
+
+# Evaluation dataset configuration (same as baseline)
+data:
+  dataset: "KORGym-AlphabeticalSorting-Eval-50"
+  type: "single"
+
+# Evaluation settings
+concurrency: 16
+pass_k: 1
+
+# Verification function settings
+verify_filename: "korgym.py"
+verify_func_name: "verify_func"
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_name: "22-alphabetical_sorting"
+  game_host: "localhost"
+  game_port: 8776
+  level: 3  # 排序难度等级
+  max_rounds: 1  # 单轮游戏
+  timeout_per_game: 300
+
+# ===== LLM-Based Experience Filtering Configuration =====
+# This configuration demonstrates the new LLM reranking feature for intelligent experience selection
+experience_filter:
+  enabled: true
+  strategy: "llm_rerank"  # Use LLM-based reranking (static | retrieval | llm_rerank)
+  
+  # External experience source (load from hierarchical experience JSON)
+  experience_source: "workspace/hierarchical_experiences/alphabetical_sorting_practice.json"
+  
+  # Two-stage filtering: Recall + Rerank
+  
+  # Stage 1: Recall candidates
+  recall:
+    method: "static"  # static | bm25 | all
+    max_l2: null      # Include all L2 (meta-strategy) experiences
+    max_l1: null      # Include all L1 (pattern-level) experiences
+    max_l0: 15        # Limit L0 (case-level) to 30 to reduce noise
+  
+  # Stage 2: LLM reranking
+  llm_rerank:
+    enabled: true
+    model: "qwen2.5-72b-instruct"           # LLM model for reranking
+    temperature: 0.1              # Low temperature for stable scoring
+    max_candidates: 20            # Maximum experiences to evaluate with LLM
+    final_top_k: 12                # Final number of experiences to inject into agent
+    include_reasoning: true       # Log LLM reasoning for scores
+    scoring_criteria:             # Evaluation criteria
+      - "relevance"               # How relevant to current task
+      - "generalization"          # How broadly applicable
+      - "actionability"           # How directly usable
+    timeout: 60                   # API timeout in seconds
+

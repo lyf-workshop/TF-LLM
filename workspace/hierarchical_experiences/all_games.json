@@ -1,0 +1,450 @@
+{
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**: Systematically generate and verify candidate words using lexicographic order and a dictionary to ensure completeness and accuracy, while efficiently handling letter frequency and avoiding revisits.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L1_1",
+      "content": "**L1 Pattern-Level Strategy**: \"Use a systematic search algorithm (e.g., depth-first search or breadth-first search) to explore all possible paths and validate each step using lexicographic order to ensure accurate and efficient sorting of words or items.\"",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 0,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L1_2",
+      "content": "**L1 Pattern-Level Strategy**: Systematically generate and verify candidate words using lexicographic order, frequency counting, and a comprehensive dictionary to ensure accuracy and completeness in sorting tasks.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 1,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L1_3",
+      "content": "**L1 Pattern-Level Strategy**: \"Use a systematic search algorithm (e.g., DFS or BFS) to explore all possible paths and validate each step using lexicographic order to ensure accurate and efficient sorting of words or items.\"",
+      "source_l0_ids": [
+        "L0_15",
+        "L0_16",
+        "L0_17",
+        "L0_18",
+        "L0_19"
+      ],
+      "step": 2,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L1_4",
+      "content": "**L1 Pattern-Level Strategy**:\n\"Systematically generate and verify candidate words in lexicographic order, stopping verification at the first invalid letter, and prioritize the lexicographically smallest valid word to ensure accurate and efficient alphabetical sorting.\"",
+      "source_l0_ids": [
+        "L0_20",
+        "L0_21",
+        "L0_22",
+        "L0_23",
+        "L0_24"
+      ],
+      "step": 0,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L1_5",
+      "content": "**L1 Pattern-Level Strategy**: \n\n\"Systematically use lexicographic order to prioritize and verify candidate words or paths, ensuring each step maintains the correct alphabetical sequence and all possible valid paths are considered without redundancy, using search algorithms like DFS or BFS for thorough and efficient verification.\"",
+      "source_l0_ids": [
+        "L0_25",
+        "L0_26",
+        "L0_27",
+        "L0_28",
+        "L0_29"
+      ],
+      "step": 0,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L1_6",
+      "content": "**L1 Pattern-Level Strategy**:\n\"Systematically generate and verify candidate words in lexicographic order, using a comprehensive word list and frequency analysis to ensure completeness and efficiency, and stop verification as soon as an invalid path or letter is found.\"",
+      "source_l0_ids": [
+        "L0_30",
+        "L0_31",
+        "L0_32",
+        "L0_33",
+        "L0_34"
+      ],
+      "step": 1,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L1_7",
+      "content": "**L1 Pattern-Level Strategy**:\n\"Use a systematic search algorithm (e.g., DFS or BFS) to explore all possible paths in a grid, prioritizing and verifying candidate words in lexicographic order to ensure efficient and accurate sorting and path validation. Maintain lexicographic order at each step, avoid revisiting cells, and verify the presence of all required letters to enhance sorting accuracy and efficiency.\"",
+      "source_l0_ids": [
+        "L0_35",
+        "L0_36",
+        "L0_37",
+        "L0_38",
+        "L0_39"
+      ],
+      "step": 2,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L1_8",
+      "content": "**L1 Pattern-Level Strategy**: \"When solving crossword puzzles, systematically interpret clues by considering word length, context, and grid fit, and cross-verify potential answers to ensure consistency and accuracy across the puzzle.\"",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_9",
+      "content": "**L1 Pattern-Level Strategy**: \"Systematically cross-verify each proposed answer using a combination of general knowledge, common crossword patterns, and external resources, ensuring that all words fit both horizontally and vertically in the grid.\"",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_10",
+      "content": "**L1 Pattern-Level Strategy**: \"Systematically verify each proposed word by cross-referencing with the crossword grid, intersecting letters, and external resources to ensure accuracy and contextual appropriateness.\"",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 2,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_11",
+      "content": "**L1 Pattern-Level Strategy**: \"Systematically verify each word by cross-referencing with the crossword grid, considering multiple interpretations of clues, and using external resources to ensure correctness and fit.\"",
+      "source_l0_ids": [
+        "L0_15",
+        "L0_16",
+        "L0_17",
+        "L0_18",
+        "L0_19"
+      ],
+      "step": 3,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_12",
+      "content": "**L1 Pattern-Level Strategy**: \"Systematically analyze and verify each answer by cross-referencing the clue context, word length, and intersecting words in the crossword grid to ensure accuracy and consistency.\"",
+      "source_l0_ids": [
+        "L0_20",
+        "L0_21",
+        "L0_22",
+        "L0_23",
+        "L0_24"
+      ],
+      "step": 0,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_13",
+      "content": "**L1 Pattern-Level Strategy**: \"When solving a crossword puzzle, systematically cross-reference each deduced word with the grid to ensure it fits both horizontally and vertically, and use external resources or tools to verify the correctness and explore multiple possible answers for each clue to enhance accuracy and completeness.\"",
+      "source_l0_ids": [
+        "L0_25",
+        "L0_26",
+        "L0_27",
+        "L0_28",
+        "L0_29"
+      ],
+      "step": 1,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_14",
+      "content": "**L1 Pattern-Level Strategy**: \"When solving crossword puzzles, systematically validate each potential answer by considering word length, context, and fit into the grid, and use external tools or resources to cross-check and ensure accuracy and consistency across all clues and intersecting words.\"",
+      "source_l0_ids": [
+        "L0_30",
+        "L0_31",
+        "L0_32",
+        "L0_33",
+        "L0_34"
+      ],
+      "step": 2,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_15",
+      "content": "**L1 Pattern-Level Strategy**: \"Systematically cross-verify and cross-check all proposed answers using a combination of general knowledge, common crossword patterns, and external resources to ensure logical consistency and correct fit within the crossword grid.\"",
+      "source_l0_ids": [
+        "L0_35",
+        "L0_36",
+        "L0_37",
+        "L0_38",
+        "L0_39"
+      ],
+      "step": 3,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_16",
+      "content": "**L1 Pattern-Level Strategy**: \"Systematically verify each proposed answer by cross-referencing with intersecting clues and the crossword grid, and use external resources to ensure accuracy and fit.\"",
+      "source_l0_ids": [
+        "L0_40",
+        "L0_41",
+        "L0_42",
+        "L0_43",
+        "L0_44"
+      ],
+      "step": 4,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_17",
+      "content": "**L1 Pattern-Level Strategy**:\n\"Systematically verify each word by cross-referencing with the crossword grid, considering multiple interpretations of clues, and using external resources like dictionaries and crossword solvers to ensure correctness and consistency.\"",
+      "source_l0_ids": [
+        "L0_45",
+        "L0_46",
+        "L0_47",
+        "L0_48",
+        "L0_49"
+      ],
+      "step": 0,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_18",
+      "content": "**L1 Pattern-Level Strategy**: \"Systematically analyze and verify each clue by considering its context, word meaning, and length, and cross-reference answers with the crossword grid and external tools to ensure accuracy and consistency.\"",
+      "source_l0_ids": [
+        "L0_50",
+        "L0_51",
+        "L0_52",
+        "L0_53",
+        "L0_54"
+      ],
+      "step": 1,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_19",
+      "content": "**L1 Pattern-Level Strategy**: \"Systematically cross-reference and verify each deduced word against the crossword grid and use external resources to explore multiple possible answers, ensuring accuracy and consistency in the final solution.\"",
+      "source_l0_ids": [
+        "L0_55",
+        "L0_56",
+        "L0_57",
+        "L0_58",
+        "L0_59"
+      ],
+      "step": 2,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_20",
+      "content": "**L1 Pattern-Level Strategy**: \"When solving crossword puzzles, systematically interpret clues by considering word length, context, and multiple potential answers, and validate each answer by ensuring it fits the crossword grid and intersects correctly with other words, using external tools or resources as needed to verify accuracy and completeness.\"",
+      "source_l0_ids": [
+        "L0_60",
+        "L0_61",
+        "L0_62",
+        "L0_63",
+        "L0_64"
+      ],
+      "step": 3,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_21",
+      "content": "**L1 Pattern-Level Strategy**: Systematically cross-verify each proposed answer with the crossword grid, using a combination of general knowledge, common patterns, and external resources to ensure correctness and fit, and always check intersections to maintain consistency across all entries.",
+      "source_l0_ids": [
+        "L0_65",
+        "L0_66",
+        "L0_67",
+        "L0_68",
+        "L0_69"
+      ],
+      "step": 4,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_22",
+      "content": "**L1 Pattern-Level Strategy**: \"Systematically verify each answer by cross-referencing with intersecting letters, checking word length against the grid, and using external resources like dictionaries or crossword-solving tools to ensure accuracy and contextually appropriate solutions.\"",
+      "source_l0_ids": [
+        "L0_70",
+        "L0_71",
+        "L0_72",
+        "L0_73",
+        "L0_74"
+      ],
+      "step": 5,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L1_23",
+      "content": "**L1 Pattern-Level Strategy**:  \nMaximize information gain through strategic initial guesses that cover high-frequency letters and multiple positions, while systematically refining constraints and tracking confirmed/eliminated possibilities to accelerate solution convergence.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0,
+      "source_game": "wordle_practice_2"
+    },
+    {
+      "id": "L1_24",
+      "content": "**L1 Pattern-Level Strategy**:  \nSystematically track and update letter inclusion/exclusion constraints across all positions, prioritize information-rich initial guesses using high-frequency letters, and iteratively test and refine placements to maximize deduction efficiency and minimize uncertainty.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1,
+      "source_game": "wordle_practice_2"
+    },
+    {
+      "id": "L1_25",
+      "content": "**L1 Pattern-Level Strategy**:  \nSystematically track and enforce positional and exclusionary constraints from feedback, while strategically selecting guesses that maximize new information and minimize redundant or invalid letter usage.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 0,
+      "source_game": "wordle_practice_2"
+    },
+    {
+      "id": "L1_26",
+      "content": "**L1 Pattern-Level Strategy**:  \nPrioritize information-rich initial moves that maximize letter and positional diversity, and iteratively refine guesses by reusing confirmed letters in new positions to systematically narrow down the solution space.",
+      "source_l0_ids": [
+        "L0_15",
+        "L0_16",
+        "L0_17",
+        "L0_18",
+        "L0_19"
+      ],
+      "step": 2,
+      "source_game": "wordle_practice_2"
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "**L2 Meta-Strategy**: Principle: Systematically structure and validate candidate solutions using a well-defined order and constraints. This approach ensures completeness and accuracy by methodically exploring all possibilities and verifying each step against established rules. The benefits include reduced errors, improved efficiency, and enhanced reliability in problem-solving across various domains.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 1,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L2_1",
+      "content": "**L2 Meta-Strategy**: \n\nPrinciple: **Systematize and Prioritize Using Lexicographic Order for Efficient and Accurate Verification.** This approach ensures that all potential solutions are considered in a structured and ordered manner, reducing errors and improving efficiency by leveraging the inherent properties of lexicographic order. By systematically verifying and prioritizing candidates, the method ensures thoroughness and optimizes the search process, making it applicable to a wide range of sorting and verification tasks.",
+      "source_l1_ids": [
+        "L1_3",
+        "L1_4",
+        "L1_5"
+      ],
+      "step": 0,
+      "source_game": "alphabetical_sorting_practice"
+    },
+    {
+      "id": "L2_2",
+      "content": "**L2 Meta-Strategy**: \n\nPrinciple: **Systematize and Validate Interdependencies to Ensure Consistency and Accuracy.** This approach works by breaking down complex problems into manageable, verifiable components and ensuring that each part aligns with the whole, reducing errors and enhancing reliability. The benefits include improved accuracy, reduced cognitive load, and a more robust problem-solving framework that can be applied across various domains.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 2,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L2_3",
+      "content": "**Principle: Systematic Verification and Cross-Referencing.** This principle ensures accuracy and consistency by methodically validating each step and cross-referencing with multiple sources and constraints. It reduces errors and enhances reliability by leveraging structured validation and external resources.",
+      "source_l1_ids": [
+        "L1_3",
+        "L1_4",
+        "L1_5"
+      ],
+      "step": 1,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L2_4",
+      "content": "**L2 Meta-Strategy**: \n\nPrinciple: **Systematically validate and cross-verify all components of a solution to ensure consistency and accuracy.** This approach reduces errors by catching inconsistencies early and ensures that all parts of the solution fit together coherently. By systematically verifying each component, you build a robust and reliable solution, which is crucial in complex problem-solving tasks.",
+      "source_l1_ids": [
+        "L1_6",
+        "L1_7",
+        "L1_8"
+      ],
+      "step": 4,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L2_5",
+      "content": "**Principle: Systematic Verification and Cross-Referencing.** This approach ensures accuracy and consistency by validating each step against multiple sources and constraints, reducing the likelihood of errors and enhancing the reliability of the final solution. **Benefits:** It minimizes cognitive load by externalizing verification processes and promotes a thorough, methodical approach that can be applied to various problem-solving tasks, ensuring high accuracy and reliability.",
+      "source_l1_ids": [
+        "L1_9",
+        "L1_10",
+        "L1_11"
+      ],
+      "step": 2,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L2_6",
+      "content": "**Principle: Systematically validate and cross-verify solutions using multiple constraints and external resources.** This approach ensures accuracy and consistency by leveraging both internal knowledge and external tools, reducing the likelihood of errors and enhancing the reliability of the solution. **Benefits**: It provides a robust framework for solving complex problems by systematically addressing all constraints and verifying each step, leading to more accurate and reliable outcomes.",
+      "source_l1_ids": [
+        "L1_12",
+        "L1_13",
+        "L1_14"
+      ],
+      "step": 5,
+      "source_game": "word_puzzle_practice"
+    },
+    {
+      "id": "L2_7",
+      "content": "Principle: **Iteratively maximize information gain while maintaining and refining a constraint-based model of the problem space.**  \nThis works because it balances exploration (gathering new information) with exploitation (applying known constraints), enabling efficient narrowing of possibilities.  \nThe benefit is accelerated convergence to the solution while minimizing wasted effort and reducing uncertainty in complex, constrained environments.",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 0,
+      "source_game": "wordle_practice_2"
+    }
+  ],
+  "stats": {
+    "total_l1": 27,
+    "total_l2": 8,
+    "source_games": 3
+  }
+}

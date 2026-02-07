@@ -1,0 +1,72 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Feedback Interpretation: Systematically explore different positions for known correct letters and avoid repeating guesses without exploring new possibilities.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_1",
+      "content": "Initial Guesses: Choose words that test a wide range of common letters and their positions, using feedback to systematically eliminate incorrect possibilities and refine subsequent guesses.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_2",
+      "content": "Feedback Tracking: Systematically track and update the positions of letters that are correct but misplaced (YELLOW) and the letters that are completely incorrect (GRAY). Use this information to refine subsequent guesses and eliminate impossible words, focusing on the most likely candidates.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_3",
+      "content": "Feedback Interpretation: Systematically explore all possible positions for yellow letters and known correct letters (GREEN). Avoid repeating incorrect guesses and positions. Use a comprehensive list of potential words to narrow down options and consistently update constraints based on feedback.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_4",
+      "content": "Initial Guesses: Choose a diverse set of words to gather more information about the presence and positions of letters. Use feedback to systematically eliminate incorrect possibilities and refine subsequent guesses.",
+      "original_id": "G1",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_5",
+      "content": "Feedback Interpretation: Systematically explore all possible positions for yellow letters and known correct letters (GREEN). Avoid repeating incorrect guesses and positions. Use a comprehensive list of potential words to narrow down options and consistently update constraints based on feedback. Test different positions for yellow letters by trying different combinations of words that fit the constraints to maximize information gain and avoid repetition of incorrect letters.",
+      "original_id": "G0",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 3
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "**L1 Pattern-Level Strategy**: Systematically use feedback to refine guesses, exploring all possible positions for known correct and misplaced letters while avoiding repetition of incorrect guesses, and choose initial words that maximize the diversity of tested letters and positions.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 1
+    }
+  ],
+  "l2_experiences": [],
+  "stats": {
+    "total_l0": 6,
+    "total_l1": 1,
+    "total_l2": 0
+  }
+}

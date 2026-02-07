@@ -1,9 +1,9 @@
 # @package _global_
 defaults:
-  - /agents/practice/word_puzzle_practice_agent@agent
+  - /agents/practice/word_puzzle_practice_easy_medium_hard_agent@agent
   - _self_
 
-exp_id: "word_puzzle_practice_eval_3"
+exp_id: "word_puzzle_practice_eval_easy_medium_hard_3"
 
 # Evaluation dataset configuration (same as baseline)
 data:
@@ -11,7 +11,7 @@ data:
   type: "single"
 
 # Evaluation settings
-concurrency: 32
+concurrency: 16
 pass_k: 1
 
 # Verification function settings
@@ -20,7 +20,7 @@ verify_func_name: "verify_func"
 
 # KORGym specific settings
 korgym:
-  enabled: true
+  enabled: true  # ✅ 启用 KORGym
   game_name: "8-word_puzzle"
   game_host: "localhost"
   game_port: 8775
@@ -28,12 +28,34 @@ korgym:
   max_rounds: 1
   timeout_per_game: 600
 
+# ===== LLM-Based Experience Filtering Configuration =====
+# This configuration demonstrates the new LLM reranking feature for intelligent experience selection
 experience_filter:
-  enabled: true              # 启用经验筛选
-  strategy: "static"         # 使用静态筛选策略
-  max_l2: 2                 # 最多保留 3 条 L2（元策略）
-  max_l1: 3                 # 最多保留 5 条 L1（模式级）
-  max_l0: 0                 # 不保留 L0（案例级）
-  # 以下为动态检索配置（未来扩展）
-  retrieval_top_k: 5
-  retrieval_min_score: 0.0
+  enabled: false
+  strategy: "llm_rerank"  # Use LLM-based reranking (static | retrieval | llm_rerank)
+  
+  # External experience source (load from hierarchical experience JSON)
+  experience_source: "workspace/hierarchical_experiences/word_puzzle_practice.json"
+  
+  # Two-stage filtering: Recall + Rerank
+  
+  # Stage 1: Recall candidates
+  recall:
+    method: "static"  # static | bm25 | all
+    max_l2: null      # Include all L2 (meta-strategy) experiences
+    max_l1: null      # Include all L1 (pattern-level) experiences
+    max_l0: 30        # Limit L0 (case-level) to 30 to reduce noise
+  
+  # Stage 2: LLM reranking
+  llm_rerank:
+    enabled: true
+    model: "qwen3-32b"           # LLM model for reranking
+    temperature: 0.1              # Low temperature for stable scoring
+    max_candidates: 20            # Maximum experiences to evaluate with LLM
+    final_top_k: 14                # Final number of experiences to inject into agent
+    include_reasoning: true       # Log LLM reasoning for scores
+    scoring_criteria:             # Evaluation criteria
+      - "relevance"               # How relevant to current task
+      - "generalization"          # How broadly applicable
+      - "actionability"           # How directly usable
+    timeout: 60                   # API timeout in seconds

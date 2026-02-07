@@ -1,0 +1,61 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: qwen3-32b
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: wordle_agent
+  instructions: "You are an expert Wordle player. Guess the hidden word within 10\
+    \ attempts using feedback.\n\nCRITICAL: First read \"Word length: X\" and always\
+    \ match that length.\nFeedback Meaning:\n- GREEN = correct letter, correct position\
+    \ (lock it)\n- YELLOW = correct letter, wrong position (keep it, move it)\n- GRAY\
+    \ = letter not in word (avoid it unless duplicates are proven)\nStrategy (each\
+    \ round):\n1. Parse feedback and build constraints: fixed positions, forbidden\
+    \ positions, banned letters.\n2. Generate candidates that satisfy all constraints.\n\
+    3. Choose a guess that fits constraints and maximizes new information.\nRequirements\
+    \ for Solving the Problem:\n- Constraint-satisfaction loop: always enforce green/yellow/gray\
+    \ constraints before proposing any guess.\n- Information gain: when multiple candidates\
+    \ fit, pick the one that tests the most unknown letters/positions.\n- Lock greens\
+    \ immediately; keep yellows but move them to new positions not yet tried.\n- Track\
+    \ letter counts: if a letter appears as both gray and colored, it may be limited\
+    \ (use only confirmed count).\n- If stuck, make a high-coverage probe word that\
+    \ fits all constraints and tests new letters.\n- Before submitting, recheck length\
+    \ and all constraints against the guess.\n\nCRITICAL WORD VALIDATION:\n- Your\
+    \ answer MUST be a real, existing English word found in standard dictionaries\n\
+    - NEVER submit made-up words or letter combinations that just fit the constraints\n\
+    - If multiple candidates satisfy constraints, prefer common/familiar words\n\n\
+    Output: Answer: word (lowercase, exact length, MUST be a real existing English\
+    \ word)\n\nWhen solving problems, you MUST first carefully read and understand\
+    \ the helpful instructions and experiences:\n[G0]. [L2-Meta] Principle: **Iteratively\
+    \ maximize information gain while maintaining and refining a constraint-based\
+    \ model of the problem space.**  \nThis works because it balances exploration\
+    \ (gathering new information) with exploitation (applying known constraints),\
+    \ enabling efficient narrowing of possibilities.  \nThe benefit is accelerated\
+    \ convergence to the solution while minimizing wasted effort and reducing uncertainty\
+    \ in complex, constrained environments.\n[G1]. [L1-Pattern] **L1 Pattern-Level\
+    \ Strategy**:  \nMaximize information gain through strategic initial guesses that\
+    \ cover high-frequency letters and multiple positions, while systematically refining\
+    \ constraints and tracking confirmed/eliminated possibilities to accelerate solution\
+    \ convergence.\n[G2]. [L1-Pattern] **L1 Pattern-Level Strategy**:  \nSystematically\
+    \ track and update letter inclusion/exclusion constraints across all positions,\
+    \ prioritize information-rich initial guesses using high-frequency letters, and\
+    \ iteratively test and refine placements to maximize deduction efficiency and\
+    \ minimize uncertainty.\n[G3]. [L1-Pattern] **L1 Pattern-Level Strategy**:  \n\
+    Systematically track and enforce positional and exclusionary constraints from\
+    \ feedback, while strategically selecting guesses that maximize new information\
+    \ and minimize redundant or invalid letter usage.\n[G4]. [L1-Pattern] **L1 Pattern-Level\
+    \ Strategy**:  \nPrioritize information-rich initial moves that maximize letter\
+    \ and positional diversity, and iteratively refine guesses by reusing confirmed\
+    \ letters in new positions to systematically narrow down the solution space."
+toolkits: {}

@@ -1,0 +1,57 @@
+{
+  "exp_id": "word_puzzle_practice_easy",
+  "updated_ts": 1770286404.3356223,
+  "records": {
+    "KORGym-WordPuzzle-Train-100::0": {
+      "key": "KORGym-WordPuzzle-Train-100::0",
+      "dataset": "KORGym-WordPuzzle-Train-100",
+      "dataset_index": 0,
+      "source": "KORGym",
+      "question": "\nYou are a good game player, I'll give you a game board which is a picture and rules.\nYour task is:\n- First, give your answer according to the game board and rules.\n- Second, output the answer in the required format. The last line of your response should be in the following format: 'Answer: $YOUR_ANSWER' (without quotes), where YOUR_ANSWER is your final answer to the question,e.g.'Answer: [\"happy\",\"person\"]'\nYou need to complete a crossword puzzle that consists of grey and white squares. The solver guesses the words corresponding to the horizontal and vertical directions based on a set of clues. During the decryption process, every white square must be filled with a letter, and the red number in the first white square of each entry corresponds to its clue number. You need to provide all the words in order in your answer as a list, e.g. 'Answer: [\"happy\", \"sad\", ...]'.\n\nClues:\n1. Marriage bureau?\n2. Stop functioning, as a computer\n3. Heartless character in Oz?\n4. Treaties\n5. One of the \"Gilligan's Island\" castaways\n6. How bingo balls are selected\n7. Like some belts sold at Hot Topic\n8. Hand sanitizer brand\n9. Hey, that's enough!\n10. Almanacs, calendars, etc.\n\n",
+      "meta": {
+        "seed": 76,
+        "game_name": "8-word_puzzle",
+        "dataset_type": "train",
+        "game_seed": 76,
+        "game_prompt": "\nYou are a good game player, I'll give you a game board which is a picture and rules.\nYour task is:\n- First, give your answer according to the game board and rules.\n- Second, output the answer in the required format. The last line of your response should be in the following format: 'Answer: $YOUR_ANSWER' (without quotes), where YOUR_ANSWER is your final answer to the question,e.g.'Answer: [\"happy\",\"person\"]'\nYou need to complete a crossword puzzle that consists of grey and white squares. The solver guesses the words corresponding to the horizontal and vertical directions based on a set of clues. During the decryption process, every white square must be filled with a letter, and the red number in the first white square of each entry corresponds to its clue number. You need to provide all the words in order in your answer as a list, e.g. 'Answer: [\"happy\", \"sad\", ...]'.\n\nClues:\n1. Marriage bureau?\n2. Stop functioning, as a computer\n3. Heartless character in Oz?\n4. Treaties\n5. One of the \"Gilligan's Island\" castaways\n6. How bingo balls are selected\n7. Like some belts sold at Hot Topic\n8. Hand sanitizer brand\n9. Hey, that's enough!\n10. Almanacs, calendars, etc.\n\n",
+        "score": 0.0,
+        "success": false,
+        "action": "[\"agency\", \"crash\", \"glinda\", \"pacts\", \"prof\", \"randomly\", \"goth\", \"purell\", \"enough\", \"planners\"]",
+        "verified_state": {
+          "answer": [
+            "sidenote",
+            "amiss",
+            "starsin",
+            "fords",
+            "adverb"
+          ],
+          "clues": [
+            "Tangential remark",
+            "Wrong",
+            "Headlines",
+            "Broncos and Explorers",
+            "Slowly or \"surely\""
+          ],
+          "image_path": "cache/crossword_4043.png",
+          "base64_image": "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",
+          "score": 0.0,
+          "is_end": false,
+          "action": "[\"agency\", \"crash\", \"glinda\", \"pacts\", \"prof\", \"randomly\", \"goth\", \"purell\", \"enough\", \"planners\"]",
+          "response": [
+            "Answer: [\"agency\", \"crash\", \"glinda\", \"pacts\", \"prof\", \"randomly\", \"goth\", \"purell\", \"enough\", \"planners\"]"
+          ],
+          "prompt": "",
+          "epoch": 1,
+          "seed": 76
+        }
+      },
+      "status": "failed",
+      "last_updated_ts": 1770286404.316528,
+      "first_seen_ts": 1770279256.2622273,
+      "attempts": 1500,
+      "last_reward": 0.0,
+      "failure_experience": "[Mistake] Failure mode: reward=0.0. Likely issue(s): context=8-word_puzzle seed=76. Fix: follow output format strictly and adjust strategy based on feedback.",
+      "success_experience": "[Success] Solved 8-word_puzzle seed=90 with reward=0.5. Preserve the key strategy choices that led to this outcome and reuse under similar conditions."
+    }
+  }
+}

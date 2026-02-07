@@ -273,8 +273,8 @@ def generate(seed: int, word_clues_path: str = "high_quality_word_clues.csv"):
     
     while overall_attempts < max_overall_attempts:
         # 随机选择单词数量和难度
-        num = random.randint(5, 15)
-        difficulty = random.randint(5, 9) / 10
+        num = random.randint(11, 15)
+        difficulty = random.randint(7, 9) / 10
         if num > len(valid_words):
             raise ValueError("可用单词不足")
         

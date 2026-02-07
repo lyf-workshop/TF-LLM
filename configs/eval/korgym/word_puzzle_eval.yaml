@@ -1,9 +1,9 @@
 # @package _global_
 defaults:
-  - /agents/practice/word_puzzle_agent@agent
+  - /agents/practice/word_puzzle_agent_off@agent
   - _self_
 
-exp_id: "word_puzzle_baseline_eval"
+exp_id: "word_puzzle_baseline_eval_medium_1"
 
 # Evaluation dataset configuration
 data:
@@ -11,7 +11,7 @@ data:
   type: "single"
 
 # Evaluation settings
-concurrency: 32
+concurrency: 16
 pass_k: 1
 
 # Verification function settings

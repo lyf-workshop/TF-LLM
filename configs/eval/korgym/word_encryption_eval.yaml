@@ -1,0 +1,60 @@
+# @package _global_
+defaults:
+  - /agents/practice/word_encryption_agent@agent  # 使用 word_encryption agent
+  - _self_
+
+exp_id: "word_encryption_eval"
+
+# Evaluation dataset configuration
+data:
+  dataset: "KORGym-WordEncryption-Eval-50"
+  type: "single"
+
+# Evaluation settings
+concurrency: 16
+pass_k: 1
+
+# Verification function settings
+verify_filename: "korgym.py"
+verify_func_name: "verify_func"
+
+# KORGym specific settings
+korgym:
+  enabled: true
+  game_name: "28-word_encryption"
+  game_host: "localhost"
+  game_port: 8775
+  level: 0  # Word encryption doesn't use level parameter
+  max_rounds: 1  # Single-round game
+  timeout_per_game: 600  # 10 minutes per game
+# ===== LLM-Based Experience Filtering Configuration =====
+# This configuration demonstrates the new LLM reranking feature for intelligent experience selection
+# ===== 关键词检索（BM25）经验筛选配置 =====
+experience_filter:
+  enabled: true 
+  # 📌 作用：启用经验筛选功能
+  
+  strategy: "retrieval"  
+  # 📌 作用：使用 BM25 关键词检索策略（static | retrieval | llm_rerank）
+  # - static: 按层级数量截断（不看内容）
+  # - retrieval: 按关键词相关性检索（本配置使用的）
+  # - llm_rerank: 用 LLM 智能重排（需要 API 成本）
+  
+  experience_source: "workspace/hierarchical_experiences/all_games.json"
+  # 📌 作用：指定从哪个 JSON 文件加载经验库
+  # 这个文件是训练阶段生成的，包含 L0/L1/L2 三层经验
+  
+  retrieval_top_k: 6
+  # 📌 作用：BM25 检索返回多少条最相关的经验
+  # 值越大，注入的经验越多（但可能引入噪声）
+  # 推荐：5-10 条
+  
+  retrieval_min_score: 0.0
+  # 📌 作用：BM25 评分的最低阈值，低于此分数的经验会被过滤
+  # 0.0 表示不设阈值，只按 top_k 选取
+  # 可以设置如 0.5 来过滤掉相关性太低的经验
+  
+  # ===== 以下是 legacy 参数（retrieval 策略下不使用）=====
+  max_l2: null  # 仅在 static 策略下生效
+  max_l1: null  # 仅在 static 策略下生效
+  max_l0: null  # 仅在 static 策略下生效  

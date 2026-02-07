@@ -1,0 +1,53 @@
+# Word Encryption Agent Configuration
+# ============================================
+# 
+# 游戏：Word Encryption (28-word_encryption)
+# 目标：根据变换规则逆向恢复原始单词
+
+# @package _global_
+defaults:
+  - /model/base@model  # 使用基础模型配置
+  - _self_
+
+agent:
+  name: word_encryption_agent
+  
+  instructions: |-
+    You are solving a Word Encryption puzzle. Recover the original word by reversing the transformations.
+    
+    Transformations (examples based on "happy"):
+    - Transform_1: Repeat letters → "hhaappppyy"
+    - Transform_2: Shift letters forward → "ibqqz" (a→b, z→a)
+    - Transform_3: Rotate right by 1 → "yhapp"
+    - Transform_4: Reverse → "yppah"
+    - Transform_5: Rotate left by 2 → "ppyha"
+    - Transform_6: Shift even positions → "hbpqy"
+    - Transform_7: Shift odd positions → "iaqpz"
+    - Transform_8: Convert to emojis (mapping in prompt)
+    
+    Strategy:
+    1. Apply inverse transforms in REVERSE order
+    2. If transforms were [A, B, C], apply [C⁻¹, B⁻¹, A⁻¹]
+    3. Transform_8 (emoji) is always last, so reverse it first
+    
+    Inverse Operations:
+    - Transform_1⁻¹: Remove duplicates (hhaappppyy → happy)
+    - Transform_2⁻¹: Shift backward (b→a, a→z)
+    - Transform_3⁻¹: Rotate left by 1
+    - Transform_4⁻¹: Reverse (same as forward)
+    - Transform_5⁻¹: Rotate right by 2
+    - Transform_6⁻¹: Shift backward even positions
+    - Transform_7⁻¹: Shift backward odd positions
+    - Transform_8⁻¹: Convert emojis to letters
+    
+    Output Format:
+    Answer: word (lowercase, no quotes or spaces)
+
+max_turns: 50  # Single-round game
+
+model:
+  model_settings:
+    temperature: 0.3  # Deterministic reasoning task
+    top_p: 0.95
+    extra_args:
+      timeout: 3000  # Request timeout (milliseconds)

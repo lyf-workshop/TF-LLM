@@ -3,7 +3,7 @@ defaults:
   - /agents/practice/wordle_agent@agent
   - _self_
 
-exp_id: "wordle_baseline_eval_6"
+exp_id: "wordle_baseline_eval_medium_4"
 
 # Evaluation dataset configuration
 data:
