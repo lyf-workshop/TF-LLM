@@ -1,0 +1,52 @@
+# @package _global_
+defaults:
+  - /eval/skillsbench/skillsbench_baseline_eval@evaluation
+  - _self_
+
+exp_id: "skillsbench_practice"
+
+# Training-Free GRPO settings
+practice:
+  epochs: 3
+  batch_size: 10          # 2 tasks/batch × grpo_n=5 = 10 rollouts/batch
+  grpo_n: 5              # 5 rollouts per task for richer contrast
+  rollout_concurrency: 2 # keep low: each rollout launches a Docker container
+  rollout_temperature: 0.7
+  rollout_data_truncate: 20  # 20/10 = 2 batches/epoch, 3 epochs = 6 steps total
+  task_timeout: 3600     # 1-hour outer timeout for the whole batch
+  do_eval: false
+  eval_strategy: "epoch"
+
+  agent_objective: |
+    input: A technical task description to be completed inside an isolated Linux environment
+    output: Correct completion of the task by executing bash commands (files created, code run, etc.)
+
+  learning_objective: |
+    Help the agent improve at completing diverse technical tasks by extracting:
+    - L0 (Case-level): Specific bash commands, file paths, and tool invocations that worked
+    - L1 (Pattern-level): Reusable strategies for categories of tasks (data processing, file parsing, etc.)
+    - L2 (Meta-level): Universal principles for systematic problem decomposition and verification
+
+  num_experiences_per_query: 1
+
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5
+    l2_aggregation_threshold: 3
+    max_l0_per_game: 1
+    max_l0_recent: 40
+    include_l0_in_prompt: true
+    experience_save_path: workspace/hierarchical_experiences/skillsbench_practice.json
+    agent_save_path: configs/agents/practice/skillsbench_practice_agent.yaml
+
+# Training dataset
+data:
+  practice_dataset_name: "SkillsBench-Train-40"
+
+# SkillsBench harbor settings (inherited by evaluation sub-config but can override here)
+skillsbench:
+  enabled: true
+  inject_curated_skills: false
+  task_timeout_sec: 900
+  max_agent_iterations: 30
+  env_build_timeout_multiplier: 3.0

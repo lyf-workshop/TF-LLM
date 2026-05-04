@@ -15,6 +15,21 @@ class ExperienceCache:
     """Database-based cache for training experiences."""
 
     @staticmethod
+    def _build_stmt(experiment_name: str, step: int, epoch: int | None, batch: int | None):
+        """Build a SELECT statement that matches by (experiment_name, epoch, batch) when both
+        are provided, falling back to (experiment_name, step) for legacy records."""
+        if epoch is not None and batch is not None:
+            return select(ExperienceCacheModel).where(
+                ExperienceCacheModel.experiment_name == experiment_name,
+                ExperienceCacheModel.epoch == epoch,
+                ExperienceCacheModel.batch == batch,
+            )
+        return select(ExperienceCacheModel).where(
+            ExperienceCacheModel.experiment_name == experiment_name,
+            ExperienceCacheModel.step == step,
+        )
+
+    @staticmethod
     def save_experiences(
         experiment_name: str,
         step: int,
@@ -22,38 +37,28 @@ class ExperienceCache:
         epoch: int | None = None,
         batch: int | None = None,
     ) -> bool:
-        """Save experiences to database.
+        """Save experiences to database keyed by (experiment_name, epoch, batch).
 
-        Args:
-            experiment_name: Name of the experiment
-            step: Step number
-            experiences: Experience data to cache
-            epoch: Epoch number (optional)
-            batch: Batch number (optional)
-            execution_time: Execution time in seconds (optional)
-
-        Returns:
-            bool: True if saved successfully, False otherwise
+        Falls back to (experiment_name, step) when epoch/batch are not provided so
+        that the old call-sites keep working.
         """
         try:
             with SQLModelUtils.create_session() as session:
-                # Check if record already exists
-                stmt = select(ExperienceCacheModel).where(
-                    ExperienceCacheModel.experiment_name == experiment_name, ExperienceCacheModel.step == step
-                )
+                stmt = ExperienceCache._build_stmt(experiment_name, step, epoch, batch)
                 existing_record = session.exec(stmt).first()
 
                 if existing_record:
-                    logger.debug(f"Experience cache for {experiment_name} step {step} already exists, updating.")
+                    key = f"epoch={epoch} batch={batch}" if epoch is not None else f"step={step}"
+                    logger.debug(f"Experience cache for {experiment_name} {key} already exists, updating.")
                     existing_record.experiences = experiences
                     existing_record.timestamp = time.time()
                     existing_record.datetime = datetime.now().isoformat()
+                    existing_record.step = step
                     if epoch is not None:
                         existing_record.epoch = epoch
                     if batch is not None:
                         existing_record.batch = batch
                 else:
-                    # Create new record
                     cache_record = ExperienceCacheModel(
                         experiment_name=experiment_name,
                         step=step,
@@ -66,7 +71,8 @@ class ExperienceCache:
                     session.add(cache_record)
 
                 session.commit()
-                logger.debug(f"Cached experiences for {experiment_name} step {step} to database")
+                key = f"epoch={epoch} batch={batch}" if epoch is not None else f"step={step}"
+                logger.debug(f"Cached experiences for {experiment_name} {key} to database")
                 return True
 
         except Exception as e:
@@ -74,28 +80,27 @@ class ExperienceCache:
             return False
 
     @staticmethod
-    def load_experiences(experiment_name: str, step: int) -> dict[str, Any] | None:
+    def load_experiences(
+        experiment_name: str,
+        step: int,
+        epoch: int | None = None,
+        batch: int | None = None,
+    ) -> dict[str, Any] | None:
         """Load experiences from database.
 
-        Args:
-            experiment_name: Name of the experiment
-            step: Step number
-
-        Returns:
-            Dict[str, Any]: Cached experience data, None if not found
+        Looks up by (experiment_name, epoch, batch) when provided, otherwise falls
+        back to (experiment_name, step) for backward compatibility.
         """
         try:
             with SQLModelUtils.create_session() as session:
-                stmt = select(ExperienceCacheModel).where(
-                    ExperienceCacheModel.experiment_name == experiment_name, ExperienceCacheModel.step == step
-                )
+                stmt = ExperienceCache._build_stmt(experiment_name, step, epoch, batch)
                 record = session.exec(stmt).first()
 
                 if record:
-                    logger.debug(f"🔄 Using cached experiences for {experiment_name} step {step} from database")
+                    key = f"epoch={epoch} batch={batch}" if epoch is not None else f"step={step}"
+                    logger.debug(f"Using cached experiences for {experiment_name} {key} from database")
                     return record.experiences
                 else:
-                    logger.debug(f"No cached experiences found for {experiment_name} step {step}")
                     return None
 
         except Exception as e:
@@ -103,21 +108,16 @@ class ExperienceCache:
             return None
 
     @staticmethod
-    def exists(experiment_name: str, step: int) -> bool:
-        """Check if experiences exist in cache.
-
-        Args:
-            experiment_name: Name of the experiment
-            step: Step number
-
-        Returns:
-            bool: True if exists, False otherwise
-        """
+    def exists(
+        experiment_name: str,
+        step: int,
+        epoch: int | None = None,
+        batch: int | None = None,
+    ) -> bool:
+        """Check if experiences exist in cache."""
         try:
             with SQLModelUtils.create_session() as session:
-                stmt = select(ExperienceCacheModel).where(
-                    ExperienceCacheModel.experiment_name == experiment_name, ExperienceCacheModel.step == step
-                )
+                stmt = ExperienceCache._build_stmt(experiment_name, step, epoch, batch)
                 record = session.exec(stmt).first()
                 return record is not None
 

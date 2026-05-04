@@ -173,6 +173,11 @@ class BaseBenchmark:
         return results
 
     async def rollout_one(self, sample: EvaluationSample) -> EvaluationSample:
+        # SkillsBench tasks are executed entirely inside harbor/Docker –
+        # no TF-LLM agent object is needed here.
+        if self._should_use_skillsbench_harbor(sample):
+            return await self._rollout_skillsbench_harbor(sample)
+
         agent = get_agent(self.config.agent)
         if hasattr(agent, "build"):  # hack, should be removed!
             await agent.build()
@@ -306,6 +311,112 @@ class BaseBenchmark:
             self.dataset.save(sample)
             return sample
     
+    # ------------------------------------------------------------------
+    # SkillsBench harbor execution
+    # ------------------------------------------------------------------
+
+    def _should_use_skillsbench_harbor(self, sample: EvaluationSample) -> bool:
+        """Return True when the sample should be executed via harbor/Docker."""
+        cfg = getattr(self.config, "skillsbench", None)
+        return cfg is not None and getattr(cfg, "enabled", False)
+
+    async def _rollout_skillsbench_harbor(
+        self, sample: EvaluationSample, recorder=None
+    ) -> EvaluationSample:
+        """
+        Execute a SkillsBench task using the harbor sandbox and
+        TFLLMHarborAgent, then record the verifier reward.
+
+        Args:
+            sample: Evaluation sample whose ``augmented_question`` carries a
+                    JSON payload written by ``SkillsBenchProcesser.preprocess_one``.
+            recorder: Optional ``TaskRecorder`` (supplied during TF-GRPO practice).
+        """
+        try:
+            from ...practice.skillsbench_adapter import SkillsBenchAdapter
+        except ImportError as exc:
+            logger.error(f"SkillsBenchAdapter not available: {exc}")
+            sample.update(response="SkillsBench adapter not available", stage="rollout")
+            self.dataset.save(sample)
+            return sample
+
+        meta = sample.meta or {}
+        if isinstance(meta, str):
+            try:
+                meta = json.loads(meta)
+            except json.JSONDecodeError:
+                meta = {}
+
+        task_path = meta.get("task_path", "")
+        if not task_path:
+            logger.error(f"No task_path in meta for sample: {sample.raw_question[:80]}")
+            sample.update(response="No task_path in meta", reward=0.0, stage="rollout")
+            self.dataset.save(sample)
+            return sample
+
+        # Decode experiences / Skills config from augmented_question
+        experiences: dict = {}
+        inject_curated_skills = False
+        if sample.augmented_question:
+            try:
+                payload = json.loads(sample.augmented_question)
+                experiences = payload.get("experiences", {})
+                inject_curated_skills = payload.get("inject_curated_skills", False)
+            except (json.JSONDecodeError, AttributeError):
+                pass
+
+        # Also accept recorder experiences (practice mode)
+        if recorder and recorder.experiences:
+            experiences = {**dict(recorder.experiences), **experiences}
+
+        skills_text = meta.get("skills_text", "")
+
+        adapter = SkillsBenchAdapter(self.config.skillsbench)
+        logger.info(f"Running SkillsBench task: {meta.get('task_id', task_path)}")
+        start_time = time.time()
+        result = await adapter.run_task(
+            task_path=task_path,
+            experiences=experiences,
+            inject_curated_skills=inject_curated_skills,
+            skills_text=skills_text,
+        )
+        elapsed = time.time() - start_time
+
+        if result.error:
+            logger.warning(
+                f"Task {meta.get('task_id')} finished with error: {result.error}"
+            )
+
+        # Build a rich trajectory for the experience updater.
+        # The sparse agent_trajectory.json only has cmd/rc pairs; we augment it
+        # with the full agent_log (harbor stdout) so the LLM can see what each
+        # command actually produced and extract meaningful experiences.
+        enriched_trajectory = result.trajectory or "[]"
+        if result.agent_log:
+            try:
+                traj_steps = json.loads(enriched_trajectory)
+                enriched_trajectory = json.dumps(
+                    [{"agent_log": result.agent_log[:6000], "steps": traj_steps}],
+                    ensure_ascii=False,
+                )
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        # correct_answer is not meaningful for SkillsBench (verifier is a script).
+        # Store the task description so experience_updater has something useful.
+        if not sample.correct_answer:
+            sample.update(correct_answer="[Verified by harbor verifier script]")
+
+        sample.update(
+            response=result.agent_log[:4000] if result.agent_log else result.error,
+            reward=result.reward,
+            time_cost=elapsed,
+            trajectories=enriched_trajectory,
+            stage="rollout",
+        )
+        self.dataset.save(sample)
+        return sample
+
     async def judge(self, stage: str | None = "rollout") -> list[EvaluationSample]:
         """Judge samples.
 

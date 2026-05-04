@@ -107,6 +107,21 @@ class KORGymConfig(ConfigBaseModel):
     """Maximum rounds for multi-turn games"""
 
 
+class SkillsBenchConfig(ConfigBaseModel):
+    """SkillsBench harbor-based evaluation configuration."""
+
+    enabled: bool = False
+    """Whether SkillsBench harbor execution is enabled."""
+    inject_curated_skills: bool = False
+    """If True, inject the task's curated Skills text into the agent system prompt."""
+    task_timeout_sec: int = 600
+    """Wall-clock timeout per task in seconds."""
+    max_agent_iterations: int = 30
+    """Maximum bash-tool iterations the agent may perform per task."""
+    env_build_timeout_multiplier: float = 3.0
+    """Multiplier applied to harbor's default 200s Docker environment build timeout."""
+
+
 class EvalConfig(ConfigBaseModel):
     """Evaluation config"""
 
@@ -143,7 +158,11 @@ class EvalConfig(ConfigBaseModel):
     # KORGym specific configuration
     korgym: KORGymConfig = Field(default_factory=KORGymConfig)
     """KORGym game evaluation configuration"""
-    
+
+    # SkillsBench specific configuration
+    skillsbench: "SkillsBenchConfig" = Field(default_factory=lambda: SkillsBenchConfig())
+    """SkillsBench harbor-based evaluation configuration"""
+
     # Experience filtering configuration
     experience_filter: ExperienceFilterConfig = Field(default_factory=ExperienceFilterConfig)
     """Experience filtering configuration for controlling injected experiences"""

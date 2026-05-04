@@ -186,9 +186,13 @@ class TrainingFreeGRPO:
 
                     # 2. Update experiences based on rollouts
                     with custom_span("Generate batch experiences"):
-                        # Check database cache first
+                        # Check database cache first — use (epoch, batch) as the stable key
+                        # so that changing num_batches across restarts never reuses wrong cache.
                         cached_experiences = ExperienceCache.load_experiences(
-                            experiment_name=self.recorder.experiment_name, step=step
+                            experiment_name=self.recorder.experiment_name,
+                            step=step,
+                            epoch=epoch,
+                            batch=batch_idx,
                         )
                         if cached_experiences is not None and self._should_use_cache(step):
                             logger.info(

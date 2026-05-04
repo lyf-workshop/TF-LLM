@@ -143,19 +143,37 @@ class HierarchicalExperienceManager:
         self.save_experiences()
 
     def _extract_scope_key(self, content: str) -> str | None:
+        """Extract a scope key from experience content.
+
+        Tries several naming conventions used by different benchmarks.
+        For SkillsBench the experience text often contains a backtick-quoted
+        tool name or a recognisable domain noun as the first word of the
+        experience title (e.g. "Docker pre-flight checks:", "Lighthouse audit:").
+        We use the first noun phrase (up to the first ':') as a coarse scope so
+        that experiences about the same topic cluster together.
+        """
         if not content:
             return None
-        patterns = [
+
+        # Explicit key=value patterns (other benchmarks)
+        explicit_patterns = [
             r"game_name\s*[:=]\s*([A-Za-z0-9_\- ]+)",
             r"Game Name\s*:\s*([A-Za-z0-9_\- ]+)",
             r"context=([A-Za-z0-9_\- ]+)",
-            r"problem\s*[:=]\s*([A-Za-z0-9_\- ]+)",
-            r"question\s*[:=]\s*([A-Za-z0-9_\- ]+)",
+            r"task[_ ]id\s*[:=]\s*([A-Za-z0-9_\-]+)",
+            r"task\s*[:=]\s*([A-Za-z0-9_\-]+)",
         ]
-        for pattern in patterns:
+        for pattern in explicit_patterns:
             match = re.search(pattern, content, re.IGNORECASE)
             if match:
                 return match.group(1).strip().lower()
+
+        # SkillsBench-style: "Title phrase: ..." → use normalised title as scope
+        # e.g. "Docker pre-flight checks: Use ..." → scope = "docker pre-flight checks"
+        title_match = re.match(r"^([A-Za-z][A-Za-z0-9 _\-]{2,40}):", content.strip())
+        if title_match:
+            return title_match.group(1).strip().lower()
+
         return None
 
     def _is_too_similar_to_existing_l0(
@@ -163,63 +181,52 @@ class HierarchicalExperienceManager:
         content: str,
         scope_key: str | None,
     ) -> bool:
-        """Enhanced L0 deduplication with adaptive thresholds.
-        
-        Strategy:
-        - With scope: strict dedup within same scope (threshold=0.90, check recent 200)
-        - Without scope: global dedup with lower threshold (threshold=0.85, check all)
-        
-        Args:
-            content: L0 experience content
-            scope_key: Scope identifier (e.g., game name)
-            
-        Returns:
-            True if too similar to existing L0, False otherwise
+        """L0 deduplication using both Jaccard similarity and containment.
+
+        Jaccard alone fails when one experience is a near-superset of another
+        (the extra tokens inflate the union, driving Jaccard down even though the
+        semantic content is identical).  We therefore use a combined score:
+
+            score = max(jaccard, containment)
+
+        where containment = |A∩B| / min(|A|, |B|) measures how much the
+        shorter experience is covered by the longer one.
+
+        Thresholds:
+        - With scope  : 0.80 (strict, within same scope only)
+        - Without scope: 0.72 (global, all experiences)
         """
         if not content or not self.l0_experiences:
             return False
-        
+
         content_tokens = self._tokenize(content)
-        
-        # Case 1: Has scope - strict dedup within same scope
+
         if scope_key is not None:
-            threshold = 0.90  # More aggressive than before (was 0.95)
-            window = 200      # Larger window (was 50)
-            
-            recent = self.l0_experiences[-window:] if len(self.l0_experiences) > window else self.l0_experiences
-            
-            for exp in recent:
-                # Only compare within same scope
-                if exp.get("scope_key") != scope_key:
-                    continue
-                
-                existing = exp.get("content", "")
-                if not existing:
-                    continue
-                
-                similarity = self._jaccard(content_tokens, self._tokenize(existing))
-                if similarity >= threshold:
-                    logger.debug(f"Found similar L0 with scope '{scope_key}' (similarity={similarity:.3f})")
-                    return True
-            
-            return False
-        
-        # Case 2: No scope - global dedup with lower threshold
+            threshold = 0.80
+            window = 200
+            candidates = (
+                self.l0_experiences[-window:]
+                if len(self.l0_experiences) > window
+                else self.l0_experiences
+            )
+            candidates = [e for e in candidates if e.get("scope_key") == scope_key]
         else:
-            threshold = 0.85  # Lower threshold for no-scope experiences
-            
-            # Check against ALL L0 experiences (no window limit)
-            for exp in self.l0_experiences:
-                existing = exp.get("content", "")
-                if not existing:
-                    continue
-                
-                similarity = self._jaccard(content_tokens, self._tokenize(existing))
-                if similarity >= threshold:
-                    logger.debug(f"Found similar L0 without scope (similarity={similarity:.3f})")
-                    return True
-            
-            return False
+            threshold = 0.72
+            candidates = self.l0_experiences
+
+        for exp in candidates:
+            existing = exp.get("content", "")
+            if not existing:
+                continue
+            existing_tokens = self._tokenize(existing)
+            score = self._similarity(content_tokens, existing_tokens)
+            if score >= threshold:
+                logger.debug(
+                    f"Found similar L0 (scope={scope_key}, score={score:.3f})"
+                )
+                return True
+
+        return False
 
     def _tokenize(self, text: str) -> set[str]:
         cleaned = []
@@ -233,30 +240,59 @@ class HierarchicalExperienceManager:
         if not a or not b:
             return 0.0
         return len(a & b) / len(a | b)
+
+    def _containment(self, a: set[str], b: set[str]) -> float:
+        """Fraction of the shorter set's tokens that appear in the other set.
+
+        This catches the case where one experience is a near-superset of another:
+        Jaccard drops when the longer text adds many new words, but containment
+        stays high because the shorter text is almost fully covered.
+        """
+        if not a or not b:
+            return 0.0
+        shorter = a if len(a) <= len(b) else b
+        longer = b if len(a) <= len(b) else a
+        return len(shorter & longer) / len(shorter)
+
+    def _similarity(self, a: set[str], b: set[str]) -> float:
+        """Combined similarity: max(jaccard, containment)."""
+        return max(self._jaccard(a, b), self._containment(a, b))
     
+    def _is_too_similar_to_existing_l1(self, content: str) -> bool:
+        """Dedup check for L1 patterns using the same combined similarity."""
+        if not content or not self.l1_experiences:
+            return False
+        tokens = self._tokenize(content)
+        for exp in self.l1_experiences:
+            existing = exp.get("content", "")
+            if not existing:
+                continue
+            if self._similarity(tokens, self._tokenize(existing)) >= 0.72:
+                return True
+        return False
+
     async def _try_generate_l1(self, step: int):
         """Try to generate L1 from accumulated L0 experiences."""
-        # Get recent L0 experiences not yet aggregated into L1
         recent_l0 = self._get_unaggregated_l0()
-        
+
         if len(recent_l0) >= self.h_config.l1_aggregation_threshold:
             logger.info(f"Generating L1 from {len(recent_l0)} L0 experiences...")
-            
-            # Take the threshold number of L0 experiences
+
             l0_batch = recent_l0[:self.h_config.l1_aggregation_threshold]
-            
-            # Generate L1
             l1_content = await self._generate_l1_from_l0(l0_batch)
-            
+
             if l1_content:
-                l1_exp = {
-                    'id': f"L1_{len(self.l1_experiences)}",
-                    'content': l1_content,
-                    'source_l0_ids': [exp['id'] for exp in l0_batch],
-                    'step': step
-                }
-                self.l1_experiences.append(l1_exp)
-                logger.info(f"Generated L1_{len(self.l1_experiences)-1}")
+                if self._is_too_similar_to_existing_l1(l1_content):
+                    logger.info("Generated L1 is too similar to an existing one; skipping.")
+                else:
+                    l1_exp = {
+                        'id': f"L1_{len(self.l1_experiences)}",
+                        'content': l1_content,
+                        'source_l0_ids': [exp['id'] for exp in l0_batch],
+                        'step': step,
+                    }
+                    self.l1_experiences.append(l1_exp)
+                    logger.info(f"Generated L1_{len(self.l1_experiences)-1}")
     
     async def _try_generate_l2(self, step: int):
         """Try to generate L2 from accumulated L1 experiences and their source L0."""
