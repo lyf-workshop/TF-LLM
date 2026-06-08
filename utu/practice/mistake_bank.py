@@ -60,7 +60,7 @@ def _safe_float(x: Any, default: float = 0.0) -> float:
 class MistakeRecord:
     key: str
     dataset: str
-    dataset_index: int
+    dataset_index: int | str
     source: str | None = None
     question: str | None = None
     meta: dict[str, Any] | None = None
@@ -97,7 +97,7 @@ class MistakeRecord:
         rec = MistakeRecord(
             key=d["key"],
             dataset=d.get("dataset", ""),
-            dataset_index=int(d.get("dataset_index", 0)),
+            dataset_index=d.get("dataset_index", 0),
             source=d.get("source"),
             question=d.get("question"),
             meta=d.get("meta"),
@@ -163,7 +163,7 @@ class MistakeBank:
         os.replace(tmp_path, self.path)
 
     @staticmethod
-    def problem_key(dataset: str, dataset_index: int) -> str:
+    def problem_key(dataset: str, dataset_index: int | str) -> str:
         return f"{dataset}::{dataset_index}"
 
     def score_for_sampling(self, rec: MistakeRecord, now_ts: float | None = None) -> float:
@@ -200,7 +200,7 @@ class MistakeBank:
 
         for s in samples:
             dataset = getattr(s, "dataset", "") or ""
-            dataset_index = int(getattr(s, "dataset_index", 0) or 0)
+            dataset_index = getattr(s, "dataset_index", 0) or 0
             key = self.problem_key(dataset, dataset_index)
 
             rec = self.records.get(key)

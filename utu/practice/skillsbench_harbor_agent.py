@@ -94,17 +94,22 @@ EXPERIENCE_SECTION = """\
 --- End of Experiences ---
 """
 
-SKILLS_SECTION = """\
+# A short nudge is all that is needed: the full skills document lives on disk
+# at /app/SKILLS.md (written by setup() before the agent starts).
+SKILLS_NUDGE = """\
 
---- Curated Skills (reference material for this task domain) ---
-{skills}
---- End of Skills ---
+--- Curated Skills ---
+A curated skill guide for this task has been written to /app/SKILLS.md.
+Read it before you start working: cat /app/SKILLS.md
+--- End of Curated Skills ---
 """
+
+# Remote path where the skills file is placed inside the container.
+_SKILLS_REMOTE_PATH = "/app/SKILLS.md"
 
 
 def _build_system_prompt(
     experiences: dict[str, str] | None = None,
-    skills_text: str | None = None,
     inject_curated_skills: bool = False,
 ) -> str:
     parts = [SYSTEM_PROMPT_BASE]
@@ -113,11 +118,9 @@ def _build_system_prompt(
         formatted = "\n".join(f"[{k}] {v}" for k, v in experiences.items())
         parts.append(EXPERIENCE_SECTION.format(experiences=formatted))
 
-    if inject_curated_skills and skills_text:
-        # Truncate very long skills documents to avoid context overflow
-        max_chars = 8000
-        truncated = skills_text[:max_chars] + (" …[truncated]" if len(skills_text) > max_chars else "")
-        parts.append(SKILLS_SECTION.format(skills=truncated))
+    if inject_curated_skills:
+        # Only add a short pointer; the actual content is a file in the container.
+        parts.append(SKILLS_NUDGE)
 
     return "".join(parts)
 
@@ -173,7 +176,35 @@ class TFLLMHarborAgent:
         return "1.0.0"
 
     async def setup(self, environment) -> None:
-        """No additional setup needed; harbor already prepared the Docker container."""
+        """Write the skills file into the container before the agent starts.
+
+        Mirrors the official benchflow ``--skills-dir`` behaviour: skills are
+        placed on the container filesystem so the agent can read them on demand
+        instead of receiving a (possibly truncated) text blob in the prompt.
+        """
+        if self._inject_curated_skills and self._skills_text:
+            import base64 as _b64
+            skills_b64 = _b64.b64encode(self._skills_text.encode("utf-8")).decode()
+            write_cmd = (
+                f"python3 -c \""
+                f"import base64; "
+                f"open('{_SKILLS_REMOTE_PATH}', 'wb').write("
+                f"base64.b64decode('{skills_b64}'))\""
+            )
+            try:
+                result = await environment.exec(write_cmd, timeout_sec=30)
+                if result.return_code != 0:
+                    logger.warning(
+                        f"Failed to write SKILLS.md (rc={result.return_code}): "
+                        f"{result.stderr[:300]}"
+                    )
+                else:
+                    logger.info(
+                        f"Wrote {len(self._skills_text)} chars to "
+                        f"{_SKILLS_REMOTE_PATH} in container"
+                    )
+            except Exception as exc:
+                logger.warning(f"setup(): could not write SKILLS.md: {exc}")
 
     async def run(self, instruction: str, environment, context) -> None:
         """
@@ -187,7 +218,6 @@ class TFLLMHarborAgent:
         llm = self._get_llm_client()
         system_prompt = _build_system_prompt(
             experiences=self._experiences,
-            skills_text=self._skills_text,
             inject_curated_skills=self._inject_curated_skills,
         )
 

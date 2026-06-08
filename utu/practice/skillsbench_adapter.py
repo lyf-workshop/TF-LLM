@@ -81,10 +81,40 @@ def _build_standalone_agent_source(
     The generated file must NOT import anything from ``utu`` because harbor
     runs inside its own isolated Python environment (installed via
     ``uv tool install harbor``) that only ships ``openai`` and standard-lib.
+
+    Skills alignment with official benchflow (``bench run --skills-dir``):
+    - Skills text is base64-encoded here and embedded as a constant in the
+      generated file.
+    - ``setup()`` decodes it and writes /app/SKILLS.md inside the container
+      before the agent starts, so the agent reads it on demand via bash.
+    - The system prompt only contains a brief nudge (not the full text).
     """
+    import base64 as _b64
+
+    # Pre-encode skills at generation time; avoids complex escaping in the template.
+    skills_raw: str = json.loads(skills_text_json) if skills_text_json and skills_text_json != '""' else ""
+    skills_b64: str = _b64.b64encode(skills_raw.encode("utf-8")).decode() if skills_raw else ""
+
+    # The setup() method in the generated code will reference the module-level
+    # SKILLS_B64 constant.  The write command passes it as a CLI arg to python3
+    # so there are no shell-escaping issues (base64 chars are shell-safe).
+    setup_body = (
+        "        if INJECT_CURATED_SKILLS and SKILLS_B64:\n"
+        "            cmd = (\n"
+        "                \"python3 -c 'import base64, sys;\"\n"
+        "                \" open(\\\"/app/SKILLS.md\\\", \\\"wb\\\").write(\"\n"
+        "                \"base64.b64decode(sys.argv[1]))' \"\n"
+        "                + SKILLS_B64\n"
+        "            )\n"
+        "            try:\n"
+        "                await environment.exec(cmd, timeout_sec=30)\n"
+        "            except Exception:\n"
+        "                pass\n"
+    )
+
     return f'''\
 """Auto-generated self-contained TFLLMHarborAgent for harbor CLI."""
-import json, os, asyncio
+import json, os, asyncio, base64
 from pathlib import Path
 from openai import AsyncOpenAI
 from harbor.agents.base import BaseAgent
@@ -92,7 +122,7 @@ from harbor.models.trial.result import AgentInfo, ModelInfo
 
 EXPERIENCES = {experiences_json}
 INJECT_CURATED_SKILLS = {inject_curated_skills}
-SKILLS_TEXT = {skills_text_json}
+SKILLS_B64 = "{skills_b64}"
 MODEL_NAME = "{model_name}"
 MAX_ITERATIONS = {max_iterations}
 
@@ -136,9 +166,13 @@ def _build_system_prompt():
     if EXPERIENCES:
         fmt = "\\n".join(f"[{{k}}] {{v}}" for k, v in EXPERIENCES.items())
         parts.append("\\n--- Past Experiences ---\\n" + fmt + "\\n--- End ---")
-    if INJECT_CURATED_SKILLS and SKILLS_TEXT:
-        trunc = SKILLS_TEXT[:8000] + (" ...[truncated]" if len(SKILLS_TEXT) > 8000 else "")
-        parts.append("\\n--- Curated Skills ---\\n" + trunc + "\\n--- End ---")
+    if INJECT_CURATED_SKILLS and SKILLS_B64:
+        parts.append(
+            "\\n--- Curated Skills ---\\n"
+            "A curated skill guide has been written to /app/SKILLS.md.\\n"
+            "Read it before starting: cat /app/SKILLS.md\\n"
+            "--- End of Curated Skills ---"
+        )
     return "\\n".join(parts)
 
 
@@ -159,8 +193,8 @@ class TFLLMHarborAgent(BaseAgent):
         return "1.0.0"
 
     async def setup(self, environment):
-        pass
-
+        """Write skills file into container before agent starts (mirrors benchflow --skills-dir)."""
+{setup_body}
     async def run(self, instruction, environment, context):
         if self._llm is None:
             self._llm = AsyncOpenAI(
@@ -267,6 +301,7 @@ class SkillsBenchAdapter:
         """
         self._config = config
         self._harbor_available: bool | None = None  # detected on first use
+        self._tasks_completed: int = 0  # counter for builder-prune interval
 
     # ------------------------------------------------------------------
     # Public API
@@ -302,6 +337,93 @@ class SkillsBenchAdapter:
         _max_iter = max_iterations or (getattr(cfg, "max_agent_iterations", None) or 30)
         _model = model_name or os.getenv("UTU_LLM_MODEL", "deepseek-chat")
 
+        max_retries = getattr(cfg, "max_retries", 0) or 0
+        retry_delay = getattr(cfg, "retry_delay_sec", None)
+        if retry_delay is None:
+            retry_delay = 5.0
+        retry_on_timeout = getattr(cfg, "retry_on_timeout", False)
+
+        task_name = Path(task_path).name
+        attempt = 0
+        result = SkillsBenchResult(reward=0.0, error="no attempt made")
+        while True:
+            attempt += 1
+            result = await self._run_task_once(
+                task_path=task_path,
+                experiences=experiences,
+                inject_curated_skills=inject_curated_skills,
+                skills_text=skills_text,
+                model_name=_model,
+                timeout=_timeout,
+                max_iterations=_max_iter,
+            )
+
+            # Stop when we have a usable result or have exhausted retries.
+            if attempt > max_retries:
+                break
+            if not self._is_retryable_error(result, retry_on_timeout):
+                break
+
+            logger.warning(
+                f"Task {task_name} attempt {attempt}/{max_retries + 1} hit an "
+                f"infrastructure error; retrying in {retry_delay:.0f}s. "
+                f"Error: {(result.error or '')[:200]}"
+            )
+            # Clear potentially corrupted Docker state before the next attempt
+            # (a half-built image/container can otherwise poison the retry).
+            if getattr(cfg, "docker_cleanup_after_task", True):
+                await self._docker_cleanup(prune_builder=False)
+            if retry_delay > 0:
+                await asyncio.sleep(retry_delay)
+
+        if attempt > 1:
+            outcome = "succeeded" if not result.error else "still failing"
+            logger.info(
+                f"Task {task_name} {outcome} after {attempt} attempt(s); "
+                f"reward={result.reward}"
+            )
+
+        # Post-task Docker cleanup to prevent ext4.vhdx from growing unboundedly.
+        self._tasks_completed += 1
+        if getattr(cfg, "docker_cleanup_after_task", True):
+            prune_builder_every = getattr(cfg, "docker_cleanup_builder_every_n", 10)
+            do_builder = (
+                prune_builder_every > 0
+                and self._tasks_completed % prune_builder_every == 0
+            )
+            await self._docker_cleanup(prune_builder=do_builder)
+
+        return result
+
+    @staticmethod
+    def _is_retryable_error(result: SkillsBenchResult, retry_on_timeout: bool) -> bool:
+        """Decide whether a failed result is worth retrying.
+
+        Only *infrastructure* failures are retryable. These are signalled by a
+        non-empty ``result.error`` (harbor crash, Docker build failure, missing
+        trial output, etc.). A result with an empty ``error`` means the agent
+        ran to completion and the verifier scored it — even a 0.0 reward there
+        is a legitimate task failure and must NOT be retried.
+        """
+        if not result.error:
+            return False
+        err = result.error.lower()
+        is_timeout = "timed out" in err or "timeout" in err
+        if is_timeout:
+            return retry_on_timeout
+        return True
+
+    async def _run_task_once(
+        self,
+        task_path: str,
+        experiences: dict[str, str] | None,
+        inject_curated_skills: bool,
+        skills_text: str,
+        model_name: str,
+        timeout: int,
+        max_iterations: int,
+    ) -> SkillsBenchResult:
+        """Run a single attempt of a SkillsBench task (no retry, no cleanup)."""
         start = time.monotonic()
         try:
             result = await asyncio.wait_for(
@@ -310,10 +432,10 @@ class SkillsBenchAdapter:
                     experiences=experiences,
                     inject_curated_skills=inject_curated_skills,
                     skills_text=skills_text,
-                    model_name=_model,
-                    max_iterations=_max_iter,
+                    model_name=model_name,
+                    max_iterations=max_iterations,
                 ),
-                timeout=_timeout,
+                timeout=timeout,
             )
         except (asyncio.TimeoutError, asyncio.CancelledError):
             # wait_for raises TimeoutError on timeout (Python 3.11+ may raise
@@ -322,7 +444,7 @@ class SkillsBenchAdapter:
             logger.warning(f"Task timed out after {elapsed:.0f}s: {task_path}")
             result = SkillsBenchResult(
                 reward=0.0,
-                error=f"Timed out after {_timeout}s",
+                error=f"Timed out after {timeout}s",
                 elapsed_sec=elapsed,
             )
         except Exception as exc:
@@ -336,6 +458,61 @@ class SkillsBenchAdapter:
 
         result.elapsed_sec = time.monotonic() - start
         return result
+
+    async def _docker_cleanup(self, prune_builder: bool = False) -> None:
+        """Remove stopped containers, dangling images, and optionally build cache.
+
+        Runs the Docker CLI in a thread to avoid blocking the event loop.
+        Errors are logged at DEBUG level so a missing Docker daemon never
+        breaks the evaluation pipeline.
+
+        Cleanup levels
+        --------------
+        Every task (always):
+          • ``docker container prune -f``  – removes exited harbor containers
+          • ``docker image prune -f``      – removes untagged (dangling) image layers
+        Every N tasks (``prune_builder=True``):
+          • ``docker builder prune -f``    – removes build cache (the largest consumer)
+        """
+        def _run_prune(cmds: list[list[str]]) -> None:
+            for cmd in cmds:
+                try:
+                    result = subprocess.run(
+                        cmd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        timeout=60,
+                    )
+                    out = result.stdout.decode("utf-8", errors="replace").strip()
+                    if out:
+                        logger.debug(f"docker cleanup [{' '.join(cmd[1:])}]: {out[:300]}")
+                except subprocess.TimeoutExpired:
+                    logger.debug(f"docker cleanup timed out: {' '.join(cmd)}")
+                except FileNotFoundError:
+                    logger.debug("docker not found; skipping cleanup")
+                    break
+                except Exception as exc:
+                    logger.debug(f"docker cleanup error ({' '.join(cmd)}): {exc}")
+
+        docker_bin = shutil.which("docker") or "docker"
+        cmds = [
+            [docker_bin, "container", "prune", "-f"],
+            [docker_bin, "image", "prune", "-f"],
+        ]
+        if prune_builder:
+            cmds.append([docker_bin, "builder", "prune", "-f"])
+            logger.info(
+                f"Docker deep cleanup at task {self._tasks_completed} "
+                "(containers + dangling images + build cache)"
+            )
+        else:
+            logger.debug(
+                f"Docker light cleanup at task {self._tasks_completed} "
+                "(containers + dangling images)"
+            )
+
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, _run_prune, cmds)
 
     # ------------------------------------------------------------------
     # Internal execution helpers
@@ -567,6 +744,17 @@ class SkillsBenchAdapter:
                 logger.warning(f"Trial result dir does not exist: {trial_result_dir}")
                 logger.warning(f"harbor stdout: {stdout_str[:2000]}")
                 logger.warning(f"harbor stderr: {stderr_str[:1000]}")
+                # No trial output despite a clean exit code almost always means
+                # an environment/Docker build failure. Flag it as an infra error
+                # so the retry logic in run_task() can pick it up.
+                return SkillsBenchResult(
+                    reward=0.0,
+                    error=(
+                        "harbor produced no trial result directory "
+                        "(likely environment/Docker build failure)"
+                    ),
+                    agent_log=stdout_str,
+                )
             else:
                 result_json_path = trial_result_dir / "result.json"
                 if result_json_path.exists():

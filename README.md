@@ -32,10 +32,15 @@ youtu-agent/
 │   ├── agents/practice/          # Agent 配置（含分层学习 Agent）
 │   ├── eval/korgym/              # KORGym 评估配置
 │   └── practice/                 # 训练配置
-├── scripts/                      # 可执行脚本
-│   ├── data/prepare_korgym_data.py  # KORGym 数据集准备
-│   ├── run_eval.py                  # 评估脚本
-│   └── run_training_free_GRPO.py    # 训练脚本
+├── scripts/                      # 可执行脚本 → 详见 scripts/README.md
+│   ├── run_eval.py                  # 评估入口
+│   ├── run_training_free_GRPO.py    # 训练入口
+│   ├── regen_practice_agent_yaml.py # 重新生成 practice agent YAML
+│   ├── utils/                       # 通用工具（结果查看、数据库管理）
+│   ├── korgym/                      # KORGym 环境脚本
+│   ├── logic/                       # ZebraLogic 等逻辑 benchmark 脚本
+│   ├── data/                        # 数据集准备脚本
+│   └── setup/                       # 环境部署脚本
 ├── KORGym/                       # KORGym 游戏服务器
 │   └── game_lib/                 # 游戏实现
 │       ├── 8-word_puzzle/
@@ -448,6 +453,7 @@ hierarchical_learning:
 
 ## 📚 详细文档
 
+- **脚本使用说明**：[`scripts/README.md`](scripts/README.md) — 所有脚本的完整用法与常用工作流
 - **KORGym 游戏指南**：[`docs/korgym/index.md`](docs/korgym/index.md)
 - **分层经验学习指南**：[`分层经验学习-完整运行指南.md`](分层经验学习-完整运行指南.md)
 - **三游戏命令速查**：[`KORGYM_THREE_GAMES_COMMANDS.md`](KORGYM_THREE_GAMES_COMMANDS.md)
@@ -664,6 +670,14 @@ chmod +x .venv/bin/activate
 - [🎮 运行第一个实验](#第五步运行第一个-korgym-实验) - Wordle 游戏完整流程
 - [🎯 其他游戏](#🎯-其他游戏快速开始) - Word Puzzle, Alphabetical Sorting
 - [🎓 进阶实验](#🎓-进阶分层经验学习实验) - ZebraLogic 逻辑推理
+
+### 脚本文档
+- [📜 脚本使用说明](scripts/README.md) — 所有脚本的完整用法与常用工作流
+  - [评估入口 run_eval.py](scripts/README.md#run_evalpy--评估入口)
+  - [训练入口 run_training_free_GRPO.py](scripts/README.md#run_training_free_grpopy--训练入口)
+  - [结果查看工具](scripts/README.md#结果查看)
+  - [数据集管理工具](scripts/README.md#数据库--数据集管理)
+  - [KORGym 脚本](scripts/README.md#korgym--korgym-游戏环境)
 
 ### 文档资源
 - [📚 KORGym 游戏指南](docs/korgym/index.md) - 详细的游戏文档

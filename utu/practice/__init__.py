@@ -1,3 +1,4 @@
+from .experience_quality_tracker import ExperienceQualityTracker
 from .hierarchical_experience_manager import HierarchicalExperienceManager
 from .rollout_manager import RolloutManager
 from .training_free_grpo import TrainingFreeGRPO
@@ -9,5 +10,6 @@ __all__ = [
     "Trainer",
     "RolloutManager",
     "HierarchicalExperienceManager",
+    "ExperienceQualityTracker",
     "parse_training_free_grpo_config",
 ]

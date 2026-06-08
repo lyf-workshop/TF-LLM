@@ -120,6 +120,24 @@ class SkillsBenchConfig(ConfigBaseModel):
     """Maximum bash-tool iterations the agent may perform per task."""
     env_build_timeout_multiplier: float = 3.0
     """Multiplier applied to harbor's default 200s Docker environment build timeout."""
+    docker_cleanup_after_task: bool = True
+    """Remove stopped containers and dangling images after every task to prevent
+    the WSL ext4.vhdx from growing unboundedly."""
+    docker_cleanup_builder_every_n: int = 10
+    """Also prune the Docker build-cache every N tasks (0 = never).
+    Build cache is the largest space consumer; pruning every 10 tasks is a
+    good balance between disk savings and rebuild speed."""
+    max_retries: int = 2
+    """Number of extra attempts for a task when it fails due to an infrastructure
+    error (Docker build failure, harbor crash, etc.). 0 disables retrying.
+    A value of 2 means up to 3 total attempts. Retries are NOT triggered when the
+    agent runs to completion and the verifier legitimately scores the task (even 0)."""
+    retry_delay_sec: float = 5.0
+    """Seconds to wait between retry attempts (gives Docker/daemon time to recover)."""
+    retry_on_timeout: bool = False
+    """If True, also retry when a task hits its wall-clock timeout. Disabled by
+    default because timeouts usually mean the agent is genuinely stuck and would
+    time out again, wasting a lot of wall-clock time."""
 
 
 class EvalConfig(ConfigBaseModel):

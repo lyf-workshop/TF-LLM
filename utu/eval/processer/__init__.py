@@ -7,6 +7,7 @@ from .base_processor import BaseProcesser
 from .browse_comp import BrowseCompProcesser as BrowseCompProcesser, BrowseCompZHProcesser as BrowseCompZHProcesser
 from .gaia import GAIAProcesser as GAIAProcesser
 from .korgym_processor import KORGymProcesser as KORGymProcesser
+from .livecodebench_processor import LiveCodeBenchProcesser as LiveCodeBenchProcesser
 from .skillsbench_processor import SkillsBenchProcesser as SkillsBenchProcesser
 from .training_free_grpo_processor import TrainingFreeGRPOProcesser as TrainingFreeGRPOProcesser
 from .web_walker import WebWalkerQAProcesser as WebWalkerQAProcesser

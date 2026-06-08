@@ -12,6 +12,7 @@ from ..config.eval_config import DataConfig
 from ..utils import DIR_ROOT, get_logger
 from ..utils.experience_cache import ExperienceCache
 from .data_manager import TrainingFreeGRPODataManager
+from .experience_quality_tracker import ExperienceQualityTracker
 from .experience_updater import ExperienceUpdater
 from .hierarchical_experience_manager import HierarchicalExperienceManager
 from .rollout_manager import RolloutManager
@@ -26,6 +27,7 @@ class TrainingFreeGRPO:
     eval_rollout_manager: RolloutManager = None
     experience_updater: ExperienceUpdater = None
     hierarchical_experience_manager: HierarchicalExperienceManager = None
+    experience_quality_tracker: ExperienceQualityTracker = None
     recorder: TaskRecorder = None
 
     def __init__(self, config: TrainingFreeGRPOConfig):
@@ -135,6 +137,12 @@ class TrainingFreeGRPO:
             )
             logger.info("Hierarchical experience manager initialized")
 
+        # 6. Create experience quality tracker
+        self.experience_quality_tracker = ExperienceQualityTracker(
+            experiment_name=self.config.exp_id,
+        )
+        logger.info("Experience quality tracker initialized")
+
         logger.info("Training-free GRPO components built successfully")
 
     async def practice(self):
@@ -176,6 +184,10 @@ class TrainingFreeGRPO:
                         stats[f"step_{step}"] = {"epoch": epoch, "batch": batch_idx, "complete": False}
 
                     # 1. Rollout batch data
+                    injected_ids = list((self.recorder.experiences or {}).keys())
+                    if self.experience_quality_tracker is not None and injected_ids:
+                        self.experience_quality_tracker.record_injection(injected_ids, step)
+
                     with custom_span("Process the batch data"):
                         rollouts, stat = await self.practice_rollout_manager.main(
                             batch_idx=batch_idx,
@@ -183,6 +195,9 @@ class TrainingFreeGRPO:
                             use_cache=self._should_use_cache(step),
                         )
                         stats[f"step_{step}"]["rollout"] = stat
+
+                    if self.experience_quality_tracker is not None and injected_ids:
+                        self.experience_quality_tracker.record_outcomes(rollouts, step, injected_ids)
 
                     # 2. Update experiences based on rollouts
                     with custom_span("Generate batch experiences"):
@@ -291,56 +306,81 @@ class TrainingFreeGRPO:
         # Convert to dict for manipulation
         config_dict = base_config.model_dump(exclude_none=True)
 
-        # Format experiences for insertion
+        # Format and inject experiences using a three-zone strategy:
+        #
+        #   ZONE 1 (top of system prompt): L2 meta-principles, written as
+        #           first-person internalized knowledge.  Highest model attention.
+        #
+        #   ZONE 2 (middle of system prompt): L1 pattern guidelines, listed as
+        #           actionable bullet points.
+        #
+        #   ZONE 3 (appended after base instructions): L0 case lessons — the
+        #           most specific layer.  Kept brief; the full case library is
+        #           available via max_l0_recent config.
+        #
+        # This layout exploits the U-shaped attention distribution in long
+        # prompts: important meta-knowledge lands at the top, where attention
+        # is highest, rather than being buried after the base instructions.
         if self.hierarchical_experience_manager is not None:
-            # Use hierarchical experiences (L2 -> L1 -> L0)
             logger.info("Using hierarchical experiences (L0/L1/L2)")
             all_l2 = self.hierarchical_experience_manager.get_all_l2_experiences()
             all_l1 = self.hierarchical_experience_manager.get_all_l1_experiences()
-            all_l0 = self.hierarchical_experience_manager.get_all_l0_experiences()
-            
-            # Build hierarchical experience text
-            experience_lines = []
-            exp_idx = 0
-            
-            # Add L2 meta-strategies first
-            for exp in all_l2:
-                experience_lines.append(f"[G{exp_idx}]. [L2-Meta] {exp['content']}")
-                exp_idx += 1
-            
-            # Add L1 patterns
-            for exp in all_l1:
-                experience_lines.append(f"[G{exp_idx}]. [L1-Pattern] {exp['content']}")
-                exp_idx += 1
-            
-            # Add recent L0 cases if configured
+
+            current_instructions = config_dict.get("agent", {}).get("instructions", "You are a helpful assistant.")
+
+            # --- ZONE 1: L2 meta-strategies prepended to the system prompt ---
+            if all_l2:
+                l2_bullets = "\n".join(f"• {exp['content']}" for exp in all_l2)
+                l2_block = (
+                    "You have developed the following principles through experience "
+                    "completing similar tasks. Apply them proactively:\n"
+                    f"{l2_bullets}\n\n"
+                )
+                current_instructions = l2_block + current_instructions
+
+            # --- ZONE 2: L1 patterns appended as an operational guideline section ---
+            if all_l1:
+                l1_bullets = "\n".join(f"• {exp['content']}" for exp in all_l1)
+                l1_block = (
+                    "\n\nProven patterns from past tasks:\n"
+                    f"{l1_bullets}"
+                )
+                current_instructions = current_instructions + l1_block
+
+            # --- ZONE 3: L0 case lessons (optional, kept brief) ---
             if self.config.practice.hierarchical_learning.include_l0_in_prompt:
                 recent_l0 = self.hierarchical_experience_manager.get_recent_l0_experiences(
                     self.config.practice.hierarchical_learning.max_l0_recent
                 )
-                for exp in recent_l0:
-                    experience_lines.append(f"[G{exp_idx}]. [L0-Case] {exp['content']}")
-                    exp_idx += 1
-            
-            if experience_lines:
-                experience_text = "\n\nWhen solving problems, you MUST first carefully read and understand "
-                experience_text += "the helpful instructions and experiences:\n"
-                experience_text += "\n".join(experience_lines)
-                
-                # Insert experiences at the end of instructions
-                current_instructions = config_dict.get("agent", {}).get("instructions", "You are a helpful assistant.")
-                config_dict["agent"]["instructions"] = current_instructions + experience_text
+                if recent_l0:
+                    l0_bullets = "\n".join(f"• {exp['content']}" for exp in recent_l0)
+                    l0_block = (
+                        "\n\nSpecific lessons from recent tasks:\n"
+                        f"{l0_bullets}"
+                    )
+                    current_instructions = current_instructions + l0_block
+            else:
+                recent_l0 = []
+
+            if all_l2 or all_l1 or recent_l0:
+                config_dict["agent"]["instructions"] = current_instructions
                 config_dict["model"]["model_settings"]["temperature"] = self.original_temperature
-                logger.info(f"Added {len(experience_lines)} hierarchical experiences (L2={len(all_l2)}, L1={len(all_l1)}, L0={len(recent_l0) if self.config.practice.hierarchical_learning.include_l0_in_prompt else 0})")
-        
+                logger.info(
+                    f"Injected experiences — L2={len(all_l2)} (top/zone-1), "
+                    f"L1={len(all_l1)} (middle/zone-2), "
+                    f"L0={len(recent_l0)} (bottom/zone-3)"
+                )
+
         elif experiences:
-            # Use traditional flat experiences
-            experience_text = "\n\nWhen solving problems, you MUST first carefully read and understand "
-            experience_text += "the helpful instructions and experiences:\n"
-            experience_text += "\n".join([f"[{i}]. {e}" for i, e in experiences.items()])
-            # Insert experiences at the end of instructions
+            # Flat experiences (no hierarchical manager): prepend as internalized knowledge.
             current_instructions = config_dict.get("agent", {}).get("instructions", "You are a helpful assistant.")
-            config_dict["agent"]["instructions"] = current_instructions + experience_text
+            exp_bullets = "\n".join(f"• {e}" for e in experiences.values())
+            exp_block = (
+                "You have developed the following principles through experience "
+                "completing similar tasks. Apply them proactively:\n"
+                f"{exp_bullets}\n\n"
+            )
+            config_dict["agent"]["instructions"] = exp_block + current_instructions
             config_dict["model"]["model_settings"]["temperature"] = self.original_temperature
 
         # Remove unnecessary fields

@@ -50,3 +50,5 @@ skillsbench:
   task_timeout_sec: 900
   max_agent_iterations: 30
   env_build_timeout_multiplier: 3.0
+  docker_cleanup_after_task: true
+  docker_cleanup_builder_every_n: 10

@@ -6,7 +6,7 @@ defaults:
   - _self_
 
 # Experiment 3 – TF-GRPO: evaluate with auto-generated L0/L1/L2 experiences
-exp_id: "skillsbench_practice_eval_1"
+exp_id: "skillsbench_practice_eval_8_ds"
 
 data:
   dataset: "SkillsBench-Eval-77"
@@ -24,3 +24,5 @@ skillsbench:
   inject_curated_skills: false   # Experiences come from the agent YAML
   task_timeout_sec: 900
   max_agent_iterations: 30
+  docker_cleanup_after_task: true
+  docker_cleanup_builder_every_n: 10
