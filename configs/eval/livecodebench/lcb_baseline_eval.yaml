@@ -1,0 +1,17 @@
+# @package _global_
+defaults:
+  - /agents/practice/livecodebench_agent@agent
+  - _self_
+
+# Experiment 1 – Baseline: no experiences injected
+exp_id: "lcb_baseline_eval_2"
+
+data:
+  dataset: "LiveCodeBench-Eval-50"
+  type: "single"
+
+# Each problem is fully self-contained (no external server).
+# Keep concurrency moderate; code execution uses subprocess.
+concurrency: 8
+judge_concurrency: 8
+pass_k: 1

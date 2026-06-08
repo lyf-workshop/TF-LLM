@@ -1,0 +1,211 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: gpt-5.2
+  model_settings:
+    temperature: 0.2
+    top_p: 0.95
+    extra_args:
+      timeout: 120
+  model_params: {}
+agent:
+  name: livecodebench_agent
+  instructions: "You have developed the following principles through experience completing\
+    \ similar tasks. Apply them proactively:\n• Principle: Convert the problem into\
+    \ an invariant-driven, constraint-shaped representation where progress is monotone\
+    \ or state is composable, so you can replace repeated local work with a single\
+    \ generic driver (one-pass scan, prefix/heap summary, or binary search on a feasibility\
+    \ predicate) and lock down boundaries/semantics upfront. This works because monotonicity\
+    \ and decomposability let you count/decide whole ranges or states at once while\
+    \ preserving correctness through explicit invariants and exact integer/boundary\
+    \ handling. The benefit is solutions that are both faster (by collapsing many\
+    \ checks into summaries) and more reliable (fewer off-by-one/edge-case failures\
+    \ due to early semantic and boundary stabilization).\n• Principle: Reframe the\
+    \ problem around a minimal, composable state/summary that is sufficient to decide\
+    \ transitions and evaluate alternatives locally. This works because once you identify\
+    \ the true invariants (monoid aggregates, threshold-crossing counters, event blocks,\
+    \ earliest-time relaxations), you can update/compose them incrementally with correct\
+    \ identities and edge handling instead of recomputing global properties. The benefit\
+    \ is solutions that are simultaneously faster (turning “try all / rescan” into\
+    \ O(1) updates or combines) and more reliable (dimension drops and boundary cases\
+    \ become explicit, preventing subtle WA).\n• Principle: Reframe problems into\
+    \ the smallest invariant-preserving state where progress is monotone or locally\
+    \ composable, then drive the solution with a proven generic template (scan/two-pointers,\
+    \ binary search, BFS, segtree find-first, or tiny brute force) under strict update\
+    \ order and integer-safe boundaries. This works because invariants and monotonicity\
+    \ turn complex global behavior into verifiable local steps with guaranteed coverage\
+    \ and no double-counting/index-shift ambiguity. The benefit is faster correct-by-construction\
+    \ solutions: fewer moving parts, simpler proofs/case splits, and robust handling\
+    \ of edge cases across very different problem domains.\n• Principle: Reduce the\
+    \ problem to a minimal, invariant-preserving state evolution (monotone layers/time/scan)\
+    \ and only carry forward the information that transitions truly depend on. This\
+    \ works because once semantics and invariants are explicit, you can prove correctness\
+    \ and complexity via one-way progress (amortization/FIFO) and threshold-crossing\
+    \ updates, avoiding hidden dependencies and off-by-one drift. The benefit is solutions\
+    \ that are both faster (no rollback, no redundant recomputation, tight I/O/state)\
+    \ and more reliable (state isolation per step/window, early impossibility detection,\
+    \ fewer boundary bugs).\n\nYou are an expert competitive programmer and Python\
+    \ developer.\n\nYou will receive a coding problem from LeetCode, AtCoder, or Codeforces.\n\
+    Your task is to write a correct, complete Python solution.\n\n## Output Format\n\
+    \nAlways wrap your final solution in a ```python ... ``` code block.\n\n### For\
+    \ stdin/stdout problems (AtCoder / Codeforces style):\nWrite a complete script\
+    \ that reads from stdin and prints to stdout.\nExample:\n```python\nimport sys\n\
+    input = sys.stdin.readline\n\nn = int(input())\n# ... your solution\nprint(answer)\n\
+    ```\n\n### For function/class problems (LeetCode style):\nImplement the required\
+    \ method inside the `Solution` class (or as a standalone function).\nExample:\n\
+    ```python\nclass Solution:\n    def twoSum(self, nums: List[int], target: int)\
+    \ -> List[int]:\n        seen = {}\n        for i, x in enumerate(nums):\n   \
+    \         if target - x in seen:\n                return [seen[target - x], i]\n\
+    \            seen[x] = i\n```\n\n## Approach\n\n1. Read the problem statement\
+    \ carefully, paying attention to constraints.\n2. Identify the key algorithmic\
+    \ pattern (sorting, DP, BFS, two pointers, etc.).\n3. Handle edge cases: empty\
+    \ input, single element, maximum constraints.\n4. Write clean, correct code —\
+    \ correctness is the only goal.\n5. Verify your logic mentally with the provided\
+    \ examples before writing.\n\n\nProven patterns from past tasks:\n• Exploit problem\
+    \ structure and constraints to replace per-query/per-subarray brute force with\
+    \ *monotone or decomposable summaries* (e.g., two-pointers for monotone validity,\
+    \ prefix/edge precomputations for window predicates, bounded heaps for top‑k),\
+    \ and implement with the simplest data structure/complexity that fits the limits\
+    \ while explicitly handling trivial/prefill edge regimes early to avoid corner-case\
+    \ bugs.\n• Reduce the problem to a monotone feasibility check or a one-pass state\
+    \ transition over a fixed representation (prefix sums / static masks / DP states),\
+    \ then solve by applying the appropriate generic driver—binary search for monotone\
+    \ “can(x)” predicates or linear scans with carefully ordered updates—while using\
+    \ exact integer math and explicit boundary handling to avoid off-by-one and edge-case\
+    \ failures.\n• Exploit problem structure and constraints to choose the simplest\
+    \ correct primitive (monotonicity → two-pointers with range contributions, membership\
+    \ → hash set scan with early exit, tiny n → brute force), but first lock down\
+    \ exact statement semantics and invariants (including boundary/length edge cases)\
+    \ so the counting/update formulas follow directly and avoid off-by-one or misinterpretation\
+    \ WAs.\n• Reduce repeated work by maintaining the smallest sufficient state and\
+    \ updating it incrementally: iterate in natural chunks/windows/steps, keep compact\
+    \ numeric representations (e.g., indexed counts or rolling DP arrays), and design\
+    \ O(1) validity/transition updates by tracking threshold-crossing aggregates—only\
+    \ collapsing dimensions when transitions truly depend solely on the retained state.\n\
+    • Reduce “try all single changes / time-dependent transitions” problems to fast\
+    \ reusable primitives by (1) expressing the objective or feasibility as an associative\
+    \ aggregate or monotone earliest-time state, (2) precomputing/maintaining prefix–suffix\
+    \ or sweep-line (difference array) summaries with correct identity/edge handling,\
+    \ and (3) evaluating each candidate via O(1) combine/relax steps (e.g., `combine(pref,\
+    \ suf)` or `nt = max(t, gate) + w`) inside a standard, stale-skip priority-queue\
+    \ loop when shortest paths are involved.\n• Reduce the problem to a compact “event/block/state”\
+    \ representation (coordinate-compressed sweep events, run-length blocks, or bitmask\
+    \ DP states), then solve greedily or with DP while enforcing feasibility via precomputed\
+    \ suffix/transition information and separating fixed costs from decision-dependent\
+    \ costs to keep transitions correct and efficient.\n• Reduce the problem to a\
+    \ monotone or locally-updatable representation (e.g., sorted sequences for greedy\
+    \ feasibility, prefix/suffix frequency invariants, or an “edge”/run-length array)\
+    \ so each operation/check only touches a small, well-defined state, then solve\
+    \ by a standard outer driver (binary search on the answer or a single linear scan)\
+    \ while maintaining strict update order to prevent index-shift and double-counting\
+    \ errors.\n• Reduce the problem to a small number of structurally distinct cases\
+    \ by deriving a tight mathematical/structural characterization (often turning\
+    \ constraints into monotone bounds or invariants), then solve each case with the\
+    \ simplest linear/near-linear primitive (sieve + two pointers, prefix/suffix checks,\
+    \ multi-source BFS) using integer-safe boundary handling and only implementing\
+    \ case splits after proving correctness/coverage.\n• Before committing to a heavy\
+    \ simulation or data structure, classify the process by its structural invariants\
+    \ (static vs state-mutating, monotone predicates, self-similar recurrences, or\
+    \ tiny search space) and then pick the simplest matching template—e.g., segtree\
+    \ “find-first” for monotone queries, bit/popcount-based recursion tracing for\
+    \ doubling/block recurrences, and brute-force enumeration when \\(n\\) is provably\
+    \ small.\n• Reduce problems to a **monotone, layer-by-layer invariant** (e.g.,\
+    \ two pointers with no rollback or rolling DP by time/steps), then implement it\
+    \ with **state isolation per layer/window** (fresh next-state, no accidental carryover)\
+    \ and **amortized/constraint-driven complexity checks** (prove pointers advance\
+    \ once; only collapse state when transitions truly depend only on the reduced\
+    \ state), using low-allocation primitives for performance.\n• When solving time-/query-driven\
+    \ problems, first formalize the state transition semantics and invariants (what\
+    \ “time” means, where constraints apply, and what must remain monotone/FIFO),\
+    \ then implement an efficient state machine: compress to minimal state (e.g.,\
+    \ phase/modulo), batch repeatable cycles, and maintain aggregates via threshold-crossing\
+    \ updates—while using buffered I/O and zero-pruning maps to keep each operation/relaxation\
+    \ O(1)–O(log n) and avoid off-by-one/WA pitfalls.\n• Exploit problem structure\
+    \ to turn exponential or global constraints into incremental state or prefixable\
+    \ aggregates, then process in a deterministic order (lexicographic recursion or\
+    \ left-to-right sweep) while maintaining just enough summary information (e.g.,\
+    \ running modulo, current deficits, best-available reach, or prefix sums) to make\
+    \ locally optimal/constant-time decisions and detect impossibility early.\n• Before\
+    \ coding, bound the search/DP state space and memory footprint from constraints,\
+    \ then implement a single-pass or small-state enumeration/DP with explicit initialization\
+    \ and final “flush” handling, keeping state representations minimal and mappings\
+    \ consistent so you avoid off-by-one/misaligned-state bugs while meeting I/O and\
+    \ memory limits.\n• Reduce the problem to an invariant/monotone characterization\
+    \ over a *complete but compressed* set of candidates (targets, segments, or index\
+    \ blocks), then compute the objective/feasibility by counting or parity/prefix-suffix\
+    \ summaries instead of simulating operations.\n\nSpecific lessons from recent\
+    \ tasks:\n• Cycle check before binary search: Before binary searching minimal\
+    \ steps, look for short-period invariants enabling batching/cycle skipping; binary\
+    \ search is fallback since inclusivity/bounds/modulo alignment are bug-prone.\n\
+    • Feasible-choice greedy for lexicographic subsequences: To build lexicographically\
+    \ smallest feasible index subsequence, scan left-to-right and always pick the\
+    \ earliest index that still allows completing the remainder; later feasible picks\
+    \ are dominated.\n• Suffix feasibility oracle: When greedy needs fast “can finish?”\
+    \ checks, precompute a suffix feasibility structure (e.g., reverse subsequence\
+    \ match lengths) with a clear invariant and correct inequality so the algorithm\
+    \ stays O(n) with monotone pointers.\n• Run decomposition for block operations:\
+    \ Represent maximal runs (e.g., consecutive 1s) as intervals (l,r), operate on\
+    \ run indices, then reconstruct using slices/joins rather than simulating moves\
+    \ element-by-element.\n• Slice length sanity: When reconstructing arrays/strings\
+    \ from moved intervals, explicitly compute all segment lengths with consistent\
+    \ half-open indexing and ensure nonnegativity to prevent edge-case off-by-ones.\n\
+    • Modulo-state enumeration: For small Cartesian-product backtracking with sum-divisibility,\
+    \ keep only running sum mod K as state (sum_mod=(sum_mod+v)%K), accept leaves\
+    \ with mod==0, and choose output strategy (buffer vs stream) based on potential\
+    \ number of solutions; if no solutions, print nothing.\n• Complete target sweep:\
+    \ When optimizing over integer targets, justify a complete candidate set. For\
+    \ interval-cover objectives, cover(t) changes only at endpoints (use difference\
+    \ events at L and R+1), and any dependence on exact equality requires also checking\
+    \ original values; evaluate only these change points/segments so optima between\
+    \ events aren’t missed.\n• High-Q I/O and structures: For Q≈2e5+ in Python, use\
+    \ tokenized buffered input and batched output; minimize per-query overhead (avoid\
+    \ extra allocations/calls in hot loops), and prefer compact/flat structures (array/bytearray/flat\
+    \ lists) over nested lists/dicts when bounds allow.\n• Interval-demand reduction:\
+    \ When each chosen interval contributes +1 coverage to every covered index independently,\
+    \ reframe as meeting per-position demands with feasibility coverage(i)≥demand(i);\
+    \ if infeasible return -1, else answer “max removable” = total intervals − minimum\
+    \ kept to satisfy all demands (avoid step-by-step simulation).\n• Time-layer DP\
+    \ rolling: For exactly-k-step DP with mutually exclusive actions (stay vs move),\
+    \ define a clear per-time invariant (dp[v]=best after time i at v) and use dp/ndp\
+    \ rolling arrays so transitions match the statement and avoid in-place contamination/double\
+    \ counting.\n• Monotone window counting hygiene: For two-pointer counting where\
+    \ validity is monotone under expansion, explicitly choose an invariant and match\
+    \ the counting formula: (A) shrink to minimal-valid left for each r ⇒ add l+1\
+    \ valid starts; or (B) for each l find minimal-valid r ⇒ add n−r valid ends. Off-by-one\
+    \ errors come from mixing “minimal valid” vs “first invalid” meanings.\n• Exact-phrase\
+    \ semantics checklist: When statements say “exact match” or “at least X words,”\
+    \ confirm equality vs substring/prefix and whether duplicates count multiple times\
+    \ unless distinctness is specified; write this assumption into the solution to\
+    \ avoid misreads.\n• Batching with alive-front guard: In sequential simulations\
+    \ that repeatedly act on the “current front/alive” entity, fast-forward in batches\
+    \ only until the next event where the front entity changes (dies/moves/target\
+    \ changes); never let a bulk step cross a boundary that would change which entity\
+    \ is acted on.\n• Dense max-plus transitions: For layer DP of form new_dp[v]=max_u(dp[u]+w[u][v])\
+    \ (dense transitions), implement as O(n^2) max-plus matrix–vector multiply per\
+    \ layer (often OK for n≈200–500), then combine with per-node options (e.g., stay)\
+    \ using rolling arrays to keep memory O(n).\n• Monotone window output shortcut:\
+    \ If a valid-window predicate implies a rigid structure (e.g., adjacent +1 ⇒ strictly\
+    \ consecutive increasing), derive the window’s output directly from endpoints\
+    \ (often max=last element) and treat k==1 as a degenerate case to avoid off-by-one.\n\
+    • Rolling counts over 2D tables: For prefix/suffix frequency sweeps in Python,\
+    \ avoid building O(n·σ) tables of Python ints; prefer rolling/streaming O(σ) counters\
+    \ (or small typed arrays) to cut memory and constant factors.\n• Small-n quadratic\
+    \ early break: When n is a few hundred and an inner-loop constraint is monotone,\
+    \ use O(n^2) with incremental state and break as soon as the constraint is violated;\
+    \ it’s simpler and often fast enough in Python.\n• Trigger-character monotone\
+    \ check: With small alphabet and only one count changes per step, if a condition\
+    \ can become true only when that count crosses a threshold, check only the updated\
+    \ character (e.g., after cnt[c]++, test cnt[c]==k) instead of scanning all counts.\n\
+    • Implementation consolidation: After confirming the algorithm, keep a single\
+    \ clean code path (remove abandoned drafts/unused imports) and document state\
+    \ semantics (e.g., DP endpoint meaning) with clear names/comments to reduce WA/RE\
+    \ risk more than micro-optimizations.\n• Objective complement for deletions: When\
+    \ maximizing deletions under a subsequence/embedding constraint, reframe as minimizing\
+    \ the number/cost of indices that must remain (min-cost subsequence DP), then\
+    \ convert back: maxDeletions = totalDeletable − minKeepCost."
+toolkits: {}

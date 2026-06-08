@@ -1,0 +1,50 @@
+# @package _global_
+defaults:
+  - /eval/livecodebench/lcb_baseline_eval@evaluation
+  - _self_
+
+exp_id: "lcb_practice_30"
+
+# Training-Free GRPO settings
+practice:
+  epochs: 3
+  # 30 problems × grpo_n=5 = 150 rollouts total
+  # batch_size=5 means 5 problems/batch → 25 rollouts/batch
+  batch_size: 30
+  grpo_n: 5                  # 5 attempts per problem — gives enough contrast
+  rollout_concurrency: 8     # code execution is lightweight (no Docker)
+  rollout_temperature: 0.8   # higher temperature → more diverse attempts → better contrast
+  rollout_data_truncate: 30  # use all 30 training problems per epoch
+  task_timeout: 600          # 10-minute outer timeout per batch
+  do_eval: false
+  eval_strategy: "epoch"
+
+  agent_objective: |
+    input: A competitive programming problem (from LeetCode, AtCoder, or Codeforces)
+    output: A correct, complete Python solution that passes all test cases
+
+  learning_objective: |
+    Help the agent improve at solving competitive programming problems by extracting:
+    - L0 (Case-level): Specific algorithmic choices, data structures, or edge-case
+      handling that led to a correct solution for a particular problem type
+    - L1 (Pattern-level): Reusable problem-solving strategies for categories of
+      problems (e.g., sliding window for subarray problems, BFS for shortest path,
+      binary search for monotone functions)
+    - L2 (Meta-level): Universal principles for competitive programming
+      (e.g., always check overflow, read constraints first, handle n=0/1 specially)
+
+  num_experiences_per_query: 2
+
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5   # 5 L0 → 1 L1
+    l2_aggregation_threshold: 3   # 3 L1 → 1 L2
+    max_l0_per_game: 1
+    max_l0_recent: 20
+    include_l0_in_prompt: true
+    experience_save_path: workspace/hierarchical_experiences/lcb_practice.json
+    agent_save_path: configs/agents/practice/livecodebench_practice_agent.yaml
+
+# Training dataset (30 problems)
+data:
+  practice_dataset_name: "LiveCodeBench-Train-30"
