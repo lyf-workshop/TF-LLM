@@ -1,0 +1,1325 @@
+{
+  "l0_experiences": [
+    {
+      "id": "L0_0",
+      "content": "Monotone substring counting: If a substring condition is monotone in the right endpoint for fixed left (once valid, remains valid as r increases), then for each l find the minimal r that satisfies it and add all longer ends at once (+(n-r)) instead of checking every r.",
+      "original_id": "G0",
+      "scope_key": "monotone substring counting",
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_1",
+      "content": "Constraints-driven implementation: Let constraints dictate the simplest safe complexity/data structures (e.g., n≈3000 allows O(n^2); small alphabet allows fixed arrays), and special-case trivial regimes (e.g., k<=1) early to simplify logic and avoid edge-case WA.",
+      "original_id": "G1",
+      "scope_key": "constraints-driven implementation",
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_2",
+      "content": "Kth-in-stream heap: For online k-th smallest with insertions only, maintain a size-k max-heap of the k smallest values (negatives in Python); push until size k, then replace top only when new value is smaller; answer is -heap[0].",
+      "original_id": "G2",
+      "scope_key": "kth-in-stream heap",
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_3",
+      "content": "Online top-k by reducible key: For ~2e5 online updates where each item can be reduced to a 1D comparable key, avoid repeated sorting by maintaining a bounded heap in O(log k); explicitly handle the prefill phase (len<k ⇒ output -1 or per statement) to prevent early-query bugs.",
+      "original_id": "G3",
+      "scope_key": "online top-k by reducible key",
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_4",
+      "content": "Adjacency reduction for consecutive windows: For windows requiring strictly +1 consecutive increases, precompute good[i]=(a[i+1]-a[i]==1); a length-k window is valid iff all its k-1 internal edges are good, and then the window’s value can be taken directly (often a[l+k-1]).",
+      "original_id": "G4",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_5",
+      "content": "Prefix-sum alignment on edge arrays: For good[0..n-2], build pref with pref[0]=0 and pref[i+1]=pref[i]+good[i]; internal-edge sum for window [l..l+k-1] is pref[l+k-1]-pref[l]; special-case k==1 (every window valid).",
+      "original_id": "G5",
+      "scope_key": "prefix-sum alignment on edge arrays",
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_6",
+      "content": "Binary search on time with parallel workers: When total produced work is monotone in time, implement can(T)=sum_i cap_i(T) and binary search minimal feasible T; choose a guaranteed-feasible high bound (e.g., fastest worker alone finishes) to keep O(n log hi) within limits.",
+      "original_id": "G6",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_7",
+      "content": "Arithmetic-series inversion via integer math: When cap_i(T) involves triangular/arithmetic sums, derive the inequality and invert with isqrt (no floats), carefully flooring and correcting off-by-one (e.g., solve x(x+1)/2 <= q with x=(isqrt(1+8q)-1)//2).",
+      "original_id": "G7",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_8",
+      "content": "Subsequence DP scan: For optimizing a score while ensuring pattern remains a subsequence of source, scan source left-to-right with dp[j]=best score after matching j chars; update with skip/keep/delete actions and match-to-advance when chars equal, using ndp or reverse-j updates to avoid reusing the same source char.",
+      "original_id": "G8",
+      "scope_key": "subsequence dp scan",
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_9",
+      "content": "Fixed-index deletion modeling: If operations reference original indices (deletions don’t shift positions), model decisions with a static boolean mask over positions; forbid deleting chosen subsequence witness positions, and if pattern is a subsequence of the remaining indices then deletion order won’t break the subsequence property mid-process.",
+      "original_id": "G9",
+      "scope_key": "fixed-index deletion modeling",
+      "step": 0,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_10",
+      "content": "Monotone substring counting: When validity of (l,r) is monotone in r for fixed l (once valid stays valid, or once invalid stays invalid), use two-pointers/contribution counting: maintain a clear invariant and count whole ranges at once (e.g., for each l find minimal valid r ⇒ add n-r+1; or for each r maintain minimal l such that window is valid ⇒ add l). Derive the +formula directly from the invariant to avoid off-by-one, and early-terminate inner loops when monotonicity implies no later r can work.",
+      "original_id": "G0",
+      "scope_key": "monotone substring counting",
+      "step": 1,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_11",
+      "content": "Set-membership hit counting: For checking whether elements from one list hit a whitelist/blacklist at least k times, build a set for O(1) membership and scan once with an early exit when count>=k, avoiding O(n·m).",
+      "original_id": "G10",
+      "scope_key": "set-membership hit counting",
+      "step": 1,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_12",
+      "content": "Statement semantics checklist: Before coding, resolve ambiguous wording that affects logic (occurrences vs distinct, subsequence vs substring, inclusive/exclusive bounds, case-sensitivity, 'at most' vs 'less than', etc.) and align with examples to avoid WA from misinterpretation.",
+      "original_id": "G11",
+      "scope_key": "statement semantics checklist",
+      "step": 1,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_13",
+      "content": "Small-n brute force enumeration: When n is tiny (e.g., <=8 or a fixed small constant), prefer enumerating all permutations/orders/subsets for correctness and simplicity rather than forcing a greedy; it is often faster to implement and still within time.",
+      "original_id": "G12",
+      "scope_key": "small-n brute force enumeration",
+      "step": 1,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_14",
+      "content": "Numeric concatenation with length handling: When building a number by concatenating digits/bits, update incrementally (binary: val=(val<<len)|x; base B: val=val*B^len+x) and handle x=0 specially because bit_length(0)=0 though representation length is 1.",
+      "original_id": "G13",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_15",
+      "content": "Fixed-size block iteration: For problems processing strings/arrays in equal-size blocks, iterate as `for i in range(0,n,k)` and compute on the slice/block; rely on (or assert) guarantees like n%k==0 to avoid partial-block bugs.",
+      "original_id": "G14",
+      "scope_key": "fixed-size block iteration",
+      "step": 1,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_16",
+      "content": "Alphabet index mapping: For lowercase-letter transforms, convert via ord/chr with 0..25 indexing and mod 26; build output with list append + ''.join to avoid quadratic concatenation.",
+      "original_id": "G15",
+      "scope_key": "alphabet index mapping",
+      "step": 1,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_17",
+      "content": "Sliding-window multiset containment: For window conditions like “window covers target multiset (with duplicates)”, maintain per-symbol counts plus a scalar missing_total; update missing_total only when a count crosses needed thresholds so validity checks are O(1) rather than O(alphabet).",
+      "original_id": "G16",
+      "scope_key": "sliding-window multiset containment",
+      "step": 1,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_18",
+      "content": "K-step dense-graph rolling DP: For “exactly k steps” max reward/path problems on dense graphs with per-step stay reward and per-move reward, use rolling arrays over steps: dpNext[v]=max(dp[v]+stay[t][v], max_u(dp[u]+travel[u][v])) for O(k·n^2), resetting dpNext each step.",
+      "original_id": "G17",
+      "scope_key": "k-step dense-graph rolling dp",
+      "step": 2,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_19",
+      "content": "DP dimension-collapsing safety rule: Only drop a DP state variable if both feasibility and reward of transitions depend on the remaining state only; otherwise compute the correct aggregated transition explicitly (e.g., per-destination best incoming) rather than assuming separability—common source of subtle WA.",
+      "original_id": "G18",
+      "scope_key": "dp dimension-collapsing safety rule",
+      "step": 2,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_20",
+      "content": "Prefix/suffix aggregate for single deletion: For objectives that combine via an associative operator (gcd/lcm/min/max/sum/xor/bitwise), precompute prefix and suffix aggregates and try deleting each index i with candidate=combine(pref[i], suf[i+1]) to get O(n).",
+      "original_id": "G19",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_21",
+      "content": "Empty-segment identity & indexing in prefix/suffix: When using prefix/suffix aggregates, define the monoid identity for empty segments (e.g., gcd→0, lcm→1) and align pref/suf indexing so i=0 and i=n-1 work; also honor any problem-specific “empty array score” convention to avoid off-by-one/edge-case WA.",
+      "original_id": "G20",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_22",
+      "content": "Time-gated shortest path relaxation: In graphs with waiting and earliest-available times on nodes/edges, model dist as earliest arrival time and relax with nt=max(t, gate(node/edge)) + w; verify whether the gate constrains departure vs arrival to prevent +1/off-by-one mistakes.",
+      "original_id": "G21",
+      "scope_key": "time-gated shortest path relaxation",
+      "step": 2,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_23",
+      "content": "Robust Dijkstra on grids/graphs: Use dist=INF, heap (t,state), skip stale pops with `if t!=dist[state]: continue`, and early-exit when the target is popped (valid for nonnegative costs and FIFO/monotone waiting), improving both correctness and speed.",
+      "original_id": "G22",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_24",
+      "content": "Interval-cover maximization with limited ops: If each a[i] can be changed once within [a[i]-k,a[i]+k] and you have m global operations to set values to a target t, then best(t)=min(cover[t], cnt[t]+m) where cover[t]=#intervals covering t and cnt[t]=#already equal to t; compute cover via diff-array/prefix sum when coordinates are bounded.",
+      "original_id": "G23",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_25",
+      "content": "Sweep bounds, compression, and “at most m” nuance: In value-axis interval sweeps, ensure the swept domain covers all reachable values (often [min-k, max+k]); if range is large, use event sweep/coordinate compression; also check whether “exactly m operations” effectively becomes “at most m useful operations” when no-ops/zero-effect ops are allowed.",
+      "original_id": "G24",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_26",
+      "content": "Lexicographically smallest index sequence via greedy + suffix feasibility: To build the lexicomin index sequence under subsequence-feasibility (possibly with one extra operation like a modification), choose indices greedily but gate each choice with a precomputed suffix-feasibility structure (e.g., reverse two-pointers invariant) so the remaining target can still be matched.",
+      "original_id": "G25",
+      "scope_key": null,
+      "step": 2,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_27",
+      "content": "Bitmask endpoint DP (TSP with oriented tasks): For small N where each task has two endpoints/orientations, use dp[mask][i][e]=min cost after completing tasks in mask and ending at endpoint e of task i; transition to a new task j by choosing its start endpoint, adding travel-to-start plus task processing cost. Initialize from each single-task start and take min over end states.",
+      "original_id": "G26",
+      "scope_key": null,
+      "step": 4,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_28",
+      "content": "Cost decomposition in DP: When objective = fixed per-item costs + decision-dependent transition/movement costs, precompute/sum the fixed part separately and run the DP only on the variable movement term to reduce state/transition complexity and prevent double-counting or missed constants.",
+      "original_id": "G27",
+      "scope_key": "cost decomposition in dp",
+      "step": 4,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_29",
+      "content": "Run-length block extraction for binary strings: When operations depend on maximal contiguous blocks, first RLE-scan into (char, l, r) blocks in O(n), apply logic using only block boundaries, and rebuild using concatenation of slices + repeated chars to keep overall O(n) and avoid per-operation rescans.",
+      "original_id": "G28",
+      "scope_key": null,
+      "step": 4,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_30",
+      "content": "Local substring swap modeling around moved blocks: For operations that move the k-th block next to the (k−1)-th (or similar), note only the interval spanning the moved block and the gap changes; model it as swapping adjacent substrings within that span (e.g., gap=0* and block=1*) to simplify reasoning and avoid index-shift/off-by-one errors.",
+      "original_id": "G29",
+      "scope_key": null,
+      "step": 4,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_31",
+      "content": "Binary search with greedy two-pointer feasibility (matching): When feasibility P(x) is monotone and is an assignment/matching of sorted demands to sorted capacities with tolerance x, implement P(x) via two pointers greedily matching smallest possible; include an early global-impossibility check when applicable (even at huge x) and then binary search minimal x.",
+      "original_id": "G30",
+      "scope_key": null,
+      "step": 4,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_32",
+      "content": "Single-skip matching invariant (one extra resource / one removal): If allowed to skip exactly one demand (or have one extra capacity), reframe as matching all-but-one after sorting. Solve via one-pass greedy with a clearly tracked “skip used” invariant, or via prefix/suffix matchability arrays to ensure the skipped index doesn’t cause overlap, avoiding complex casework.",
+      "original_id": "G31",
+      "scope_key": null,
+      "step": 4,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_33",
+      "content": "Length-3 subsequence counting by prefix/suffix dot product: For triples i<j<k where condition depends only on endpoint label (e.g., s[i]==s[k]), maintain frequency arrays left (indices <j) and right (indices >j). For each j: decrement right[s[j]] first, add contrib=Σ_c left[c]*right[c], then increment left[s[j]]; this preserves invariants and avoids double counting.",
+      "original_id": "G32",
+      "scope_key": null,
+      "step": 4,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_34",
+      "content": "Edge-array run-length counting for subarrays: If a subarray property depends only on adjacent relations (diffs/comparisons), convert to an edge array b[i]=relation(a[i],a[i+1]). Count valid subarrays by run-lengths of edges satisfying the condition: each maximal run of length L contributes L*(L+1)//2 edge-segments, then map to original subarrays carefully (often +1 in length).",
+      "original_id": "G33",
+      "scope_key": null,
+      "step": 4,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_35",
+      "content": "Exact-K divisors via exponent patterns: Use d(n)=∏(ai+1) and enumerate multiplicative partitions of K into (ai+1); reduce counting to a small set of prime-exponent forms (e.g., K=9 ⇒ n=p^8 or n=p^2 q^2 with distinct primes) and handle each case separately.",
+      "original_id": "G34",
+      "scope_key": "exact-k divisors via exponent patterns",
+      "step": 5,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_36",
+      "content": "Prime-product counting with integer roots: When constraints reduce to products like p^a q^b ≤ N, algebraically simplify to a monotone bound (e.g., p^2 q^2≤N ⇒ pq≤⌊√N⌋), sieve primes up to the derived limit, then count valid prime pairs via two pointers; compute all root limits with integer-safe methods (isqrt / integer bsearch + adjustment) to avoid float off-by-one.",
+      "original_id": "G35",
+      "scope_key": "prime-product counting with integer roots",
+      "step": 5,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_37",
+      "content": "Pivot-side sorting reachability check: For operations that sort left and right sides around a fixed pivot k, characterize 1-move reachability by a pivot k satisfying P[k]=k and all values <k are positioned left of k while all values >k are positioned right; implement in O(n) using pos[value] plus pref_max(pos[1..k-1])<k and suf_min(pos[k+1..n])>k (empty ranges are valid).",
+      "original_id": "G36",
+      "scope_key": "pivot-side sorting reachability check",
+      "step": 5,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_38",
+      "content": "Small answer set proof workflow: When you suspect the answer lies in a tiny set (e.g., {0,1,2}), first prove a constructive global upper bound, then derive necessary-and-sufficient conditions for smaller answers via invariants, and only then implement the case split—avoid unproven “always ≤C” heuristics.",
+      "original_id": "G37",
+      "scope_key": "small answer set proof workflow",
+      "step": 5,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_39",
+      "content": "Multi-source BFS radius: For grid/graph cells within distance D of any of multiple sources (with obstacles), push all sources into one queue and run a single BFS for shortest distances; prune expansions at dist==D and count dist<=D, achieving O(V+E) total vs per-source BFS.",
+      "original_id": "G38",
+      "scope_key": "multi-source bfs radius",
+      "step": 5,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_40",
+      "content": "Static-vs-dynamic processing check: Before designing a simulation/online algorithm, decide whether processing an item mutates the future state (dynamic deletions/updates) or merely queries a fixed set (static structure). This prevents choosing an overcomplicated dynamic DS or an incorrect static precompute.",
+      "original_id": "G39",
+      "scope_key": "static-vs-dynamic processing check",
+      "step": 5,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_41",
+      "content": "Segment tree find-first template: To find the leftmost index where a monotone predicate becomes true (e.g., A[i]≤x using range-min), store a certificate monoid in a segtree, first check feasibility at the root, then descend left-first choosing the earliest child whose certificate can satisfy the query, returning an index in O(log n).",
+      "original_id": "G40",
+      "scope_key": "segment tree find-first template",
+      "step": 5,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_42",
+      "content": "Doubling-string index tracing: For strings built by repeated doubling S←S+f(S) (f often an involution), answer position k without simulation by tracing the recursion: base index i=k%|S0| selects the original char, and the number of f-applications is determined by the recursion path (commonly popcount(k//|S0|)).",
+      "original_id": "G41",
+      "scope_key": "doubling-string index tracing",
+      "step": 5,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_43",
+      "content": "Block recurrence via popcount: For sequences with B_{2t}=B_t and B_{2t+1}=f(B_t), derive B_t = f^{popcount(t)}(B_0); implement using int.bit_count() and fast bulk input (sys.stdin.buffer.read().split()) for many queries.",
+      "original_id": "G42",
+      "scope_key": "block recurrence via popcount",
+      "step": 5,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_44",
+      "content": "Small-n brute force enumeration: When n is tiny (e.g., <=8 or otherwise constant like n=3) and you optimize over all orders/subsets, prefer direct enumeration (`itertools.permutations`, subsets/masks). State/justify the exact complexity (e.g., 3!=6) instead of forcing an unproven greedy/comparator.",
+      "original_id": "G12",
+      "scope_key": "small-n brute force enumeration",
+      "step": 6,
+      "problem_count": 4
+    },
+    {
+      "id": "L0_45",
+      "content": "Alphabet index mapping: For lowercase transforms, cache `base=ord('a')` and map via `ord(c)-base` and `chr(x+base)` with mod 26. Build output with list-append + `''.join`, and for large inputs prefer index-based traversal over repeated slicing to reduce allocations.",
+      "original_id": "G15",
+      "scope_key": "alphabet index mapping",
+      "step": 6,
+      "problem_count": 4
+    },
+    {
+      "id": "L0_46",
+      "content": "Exactly-K via atMost difference: For counting subarrays/substrings with exactly K of some property, use exactly(K)=atMost(K)−atMost(K−1). Implement atMost with monotone two pointers (no rollback). For “must include all required symbols” constraints, consider an alternative O(n) method using last-seen positions to compute the earliest valid start, which can simplify correctness and avoid per-window scanning.",
+      "original_id": "G43",
+      "scope_key": "exactly-k via atmost difference",
+      "step": 6,
+      "problem_count": 4
+    },
+    {
+      "id": "L0_47",
+      "content": "K-step dense-graph rolling DP: For “exactly k steps/days” reward maximization on (often dense) graphs with mutually exclusive per-step actions (stay vs move), keep a clear day-boundary invariant with rolling arrays: dp[v]=best score at start of day i at v; then ndp[v]=max(dp[v]+stay[i][v], max_u(dp[u]+travel[u][v])). Initialize correctly (start-anywhere vs fixed start with -INF elsewhere), reset ndp each day to avoid carryover, and watch day indexing/off-by-one.",
+      "original_id": "G17",
+      "scope_key": "k-step dense-graph rolling dp",
+      "step": 7,
+      "problem_count": 2
+    },
+    {
+      "id": "L0_48",
+      "content": "DP dimension-collapsing safety rule: Only collapse a DP state variable when both feasibility and reward of transitions depend solely on the remaining state. For dense transitions like ndp[v]=max_u(dp[u]+w[u][v]), implement the explicit per-layer aggregation (best incoming per destination) rather than assuming separability; then combine with other actions (e.g., stay) without double-counting. Pick the simplest complexity that fits constraints (often O(k·n^2) rolling DP), and enforce action exclusivity/day-boundary indexing to avoid subtle WA.",
+      "original_id": "G18",
+      "scope_key": "dp dimension-collapsing safety rule",
+      "step": 7,
+      "problem_count": 2
+    },
+    {
+      "id": "L0_49",
+      "content": "Amortized two-pointer complexity: For outer-loop + inner while-scan patterns, do amortized analysis before assuming O(n^2) or adding heavy DS. If the scan pointer only moves forward globally (never retreats), each element is advanced/popped at most once, so total work is linear (e.g., O(n) or O(n+m)). State the monotone-pointer invariant and the amortized proof to justify complexity and correctness.",
+      "original_id": "G44",
+      "scope_key": "amortized two-pointer complexity",
+      "step": 7,
+      "problem_count": 2
+    },
+    {
+      "id": "L0_50",
+      "content": "Time-gated shortest path semantics check: For waiting/earliest-available constraints, model dist as earliest arrival and relax as `nt=max(t, gate(target/edge/departure)) + w`; before coding, verify (1) whether the gate applies to entering the next node vs leaving current node vs an edge, (2) whether waiting/delaying is allowed, and (3) FIFO/monotonicity (arriving later cannot enable arriving earlier later) so Dijkstra is valid—these checks prevent systematic WA on gate-placement variants.",
+      "original_id": "G21",
+      "scope_key": "time-gated shortest path semantics check",
+      "step": 8,
+      "problem_count": 3
+    },
+    {
+      "id": "L0_51",
+      "content": "Modulo-period cycle batching: When a process depends only on time modulo p (small), compress state to phase=t%p, prove the net effect of one full period (including phase transition), then apply ⌊T/p⌋ full cycles in O(1) and simulate the remaining <p steps explicitly.",
+      "original_id": "G45",
+      "scope_key": "modulo-period cycle batching",
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_52",
+      "content": "Phase-step simulation for off-by-one safety: For cyclic/phase processes with ambiguous “advance then act” semantics, implement the last few steps by literally iterating (phase=(phase+1)%p; apply effect) rather than relying on closed-form shifted formulas, reducing off-by-one risk and easing later fixes.",
+      "original_id": "G46",
+      "scope_key": null,
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_53",
+      "content": "Online frequency invariant for add/remove streams: Maintain a count map plus an aggregate (e.g., distinct_active) and update the aggregate only when a key crosses a critical threshold (typically 0↔1); delete keys at 0 so invariants like len(cnt) are meaningful and each query stays O(1).",
+      "original_id": "G47",
+      "scope_key": null,
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_54",
+      "content": "Large-Q I/O + state hygiene: For ~2e5+ operations, use buffered input (sys.stdin.buffer.read/split or readline) and batch outputs (list + '\\n'.join). Keep dicts small by deleting zero-count keys and use local bindings to reduce per-query overhead.",
+      "original_id": "G48",
+      "scope_key": null,
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_55",
+      "content": "Small product backtracking (lexicographic): If the total Cartesian product size ∏R_i is small enough (≈1e6), enumerate with DFS/backtracking left-to-right and iterate each dimension in sorted order to emit lexicographic solutions without extra sorting.",
+      "original_id": "G49",
+      "scope_key": null,
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_56",
+      "content": "Backtracking with modular running sum: For enumeration constrained by sum%K, carry sum_mod through recursion ((sum_mod+x)%K) and check only at full depth; use buffered output and follow statement rules for the no-solution case (often print nothing).",
+      "original_id": "G50",
+      "scope_key": "backtracking with modular running sum",
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_57",
+      "content": "Interval-to-demand reduction: For problems where selectable intervals contribute +1 coverage independently, reduce to meeting per-index demands coverage[i]≥need[i]; during a sweep, detect impossibility when deficits occur with no available interval covering the point, and compute the objective via (total selectable) − (minimum selected to satisfy demands) when applicable.",
+      "original_id": "G51",
+      "scope_key": "interval-to-demand reduction",
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_58",
+      "content": "Greedy max-reach interval selection under deficits: Sweep positions increasing; maintain available intervals with l≤i in a max-heap by r, expire those with r<i. While coverage at i is below demand, pick the available interval with farthest r (exchange argument: farther reach cannot hurt feasibility and is optimal for minimizing picks).",
+      "original_id": "G52",
+      "scope_key": null,
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_59",
+      "content": "d-dimensional prefix sums (inclusion–exclusion): For many axis-aligned range-sum queries on a static dD grid, build a 1-based prefix with a 0-padded border and answer each query using the 2^d corners via inclusion–exclusion (use L-1/R per dimension) to get O(1) per query with fewer boundary bugs.",
+      "original_id": "G53",
+      "scope_key": null,
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_60",
+      "content": "Prefix-sum memory/I-O budgeting in Python: Before implementing high-dimensional prefixes, estimate (N+1)^d element count and Python object overhead; plan fast I/O and consider flattening to 1D or using compact storage (array('q')/numpy if allowed) when memory is tight, without changing the core algorithm.",
+      "original_id": "G54",
+      "scope_key": null,
+      "step": 9,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_61",
+      "content": "Run-length flush checklist: For O(n) RLE/run counting, initialize the first run correctly, flush/update the previous run immediately on value change, and flush once more after the loop. Explicitly handle n=0/1, and sanity-check off-by-one between derived array lengths (often n−1 for edge arrays) and original lengths to prevent silent miscounts.",
+      "original_id": "G55",
+      "scope_key": "run-length flush checklist",
+      "step": 10,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_62",
+      "content": "Tiny-N routing enumeration hygiene: In permutations × direction-bits search, define one explicit direction→(start,end) mapping per segment and keep direction bits tied to stable segment IDs (not permutation positions) to avoid mismatches. Remove dead/abandoned branches before submitting to prevent unintended transitions and WA.",
+      "original_id": "G56",
+      "scope_key": "tiny-n routing enumeration hygiene",
+      "step": 10,
+      "problem_count": 5
+    },
+    {
+      "id": "L0_63",
+      "content": "Lexicographic backtracking: Enumerate small Cartesian-product spaces with DFS over dimensions left-to-right and iterate candidates in sorted order to emit lexicographic results without post-sorting.",
+      "original_id": "G0",
+      "scope_key": "lexicographic backtracking",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_64",
+      "content": "Modulo-state enumeration: For sum-divisibility constraints, keep running sum mod K as the only recursion/DP state and accept leaves with mod==0; choose buffered vs streaming output based on size and ensure no-solution prints nothing.",
+      "original_id": "G1",
+      "scope_key": "modulo-state enumeration",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_65",
+      "content": "Target decomposition for max frequency with ±k ops: Fix target t, compute cover(t)=# with |a-t|<=k and keep(t)=# equal to t; answer is keep(t)+min(ops, cover(t)-keep(t)) to separate free matches from budgeted conversions.",
+      "original_id": "G2",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_66",
+      "content": "Complete target sweep: When maximizing over target values, iterate a provably complete candidate set (small-domain brute force, or sweep interval endpoints/constant-coverage segments) so optima at non-array values aren’t missed.",
+      "original_id": "G3",
+      "scope_key": "complete target sweep",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_67",
+      "content": "Involution doubling queries: For S <- S + f(S) with involution f, answer K-th char via idx=(K-1)%n and block=(K-1)//n; apply f iff popcount(block) is odd (parity of right-half choices).",
+      "original_id": "G4",
+      "scope_key": "involution doubling queries",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_68",
+      "content": "Binary index arithmetic for huge ops: When operations are enormous but queries are index-based (K up to 1e18), avoid simulation and compute via 0-index arithmetic on K; use fast tokenized I/O and batched output for large Q.",
+      "original_id": "G5",
+      "scope_key": "binary index arithmetic for huge ops",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_69",
+      "content": "Pivot-sort condition checks: For operations that sort all but a small untouched part, characterize success by (a) untouched positions already match target and (b) each sorted region contains exactly the target value set; for permutations, verify segments equal {1..m} or {m..N} using length with prefix-max/suffix-min for O(N).",
+      "original_id": "G6",
+      "scope_key": "pivot-sort condition checks",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_70",
+      "content": "Small-answer proofing: If the answer is likely in a tiny set (e.g., {0,1,2}), first prove a global upper bound then derive necessary/sufficient conditions for each value (especially 0 and 1) to avoid heuristic WAs.",
+      "original_id": "G7",
+      "scope_key": "small-answer proofing",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_71",
+      "content": "Chunk-reduce template: For partitioning into fixed-size groups, loop i=0..n-1 step k, aggregate within [i,i+k) in a bounded inner loop, then transform/append, reducing off-by-one mistakes.",
+      "original_id": "G8",
+      "scope_key": "chunk-reduce template",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_72",
+      "content": "Letter modular output: For lowercase modular arithmetic, use ord/chr with base=ord('a'), build via list + ''.join, and test edge cases (k=1, k=n, all 'z'); prefer index loops if slicing may be costly.",
+      "original_id": "G9",
+      "scope_key": "letter modular output",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_73",
+      "content": "Multi-source BFS within K: For unweighted grids with many sources, enqueue all starts with dist=0, mark visited on first reach, and stop expanding beyond distance K to count cells within <=K efficiently.",
+      "original_id": "G10",
+      "scope_key": "multi-source bfs within k",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_74",
+      "content": "Large-grid BFS efficiency: For H*W up to ~1e6, minimize extra passes, count on first-visit, and reduce memory using flattened/compact visited (bytearray/array) or level BFS instead of full 2D dist, especially with a distance bound.",
+      "original_id": "G11",
+      "scope_key": "large-grid bfs efficiency",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_75",
+      "content": "Distinct-count invariant: For dynamic multiset distinct queries, maintain freq per value and a distinct counter updated only on transitions 0→1 and 1→0 for O(1) answers.",
+      "original_id": "G12",
+      "scope_key": "distinct-count invariant",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_76",
+      "content": "High-Q I/O and structures: With Q≈2e5+, use fast input and buffered output; choose array vs dict by value bounds to optimize constants and memory.",
+      "original_id": "G13",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_77",
+      "content": "State persistence check: In repeated-process problems, confirm whether items persist unless explicitly removed; this determines static vs dynamic data structures and prevents mis-modeling updates/deletions.",
+      "original_id": "G14",
+      "scope_key": "state persistence check",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_78",
+      "content": "Segment-tree leftmost query: For “leftmost i with A[i] <= x”, build a segtree over range minima and descend to the first feasible index in O(log N); avoid DSU skip tricks unless removals are permanent/amortized is proven.",
+      "original_id": "G15",
+      "scope_key": "segment-tree leftmost query",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_79",
+      "content": "Oriented-items bitmask DP: For tiny N items with two orientations (endpoints), precompute distances and run dp[mask][i][end]=min cost ending at endpoint end of item i; add any mandatory constant cost separately.",
+      "original_id": "G16",
+      "scope_key": "oriented-items bitmask dp",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_80",
+      "content": "Exponential DP hygiene: For bitmask DP, define states by physical position after finishing a subset, precompute all pairwise distances (origin + endpoints), and remove unused arrays to avoid index/endpoint confusion.",
+      "original_id": "G17",
+      "scope_key": "exponential dp hygiene",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_81",
+      "content": "Prefix-suffix removal optimization: For “at most one deletion” problems with mergeable objectives, precompute prefix/suffix aggregates and score each deletion by merging left/right in O(1); keep separate arrays per aggregate (e.g., gcd and lcm).",
+      "original_id": "G18",
+      "scope_key": "prefix-suffix removal optimization",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_82",
+      "content": "Aggregation identities for boundaries: Use correct identity elements (gcd=0, lcm=1), include the no-deletion case for “at most one removal,” and compute lcm as (a//gcd(a,b))*b to reduce overflow risk in fixed-width languages.",
+      "original_id": "G19",
+      "scope_key": "aggregation identities for boundaries",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_83",
+      "content": "Subsequence score DP: To optimize score/deletions while keeping a fixed pattern as a subsequence, scan source and maintain dp[j]=best score after matching j chars; transitions cover skip/keep, delete (if allowed), and match-advance when chars equal, avoiding greedy traps.",
+      "original_id": "G20",
+      "scope_key": "subsequence score dp",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_84",
+      "content": "1D DP update hygiene: In 1D knapsack/matched-prefix DP, avoid reusing the same item/char by using ndp per step or updating in the correct direction; use unreachable sentinels to block invalid transitions.",
+      "original_id": "G21",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_85",
+      "content": "Bounded heap for streaming k-th: For insert-only streams needing k-th statistic after each insert, maintain a heap of size k (k smallest via max-heap, k largest via min-heap) so the answer is the root in O(log k).",
+      "original_id": "G22",
+      "scope_key": "bounded heap for streaming k-th",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_86",
+      "content": "Python heap invariant: Use heapq with negation for max-heap; prefer heapreplace/heappushpop; state the invariant (e.g., stores k smallest) and guard the <k case before reading heap[0].",
+      "original_id": "G23",
+      "scope_key": "python heap invariant",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_87",
+      "content": "Monotone substring counting: If validity is monotone in right endpoint for a fixed left, find the first valid r and add all longer endings in O(1) via ans += n - r, not by iterating all r.",
+      "original_id": "G24",
+      "scope_key": "monotone substring counting",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_88",
+      "content": "Quadratic freq expansion for small n: When O(n^2) is safe and alphabet small, expand per-left with a fixed-size freq array (e.g., 26) and add fast paths for special parameters (e.g., k==1) to keep code simple and safe.",
+      "original_id": "G25",
+      "scope_key": "quadratic freq expansion for small n",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_89",
+      "content": "Interval-demand reduction: When each interval can contribute at most once per index independently, model as selecting a minimum subset of intervals so coverage(i) >= demand[i]; if full coverage fails any demand return -1, and derive final answer from total minus minimum used.",
+      "original_id": "G26",
+      "scope_key": "interval-demand reduction",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_90",
+      "content": "Greedy farthest-right sweep for interval demands: Sweep i left-to-right tracking active chosen coverage; maintain max-heap of available intervals by right endpoint and when active<demand[i], pick largest-r intervals (dominates shorter), expiring chosen intervals via diff/events; O((n+m)log m).",
+      "original_id": "G27",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_91",
+      "content": "Time-layer DP rolling: For k-step state problems (stay vs move), use rolling dp/ndp per time layer; compute move transitions with the correct per-destination max/aggregation and avoid in-place contamination and off-by-one errors.",
+      "original_id": "G28",
+      "scope_key": "time-layer dp rolling",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_92",
+      "content": "DP max initialization: For max-DP, confirm reward semantics and initialize unreachable states with -inf when negatives/unreachability exist; use 0 only when all states are reachable and values are non-negative.",
+      "original_id": "G29",
+      "scope_key": "dp max initialization",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_93",
+      "content": "Infinite-feasibility check: With one adjustable capacity and many fixed ones, first test feasibility with adjustable=∞ (after sorting) via greedy/two-pointers; if fixed capacities can’t cover required demands, return -1 early.",
+      "original_id": "G30",
+      "scope_key": "infinite-feasibility check",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_94",
+      "content": "Binary-search predicate efficiency: In answer binary search, preprocess once and keep can(mid) O(N); avoid sorting/log factors inside the predicate, and if there’s a one-time extra resource consider deriving the minimal parameter via a single-pass greedy.",
+      "original_id": "G31",
+      "scope_key": "binary-search predicate efficiency",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_95",
+      "content": "Bruteforce tiny n: For very small n (e.g., <=8), enumerate permutations/orders directly instead of inventing a fragile greedy.",
+      "original_id": "G32",
+      "scope_key": "bruteforce tiny n",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_96",
+      "content": "Arithmetic concatenation: For concatenation-in-base-B tasks, avoid strings; append numerically via x = x * B^{digits(y)} + y (binary: x = (x << bit_length(y)) | y).",
+      "original_id": "G33",
+      "scope_key": "arithmetic concatenation",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_97",
+      "content": "ExactlyK via AtMost: For counts of subarrays/substrings with exactly K of a monotone window property, compute exactly(K)=atMost(K)-atMost(K-1); implement atMost with a sliding window for O(n).",
+      "original_id": "G34",
+      "scope_key": "exactlyk via atmost",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_98",
+      "content": "Required-set windows: To enforce a window contains all items from a small required set, maintain O(1)-updatable state plus a scalar completeness check (satisfied counter or min last-occurrence) and count valid starts per right endpoint from that scalar.",
+      "original_id": "G35",
+      "scope_key": "required-set windows",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_99",
+      "content": "Middle-fix triples with prefix/suffix: For triples where only i and k interact, sweep middle j and maintain prefix/suffix frequency tables so contribution at j is Σ_c left[c]*right[c], yielding O(n*σ).",
+      "original_id": "G36",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_100",
+      "content": "Sweep invariants for prefix/suffix: State and preserve strict-inequality invariants (left indices < j, right indices > j) by updating in the correct order (remove current from right before counting; add to left after) to avoid off-by-one.",
+      "original_id": "G37",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_101",
+      "content": "Divisor-pattern enumeration: For “exactly K divisors” counting, factor K into products of (e_i+1), enumerate exponent patterns, and map each to prime-power forms (e.g., K=9 => p^8 or p^2 q^2) to avoid missing cases.",
+      "original_id": "G38",
+      "scope_key": "divisor-pattern enumeration",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_102",
+      "content": "Prime-pair counting under product bound: To count distinct primes p<q with p*q<=X, sieve needed primes and count pairs with two-pointers/binary search; use integer bounds (isqrt) and verify any float-root estimates with exact integer comparisons to avoid off-by-one.",
+      "original_id": "G39",
+      "scope_key": "prime-pair counting under product bound",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_103",
+      "content": "D-dimensional prefix sums: For many static axis-aligned range-sum queries on a D-D grid, preprocess D-D prefix sums and answer by inclusion–exclusion over 2^D corners; use 1-based indexing with a zero border and map [L..R] to (L-1,R) indices.",
+      "original_id": "G40",
+      "scope_key": "d-dimensional prefix sums",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_104",
+      "content": "High-Q prefix-sum optimization: With very large Q, use tokenized input and batched output; build prefix sums in-place/flattened to reduce memory and avoid storing the raw grid when possible, keeping inclusion–exclusion formulas unchanged.",
+      "original_id": "G41",
+      "scope_key": "high-q prefix-sum optimization",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_105",
+      "content": "Parallel-work binary search: For minimum-time with multiple workers where completed units by time S is monotone, define can(S)=sum(work_i(S))>=need and binary search the smallest feasible S using a safe upper bound (e.g., fastest worker alone).",
+      "original_id": "G42",
+      "scope_key": "parallel-work binary search",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_106",
+      "content": "Triangular inequality via isqrt: When work_i(S) satisfies t*x*(x+1)/2<=S, avoid inner binary search by solving q=(2S)//t then x=(isqrt(1+4q)-1)//2 with correction if needed; applies to convex/increasing marginal-cost schedules.",
+      "original_id": "G43",
+      "scope_key": "triangular inequality via isqrt",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_107",
+      "content": "Frequency dominance window: For anagram/cover constraints (have[c]>=need[c]), use two pointers with a scalar deficit/missing updated on add/remove (careful <=/< thresholds) to avoid O(σ) rechecks.",
+      "original_id": "G44",
+      "scope_key": "frequency dominance window",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_108",
+      "content": "Monotone window counting hygiene: Fix whether l after shrinking represents minimal-valid or first-invalid, and use the corresponding per-r counting formula (add l or l+1) to avoid off-by-one in substring counts.",
+      "original_id": "G45",
+      "scope_key": "monotone window counting hygiene",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_109",
+      "content": "Adjacency indicators: If a window property depends on all adjacent pairs, precompute a 0/1 edge array and use prefix sums or sliding edge-sum to test each length-k window in O(1), turning O(nk) into O(n).",
+      "original_id": "G46",
+      "scope_key": "adjacency indicators",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_110",
+      "content": "Prefix sum template: Use pref[0]=0 and pref[i+1]=pref[i]+a[i], with range sum pref[r]-pref[l] for [l,r), to prevent off-by-one and brittle fixes.",
+      "original_id": "G47",
+      "scope_key": "prefix sum template",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_111",
+      "content": "Gated grid relaxation: For grids where entering cell v is allowed only after time G[v], use next_time = max(cur_time, G[v]) + move_cost to model waiting+moving correctly.",
+      "original_id": "G48",
+      "scope_key": "gated grid relaxation",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_112",
+      "content": "FIFO Dijkstra criterion: Use Dijkstra for time-dependent edges only when the transition is FIFO/monotone (leaving later can’t arrive earlier); functions like f(t)=max(t,gate)+c are FIFO so standard Dijkstra with stale-skip works, while BFS needs uniform effective costs.",
+      "original_id": "G49",
+      "scope_key": "fifo dijkstra criterion",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_113",
+      "content": "Difference-run counting for arithmetic subarrays: Convert to differences D[i]=A[i+1]-A[i]; sum L*(L+1)//2 over maximal equal runs in D and add N length-1 subarrays (handle N=1).",
+      "original_id": "G50",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_114",
+      "content": "Local-to-run reduction: If a subarray property depends only on adjacent relations, map to a local-feature array (diff/compare/ratio), reduce to counting runs with a triangular-number formula, and carefully translate run length to subarray count.",
+      "original_id": "G51",
+      "scope_key": "local-to-run reduction",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_115",
+      "content": "Spec-first output: When a platform requires an exact class/method signature and code formatting, output runnable code with required imports and exact signature to avoid format-based failures.",
+      "original_id": "G52",
+      "scope_key": "spec-first output",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_116",
+      "content": "Hashset matching with early exit: To count if there are at least K exact string matches between two lists, store one list in a set and scan the other counting hits with early stop at K for O(n+m).",
+      "original_id": "G53",
+      "scope_key": "hashset matching with early exit",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_117",
+      "content": "Period fast-forwarding: For processes depending on time mod p, precompute net change over one period, jump full periods using div/mod while tracking phase, then simulate the remainder; reduces time and avoids modulo/off-by-one bugs.",
+      "original_id": "G54",
+      "scope_key": "period fast-forwarding",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_118",
+      "content": "Cycle check before binary search: Before binary searching minimal steps, look for short-period invariants enabling batching/cycle skipping; binary search is fallback since inclusivity/bounds/modulo alignment are bug-prone.",
+      "original_id": "G55",
+      "scope_key": "cycle check before binary search",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_119",
+      "content": "Feasible-choice greedy for lexicographic subsequences: To build lexicographically smallest feasible index subsequence, scan left-to-right and always pick the earliest index that still allows completing the remainder; later feasible picks are dominated.",
+      "original_id": "G56",
+      "scope_key": null,
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_120",
+      "content": "Suffix feasibility oracle: When greedy needs fast “can finish?” checks, precompute a suffix feasibility structure (e.g., reverse subsequence match lengths) with a clear invariant and correct inequality so the algorithm stays O(n) with monotone pointers.",
+      "original_id": "G57",
+      "scope_key": "suffix feasibility oracle",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_121",
+      "content": "Run decomposition for block operations: Represent maximal runs (e.g., consecutive 1s) as intervals (l,r), operate on run indices, then reconstruct using slices/joins rather than simulating moves element-by-element.",
+      "original_id": "G58",
+      "scope_key": "run decomposition for block operations",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_122",
+      "content": "Slice length sanity: When reconstructing arrays/strings from moved intervals, explicitly compute all segment lengths with consistent half-open indexing and ensure nonnegativity to prevent edge-case off-by-ones.",
+      "original_id": "G59",
+      "scope_key": "slice length sanity",
+      "step": 0,
+      "problem_count": 30
+    },
+    {
+      "id": "L0_123",
+      "content": "Modulo-state enumeration: For small Cartesian-product backtracking with sum-divisibility, keep only running sum mod K as state (sum_mod=(sum_mod+v)%K), accept leaves with mod==0, and choose output strategy (buffer vs stream) based on potential number of solutions; if no solutions, print nothing.",
+      "original_id": "G1",
+      "scope_key": "modulo-state enumeration",
+      "step": 1,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_124",
+      "content": "Complete target sweep: When optimizing over integer targets, justify a complete candidate set. For interval-cover objectives, cover(t) changes only at endpoints (use difference events at L and R+1), and any dependence on exact equality requires also checking original values; evaluate only these change points/segments so optima between events aren’t missed.",
+      "original_id": "G3",
+      "scope_key": "complete target sweep",
+      "step": 1,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_125",
+      "content": "High-Q I/O and structures: For Q≈2e5+ in Python, use tokenized buffered input and batched output; minimize per-query overhead (avoid extra allocations/calls in hot loops), and prefer compact/flat structures (array/bytearray/flat lists) over nested lists/dicts when bounds allow.",
+      "original_id": "G13",
+      "scope_key": null,
+      "step": 1,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_126",
+      "content": "Interval-demand reduction: When each chosen interval contributes +1 coverage to every covered index independently, reframe as meeting per-position demands with feasibility coverage(i)≥demand(i); if infeasible return -1, else answer “max removable” = total intervals − minimum kept to satisfy all demands (avoid step-by-step simulation).",
+      "original_id": "G26",
+      "scope_key": "interval-demand reduction",
+      "step": 1,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_127",
+      "content": "Time-layer DP rolling: For exactly-k-step DP with mutually exclusive actions (stay vs move), define a clear per-time invariant (dp[v]=best after time i at v) and use dp/ndp rolling arrays so transitions match the statement and avoid in-place contamination/double counting.",
+      "original_id": "G28",
+      "scope_key": "time-layer dp rolling",
+      "step": 1,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_128",
+      "content": "Monotone window counting hygiene: For two-pointer counting where validity is monotone under expansion, explicitly choose an invariant and match the counting formula: (A) shrink to minimal-valid left for each r ⇒ add l+1 valid starts; or (B) for each l find minimal-valid r ⇒ add n−r valid ends. Off-by-one errors come from mixing “minimal valid” vs “first invalid” meanings.",
+      "original_id": "G45",
+      "scope_key": "monotone window counting hygiene",
+      "step": 1,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_129",
+      "content": "Exact-phrase semantics checklist: When statements say “exact match” or “at least X words,” confirm equality vs substring/prefix and whether duplicates count multiple times unless distinctness is specified; write this assumption into the solution to avoid misreads.",
+      "original_id": "G60",
+      "scope_key": "exact-phrase semantics checklist",
+      "step": 1,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_130",
+      "content": "Batching with alive-front guard: In sequential simulations that repeatedly act on the “current front/alive” entity, fast-forward in batches only until the next event where the front entity changes (dies/moves/target changes); never let a bulk step cross a boundary that would change which entity is acted on.",
+      "original_id": "G61",
+      "scope_key": "batching with alive-front guard",
+      "step": 1,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_131",
+      "content": "Dense max-plus transitions: For layer DP of form new_dp[v]=max_u(dp[u]+w[u][v]) (dense transitions), implement as O(n^2) max-plus matrix–vector multiply per layer (often OK for n≈200–500), then combine with per-node options (e.g., stay) using rolling arrays to keep memory O(n).",
+      "original_id": "G62",
+      "scope_key": "dense max-plus transitions",
+      "step": 1,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_132",
+      "content": "Monotone window output shortcut: If a valid-window predicate implies a rigid structure (e.g., adjacent +1 ⇒ strictly consecutive increasing), derive the window’s output directly from endpoints (often max=last element) and treat k==1 as a degenerate case to avoid off-by-one.",
+      "original_id": "G63",
+      "scope_key": "monotone window output shortcut",
+      "step": 2,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_133",
+      "content": "Rolling counts over 2D tables: For prefix/suffix frequency sweeps in Python, avoid building O(n·σ) tables of Python ints; prefer rolling/streaming O(σ) counters (or small typed arrays) to cut memory and constant factors.",
+      "original_id": "G64",
+      "scope_key": "rolling counts over 2d tables",
+      "step": 2,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_134",
+      "content": "Small-n quadratic early break: When n is a few hundred and an inner-loop constraint is monotone, use O(n^2) with incremental state and break as soon as the constraint is violated; it’s simpler and often fast enough in Python.",
+      "original_id": "G65",
+      "scope_key": "small-n quadratic early break",
+      "step": 2,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_135",
+      "content": "Trigger-character monotone check: With small alphabet and only one count changes per step, if a condition can become true only when that count crosses a threshold, check only the updated character (e.g., after cnt[c]++, test cnt[c]==k) instead of scanning all counts.",
+      "original_id": "G66",
+      "scope_key": "trigger-character monotone check",
+      "step": 2,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_136",
+      "content": "Implementation consolidation: After confirming the algorithm, keep a single clean code path (remove abandoned drafts/unused imports) and document state semantics (e.g., DP endpoint meaning) with clear names/comments to reduce WA/RE risk more than micro-optimizations.",
+      "original_id": "G67",
+      "scope_key": "implementation consolidation",
+      "step": 2,
+      "problem_count": 25
+    },
+    {
+      "id": "L0_137",
+      "content": "Objective complement for deletions: When maximizing deletions under a subsequence/embedding constraint, reframe as minimizing the number/cost of indices that must remain (min-cost subsequence DP), then convert back: maxDeletions = totalDeletable − minKeepCost.",
+      "original_id": "G68",
+      "scope_key": "objective complement for deletions",
+      "step": 2,
+      "problem_count": 25
+    }
+  ],
+  "l1_experiences": [
+    {
+      "id": "L1_0",
+      "content": "Exploit problem structure and constraints to replace per-query/per-subarray brute force with *monotone or decomposable summaries* (e.g., two-pointers for monotone validity, prefix/edge precomputations for window predicates, bounded heaps for top‑k), and implement with the simplest data structure/complexity that fits the limits while explicitly handling trivial/prefill edge regimes early to avoid corner-case bugs.",
+      "source_l0_ids": [
+        "L0_0",
+        "L0_1",
+        "L0_2",
+        "L0_3",
+        "L0_4"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_1",
+      "content": "Reduce the problem to a monotone feasibility check or a one-pass state transition over a fixed representation (prefix sums / static masks / DP states), then solve by applying the appropriate generic driver—binary search for monotone “can(x)” predicates or linear scans with carefully ordered updates—while using exact integer math and explicit boundary handling to avoid off-by-one and edge-case failures.",
+      "source_l0_ids": [
+        "L0_5",
+        "L0_6",
+        "L0_7",
+        "L0_8",
+        "L0_9"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_2",
+      "content": "Exploit problem structure and constraints to choose the simplest correct primitive (monotonicity → two-pointers with range contributions, membership → hash set scan with early exit, tiny n → brute force), but first lock down exact statement semantics and invariants (including boundary/length edge cases) so the counting/update formulas follow directly and avoid off-by-one or misinterpretation WAs.",
+      "source_l0_ids": [
+        "L0_10",
+        "L0_11",
+        "L0_12",
+        "L0_13",
+        "L0_14"
+      ],
+      "step": 2
+    },
+    {
+      "id": "L1_3",
+      "content": "Reduce repeated work by maintaining the smallest sufficient state and updating it incrementally: iterate in natural chunks/windows/steps, keep compact numeric representations (e.g., indexed counts or rolling DP arrays), and design O(1) validity/transition updates by tracking threshold-crossing aggregates—only collapsing dimensions when transitions truly depend solely on the retained state.",
+      "source_l0_ids": [
+        "L0_15",
+        "L0_16",
+        "L0_17",
+        "L0_18",
+        "L0_19"
+      ],
+      "step": 3
+    },
+    {
+      "id": "L1_4",
+      "content": "Reduce “try all single changes / time-dependent transitions” problems to fast reusable primitives by (1) expressing the objective or feasibility as an associative aggregate or monotone earliest-time state, (2) precomputing/maintaining prefix–suffix or sweep-line (difference array) summaries with correct identity/edge handling, and (3) evaluating each candidate via O(1) combine/relax steps (e.g., `combine(pref, suf)` or `nt = max(t, gate) + w`) inside a standard, stale-skip priority-queue loop when shortest paths are involved.",
+      "source_l0_ids": [
+        "L0_20",
+        "L0_21",
+        "L0_22",
+        "L0_23",
+        "L0_24"
+      ],
+      "step": 4
+    },
+    {
+      "id": "L1_5",
+      "content": "Reduce the problem to a compact “event/block/state” representation (coordinate-compressed sweep events, run-length blocks, or bitmask DP states), then solve greedily or with DP while enforcing feasibility via precomputed suffix/transition information and separating fixed costs from decision-dependent costs to keep transitions correct and efficient.",
+      "source_l0_ids": [
+        "L0_25",
+        "L0_26",
+        "L0_27",
+        "L0_28",
+        "L0_29"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_6",
+      "content": "Reduce the problem to a monotone or locally-updatable representation (e.g., sorted sequences for greedy feasibility, prefix/suffix frequency invariants, or an “edge”/run-length array) so each operation/check only touches a small, well-defined state, then solve by a standard outer driver (binary search on the answer or a single linear scan) while maintaining strict update order to prevent index-shift and double-counting errors.",
+      "source_l0_ids": [
+        "L0_30",
+        "L0_31",
+        "L0_32",
+        "L0_33",
+        "L0_34"
+      ],
+      "step": 1
+    },
+    {
+      "id": "L1_7",
+      "content": "Reduce the problem to a small number of structurally distinct cases by deriving a tight mathematical/structural characterization (often turning constraints into monotone bounds or invariants), then solve each case with the simplest linear/near-linear primitive (sieve + two pointers, prefix/suffix checks, multi-source BFS) using integer-safe boundary handling and only implementing case splits after proving correctness/coverage.",
+      "source_l0_ids": [
+        "L0_35",
+        "L0_36",
+        "L0_37",
+        "L0_38",
+        "L0_39"
+      ],
+      "step": 2
+    },
+    {
+      "id": "L1_8",
+      "content": "Before committing to a heavy simulation or data structure, classify the process by its structural invariants (static vs state-mutating, monotone predicates, self-similar recurrences, or tiny search space) and then pick the simplest matching template—e.g., segtree “find-first” for monotone queries, bit/popcount-based recursion tracing for doubling/block recurrences, and brute-force enumeration when \\(n\\) is provably small.",
+      "source_l0_ids": [
+        "L0_40",
+        "L0_41",
+        "L0_42",
+        "L0_43",
+        "L0_44"
+      ],
+      "step": 6
+    },
+    {
+      "id": "L1_9",
+      "content": "Reduce problems to a **monotone, layer-by-layer invariant** (e.g., two pointers with no rollback or rolling DP by time/steps), then implement it with **state isolation per layer/window** (fresh next-state, no accidental carryover) and **amortized/constraint-driven complexity checks** (prove pointers advance once; only collapse state when transitions truly depend only on the reduced state), using low-allocation primitives for performance.",
+      "source_l0_ids": [
+        "L0_45",
+        "L0_46",
+        "L0_47",
+        "L0_48",
+        "L0_49"
+      ],
+      "step": 7
+    },
+    {
+      "id": "L1_10",
+      "content": "When solving time-/query-driven problems, first formalize the state transition semantics and invariants (what “time” means, where constraints apply, and what must remain monotone/FIFO), then implement an efficient state machine: compress to minimal state (e.g., phase/modulo), batch repeatable cycles, and maintain aggregates via threshold-crossing updates—while using buffered I/O and zero-pruning maps to keep each operation/relaxation O(1)–O(log n) and avoid off-by-one/WA pitfalls.",
+      "source_l0_ids": [
+        "L0_50",
+        "L0_51",
+        "L0_52",
+        "L0_53",
+        "L0_54"
+      ],
+      "step": 9
+    },
+    {
+      "id": "L1_11",
+      "content": "Exploit problem structure to turn exponential or global constraints into incremental state or prefixable aggregates, then process in a deterministic order (lexicographic recursion or left-to-right sweep) while maintaining just enough summary information (e.g., running modulo, current deficits, best-available reach, or prefix sums) to make locally optimal/constant-time decisions and detect impossibility early.",
+      "source_l0_ids": [
+        "L0_55",
+        "L0_56",
+        "L0_57",
+        "L0_58",
+        "L0_59"
+      ],
+      "step": 10
+    },
+    {
+      "id": "L1_12",
+      "content": "Before coding, bound the search/DP state space and memory footprint from constraints, then implement a single-pass or small-state enumeration/DP with explicit initialization and final “flush” handling, keeping state representations minimal and mappings consistent so you avoid off-by-one/misaligned-state bugs while meeting I/O and memory limits.",
+      "source_l0_ids": [
+        "L0_60",
+        "L0_61",
+        "L0_62",
+        "L0_63",
+        "L0_64"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L1_13",
+      "content": "Reduce the problem to an invariant/monotone characterization over a *complete but compressed* set of candidates (targets, segments, or index blocks), then compute the objective/feasibility by counting or parity/prefix-suffix summaries instead of simulating operations.",
+      "source_l0_ids": [
+        "L0_65",
+        "L0_66",
+        "L0_67",
+        "L0_68",
+        "L0_69"
+      ],
+      "step": 2
+    }
+  ],
+  "l2_experiences": [
+    {
+      "id": "L2_0",
+      "content": "Principle: Convert the problem into an invariant-driven, constraint-shaped representation where progress is monotone or state is composable, so you can replace repeated local work with a single generic driver (one-pass scan, prefix/heap summary, or binary search on a feasibility predicate) and lock down boundaries/semantics upfront. This works because monotonicity and decomposability let you count/decide whole ranges or states at once while preserving correctness through explicit invariants and exact integer/boundary handling. The benefit is solutions that are both faster (by collapsing many checks into summaries) and more reliable (fewer off-by-one/edge-case failures due to early semantic and boundary stabilization).",
+      "source_l1_ids": [
+        "L1_0",
+        "L1_1",
+        "L1_2"
+      ],
+      "step": 2
+    },
+    {
+      "id": "L2_1",
+      "content": "Principle: Reframe the problem around a minimal, composable state/summary that is sufficient to decide transitions and evaluate alternatives locally. This works because once you identify the true invariants (monoid aggregates, threshold-crossing counters, event blocks, earliest-time relaxations), you can update/compose them incrementally with correct identities and edge handling instead of recomputing global properties. The benefit is solutions that are simultaneously faster (turning “try all / rescan” into O(1) updates or combines) and more reliable (dimension drops and boundary cases become explicit, preventing subtle WA).",
+      "source_l1_ids": [
+        "L1_3",
+        "L1_4",
+        "L1_5"
+      ],
+      "step": 0
+    },
+    {
+      "id": "L2_2",
+      "content": "Principle: Reframe problems into the smallest invariant-preserving state where progress is monotone or locally composable, then drive the solution with a proven generic template (scan/two-pointers, binary search, BFS, segtree find-first, or tiny brute force) under strict update order and integer-safe boundaries. This works because invariants and monotonicity turn complex global behavior into verifiable local steps with guaranteed coverage and no double-counting/index-shift ambiguity. The benefit is faster correct-by-construction solutions: fewer moving parts, simpler proofs/case splits, and robust handling of edge cases across very different problem domains.",
+      "source_l1_ids": [
+        "L1_6",
+        "L1_7",
+        "L1_8"
+      ],
+      "step": 6
+    },
+    {
+      "id": "L2_3",
+      "content": "Principle: Reduce the problem to a minimal, invariant-preserving state evolution (monotone layers/time/scan) and only carry forward the information that transitions truly depend on. This works because once semantics and invariants are explicit, you can prove correctness and complexity via one-way progress (amortization/FIFO) and threshold-crossing updates, avoiding hidden dependencies and off-by-one drift. The benefit is solutions that are both faster (no rollback, no redundant recomputation, tight I/O/state) and more reliable (state isolation per step/window, early impossibility detection, fewer boundary bugs).",
+      "source_l1_ids": [
+        "L1_9",
+        "L1_10",
+        "L1_11"
+      ],
+      "step": 10
+    }
+  ],
+  "stats": {
+    "total_l0": 138,
+    "total_l1": 14,
+    "total_l2": 4
+  }
+}
