@@ -201,14 +201,14 @@ def main():
     if all_passed:
         print("\n✅ 所有检查通过！环境配置正确。")
         print("\n下一步:")
-        print("  1. 运行测试: uv run python scripts/test_korgym_adapter.py")
-        print("  2. 启动游戏: python scripts/start_korgym_server.py 3-2048")
+        print('  1. 运行预检: uv run python scripts/setup/check_environment.py --profile korgym')
+        print('  2. 启动游戏: uv run python scripts/korgym/start_korgym_server.py 3-2048')
         return 0
     else:
         print("\n❌ 部分检查失败，请先完成环境配置。")
         print("\n推荐操作:")
-        print("  1. 运行配置脚本: bash setup_korgym_wsl.sh")
-        print("  2. 或查看文档: cat KORGym_WSL环境配置指南.md")
+        print('  1. 运行配置脚本: bash scripts/setup/deploy.sh --profile korgym')
+        print('  2. 查看文档: docs/datasets/korgym.md')
         return 1
 
 

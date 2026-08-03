@@ -1,0 +1,55 @@
+# @package _global_
+# ZebraLogic (logic puzzles) — hierarchical experience learning template (Path Z).
+#
+# How to use:
+#   1. Copy / rename this file and adjust the [MODIFY] fields.
+#   2. Make sure the referenced eval config and the practice dataset exist.
+#   3. Run: uv run python scripts/run_training_free_GRPO.py --config_name logic/TEMPLATE_zebralogic_practice
+defaults:
+  # load the evaluation config file (baseline)
+  - /eval/logic/logic_zebralogic_test@evaluation   # [MODIFY] evaluation sub-config
+  - _self_
+
+exp_id: "logic_practice_zebralogic"      # [MODIFY] unique experiment id
+
+# Practice Arguments
+practice:
+  epochs: 3                # ≥2 so L1/L2 get refined across epochs (Path Z aggregates at each epoch end)
+  batch_size: 80           # adjust to match dataset size
+  grpo_n: 5
+  rollout_concurrency: 128
+  rollout_temperature: 0.7
+  task_timeout: 1800
+  do_eval: false
+  eval_strategy: "epoch"
+  verify_module: "utu.practice.verify.logic"   # logic verifier for reward calculation
+
+  agent_objective: |
+    input: A logic puzzle that requires deductive reasoning and constraint satisfaction
+    output: A step-by-step reasoning process that leads to the correct solution
+
+  learning_objective: |
+    Help the agent improve logical reasoning by extracting:
+    - L0 (Case-level): Specific deductions, constraint checks, or mistakes on a particular puzzle
+    - L1 (Pattern-level): Reusable strategies (grid tracking, constraint propagation, elimination)
+    - L2 (Meta-level): Universal principles (formalize structure early, validate interdependencies)
+
+  num_experiences_per_query: 1
+
+  # ---- Hierarchical experience learning (Path Z) ----
+  # Three pools, one shared LLM merge (ADD/UPDATE/DELETE/NONE):
+  #   L0 = raw per-puzzle insights, accumulated EVERY STEP via LLM merge
+  #   L1 = patterns aggregated FROM L0 at EACH EPOCH END, then merged into the L1 pool
+  #   L2 = meta-principles aggregated FROM L1 at EACH EPOCH END, then merged into the L2 pool
+  # Cross-epoch refinement (updating/deleting stale entries) is handled by the merge.
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5   # min NEW L0 in an epoch before aggregating an L1
+    l2_aggregation_threshold: 3   # min L1 in the pool before aggregating an L2
+    include_l0_in_prompt: true    # also append recent L0 cases to the agent prompt
+    max_l0_recent: 20             # how many recent L0 to inject into the prompt
+    experience_save_path: workspace/hierarchical_experiences/logic_practice_zebralogic.json
+
+# Data Arguments
+data:
+  practice_dataset_name: "ZebraLogic-Train-100"   # [MODIFY] training dataset

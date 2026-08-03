@@ -209,6 +209,10 @@ class TrainingFreeGRPO:
                             epoch=epoch,
                             batch=batch_idx,
                         )
+                        # Raw L0 candidates (pre-merge per-problem insights) for the
+                        # hierarchical manager. Only available on a fresh run; cached
+                        # steps were already folded into L0 on the original run.
+                        l0_candidates: list[str] = []
                         if cached_experiences is not None and self._should_use_cache(step):
                             logger.info(
                                 f"Experiences for step {step} already exist in database, skipping experience update."
@@ -237,20 +241,19 @@ class TrainingFreeGRPO:
                                 batch=batch_idx,
                             )
                             logger.info(f"Step {step} completed. New experiences added: {len(new_experiences)}")
-                        
-                        # Process hierarchical experiences if enabled
+                            # Raw, pre-merge insights produced by this step's updater run.
+                            l0_candidates = list(getattr(self.experience_updater, "last_l0_candidates", []) or [])
+
+                        # Per-step: accumulate L0 only. L1/L2 are aggregated at epoch end.
                         if self.hierarchical_experience_manager is not None:
-                            logger.info(f"Processing hierarchical experiences for step {step}...")
-                            # Calculate number of unique problems in this step
-                            problem_count = len(set(r.raw_question for r in rollouts if r.raw_question))
+                            logger.info(f"Merging L0 candidates for step {step} ({len(l0_candidates)} candidates)...")
                             await self.hierarchical_experience_manager.process_step_experiences(
-                                step_experiences=new_experiences,
+                                l0_candidates=l0_candidates,
                                 step=step,
-                                problem_count=problem_count
                             )
-                            logger.info(f"Hierarchical processing complete. L0={len(self.hierarchical_experience_manager.l0_experiences)}, "
-                                      f"L1={len(self.hierarchical_experience_manager.l1_experiences)}, "
-                                      f"L2={len(self.hierarchical_experience_manager.l2_experiences)}")
+                            logger.info(
+                                f"L0 pool size: {len(self.hierarchical_experience_manager.l0)}"
+                            )
 
                         stats[f"step_{step}"]["complete"] = True
                         self.recorder.stat_update({f"step_{step}": stats[f"step_{step}"]})
@@ -277,6 +280,12 @@ class TrainingFreeGRPO:
                         stat_span.span_data.output = stats[f"step_{step}"]
                     with function_span("Record current experiences") as exp_span:
                         exp_span.span_data.output = new_experiences
+
+            # End of epoch: aggregate L1 (from new L0) and L2 (from L1), refining
+            # any stale entries across epochs via the shared LLM merge.
+            if self.hierarchical_experience_manager is not None:
+                logger.info(f"Aggregating hierarchical experiences at end of epoch {epoch}...")
+                await self.hierarchical_experience_manager.aggregate_epoch(epoch)
 
     def _should_use_cache(self, step: int) -> bool:
         """Determine if cached results should be used for current step.

@@ -1,0 +1,88 @@
+task_id	domain	capability	diff
+azure-bgp-oscillation-route-leak	Software Engineering	Reasoning	X
+data-to-d3	Software Engineering	Agentic Coding	X
+debug-trl-grpo	Software Engineering	Agentic Coding	E
+dialogue-parser	Software Engineering	Agentic Coding	C
+fix-build-agentops	Software Engineering	Agentic Coding	C
+fix-build-google-auto	Software Engineering	Agentic Coding	C
+fix-visual-stability	Software Engineering	Agentic Coding	E
+flink-query	Software Engineering	Agentic Coding	E
+jax-computing-basics	Software Engineering	Agentic Coding	X
+llm-prefix-cache-replay	Software Engineering	Agentic Coding	X
+parallel-tfidf-search	Software Engineering	Agentic Coding	X
+python-scala-translation	Software Engineering	Agentic Coding	X
+react-performance-debugging	Software Engineering	Agentic Coding	E
+simpo-code-reproduction	Software Engineering	Agentic Coding	E
+spring-boot-jakarta-migration	Software Engineering	Agentic Coding	E
+tictoc-unnecessary-abort-detection	Software Engineering	Reasoning	E
+3d-scan-calc	Industrial & Physical Systems	Reasoning	E
+ada-bathroom-plan-repair	Industrial & Physical Systems	Reasoning	E
+adaptive-cruise-control	Industrial & Physical Systems	Reasoning	X
+drone-planning-control	Industrial & Physical Systems	Reasoning	X
+dynamic-object-aware-egomotion	Industrial & Physical Systems	Reasoning	X
+energy-ac-optimal-power-flow	Industrial & Physical Systems	Reasoning	X
+energy-market-pricing	Industrial & Physical Systems	Reasoning	E
+energy-unit-commitment	Industrial & Physical Systems	Reasoning	E
+grid-dispatch-operator	Industrial & Physical Systems	Reasoning	X
+hvac-control	Industrial & Physical Systems	Reasoning	X
+manufacturing-codebook-normalization	Industrial & Physical Systems	Reasoning	X
+manufacturing-equipment-maintenance	Industrial & Physical Systems	Reasoning	X
+manufacturing-fjsp-optimization	Industrial & Physical Systems	Reasoning	X
+r2r-mpc-control	Industrial & Physical Systems	Reasoning	X
+crystallographic-wyckoff-position-analysis	Natural Science	Reasoning	X
+earthquake-phase-association	Natural Science	Reasoning	E
+earthquake-plate-calculation	Natural Science	Reasoning	X
+exoplanet-detection-period	Natural Science	Reasoning	X
+flood-risk-analysis	Natural Science	Reasoning	X
+glm-lake-mendota	Natural Science	Reasoning	E
+gravitational-wave-detection	Natural Science	Reasoning	X
+lab-unit-harmonization	Natural Science	Reasoning	X
+lake-warming-attribution	Natural Science	Reasoning	X
+mars-clouds-clustering	Natural Science	Reasoning	E
+protein-expression-analysis	Natural Science	Reasoning	X
+quantum-numerical-simulation	Natural Science	Reasoning	X
+radar-vital-signs	Natural Science	Reasoning	X
+seismic-phase-picking	Natural Science	Reasoning	E
+citation-check	Office & White Collar	Search & Research	X
+court-form-filling	Office & White Collar	Tool Use	C
+edit-pdf	Office & White Collar	Tool Use	X
+enterprise-information-search	Office & White Collar	Search & Research	E
+exceltable-in-ppt	Office & White Collar	Tool Use	X
+jpg-ocr-stat	Office & White Collar	Multimodal	E
+latex-formula-extraction	Office & White Collar	Multimodal	X
+offer-letter-generator	Office & White Collar	Tool Use	C
+organize-messy-files	Office & White Collar	Tool Use	X
+paper-anonymizer	Office & White Collar	Multimodal	X
+pdf-excel-diff	Office & White Collar	Multimodal	X
+powerlifting-coef-calc	Office & White Collar	Tool Use	C
+pptx-reference-formatting	Office & White Collar	Tool Use	X
+sales-pivot-analysis	Office & White Collar	Tool Use	X
+econ-detrending-correlation	Finance & Economics	Tool Use	X
+financial-modeling-qa	Finance & Economics	Multimodal	E
+invoice-fraud-detection	Finance & Economics	Multimodal	E
+reserves-at-risk-calc	Finance & Economics	Tool Use	X
+sec-financial-report	Finance & Economics	Search & Research	E
+shock-analysis-demand	Finance & Economics	Tool Use	X
+shock-analysis-supply	Finance & Economics	Tool Use	E
+weighted-gdp-calc	Finance & Economics	Tool Use	X
+xlsx-recover-data	Finance & Economics	Tool Use	X
+bike-rebalance	Mathematics & OR	Reasoning	X
+civ6-adjacency-optimizer	Mathematics & OR	Reasoning	E
+exam-block-sequencing	Mathematics & OR	Reasoning	E
+lean4-proof	Mathematics & OR	Reasoning	X
+paratransit-routing	Mathematics & OR	Reasoning	E
+pddl-airport-planning	Mathematics & OR	Reasoning	X
+pddl-tpp-planning	Mathematics & OR	Reasoning	X
+travel-planning	Mathematics & OR	Search & Research	X
+dapt-intrusion-detection	Cybersecurity	Multimodal	E
+fix-druid-loophole-cve	Cybersecurity	Agentic Coding	E
+fix-erlang-ssh-cve	Cybersecurity	Agentic Coding	E
+setup-fuzzing-py	Cybersecurity	Agentic Coding	X
+software-dependency-audit	Cybersecurity	Search & Research	X
+suricata-custom-exfil	Cybersecurity	Multimodal	X
+syzkaller-ppdev-syzlang	Cybersecurity	Agentic Coding	X
+mario-coin-counting	Media & Content Production	Multimodal	X
+multilingual-video-dubbing	Media & Content Production	Multimodal	X
+threejs-structure-parser	Media & Content Production	Multimodal	X
+threejs-to-obj	Media & Content Production	Multimodal	X
+video-silence-remover	Media & Content Production	Multimodal	E

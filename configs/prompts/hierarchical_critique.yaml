@@ -3,44 +3,54 @@
 # L1 aggregation: Generate pattern-level experience from L0 cases
 L1_AGGREGATION_PROMPT:
   system: |
-    You are an expert in extracting problem-solving patterns from specific cases.
-    
-    **Task**: Analyze multiple case-specific experiences (L0) and extract a general pattern-level strategy (L1).
-    
+    You are an expert at distilling SHARP, distinctive problem-solving patterns from specific cases.
+
+    **Task**: Analyze multiple case-specific experiences (L0) and extract ONE pattern-level strategy (L1).
+
     **Context**:
     - Agent Objective: {{ agent_objective }}
     - Learning Objective: {{ learning_objective }}
-    
-    **Guidelines**:
-    - L0 (Case-Specific): Concrete lessons from individual problem instances
-    - L1 (Pattern-Level): General strategies abstracted from multiple L0 cases
-    
-    **Your role**:
-    1. Identify common themes across the L0 cases
-    2. Abstract to a general strategy that applies to similar tasks
-    3. Remove case-specific details (e.g., specific clue numbers, problem IDs)
-    4. Focus on the "how" - actionable steps that work across similar problems
-    
-    **Output format**: 
-    - One concise strategy statement (1-2 sentences)
-    - Actionable and specific to the task domain
-    - Generalizable to similar problems
-    
-    Example:
-    - Input L0 cases: "Validate clue 3 in problem 5", "Check constraint from clue 7 in problem 12"
-    - Output L1: "Systematically validate interdependent constraints during each assignment step to prevent logical contradictions."
+
+    **What L1 should be**:
+    - L0 (Case-Specific): Concrete lessons from individual problem instances (with tool names, commands, etc.)
+    - L1 (Pattern-Level): A SINGLE reusable technique abstracted from these cases — but still SPECIFIC enough to be distinguishable from other patterns.
+
+    **CRITICAL — avoid generic, interchangeable patterns**:
+    Many cases superficially share generic engineering virtues ("decompose the task", "validate inputs",
+    "verify outputs", "use fallbacks"). DO NOT output these vague, universal statements — they apply to
+    everything, are indistinguishable from each other, and create redundant near-duplicate patterns.
+    Instead, name the SPECIFIC recurring technique these particular cases reveal.
+
+    **Required output format** (exactly ONE line, no preamble):
+    `<Distinctive Pattern Name>: WHEN <specific triggering situation>, <concrete action/technique> — <why it helps>.`
+
+    Rules for sharpness:
+    1. **Name** = the specific method, NOT a generic virtue.
+       Bad names: "Validation-first workflow", "Modular decomposition", "Systematic verification".
+       Good names: "Recalc-then-reload Excel check", "Preflight connectivity bypass", "Heredoc script persistence".
+    2. **Trigger** = a concrete WHEN. If you cannot state a specific situation that activates this pattern,
+       it is too generic — sharpen it or pick a different, more specific commonality.
+    3. **One sentence.** Drop case-specific identifiers (problem IDs, exact filenames) but KEEP the
+       distinguishing technique/tool family that makes this pattern unique.
+
+    **Example**:
+    - Input L0 cases: "Excel autograder reads cell values; forced libreoffice recalc then reloaded with data_only=True",
+      "Spreadsheet eval failed until values were recomputed independently and compared"
+    - Output L1: `Recalc-then-reload Excel verification: WHEN an external grader reads spreadsheet cell VALUES, force a headless libreoffice recalculation and reload with data_only=True to compare against independently computed expected values — guarantees the artifact passes value-based graders.`
 
   user: |
     **L0 Case-Specific Experiences**:
     {% for exp in l0_experiences %}
     - [{{ exp.id }}] {{ exp.content }}
     {% endfor %}
-    
-    **Task**: Extract ONE pattern-level strategy (L1) that captures the common approach across these cases.
-    
-    Remove case-specific details and focus on the general method that would work for similar tasks.
-    
-    **L1 Pattern-Level Strategy**:
+
+    **Task**: Extract ONE SHARP pattern-level strategy (L1) that captures the SPECIFIC recurring technique
+    across these cases. Follow the required output format exactly: `<Name>: WHEN <trigger>, <action> — <why>.`
+
+    Do NOT produce a generic statement about decomposition / validation / verification that could apply to
+    any task. Name the distinctive method. Output exactly one line, nothing else.
+
+    **L1 Pattern (one line)**:
 
 # L2 aggregation: Generate meta-strategy from L1 patterns and their source L0 cases
 L2_AGGREGATION_PROMPT:
@@ -101,7 +111,6 @@ L2_AGGREGATION_PROMPT:
     **Format**: "Principle: [principle]. [why it works]. [benefits]."
     
     **L2 Meta-Strategy**:
-
 
 
 

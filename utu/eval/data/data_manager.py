@@ -1,4 +1,5 @@
 import abc
+import json
 from typing import Literal
 
 from sqlmodel import select
@@ -8,6 +9,8 @@ from ...db import DatasetSample, EvaluationSample
 from ...utils import SQLModelUtils, get_logger
 
 logger = get_logger(__name__)
+
+EvaluationStage = Literal["init", "rollout", "judged", "infra_error"]
 
 
 class BaseDataManager(abc.ABC):
@@ -29,7 +32,7 @@ class BaseDataManager(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_samples(self, stage: Literal["init", "rollout", "judged"] = None) -> list[EvaluationSample]:
+    def get_samples(self, stage: EvaluationStage | None = None) -> list[EvaluationSample]:
         """Get samples of specified stage from the dataset."""
         raise NotImplementedError
 
@@ -52,8 +55,37 @@ class DBDataManager(BaseDataManager):
             logger.info(f"Loaded {len(datapoints)} samples from {self.config.data.dataset}.")
             samples = []
             logger.info(f"Duplicate {self.config.pass_k} times for each sample.")
+            skillsbench_cfg = getattr(self.config, "skillsbench", None)
+            is_skillsbench_v4 = bool(
+                skillsbench_cfg and getattr(skillsbench_cfg, "enabled", False)
+            )
+            expected_num_tasks = (
+                getattr(skillsbench_cfg, "expected_num_tasks", None) or len(datapoints)
+            )
             for dp in datapoints:
-                for _ in range(self.config.pass_k):
+                for trial_index in range(self.config.pass_k):
+                    source_meta = dp.meta
+                    if isinstance(source_meta, str):
+                        try:
+                            source_meta = json.loads(source_meta)
+                        except json.JSONDecodeError:
+                            pass
+                    if isinstance(source_meta, dict):
+                        trial_meta = {**source_meta, "trial_index": trial_index}
+                    elif dp.meta is None:
+                        trial_meta = {"trial_index": trial_index}
+                    else:
+                        trial_meta = source_meta
+                    if is_skillsbench_v4:
+                        if not isinstance(trial_meta, dict):
+                            trial_meta = {"source_meta": trial_meta}
+                        trial_meta.update(
+                            evaluation_protocol="skillsbench_v4",
+                            eval_status="pending",
+                            trial_index=trial_index,
+                            expected_num_tasks=int(expected_num_tasks),
+                            expected_trials_per_task=int(self.config.pass_k),
+                        )
                     sample = EvaluationSample(
                         dataset=dp.dataset,
                         dataset_index=dp.index,
@@ -62,7 +94,7 @@ class DBDataManager(BaseDataManager):
                         level=dp.level,
                         correct_answer=dp.answer,
                         file_name=dp.file_name,
-                        meta=dp.meta,
+                        meta=trial_meta,
                         exp_id=self.config.exp_id,  # add exp_id
                     )
                     samples.append(sample)
@@ -73,7 +105,7 @@ class DBDataManager(BaseDataManager):
             return self.data
 
     def get_samples(
-        self, stage: Literal["init", "rollout", "judged"] = None, limit: int = None
+        self, stage: EvaluationStage | None = None, limit: int = None
     ) -> list[EvaluationSample]:
         """Get samples from exp_id with specified stage."""
         with SQLModelUtils.create_session() as session:

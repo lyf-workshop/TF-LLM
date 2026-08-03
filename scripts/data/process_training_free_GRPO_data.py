@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 import random
@@ -13,6 +14,7 @@ from utu.utils.sqlmodel_utils import SQLModelUtils
 
 rng = random.Random(42)
 feat_path = "utu/train/dataset"
+DATASET_NAMES = ("AIME24", "AIME25", "DAPO-Math-17k", "AFM_web_RL", "WebWalkerQA")
 
 
 def _check_exists(name: str, save_type: Literal["db", "file"]) -> list[DatasetSample] | list[dict[str, Any]]:
@@ -151,8 +153,22 @@ def load_data(name: str, save_type: Literal["db", "file"] = "db") -> list[Datase
     return dataset
 
 
-if __name__ == "__main__":
-    dataset_names = ["AIME24", "AIME25", "DAPO-Math-17k", "AFM_web_RL", "WebWalkerQA"]
-    for name in dataset_names:
-        data = load_data(name)
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Prepare TF-GRPO datasets")
+    parser.add_argument(
+        "--datasets",
+        nargs="+",
+        choices=DATASET_NAMES,
+        default=list(DATASET_NAMES),
+        help="Datasets to prepare; without this option all supported datasets are loaded.",
+    )
+    parser.add_argument("--save-type", choices=("db", "file"), default="db")
+    args = parser.parse_args()
+
+    for name in args.datasets:
+        data = load_data(name, save_type=args.save_type)
         print(f"Loaded {len(data)} records for dataset {name}")
+
+
+if __name__ == "__main__":
+    main()

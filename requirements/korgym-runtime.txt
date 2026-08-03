@@ -1,0 +1,7 @@
+# Minimal cross-platform dependencies for the three TF-LLM KORGym servers.
+# The upstream KORGym/requirements.txt also installs CUDA-oriented packages
+# such as vllm; those are not needed for API-backed TF-LLM experiments.
+fastapi==0.115.12
+pandas>=2.2,<3
+pillow>=11,<13
+uvicorn>=0.34,<1

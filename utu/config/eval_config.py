@@ -138,6 +138,30 @@ class SkillsBenchConfig(ConfigBaseModel):
     """If True, also retry when a task hits its wall-clock timeout. Disabled by
     default because timeouts usually mean the agent is genuinely stuck and would
     time out again, wasting a lot of wall-clock time."""
+    llm_connect_timeout_sec: float = 10.0
+    """Connection timeout for each model API request."""
+    llm_read_timeout_sec: float = 120.0
+    """Read timeout for each model API request."""
+    llm_max_retries: int = 4
+    """Extra attempts for transient model API errors within the same trial."""
+    llm_retry_initial_delay_sec: float = 2.0
+    """Initial exponential-backoff delay for transient model API errors."""
+    llm_retry_max_delay_sec: float = 30.0
+    """Maximum model API retry delay."""
+    circuit_breaker_enabled: bool = True
+    """Pause new trials after repeated transient model API failures."""
+    circuit_breaker_failure_threshold: int = 3
+    """Consecutive transient API failures that open the circuit."""
+    circuit_breaker_cooldown_sec: float = 60.0
+    """Fixed pause before a recovery probe; this value never grows exponentially."""
+    healthcheck_enabled: bool = True
+    """Probe the configured endpoint before measured SkillsBench trials."""
+    healthcheck_attempts: int = 3
+    """Number of successful startup probes required."""
+    expected_num_tasks: int | None = None
+    """Expected benchmark task count. Paper-aligned SkillsBench uses 87."""
+    require_complete_coverage: bool = True
+    """Do not publish headline metrics until every expected trial is valid."""
 
 
 class EvalConfig(ConfigBaseModel):

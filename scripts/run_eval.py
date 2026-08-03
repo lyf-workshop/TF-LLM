@@ -7,6 +7,8 @@ from utu.eval import BaseBenchmark
 
 def get_eval_config(args: argparse.Namespace) -> EvalConfig:
     config = ConfigLoader.load_eval_config(args.config_name)
+    if args.agent_config:
+        config.agent = ConfigLoader.load_agent_config(args.agent_config)
     if args.exp_id:
         config.exp_id = args.exp_id
     if args.agent_model:
@@ -28,6 +30,7 @@ async def main():
     parser.add_argument("--config_name", type=str, default="ww", help="Configuration name for evaluation.")
     parser.add_argument("--exp_id", type=str, default=None, help="Experiment ID.")
     parser.add_argument("--agent_model", type=str, default=None, help="Agent model.")
+    parser.add_argument("--agent_config", type=str, default=None, help="Agent config under configs/agents/.")
     parser.add_argument("--dataset", type=str, default=None, help="Dataset.")
     parser.add_argument("--dataset_type", type=str, default=None, help="Dataset type.")
     parser.add_argument("--concurrency", type=int, default=None, help="Test concurrency.")
@@ -35,7 +38,11 @@ async def main():
 
     # eval steps
     parser.add_argument(
-        "--step", type=str, default="all", choices=["all", "rollout", "judge"], help="Evaluation step to run."
+        "--step",
+        type=str,
+        default="all",
+        choices=["all", "rollout", "judge", "retry-infra"],
+        help="Evaluation step to run.",
     )
     args = parser.parse_args()
 
@@ -50,6 +57,10 @@ async def main():
             await runner.rollout()
         case "judge":
             await runner.judge(stage="rollout")  # set stage=None to rejudge; rollout or judged incrementally
+            await runner.stat()
+        case "retry-infra":
+            await runner.retry_infra()
+            await runner.judge(stage="rollout")
             await runner.stat()
         case _:
             raise ValueError(f"Unsupported stage: {args.step}")

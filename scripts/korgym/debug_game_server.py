@@ -70,7 +70,7 @@ def main():
             all_ok = False
     
     if not all_ok:
-        print("\n   请先安装依赖: bash setup_korgym_wsl.sh")
+        print('\n   请先安装依赖: bash scripts/setup/deploy.sh --profile korgym')
         return 1
     
     # 尝试启动服务器
@@ -144,7 +144,7 @@ def main():
                     print("  ✅ 服务器启动成功！")
                     print("=" * 70)
                     print(f"\n  API 文档: http://localhost:{port}/docs")
-                    print(f"  可以运行: uv run python scripts/test_korgym_adapter.py")
+                    print('  可以运行: uv run python scripts/setup/check_environment.py --profile korgym')
                     print(f"\n  按 Ctrl+C 停止服务器...")
                     
                     try:

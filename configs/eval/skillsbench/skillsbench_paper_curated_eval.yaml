@@ -1,0 +1,32 @@
+# @package _global_
+defaults:
+  - /agents/practice/skillsbench_agent@agent
+  - _self_
+
+# Paper-aligned condition B: curated Skills mounted from the task package.
+exp_id: "skillsbench_paper_curated_eval"
+
+data:
+  dataset: "SkillsBench-Paper-87"
+  type: "single"
+
+concurrency: 1
+judge_concurrency: 4
+pass_k: 3
+
+verify_filename: "skillsbench.py"
+verify_func_name: "verify_func"
+
+agent:
+  model:
+    model_settings:
+      temperature: 0.0
+
+skillsbench:
+  enabled: true
+  inject_curated_skills: true
+  task_timeout_sec: 900
+  max_agent_iterations: 30
+  env_build_timeout_multiplier: 3.0
+  docker_cleanup_after_task: true
+  docker_cleanup_builder_every_n: 10

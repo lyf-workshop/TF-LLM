@@ -3,7 +3,6 @@ Experience updater for training-free GRPO.
 """
 
 import asyncio
-import copy
 import json
 import re
 from collections import defaultdict
@@ -16,6 +15,7 @@ from tqdm import tqdm
 from ..config import AgentConfig
 from ..db import EvaluationSample
 from ..utils import FileUtils, SimplifiedAsyncOpenAI, get_logger
+from .experience_pool import consolidate_and_apply, split_experiences
 from .utils import TaskRecorder
 
 logger = get_logger(__name__)
@@ -36,6 +36,9 @@ class ExperienceUpdater:
         self.learning_objective = learning_objective
         self.prompts = FileUtils.load_prompts("practice/experience.yaml")
         self.llm = SimplifiedAsyncOpenAI(**config.model.model_provider.model_dump())
+        # Raw, per-problem case insights from the most recent run() — consumed by
+        # the hierarchical manager as L0 candidates (set at the end of run()).
+        self.last_l0_candidates: list[str] = []
 
     async def run(
         self,
@@ -60,6 +63,14 @@ class ExperienceUpdater:
                 given_ground_truth=given_ground_truth,
                 num_experiences=num_experiences,
             )
+
+        # Stash the raw, pre-merge per-problem insights as L0 candidates.
+        # These are the most concrete/primitive lessons, before the flat pool's
+        # LLM merge abstracts/consolidates them.
+        l0_candidates: list[str] = []
+        for item in new_experiences:
+            l0_candidates.extend(split_experiences(item.get("experiences", "")))
+        self.last_l0_candidates = l0_candidates
 
         # 3. group update experiences
         with custom_span("Group update"):
@@ -327,99 +338,32 @@ class ExperienceUpdater:
     async def _batch_update(
         self, recorder: TaskRecorder, critiques: list[dict], max_retries: int = 3
     ) -> dict[str, dict]:
-        """Batch update experiences based on critiques."""
-        # get current experiences from recorder
+        """Batch update experiences based on critiques.
+
+        Delegates the consolidation + apply to the shared ``pool_merge`` machinery
+        (see ``experience_pool.consolidate_and_apply``) so the flat pool and the
+        hierarchical L0/L1/L2 pools share one merge implementation.
+        """
         logger.info("Batch update")
-        # collect operations
         all_operations = []
         for each in critiques:
             all_operations.extend(each["operations"])
         print("- Num of operations to process:", len(all_operations))
 
-        # use LLM to get the revision plan
         experiences = recorder.experiences or {}
-        revision_plan = []
-        for _ in range(max_retries):
-            try:
-                sp = FileUtils.get_jinja_template_str(self.prompts["BATCH_EXPERIENCE_UPDATE_TEMPLATE_SP"]).render(
-                    agent_objective=self.agent_objective,
-                    learning_objective=self.learning_objective,
-                )
-                up = FileUtils.get_jinja_template_str(self.prompts["BATCH_EXPERIENCE_UPDATE_TEMPLATE_UP"]).render(
-                    experiences_and_operations=self._format_exp_and_ops(experiences, all_operations)
-                )
-                response = await self.llm.query_one(
-                    messages=[
-                        {"role": "system", "content": sp},
-                        {"role": "user", "content": up},
-                    ],
-                    **self.config.model.model_params.model_dump(),
-                )
-                # parse response
-                revision_plan = json.loads(response.split("```json")[-1].split("```")[0])
-                break
-            except Exception:
-                print("Warning: failed to decode in updating general experiences")
-
-        # apply revision plan to get new experiences
-        max_ID = len(experiences)
-        new_experiences = copy.deepcopy(experiences)
-        for plan in revision_plan:
-            operation = plan.get("operation", "ADD")
-            content = plan.get("content", "")
-            target_id = plan.get("id", None)
-            if not content:
-                continue
-
-            if operation == "ADD":
-                new_experiences[f"{max_ID}"] = content
-                max_ID += 1
-            elif operation == "UPDATE":
-                if target_id in new_experiences:
-                    new_experiences[target_id] = content
-                else:
-                    # directly add new experience
-                    new_experiences[f"{max_ID}"] = content
-                    max_ID += 1
-            elif operation == "DELETE":
-                if target_id in new_experiences:
-                    del new_experiences[target_id]
+        new_experiences = await consolidate_and_apply(
+            self.llm,
+            self.prompts,
+            self.agent_objective,
+            self.learning_objective,
+            existing=experiences,
+            operations=all_operations,
+            model_params=self.config.model.model_params.model_dump(),
+            id_prefix="",
+            max_retries=max_retries,
+        )
         print("- Num of candidate experiences:", len(new_experiences))
         return new_experiences
-
-    def _format_exp_and_ops(self, experiences: dict[str, str], operations: list[dict]) -> str:
-        """Format experiences and operations."""
-        if not operations:
-            return "No batch operations."
-
-        # Format existing experiences and their related operations
-        formatted_res = []
-        for id, exp in experiences.items():
-            curr_str = f"Experience {id}:\nContent: {exp}\n"
-            related_ops = [op for op in operations if op.get("id") == id]
-            if related_ops:
-                curr_str += "Related Operations:\n"
-                op_str = []
-                for op in related_ops:
-                    op_str.append(f"{json.dumps(op, ensure_ascii=False, indent=2)}")
-                op_str = "\n".join(op_str)
-                curr_str += op_str
-            else:
-                curr_str += "No related operations."
-            formatted_res.append(curr_str)
-
-        # Format operations without specific IDs
-        no_id_ops = [op for op in operations if not op.get("id", None)]
-        if no_id_ops:
-            curr_str = "Operations without specific Experience ID:\n"
-            op_str = []
-            for op in no_id_ops:
-                op_str.append(f"{json.dumps(op, ensure_ascii=False, indent=2)}")
-            op_str = "\n".join(op_str)
-            curr_str += op_str
-            formatted_res.append(curr_str)
-
-        return "\n\n".join(formatted_res)
 
     def _safe_reward(self, reward: Any) -> float:
         try:

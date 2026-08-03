@@ -1,0 +1,48 @@
+# @package _global_
+defaults:
+  - /agents/practice/skillsbench_practice_2_ds_agent@agent
+  - _self_
+
+# Project-specific third condition: TF-GRPO L0/L1/L2 experiences.
+# This is not the paper's self-generated Skills protocol; it is the local
+# TF-LLM comparison against the same paper-aligned task frame.
+exp_id: "skillsbench_paper_tf_grpo_eval_v4"
+
+data:
+  dataset: "SkillsBench-Paper-87"
+  type: "single"
+
+concurrency: 2
+judge_concurrency: 4
+pass_k: 3
+
+verify_filename: "skillsbench.py"
+verify_func_name: "verify_func"
+
+agent:
+  model:
+    model_settings:
+      temperature: 0.0
+
+skillsbench:
+  enabled: true
+  inject_curated_skills: false
+  task_timeout_sec: 900
+  max_agent_iterations: 30
+  env_build_timeout_multiplier: 3.0
+  docker_cleanup_after_task: true
+  docker_cleanup_builder_every_n: 10
+  max_retries: 2
+  retry_on_timeout: false
+  llm_connect_timeout_sec: 10
+  llm_read_timeout_sec: 120
+  llm_max_retries: 4
+  llm_retry_initial_delay_sec: 2
+  llm_retry_max_delay_sec: 30
+  circuit_breaker_enabled: true
+  circuit_breaker_failure_threshold: 3
+  circuit_breaker_cooldown_sec: 60
+  healthcheck_enabled: true
+  healthcheck_attempts: 3
+  expected_num_tasks: 87
+  require_complete_coverage: true

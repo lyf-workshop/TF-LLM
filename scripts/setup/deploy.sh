@@ -1,317 +1,138 @@
 #!/usr/bin/env bash
-# =============================================================================
-# TF-LLM Linux 部署脚本
-#
-# 用法:
-#   # 全新部署（交互式配置 API Key）
-#   bash scripts/setup/deploy.sh
-#
-#   # 指定 API Key 非交互部署
-#   bash scripts/setup/deploy.sh --api-key sk-xxxx
-#
-#   # 指定模型和 API 地址（适配国产模型）
-#   bash scripts/setup/deploy.sh --api-key sk-xxxx --model qwen-plus \
-#       --base-url https://dashscope.aliyuncs.com/compatible-mode/v1
-#
-#   # 仅更新依赖（已部署后）
-#   bash scripts/setup/deploy.sh --update-only
-#
-#   # 跳过 KORGym 安装（只用 SkillsBench/LiveCodeBench）
-#   bash scripts/setup/deploy.sh --api-key sk-xxxx --no-korgym
-# =============================================================================
+set -Eeuo pipefail
 
-set -euo pipefail
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+PROFILE="core"
+PYTHON_VERSION="3.12"
+SKILLSBENCH_DIR="${SKILLSBENCH_DIR:-$ROOT_DIR/SkillsBench-repo}"
+SKILLSBENCH_REF="${SKILLSBENCH_REF:-b63b7b2850226b6aa4fb5929a8c1ac7bc4d9a6af}"
+SKILLSBENCH_URL="https://github.com/benchflow-ai/SkillsBench.git"
 
-# ---------------------------------------------------------------------------
-# 颜色定义
-# ---------------------------------------------------------------------------
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
-BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
+usage() {
+  cat <<'EOF'
+Usage: bash scripts/setup/deploy.sh [options]
+  --profile PROFILE        core | korgym | skillsbench | all
+  --python VERSION         Python version managed by uv (default: 3.12)
+  --skillsbench-dir PATH   External SkillsBench checkout path
+  --skillsbench-ref REF    Reproducible SkillsBench git commit
+  -h, --help               Show this help
 
-ok()   { echo -e "  ${GREEN}✓${NC} $*"; }
-warn() { echo -e "  ${YELLOW}⚠${NC}  $*"; }
-err()  { echo -e "  ${RED}✗${NC} $*" >&2; }
-info() { echo -e "  ${CYAN}→${NC} $*"; }
-step() { echo -e "\n${BOLD}${BLUE}[$1]${NC} ${BOLD}$2${NC}"; }
-die()  { err "$*"; exit 1; }
+This script never accepts API keys on the command line. Edit .env after setup.
+EOF
+}
 
-# ---------------------------------------------------------------------------
-# 参数解析
-# ---------------------------------------------------------------------------
-API_KEY=""
-MODEL="deepseek-chat"
-BASE_URL="https://api.deepseek.com/v1"
-UPDATE_ONLY=false
-NO_KORGYM=false
-REPO_URL="https://github.com/TencentCloudADP/youtu-agent.git"  # 按需修改
-INSTALL_DIR="${INSTALL_DIR:-$(pwd)}"
+log() { printf '[tf-llm] %s\n' "$*"; }
+warn() { printf '[tf-llm] WARNING: %s\n' "$*" >&2; }
+die() { printf '[tf-llm] ERROR: %s\n' "$*" >&2; exit 1; }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --api-key)     API_KEY="$2";    shift 2 ;;
-    --model)       MODEL="$2";      shift 2 ;;
-    --base-url)    BASE_URL="$2";   shift 2 ;;
-    --repo)        REPO_URL="$2";   shift 2 ;;
-    --dir)         INSTALL_DIR="$2"; shift 2 ;;
-    --update-only) UPDATE_ONLY=true; shift ;;
-    --no-korgym)   NO_KORGYM=true;  shift ;;
-    -h|--help)
-      sed -n '3,20p' "$0" | sed 's/^# \{0,1\}//'
-      exit 0 ;;
-    *) die "未知参数: $1  (使用 --help 查看帮助)" ;;
+    --profile)
+      [[ $# -ge 2 ]] || die "--profile requires a value"
+      PROFILE="$2"; shift 2 ;;
+    --python)
+      [[ $# -ge 2 ]] || die "--python requires a value"
+      PYTHON_VERSION="$2"; shift 2 ;;
+    --skillsbench-dir)
+      [[ $# -ge 2 ]] || die "--skillsbench-dir requires a value"
+      SKILLSBENCH_DIR="$2"; shift 2 ;;
+    --skillsbench-ref)
+      [[ $# -ge 2 ]] || die "--skillsbench-ref requires a value"
+      SKILLSBENCH_REF="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) die "unknown option: $1" ;;
   esac
 done
 
-# ---------------------------------------------------------------------------
-# 标题
-# ---------------------------------------------------------------------------
-echo ""
-echo -e "${BOLD}${BLUE}=================================================${NC}"
-echo -e "${BOLD}${BLUE}   TF-LLM  Linux 部署脚本                       ${NC}"
-echo -e "${BOLD}${BLUE}   Training-Free GRPO + 分层经验学习系统         ${NC}"
-echo -e "${BOLD}${BLUE}=================================================${NC}"
-echo ""
+case "$PROFILE" in
+  core) WITH_KORGYM=false; WITH_SKILLSBENCH=false ;;
+  korgym) WITH_KORGYM=true; WITH_SKILLSBENCH=false ;;
+  skillsbench) WITH_KORGYM=false; WITH_SKILLSBENCH=true ;;
+  all) WITH_KORGYM=true; WITH_SKILLSBENCH=true ;;
+  *) die "invalid profile '$PROFILE'" ;;
+esac
+install_skillsbench() {
+  command -v docker >/dev/null 2>&1 || die "Docker is required for SkillsBench"
+  docker info >/dev/null 2>&1 || die "Docker daemon is unavailable"
 
-# ---------------------------------------------------------------------------
-# STEP 1: 检查先决条件
-# ---------------------------------------------------------------------------
-step "1/6" "检查先决条件"
-
-# Python
-if ! command -v python3 &>/dev/null; then
-  die "Python3 未安装。请安装 Python 3.10+：\n    sudo apt install python3.10 python3.10-venv"
-fi
-PY_VER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-PY_MAJOR=$(echo "$PY_VER" | cut -d. -f1)
-PY_MINOR=$(echo "$PY_VER" | cut -d. -f2)
-if [[ $PY_MAJOR -lt 3 || ($PY_MAJOR -eq 3 && $PY_MINOR -lt 10) ]]; then
-  die "Python $PY_VER 版本过低，需要 3.10+。当前版本: $PY_VER"
-fi
-ok "Python $PY_VER"
-
-# git
-command -v git &>/dev/null || die "git 未安装：sudo apt install git"
-ok "git $(git --version | awk '{print $3}')"
-
-# uv
-if ! command -v uv &>/dev/null; then
-  warn "uv 未安装，正在安装..."
-  pip3 install uv --quiet || die "uv 安装失败，请手动执行：pip3 install uv"
-fi
-ok "uv $(uv --version | awk '{print $2}')"
-
-# curl（API 连通性测试用）
-command -v curl &>/dev/null && ok "curl" || warn "curl 未安装，将跳过 API 连通性测试"
-
-# ---------------------------------------------------------------------------
-# STEP 2: 获取代码
-# ---------------------------------------------------------------------------
-step "2/6" "获取代码"
-
-if [[ "$UPDATE_ONLY" == true ]]; then
-  info "更新模式：只拉取最新代码"
-  if [[ ! -f pyproject.toml ]]; then
-    die "当前目录不是项目根目录，请先 cd 到项目目录，或去掉 --update-only"
+  export PATH="$HOME/.local/bin:$PATH"
+  local harbor_version=""
+  if command -v harbor >/dev/null 2>&1; then
+    harbor_version="$(harbor --version 2>/dev/null | head -n 1 || true)"
   fi
-  git pull --ff-only
-  ok "代码已更新到最新版本"
-else
-  if [[ -f pyproject.toml ]]; then
-    ok "已在项目目录中，跳过 clone（如需更新请加 --update-only）"
-  else
-    info "克隆仓库到 $INSTALL_DIR ..."
-    git clone "$REPO_URL" "$INSTALL_DIR"
-    cd "$INSTALL_DIR"
-    ok "仓库克隆完成"
+  if [[ "$harbor_version" != "0.3.0" ]]; then
+    log "Installing adapter-compatible harbor==0.3.0"
+    uv tool install --force "harbor==0.3.0"
+    hash -r
   fi
-fi
+  command -v harbor >/dev/null 2>&1 || die "Harbor is not on PATH"
+  [[ "$(harbor --version 2>/dev/null | head -n 1)" == "0.3.0" ]] || \
+    die "TF-LLM currently requires harbor==0.3.0"
 
-# 确认项目根目录
-[[ -f pyproject.toml ]] || die "pyproject.toml 不存在，请确认当前目录为项目根目录"
-
-# ---------------------------------------------------------------------------
-# STEP 3: 安装主项目依赖
-# ---------------------------------------------------------------------------
-step "3/6" "安装主项目依赖"
-
-info "运行 uv sync（首次可能需要几分钟）..."
-uv sync --quiet
-ok "主项目依赖安装完成"
-
-# 激活虚拟环境（后续命令使用）
-VENV_PYTHON=".venv/bin/python"
-VENV_PIP=".venv/bin/pip"
-[[ -f "$VENV_PYTHON" ]] || die ".venv 未创建，请检查 uv sync 输出"
-
-# ---------------------------------------------------------------------------
-# STEP 4: 安装 KORGym 依赖（可跳过）
-# ---------------------------------------------------------------------------
-step "4/6" "安装 KORGym 游戏环境依赖"
-
-if [[ "$NO_KORGYM" == true ]]; then
-  warn "已跳过 KORGym 安装（--no-korgym）"
-  warn "若需使用 KORGym 游戏，请后续手动执行："
-  warn "  .venv/bin/pip install -r KORGym/requirements.txt"
-elif [[ -f "KORGym/requirements.txt" ]]; then
-  info "安装 KORGym 依赖..."
-  "$VENV_PIP" install -r KORGym/requirements.txt --quiet
-  ok "KORGym 依赖安装完成"
-else
-  warn "KORGym/requirements.txt 不存在，跳过"
-fi
-
-# ---------------------------------------------------------------------------
-# STEP 5: 配置 .env
-# ---------------------------------------------------------------------------
-step "5/6" "配置环境变量 (.env)"
-
-if [[ -f .env ]]; then
-  ok ".env 文件已存在"
-  # 检查 API Key 是否已填写
-  EXISTING_KEY=$(grep -E '^UTU_LLM_API_KEY=' .env | cut -d= -f2- | tr -d '"' | tr -d "'")
-  if [[ -n "$EXISTING_KEY" ]]; then
-    ok "API Key 已配置"
-    if [[ -n "$API_KEY" && "$API_KEY" != "$EXISTING_KEY" ]]; then
-      warn "检测到 --api-key 参数与现有 .env 不同，将更新..."
-      sed -i "s|^UTU_LLM_API_KEY=.*|UTU_LLM_API_KEY=${API_KEY}|" .env
-      ok "API Key 已更新"
-    fi
-  else
-    # API Key 为空
-    if [[ -z "$API_KEY" ]]; then
-      echo ""
-      echo -e "  ${YELLOW}请输入 LLM API Key（回车跳过，之后手动编辑 .env）：${NC}"
-      echo -e "  支持：DeepSeek (https://platform.deepseek.com/)"
-      echo -e "         阿里云百炼 (https://dashscope.aliyuncs.com/)"
-      echo -e "         硅基流动、OpenAI 等兼容 OpenAI 格式的服务"
-      read -rp "  API Key: " API_KEY
-    fi
-    if [[ -n "$API_KEY" ]]; then
-      sed -i "s|^UTU_LLM_API_KEY=.*|UTU_LLM_API_KEY=${API_KEY}|" .env
-      ok "API Key 已写入 .env"
-    else
-      warn "API Key 未填写，请之后手动编辑 .env：  UTU_LLM_API_KEY=your-key"
-    fi
-  fi
-else
-  # 从模板创建 .env
-  if [[ -f .env.example ]]; then
-    cp .env.example .env
-    ok ".env 已从 .env.example 创建"
-  else
-    cat > .env << 'ENVEOF'
-UTU_LLM_TYPE=chat.completions
-UTU_LLM_MODEL=deepseek-chat
-UTU_LLM_BASE_URL=https://api.deepseek.com/v1
-UTU_LLM_API_KEY=
-UTU_DB_URL=sqlite:///test.db
-UTU_LOG_LEVEL=WARNING
-ENVEOF
-    ok ".env 已从内置模板创建"
+  if [[ ! -d "$SKILLSBENCH_DIR/.git" ]]; then
+    [[ ! -e "$SKILLSBENCH_DIR" ]] || \
+      die "$SKILLSBENCH_DIR exists but is not a git checkout"
+    log "Cloning the external SkillsBench task repository"
+    git clone "$SKILLSBENCH_URL" "$SKILLSBENCH_DIR"
   fi
 
-  # 写入 API Key / Model / Base URL
-  if [[ -z "$API_KEY" ]]; then
-    echo ""
-    echo -e "  ${YELLOW}请输入 LLM API Key（回车跳过，之后手动编辑 .env）：${NC}"
-    read -rp "  API Key: " API_KEY
+  local current_ref
+  current_ref="$(git -C "$SKILLSBENCH_DIR" rev-parse HEAD)"
+  if [[ "$current_ref" != "$SKILLSBENCH_REF" ]]; then
+    [[ -z "$(git -C "$SKILLSBENCH_DIR" status --porcelain)" ]] || \
+      die "SkillsBench checkout is dirty; preserve it before changing commits"
+    log "Pinning SkillsBench to $SKILLSBENCH_REF"
+    git -C "$SKILLSBENCH_DIR" fetch origin "$SKILLSBENCH_REF"
+    git -C "$SKILLSBENCH_DIR" checkout --detach "$SKILLSBENCH_REF"
   fi
-  [[ -n "$API_KEY" ]]    && sed -i "s|^UTU_LLM_API_KEY=.*|UTU_LLM_API_KEY=${API_KEY}|" .env
-  sed -i "s|^UTU_LLM_MODEL=.*|UTU_LLM_MODEL=${MODEL}|" .env
-  sed -i "s|^UTU_LLM_BASE_URL=.*|UTU_LLM_BASE_URL=${BASE_URL}|" .env
-  [[ -n "$API_KEY" ]] && ok "API Key / Model / Base URL 已写入 .env" || warn "API Key 未填写，请手动编辑 .env"
-fi
 
-# ---------------------------------------------------------------------------
-# STEP 6: 验证安装
-# ---------------------------------------------------------------------------
-step "6/6" "验证安装"
-
-PASS=0; FAIL=0
-
-check_import() {
-  local pkg="$1" label="${2:-$1}"
-  if "$VENV_PYTHON" -c "import $pkg" &>/dev/null; then
-    ok "$label"
-    PASS=$((PASS+1))
-  else
-    err "$label 导入失败"
-    FAIL=$((FAIL+1))
+  if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+    warn "Apple Silicon is for smoke tests; use Linux x86_64 for paper-scale runs"
   fi
 }
+cd "$ROOT_DIR"
+[[ -f pyproject.toml ]] || die "run this script inside a TF-LLM checkout"
+command -v git >/dev/null 2>&1 || die "git is required"
 
-check_import utu          "utu 核心包"
-check_import openai       "openai"
-check_import sqlmodel     "sqlmodel (数据库)"
-check_import hydra        "hydra (配置管理)"
-check_import jinja2       "jinja2 (模板引擎)"
-
-if [[ "$NO_KORGYM" == false && -f "KORGym/requirements.txt" ]]; then
-  check_import flask  "flask (KORGym 服务器)"
-  check_import numpy  "numpy"
+if ! command -v uv >/dev/null 2>&1; then
+  command -v curl >/dev/null 2>&1 || die "curl is required to install uv"
+  log "Installing uv"
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  export PATH="$HOME/.local/bin:$PATH"
 fi
+command -v uv >/dev/null 2>&1 || die "uv is not on PATH; restart the shell"
 
-# API 连通性测试
-if [[ -n "$API_KEY" ]] && command -v curl &>/dev/null; then
-  info "测试 API 连通性..."
-  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-    -H "Authorization: Bearer ${API_KEY}" \
-    -H "Content-Type: application/json" \
-    "${BASE_URL%/v1}/v1/models" 2>/dev/null || echo "000")
-  if [[ "$HTTP_CODE" == "200" ]]; then
-    ok "LLM API 连通正常 (HTTP $HTTP_CODE)"
-  elif [[ "$HTTP_CODE" == "401" ]]; then
-    warn "API Key 认证失败 (HTTP 401)，请检查 .env 中的 UTU_LLM_API_KEY"
-  else
-    warn "API 连通性测试返回 HTTP $HTTP_CODE（可能是防火墙限制，不影响部署）"
-  fi
-fi
+log "Using $(uv --version)"
+uv python install "$PYTHON_VERSION"
+uv sync --locked --python "$PYTHON_VERSION"
 
-# 汇总
-echo ""
-if [[ $FAIL -eq 0 ]]; then
-  echo -e "${GREEN}${BOLD}  ✓ 验证通过（$PASS 项全部正常）${NC}"
+if [[ ! -f .env ]]; then
+  cp .env.example .env
+  chmod 600 .env 2>/dev/null || true
+  log "Created .env from .env.example"
 else
-  echo -e "${YELLOW}${BOLD}  ⚠ 验证完成：$PASS 项正常，$FAIL 项失败${NC}"
+  log "Keeping the existing .env"
 fi
 
-# ---------------------------------------------------------------------------
-# 完成：打印下一步
-# ---------------------------------------------------------------------------
-echo ""
-echo -e "${BOLD}${GREEN}=================================================${NC}"
-echo -e "${BOLD}${GREEN}  部署完成！                                     ${NC}"
-echo -e "${BOLD}${GREEN}=================================================${NC}"
-echo ""
-
-# 检查 API Key 是否已配置
-FINAL_KEY=$(grep -E '^UTU_LLM_API_KEY=' .env | cut -d= -f2- | tr -d '"' | tr -d "'" || true)
-if [[ -z "$FINAL_KEY" ]]; then
-  echo -e "${YELLOW}  ⚠ 提醒：UTU_LLM_API_KEY 尚未填写，运行实验前请先编辑 .env${NC}"
-  echo ""
+if [[ "$WITH_KORGYM" == true ]]; then
+  log "Installing the minimal KORGym runtime"
+  uv pip install --python "$ROOT_DIR/.venv/bin/python" -r requirements/korgym-runtime.txt
 fi
 
-echo -e "${BOLD}  下一步操作：${NC}"
-echo ""
-echo -e "  ${CYAN}1. 运行 SkillsBench 评估（无需游戏服务器）${NC}"
-echo "     uv run python scripts/run_eval.py --config_name skillsbench/skillsbench_baseline_eval"
-echo ""
-echo -e "  ${CYAN}2. 启动 KORGym 游戏服务器（以 Wordle 为例）${NC}"
-echo "     # 在单独终端中运行："
-echo "     cd KORGym/game_lib/33-wordle && python game_lib.py -p 8777"
-echo "     # 然后在项目根目录运行评估："
-echo "     uv run python scripts/run_eval.py --config_name korgym/wordle_eval"
-echo ""
-echo -e "  ${CYAN}3. 运行 Training-Free GRPO 训练${NC}"
-echo "     uv run python scripts/run_training_free_GRPO.py --config_name skillsbench/skillsbench_practice"
-echo ""
-echo -e "  ${CYAN}4. 查看评估结果${NC}"
-echo "     uv run python scripts/utils/view_benchmark_results.py -e skillsbench_baseline_eval"
-echo "     uv run python scripts/utils/view_results.py -e exp_id --compare"
-echo ""
-echo -e "  ${CYAN}5. 完整脚本使用说明${NC}"
-echo "     cat scripts/README.md"
-echo ""
-echo -e "  ${CYAN}6. 更新项目${NC}"
-echo "     bash scripts/setup/deploy.sh --update-only"
-echo ""
+if [[ "$WITH_SKILLSBENCH" == true ]]; then
+  install_skillsbench
+fi
+
+log "Running a non-secret preflight check"
+uv run python scripts/setup/check_environment.py \
+  --profile "$PROFILE" \
+  --skillsbench-repo "$SKILLSBENCH_DIR" \
+  --allow-missing-api-key
+
+cat <<EOF
+
+Deployment finished.
+1. Edit $ROOT_DIR/.env.
+2. Run: uv run python scripts/setup/check_environment.py --profile $PROFILE --check-api
+3. Follow docs/DEPLOYMENT.md and the selected dataset guide.
+EOF

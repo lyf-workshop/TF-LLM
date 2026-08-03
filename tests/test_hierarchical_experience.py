@@ -72,7 +72,7 @@ async def test_hierarchical_experience():
     }
     
     print(f"\nStep 0: Processing {len(step0_experiences)} experiences from 30 problems...")
-    await manager.process_step_experiences(step0_experiences, step=0, problem_count=30)
+    await manager.process_step_experiences(list(step0_experiences.values()), step=0)
     print(f"  ✓ L0: {len(manager.l0_experiences)} | L1: {len(manager.l1_experiences)} | L2: {len(manager.l2_experiences)}")
     
     # Step 1: 14 experiences from 29 problems
@@ -90,7 +90,7 @@ async def test_hierarchical_experience():
     }
     
     print(f"\nStep 1: Processing {len(step1_experiences)} experiences from 29 problems...")
-    await manager.process_step_experiences(step1_experiences, step=1, problem_count=29)
+    await manager.process_step_experiences(list(step1_experiences.values()), step=1)
     print(f"  ✓ L0: {len(manager.l0_experiences)} | L1: {len(manager.l1_experiences)} | L2: {len(manager.l2_experiences)}")
     
     # Step 2: 15 experiences from 28 problems
@@ -104,7 +104,12 @@ async def test_hierarchical_experience():
     }
     
     print(f"\nStep 2: Processing {len(step2_experiences)} experiences from 28 problems...")
-    await manager.process_step_experiences(step2_experiences, step=2, problem_count=28)
+    await manager.process_step_experiences(list(step2_experiences.values()), step=2)
+    print(f"  ✓ L0: {len(manager.l0_experiences)} | L1: {len(manager.l1_experiences)} | L2: {len(manager.l2_experiences)}")
+
+    # End of epoch: aggregate L1 (from L0) and L2 (from L1) via LLM merge.
+    print("\nAggregating L1/L2 at end of epoch 0...")
+    await manager.aggregate_epoch(epoch=0)
     print(f"  ✓ L0: {len(manager.l0_experiences)} | L1: {len(manager.l1_experiences)} | L2: {len(manager.l2_experiences)}")
     
     # Display summary
@@ -122,7 +127,7 @@ async def test_hierarchical_experience():
         print("L2 Meta-Strategies")
         print("=" * 80)
         for l2 in manager.l2_experiences:
-            print(f"\n[{l2['id']}] (from {len(l2['source_l1_ids'])} L1)")
+            print(f"\n[{l2['id']}]")
             print(f"  {l2['content']}")
     
     # Show L1 experiences
@@ -131,7 +136,7 @@ async def test_hierarchical_experience():
         print("L1 Patterns")
         print("=" * 80)
         for l1 in manager.l1_experiences:
-            print(f"\n[{l1['id']}] (from {len(l1['source_l0_ids'])} L0)")
+            print(f"\n[{l1['id']}]")
             print(f"  {l1['content']}")
     
     # Show recent L0 experiences
@@ -141,7 +146,7 @@ async def test_hierarchical_experience():
         print("Recent L0 Cases (Last 5)")
         print("=" * 80)
         for l0 in recent_l0:
-            print(f"\n[{l0['id']}] (step {l0['step']}, {l0['problem_count']} problems)")
+            print(f"\n[{l0['id']}]")
             print(f"  {l0['content'][:100]}...")
     
     print(f"\n" + "=" * 80)

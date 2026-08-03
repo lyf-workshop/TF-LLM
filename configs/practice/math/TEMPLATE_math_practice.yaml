@@ -1,0 +1,55 @@
+# @package _global_
+# Math reasoning — hierarchical experience learning template (Path Z).
+#
+# How to use:
+#   1. Copy / rename this file and adjust the [MODIFY] fields.
+#   2. Make sure the referenced eval config and the practice dataset exist.
+#   3. Run: uv run python scripts/run_training_free_GRPO.py --config_name math/TEMPLATE_math_practice
+defaults:
+  # load the evaluation config file
+  - /eval/math/math_AIME24@evaluation   # [MODIFY] evaluation sub-config
+  - _self_
+
+exp_id: "math_practice"                  # [MODIFY] unique experiment id
+
+# Practice Arguments
+practice:
+  epochs: 2                # ≥2 so L1/L2 get refined across epochs (Path Z aggregates at each epoch end)
+  batch_size: 50
+  grpo_n: 5
+  rollout_concurrency: 128
+  rollout_temperature: 0.7
+  task_timeout: 1800
+  rollout_data_truncate: 100
+  do_eval: false
+  eval_strategy: "epoch"
+
+  agent_objective: |
+    input: A math question that could fall into any area of mathematics
+    output: A step-by-step reasoning process that leads to the final answer
+
+  learning_objective: |
+    Help the agent improve at solving math questions by extracting:
+    - L0 (Case-level): Specific techniques, substitutions, or pitfalls for a particular problem
+    - L1 (Pattern-level): Reusable strategies for categories of problems (induction, casework, invariants)
+    - L2 (Meta-level): Universal principles (check edge cases, verify by substitution, restate constraints)
+
+  num_experiences_per_query: 1
+
+  # ---- Hierarchical experience learning (Path Z) ----
+  # Three pools, one shared LLM merge (ADD/UPDATE/DELETE/NONE):
+  #   L0 = raw per-problem insights, accumulated EVERY STEP via LLM merge
+  #   L1 = patterns aggregated FROM L0 at EACH EPOCH END, then merged into the L1 pool
+  #   L2 = meta-principles aggregated FROM L1 at EACH EPOCH END, then merged into the L2 pool
+  # Cross-epoch refinement (updating/deleting stale entries) is handled by the merge.
+  hierarchical_learning:
+    enabled: true
+    l1_aggregation_threshold: 5   # min NEW L0 in an epoch before aggregating an L1
+    l2_aggregation_threshold: 3   # min L1 in the pool before aggregating an L2
+    include_l0_in_prompt: true    # also append recent L0 cases to the agent prompt
+    max_l0_recent: 20             # how many recent L0 to inject into the prompt
+    experience_save_path: workspace/hierarchical_experiences/math_practice.json
+
+# Data Arguments
+data:
+  practice_dataset_name: "DAPO-Math-17k"   # [MODIFY] training dataset

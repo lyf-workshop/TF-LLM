@@ -4,7 +4,7 @@ defaults:
   - _self_
 
 # Experiment 1 – Baseline: no Skills, no experiences
-exp_id: "skillsbench_baseline_eval_8_ds"
+exp_id: "skillsbench_baseline_eval_12_ds"
 
 data:
   dataset: "SkillsBench-Eval-77"

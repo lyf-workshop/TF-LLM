@@ -10,7 +10,7 @@ echo ""
 # 检查.env文件
 if [[ ! -f ".env" ]]; then
     echo "未找到.env文件，从模板创建..."
-    cp env.template .env
+    cp scripts/archive/setup/env.template .env
     echo "✓ .env文件已创建"
     echo ""
     echo "请编辑.env文件，填写你的API密钥："

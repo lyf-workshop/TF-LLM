@@ -43,17 +43,20 @@ practice:
   num_experiences_per_query: 1
   
   # Hierarchical learning settings (必须在practice下！)
+  # ---- Path Z: 三个经验池共用一套 LLM merge (ADD/UPDATE/DELETE/NONE) ----
+  #   L0 = 每个 step 累积的原始案例洞察（LLM 去重）
+  #   L1 = 每个 epoch 末从 L0 聚合的模式（再 merge 进 L1 池）
+  #   L2 = 每个 epoch 末从 L1 聚合的元原则（再 merge 进 L2 池）
+  # 跨 epoch 的精炼/淘汰由 merge 处理，坏经验会被更新或删除而非堆叠。
   hierarchical_learning:
     enabled: true  # ✅ 启用分层经验学习
-    l1_aggregation_threshold: 5  # 每5个L0聚合成1个L1
-    l2_aggregation_threshold: 3  # 每3个L1聚合成1个L2
-    max_l0_per_game: 1  # 每个游戏最多提取1个L0经验
-    max_l0_recent: 50  # prompt中最多包含50个最近的L0
-    include_l0_in_prompt: true  # 是否在prompt中包含L0经验
+    l1_aggregation_threshold: 5  # 一个 epoch 内新增 L0 ≥ 此值才聚合 L1
+    l2_aggregation_threshold: 3  # L1 池 ≥ 此值才聚合 L2
+    include_l0_in_prompt: true   # 是否在 prompt 中包含最近的 L0 经验
+    max_l0_recent: 50            # prompt 中最多注入多少条最近 L0
     
     # [MODIFY] 保存路径
     experience_save_path: workspace/hierarchical_experiences/your_game_practice.json
-    agent_save_path: configs/agents/practice/your_game_practice_agent.yaml
 
 # Data Arguments  
 data:

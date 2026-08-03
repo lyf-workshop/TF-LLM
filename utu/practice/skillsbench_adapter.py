@@ -32,23 +32,41 @@ import asyncio
 import json
 import os
 import shutil
+import signal
 import subprocess
 import tempfile
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from ..utils import get_logger
+from ..skillsbench_reliability import (
+    OUTCOME_FATAL_ERROR,
+    OUTCOME_INFRA_ERROR,
+    OUTCOME_TASK_TIMEOUT,
+    OUTCOME_VALID,
+    TRANSIENT_API_ERROR_TYPES,
+    classify_infra_error,
+    redact_command,
+)
+from ..utils import DIR_ROOT, get_logger
+
+try:
+    import yaml
+except ImportError:  # pragma: no cover - PyYAML is provided by Hydra in normal runs.
+    yaml = None
 
 logger = get_logger(__name__)
+
+_HARBOR_COMPAT_VERSION = "v3-tests-mount-logs"
 
 
 @dataclass
 class SkillsBenchResult:
     """Result of a single SkillsBench task execution."""
 
-    reward: float = 0.0
+    reward: float | None = None
     """Score from the task verifier (0.0 = fail, 1.0 = full pass, partial possible)."""
     trajectory: str = ""
     """JSON-serialised list of steps for TF-LLM's ``trajectories`` field."""
@@ -56,6 +74,13 @@ class SkillsBenchResult:
     """Raw agent stdout/stderr for debugging and experience extraction."""
     error: str = ""
     """Non-empty if the run failed for infrastructure reasons."""
+    outcome: str = OUTCOME_VALID
+    """One of valid, infra_error, task_timeout, or fatal_error."""
+    error_type: str = ""
+    retryable: bool = False
+    fatal: bool = False
+    attempts: int = 1
+    metadata: dict[str, Any] = field(default_factory=dict)
     elapsed_sec: float = 0.0
 
 
@@ -74,6 +99,13 @@ def _build_standalone_agent_source(
     skills_text_json: str,
     model_name: str,
     max_iterations: int,
+    agent_instructions_json: str = '""',
+    temperature: float = 0.0,
+    connect_timeout_sec: float = 10.0,
+    read_timeout_sec: float = 120.0,
+    llm_max_retries: int = 4,
+    retry_initial_delay_sec: float = 2.0,
+    retry_max_delay_sec: float = 30.0,
 ) -> str:
     """
     Generate a fully self-contained Python source file for the harbor agent.
@@ -114,9 +146,10 @@ def _build_standalone_agent_source(
 
     return f'''\
 """Auto-generated self-contained TFLLMHarborAgent for harbor CLI."""
-import json, os, asyncio, base64
+import json, os, asyncio, base64, re
 from pathlib import Path
 from openai import AsyncOpenAI
+from httpx import Timeout
 from harbor.agents.base import BaseAgent
 from harbor.models.trial.result import AgentInfo, ModelInfo
 
@@ -125,6 +158,13 @@ INJECT_CURATED_SKILLS = {inject_curated_skills}
 SKILLS_B64 = "{skills_b64}"
 MODEL_NAME = "{model_name}"
 MAX_ITERATIONS = {max_iterations}
+AGENT_INSTRUCTIONS = {agent_instructions_json}
+TEMPERATURE = {float(temperature)!r}
+CONNECT_TIMEOUT_SEC = {float(connect_timeout_sec)!r}
+READ_TIMEOUT_SEC = {float(read_timeout_sec)!r}
+LLM_MAX_RETRIES = {max(0, int(llm_max_retries))}
+RETRY_INITIAL_DELAY_SEC = {max(0.0, float(retry_initial_delay_sec))!r}
+RETRY_MAX_DELAY_SEC = {max(0.0, float(retry_max_delay_sec))!r}
 
 BASH_TOOL = {{
     "type": "function",
@@ -158,11 +198,17 @@ TASK_COMPLETE_TOOL = {{
 
 
 def _build_system_prompt():
-    parts = [
-        "You are an expert software engineer operating inside an isolated Linux "
-        "environment. Complete the task by executing bash commands step-by-step. "
-        "When done, call task_complete(). Verify results before finishing."
-    ]
+    # When agent_instructions are provided (eval mode: baked experiences live in
+    # the agent YAML), use them as the system prompt base instead of the generic
+    # fallback. The EXPERIENCES dict (training mode) is still appended on top.
+    if AGENT_INSTRUCTIONS:
+        parts = [AGENT_INSTRUCTIONS]
+    else:
+        parts = [
+            "You are an expert software engineer operating inside an isolated Linux "
+            "environment. Complete the task by executing bash commands step-by-step. "
+            "When done, call task_complete(). Verify results before finishing."
+        ]
     if EXPERIENCES:
         fmt = "\\n".join(f"[{{k}}] {{v}}" for k, v in EXPERIENCES.items())
         parts.append("\\n--- Past Experiences ---\\n" + fmt + "\\n--- End ---")
@@ -174,6 +220,83 @@ def _build_system_prompt():
             "--- End of Curated Skills ---"
         )
     return "\\n".join(parts)
+
+
+TRANSIENT_ERROR_TYPES = {{"api_connection_error", "api_timeout", "api_rate_limit", "api_5xx"}}
+
+
+def _classify_llm_error(error):
+    name = type(error).__name__.lower()
+    text = str(error).lower()
+    status = getattr(error, "status_code", None)
+    if status is None:
+        status = getattr(getattr(error, "response", None), "status_code", None)
+    if "apiconnectionerror" in name or "connection error" in text:
+        return {{"error_type": "api_connection_error", "retryable": True, "fatal": False}}
+    if "apitimeouterror" in name or "request timed out" in text or "read timeout" in text:
+        return {{"error_type": "api_timeout", "retryable": True, "fatal": False}}
+    if "ratelimiterror" in name or status == 429 or "rate limit" in text:
+        return {{"error_type": "api_rate_limit", "retryable": True, "fatal": False}}
+    if (isinstance(status, int) and 500 <= status <= 599) or "internalservererror" in name:
+        return {{"error_type": "api_5xx", "retryable": True, "fatal": False}}
+    if status in {{400, 401, 403, 404, 422}} or any(
+        token in name for token in ("authenticationerror", "badrequesterror", "notfounderror")
+    ):
+        return {{"error_type": "api_configuration_error", "retryable": False, "fatal": True}}
+    return {{"error_type": "api_unknown_error", "retryable": False, "fatal": False}}
+
+
+async def _completion_with_retry(client, kwargs, logs_dir, context, iteration):
+    for retry_index in range(LLM_MAX_RETRIES + 1):
+        try:
+            return await client.chat.completions.create(**kwargs)
+        except Exception as error:
+            classification = _classify_llm_error(error)
+            can_retry = (
+                classification["error_type"] in TRANSIENT_ERROR_TYPES
+                and retry_index < LLM_MAX_RETRIES
+            )
+            if can_retry:
+                delay = min(RETRY_INITIAL_DELAY_SEC * (2 ** retry_index), RETRY_MAX_DELAY_SEC)
+                headers = getattr(getattr(error, "response", None), "headers", {{}}) or {{}}
+                retry_after = headers.get("retry-after") if hasattr(headers, "get") else None
+                try:
+                    delay = max(delay, float(retry_after)) if retry_after is not None else delay
+                except (TypeError, ValueError):
+                    pass
+                print(
+                    "LLM transient error " + classification["error_type"]
+                    + f"; retry {{retry_index + 1}}/{{LLM_MAX_RETRIES}} in {{delay:.1f}}s",
+                    flush=True,
+                )
+                if delay > 0:
+                    await asyncio.sleep(delay)
+                continue
+
+            payload = {{
+                "error_type": classification["error_type"],
+                "message": str(error)[:1000],
+                "retryable": classification["retryable"],
+                "fatal": classification["fatal"],
+                "request_attempts": retry_index + 1,
+                "iteration": iteration,
+            }}
+            try:
+                (logs_dir / "infra_error.json").write_text(
+                    json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+                )
+            except OSError:
+                pass
+            try:
+                context.error_message = payload["message"]
+            except (AttributeError, ValueError):
+                if not hasattr(context, "metadata") or context.metadata is None:
+                    context.metadata = {{}}
+                context.metadata["infra_error"] = payload
+            raise RuntimeError(
+                "TFLLM_INFRA_ERROR:" + json.dumps(payload, ensure_ascii=True)
+            ) from error
+    raise AssertionError("unreachable LLM retry loop")
 
 
 class TFLLMHarborAgent(BaseAgent):
@@ -200,6 +323,8 @@ class TFLLMHarborAgent(BaseAgent):
             self._llm = AsyncOpenAI(
                 api_key=os.getenv("UTU_LLM_API_KEY", os.getenv("OPENAI_API_KEY", "")),
                 base_url=os.getenv("UTU_LLM_BASE_URL", os.getenv("OPENAI_BASE_URL")),
+                timeout=Timeout(READ_TIMEOUT_SEC, connect=CONNECT_TIMEOUT_SEC),
+                max_retries=0,
             )
 
         system_prompt = _build_system_prompt()
@@ -210,26 +335,26 @@ class TFLLMHarborAgent(BaseAgent):
         tools = [BASH_TOOL, TASK_COMPLETE_TOOL]
         commands_executed = 0
         trajectory = []
+        actual_models = []
 
         for i in range(MAX_ITERATIONS):
-            try:
-                resp = await self._llm.chat.completions.create(
-                    model=self.model_name or MODEL_NAME,
-                    messages=messages,
-                    tools=tools,
-                    tool_choice="auto",
-                    temperature=0.2,
-                    max_completion_tokens=4096,
-                )
-            except Exception as e:
-                print("LLM error: " + repr(e), flush=True)
-                try:
-                    context.error_message = str(e)
-                except (AttributeError, ValueError):
-                    if not hasattr(context, "metadata") or context.metadata is None:
-                        context.metadata = {{}}
-                    context.metadata["error_message"] = str(e)
-                break
+            resp = await _completion_with_retry(
+                self._llm,
+                {{
+                    "model": self.model_name or MODEL_NAME,
+                    "messages": messages,
+                    "tools": tools,
+                    "tool_choice": "auto",
+                    "temperature": TEMPERATURE,
+                    "max_completion_tokens": 4096,
+                }},
+                self.logs_dir,
+                context,
+                i,
+            )
+            response_model = getattr(resp, "model", None)
+            if response_model and response_model not in actual_models:
+                actual_models.append(str(response_model))
 
             msg = resp.choices[0].message
             messages.append(msg.model_dump(exclude_unset=True))
@@ -283,7 +408,16 @@ class TFLLMHarborAgent(BaseAgent):
         context.metadata = {{
             "commands_executed": commands_executed,
             "iterations_used": len(trajectory),
+            "requested_model": self.model_name or MODEL_NAME,
+            "actual_models": actual_models,
+            "temperature": TEMPERATURE,
         }}
+        try:
+            (self.logs_dir / "agent_run_metadata.json").write_text(
+                json.dumps(context.metadata, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        except OSError:
+            pass
 '''
 
 
@@ -316,6 +450,8 @@ class SkillsBenchAdapter:
         model_name: str | None = None,
         timeout_sec: int | None = None,
         max_iterations: int | None = None,
+        agent_instructions: str = "",
+        model_temperature: float = 0.0,
     ) -> SkillsBenchResult:
         """
         Run a single SkillsBench task and return the reward.
@@ -328,14 +464,19 @@ class SkillsBenchAdapter:
             model_name: LLM model name override.
             timeout_sec: Per-task wall-clock timeout in seconds.
             max_iterations: Maximum bash-tool iterations for the agent.
+            agent_instructions: Full agent instructions (with baked experiences) to
+                use as the system prompt base. Used in eval mode where experiences
+                are stored in the agent YAML rather than the experiences dict.
 
         Returns:
             ``SkillsBenchResult`` with reward, trajectory, logs.
         """
+        task_path = self._ensure_harbor_compat_task(task_path)
         cfg = self._config
         _timeout = timeout_sec or (getattr(cfg, "task_timeout_sec", None) or 600)
         _max_iter = max_iterations or (getattr(cfg, "max_agent_iterations", None) or 30)
         _model = model_name or os.getenv("UTU_LLM_MODEL", "deepseek-chat")
+        _temperature = float(model_temperature)
 
         max_retries = getattr(cfg, "max_retries", 0) or 0
         retry_delay = getattr(cfg, "retry_delay_sec", None)
@@ -345,7 +486,12 @@ class SkillsBenchAdapter:
 
         task_name = Path(task_path).name
         attempt = 0
-        result = SkillsBenchResult(reward=0.0, error="no attempt made")
+        result = SkillsBenchResult(
+            outcome=OUTCOME_INFRA_ERROR,
+            error="no attempt made",
+            error_type="adapter_not_started",
+            retryable=True,
+        )
         while True:
             attempt += 1
             result = await self._run_task_once(
@@ -356,7 +502,10 @@ class SkillsBenchAdapter:
                 model_name=_model,
                 timeout=_timeout,
                 max_iterations=_max_iter,
+                agent_instructions=agent_instructions,
+                model_temperature=_temperature,
             )
+            result.attempts = attempt
 
             # Stop when we have a usable result or have exhausted retries.
             if attempt > max_retries:
@@ -377,7 +526,7 @@ class SkillsBenchAdapter:
                 await asyncio.sleep(retry_delay)
 
         if attempt > 1:
-            outcome = "succeeded" if not result.error else "still failing"
+            outcome = "succeeded" if result.outcome in {OUTCOME_VALID, OUTCOME_TASK_TIMEOUT} else "still failing"
             logger.info(
                 f"Task {task_name} {outcome} after {attempt} attempt(s); "
                 f"reward={result.reward}"
@@ -395,6 +544,210 @@ class SkillsBenchAdapter:
 
         return result
 
+    async def health_check(
+        self,
+        *,
+        model_name: str,
+        temperature: float = 0.0,
+        attempts: int | None = None,
+    ) -> list[str]:
+        """Require successful lightweight requests before measured trials."""
+
+        import httpx
+        from openai import AsyncOpenAI
+
+        cfg = self._config
+        required = max(1, int(attempts or getattr(cfg, "healthcheck_attempts", 3)))
+        client = AsyncOpenAI(
+            api_key=os.getenv("UTU_LLM_API_KEY", os.getenv("OPENAI_API_KEY", "")),
+            base_url=os.getenv("UTU_LLM_BASE_URL", os.getenv("OPENAI_BASE_URL")),
+            timeout=httpx.Timeout(
+                getattr(cfg, "llm_read_timeout_sec", 120.0),
+                connect=getattr(cfg, "llm_connect_timeout_sec", 10.0),
+            ),
+            max_retries=0,
+        )
+        actual_models: list[str] = []
+        try:
+            for probe_index in range(required):
+                response = await client.chat.completions.create(
+                    model=model_name,
+                    messages=[{"role": "user", "content": "Reply with OK."}],
+                    temperature=float(temperature),
+                    max_completion_tokens=8,
+                )
+                actual = str(getattr(response, "model", "") or model_name)
+                actual_models.append(actual)
+                logger.info(
+                    "SkillsBench endpoint probe %s/%s succeeded (model=%s)",
+                    probe_index + 1,
+                    required,
+                    actual,
+                )
+        finally:
+            await client.close()
+        return actual_models
+
+    # ------------------------------------------------------------------
+    # SkillsBench v1.1 -> legacy harbor compatibility
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _split_task_md(task_md: Path) -> tuple[dict[str, Any], str]:
+        """Parse BenchFlow-native task.md into frontmatter and instruction body."""
+        text = task_md.read_text(encoding="utf-8")
+        if not text.startswith("---"):
+            return {}, text.strip()
+        parts = text.split("---", 2)
+        if len(parts) < 3:
+            return {}, text.strip()
+        frontmatter = parts[1].strip()
+        body = parts[2].strip()
+        if yaml is None:
+            return {}, body
+        try:
+            return yaml.safe_load(frontmatter) or {}, body
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(f"Failed to parse task.md frontmatter for {task_md}: {exc}")
+            return {}, body
+
+    @staticmethod
+    def _toml_value(value: Any) -> str:
+        """Serialize a small TOML value set needed by legacy harbor."""
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if isinstance(value, (int, float)):
+            return str(value)
+        if isinstance(value, list):
+            return "[" + ", ".join(SkillsBenchAdapter._toml_value(v) for v in value) + "]"
+        return json.dumps("" if value is None else str(value))
+
+    @staticmethod
+    def _legacy_task_toml(frontmatter: dict[str, Any]) -> str:
+        """Generate the legacy task.toml expected by harbor 0.x."""
+        metadata = frontmatter.get("metadata") or {}
+        verifier = frontmatter.get("verifier") or {}
+        agent = frontmatter.get("agent") or {}
+        environment = frontmatter.get("environment") or {}
+
+        category = metadata.get("category") or metadata.get("domain") or "general"
+        tags = metadata.get("tags") or []
+        network_mode = str(environment.get("network_mode", "")).lower()
+        allow_internet = network_mode not in {"none", "disabled", "offline"}
+
+        lines = [
+            'version = "1.0"',
+            "",
+            "[metadata]",
+            f"author_name = {SkillsBenchAdapter._toml_value(metadata.get('author_name', ''))}",
+            f"author_email = {SkillsBenchAdapter._toml_value(metadata.get('author_email', ''))}",
+            f"difficulty = {SkillsBenchAdapter._toml_value(metadata.get('difficulty', 'medium'))}",
+            f"category = {SkillsBenchAdapter._toml_value(category)}",
+            f"tags = {SkillsBenchAdapter._toml_value(tags)}",
+            "",
+            "[verifier]",
+            f"timeout_sec = {SkillsBenchAdapter._toml_value(verifier.get('timeout_sec', 900.0))}",
+            "",
+            "[agent]",
+            f"timeout_sec = {SkillsBenchAdapter._toml_value(agent.get('timeout_sec', 1800.0))}",
+            "",
+            "[environment]",
+            f"build_timeout_sec = {SkillsBenchAdapter._toml_value(environment.get('build_timeout_sec', 600.0))}",
+            f"cpus = {SkillsBenchAdapter._toml_value(environment.get('cpus', 2))}",
+            f"memory_mb = {SkillsBenchAdapter._toml_value(environment.get('memory_mb', 4096))}",
+            f"storage_mb = {SkillsBenchAdapter._toml_value(environment.get('storage_mb', 10240))}",
+            f"gpus = {SkillsBenchAdapter._toml_value(environment.get('gpus', 0))}",
+            f"allow_internet = {SkillsBenchAdapter._toml_value(allow_internet)}",
+            "",
+        ]
+        return "\n".join(lines)
+
+    @staticmethod
+    def _rewrite_legacy_test_mount_paths(tests_dir: Path) -> None:
+        """Translate BenchFlow verifier paths to harbor's legacy tests mount."""
+        text_suffixes = {
+            ".bash",
+            ".cfg",
+            ".ini",
+            ".json",
+            ".md",
+            ".py",
+            ".sh",
+            ".toml",
+            ".txt",
+            ".yaml",
+            ".yml",
+        }
+        for path in tests_dir.rglob("*"):
+            if not path.is_file() or path.suffix.lower() not in text_suffixes:
+                continue
+            try:
+                text = path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                text = path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            rewritten = text.replace("/verifier", "/tests")
+            rewritten = rewritten.replace("/logs/tests", "/logs/verifier")
+            if rewritten != text:
+                path.write_text(rewritten, encoding="utf-8")
+
+    @staticmethod
+    def _ensure_harbor_compat_task(task_path: str) -> str:
+        """Return a legacy harbor-readable task path.
+
+        SkillsBench v1.1 stores tasks as BenchFlow-native ``task.md`` packages:
+        ``task.md``, ``environment/``, ``oracle/``, ``verifier/``.  The harbor
+        CLI used by this project still expects the older shape:
+        ``instruction.md``, ``task.toml``, ``environment/``, ``tests/``.
+        This method materializes a cached compatibility directory under
+        ``workspace/skillsbench_harbor_compat`` and returns that path.
+        """
+        source = Path(task_path)
+        if (source / "instruction.md").exists() and (source / "task.toml").exists():
+            return task_path
+        task_md = source / "task.md"
+        if not task_md.exists():
+            return task_path
+
+        compat_root = DIR_ROOT / "workspace" / "skillsbench_harbor_compat" / source.name
+        ready_marker = compat_root / ".tfllm_compat_ready"
+        if ready_marker.exists():
+            try:
+                marker = json.loads(ready_marker.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                marker = {}
+            if marker.get("version") == _HARBOR_COMPAT_VERSION:
+                return str(compat_root)
+
+        logger.info(f"Materializing harbor-compatible SkillsBench task: {source.name}")
+        compat_root.mkdir(parents=True, exist_ok=True)
+        frontmatter, instruction = SkillsBenchAdapter._split_task_md(task_md)
+        (compat_root / "instruction.md").write_text(instruction, encoding="utf-8")
+        (compat_root / "task.toml").write_text(
+            SkillsBenchAdapter._legacy_task_toml(frontmatter),
+            encoding="utf-8",
+        )
+
+        for src_name, dst_name in (("environment", "environment"), ("verifier", "tests")):
+            src_dir = source / src_name
+            dst_dir = compat_root / dst_name
+            if dst_dir.exists():
+                shutil.rmtree(dst_dir)
+            if src_dir.exists():
+                shutil.copytree(src_dir, dst_dir)
+                if dst_name == "tests":
+                    SkillsBenchAdapter._rewrite_legacy_test_mount_paths(dst_dir)
+
+        ready_marker.write_text(
+            json.dumps(
+                {"version": _HARBOR_COMPAT_VERSION, "source": str(source)},
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        return str(compat_root)
+
     @staticmethod
     def _is_retryable_error(result: SkillsBenchResult, retry_on_timeout: bool) -> bool:
         """Decide whether a failed result is worth retrying.
@@ -405,12 +758,12 @@ class SkillsBenchAdapter:
         ran to completion and the verifier scored it — even a 0.0 reward there
         is a legitimate task failure and must NOT be retried.
         """
-        if not result.error:
+        if result.outcome != OUTCOME_INFRA_ERROR or result.fatal or not result.retryable:
             return False
-        err = result.error.lower()
-        is_timeout = "timed out" in err or "timeout" in err
-        if is_timeout:
-            return retry_on_timeout
+        # Transient API errors already exhausted their retries inside the same
+        # trial. Keep the trial invalid so retry-infra can rerun it later.
+        if result.error_type in TRANSIENT_API_ERROR_TYPES:
+            return False
         return True
 
     async def _run_task_once(
@@ -422,6 +775,8 @@ class SkillsBenchAdapter:
         model_name: str,
         timeout: int,
         max_iterations: int,
+        agent_instructions: str = "",
+        model_temperature: float = 0.0,
     ) -> SkillsBenchResult:
         """Run a single attempt of a SkillsBench task (no retry, no cleanup)."""
         start = time.monotonic()
@@ -434,25 +789,36 @@ class SkillsBenchAdapter:
                     skills_text=skills_text,
                     model_name=model_name,
                     max_iterations=max_iterations,
+                    agent_instructions=agent_instructions,
+                    model_temperature=model_temperature,
                 ),
                 timeout=timeout,
             )
-        except (asyncio.TimeoutError, asyncio.CancelledError):
-            # wait_for raises TimeoutError on timeout (Python 3.11+ may raise
-            # CancelledError internally); treat both the same way.
+        except TimeoutError:
             elapsed = time.monotonic() - start
             logger.warning(f"Task timed out after {elapsed:.0f}s: {task_path}")
             result = SkillsBenchResult(
                 reward=0.0,
-                error=f"Timed out after {timeout}s",
+                outcome=OUTCOME_TASK_TIMEOUT,
+                error_type="task_timeout",
                 elapsed_sec=elapsed,
+                metadata={"task_timeout_sec": timeout},
             )
+        except asyncio.CancelledError:
+            # Parent cancellation is scheduler control, not a measured task
+            # timeout. The harbor subprocess path handles its own termination.
+            raise
         except Exception as exc:
             elapsed = time.monotonic() - start
             logger.error(f"Task failed: {task_path}: {exc}", exc_info=True)
+            classification = classify_infra_error(exc)
             result = SkillsBenchResult(
-                reward=0.0,
+                reward=None,
+                outcome=OUTCOME_FATAL_ERROR if classification.fatal else OUTCOME_INFRA_ERROR,
                 error=str(exc),
+                error_type=classification.error_type,
+                retryable=classification.retryable,
+                fatal=classification.fatal,
                 elapsed_sec=elapsed,
             )
 
@@ -526,6 +892,8 @@ class SkillsBenchAdapter:
         skills_text: str,
         model_name: str,
         max_iterations: int,
+        agent_instructions: str = "",
+        model_temperature: float = 0.0,
     ) -> SkillsBenchResult:
         """Dispatch to Python API or CLI subprocess depending on availability."""
         if self._harbor_available is None:
@@ -533,12 +901,14 @@ class SkillsBenchAdapter:
 
         if self._harbor_available:
             return await self._run_via_python_api(
-                task_path, experiences, inject_curated_skills, skills_text, model_name, max_iterations
+                task_path, experiences, inject_curated_skills, skills_text, model_name,
+                max_iterations, agent_instructions, model_temperature,
             )
         else:
             logger.info("harbor Python API not importable; falling back to CLI subprocess.")
             return await self._run_via_cli(
-                task_path, experiences, inject_curated_skills, skills_text, model_name, max_iterations
+                task_path, experiences, inject_curated_skills, skills_text, model_name,
+                max_iterations, agent_instructions, model_temperature,
             )
 
     async def _run_via_python_api(
@@ -549,9 +919,12 @@ class SkillsBenchAdapter:
         skills_text: str,
         model_name: str,
         max_iterations: int,
+        agent_instructions: str = "",
+        model_temperature: float = 0.0,
     ) -> SkillsBenchResult:
         """Execute a task using harbor's Python API."""
         from harbor.runner import TaskRunner  # type: ignore[import]
+
         from .skillsbench_harbor_agent import TFLLMHarborAgent
 
         with tempfile.TemporaryDirectory(prefix="tfllm_harbor_") as tmp_logs:
@@ -564,6 +937,15 @@ class SkillsBenchAdapter:
                 model_name=model_name,
                 max_iterations=max_iterations,
                 logs_dir=logs_dir,
+                agent_instructions=agent_instructions,
+                temperature=model_temperature,
+                connect_timeout_sec=getattr(self._config, "llm_connect_timeout_sec", 10.0),
+                read_timeout_sec=getattr(self._config, "llm_read_timeout_sec", 120.0),
+                llm_max_retries=getattr(self._config, "llm_max_retries", 4),
+                retry_initial_delay_sec=getattr(
+                    self._config, "llm_retry_initial_delay_sec", 2.0
+                ),
+                retry_max_delay_sec=getattr(self._config, "llm_retry_max_delay_sec", 30.0),
             )
 
             runner = TaskRunner()
@@ -574,16 +956,43 @@ class SkillsBenchAdapter:
                 )
             except Exception as exc:
                 logger.error(f"harbor TaskRunner.run() failed: {exc}", exc_info=True)
-                return SkillsBenchResult(reward=0.0, error=str(exc))
+                payload = self._read_json_artifact(logs_dir, "infra_error.json")
+                if payload:
+                    return self._infra_result_from_payload(payload)
+                classification = classify_infra_error(exc, default_type="harbor_runtime_error")
+                return SkillsBenchResult(
+                    reward=None,
+                    outcome=OUTCOME_FATAL_ERROR if classification.fatal else OUTCOME_INFRA_ERROR,
+                    error=str(exc),
+                    error_type=classification.error_type,
+                    retryable=classification.retryable,
+                    fatal=classification.fatal,
+                )
+
+            payload = self._read_json_artifact(logs_dir, "infra_error.json")
+            if payload:
+                return self._infra_result_from_payload(payload)
 
             reward = self._extract_reward(run_result, logs_dir)
+            if reward is None:
+                return self._infra_result_from_payload(
+                    {
+                        "error_type": "reward_file_missing",
+                        "message": "Harbor completed without a verifier reward",
+                        "retryable": False,
+                        "fatal": False,
+                    }
+                )
             trajectory = self._build_trajectory_json(logs_dir)
             agent_log = self._read_agent_log(logs_dir)
+            metadata = self._read_json_artifact(logs_dir, "agent_run_metadata.json") or {}
 
             return SkillsBenchResult(
                 reward=reward,
                 trajectory=trajectory,
                 agent_log=agent_log,
+                outcome=OUTCOME_VALID,
+                metadata=metadata,
             )
 
     async def _run_via_cli(
@@ -594,6 +1003,8 @@ class SkillsBenchAdapter:
         skills_text: str,
         model_name: str,
         max_iterations: int,
+        agent_instructions: str = "",
+        model_temperature: float = 0.0,
     ) -> SkillsBenchResult:
         """
         Execute a task via the harbor CLI subprocess.
@@ -604,7 +1015,12 @@ class SkillsBenchAdapter:
                 --agent-import-path <tmp_agent_file>
         and reads the resulting reward from the output logs.
         """
-        with tempfile.TemporaryDirectory(prefix="tfllm_harbor_") as tmp_dir:
+        # ignore_cleanup_errors=True: some harbor tasks (e.g. fix-druid-loophole-cve)
+        # create root-owned files inside Docker that the host process cannot delete.
+        # Without this flag the PermissionError propagates as an infrastructure error
+        # and triggers needless retries.  The temp dir will be cleaned by the OS on
+        # the next reboot; disk impact is negligible (a few KB of trial metadata).
+        with tempfile.TemporaryDirectory(prefix="tfllm_harbor_", ignore_cleanup_errors=True) as tmp_dir:
             tmp_path = Path(tmp_dir)
 
             # Write a fully self-contained agent file.
@@ -614,6 +1030,7 @@ class SkillsBenchAdapter:
             agent_file = tmp_path / "tfllm_agent.py"
             experiences_json = json.dumps(experiences or {})
             skills_escaped = json.dumps(skills_text or "")
+            agent_instructions_json = json.dumps(agent_instructions or "")
             agent_file.write_text(
                 _build_standalone_agent_source(
                     experiences_json=experiences_json,
@@ -621,6 +1038,15 @@ class SkillsBenchAdapter:
                     skills_text_json=skills_escaped,
                     model_name=model_name,
                     max_iterations=max_iterations,
+                    agent_instructions_json=agent_instructions_json,
+                    temperature=model_temperature,
+                    connect_timeout_sec=getattr(self._config, "llm_connect_timeout_sec", 10.0),
+                    read_timeout_sec=getattr(self._config, "llm_read_timeout_sec", 120.0),
+                    llm_max_retries=getattr(self._config, "llm_max_retries", 4),
+                    retry_initial_delay_sec=getattr(
+                        self._config, "llm_retry_initial_delay_sec", 2.0
+                    ),
+                    retry_max_delay_sec=getattr(self._config, "llm_retry_max_delay_sec", 30.0),
                 ),
                 encoding="utf-8",
             )
@@ -670,7 +1096,7 @@ class SkillsBenchAdapter:
                 str(tmp_path) + (":" + existing_pythonpath if existing_pythonpath else "")
             )
 
-            logger.info(f"Running harbor CLI: {' '.join(cmd)}")
+            logger.info(f"Running harbor CLI: {redact_command(cmd)}")
 
             # Run the harbor subprocess in a thread so it never blocks the
             # event loop.  This is critical: asyncio.wait_for relies on the
@@ -681,22 +1107,39 @@ class SkillsBenchAdapter:
             # GIL while waiting on the child process and lets the event loop
             # run freely.
             proc_holder: list[subprocess.Popen] = []
+            cancel_requested = threading.Event()
+
+            def _signal_harbor_process(proc: subprocess.Popen, *, force: bool) -> None:
+                if proc.poll() is not None:
+                    return
+                try:
+                    if os.name == "posix":
+                        os.killpg(proc.pid, signal.SIGKILL if force else signal.SIGTERM)
+                    elif force:
+                        proc.kill()
+                    else:
+                        proc.terminate()
+                except (ProcessLookupError, OSError):
+                    pass
 
             def _run_harbor_blocking() -> tuple[str, str, int]:
+                if cancel_requested.is_set():
+                    return "", "cancelled before harbor process start", -1
                 proc = subprocess.Popen(
                     cmd,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     env=env,
+                    start_new_session=os.name == "posix",
                 )
                 proc_holder.append(proc)
+                if cancel_requested.is_set():
+                    _signal_harbor_process(proc, force=False)
                 try:
                     stdout_bytes, stderr_bytes = proc.communicate()
                 finally:
-                    # Ensure the process is reaped even if communicate() is
-                    # interrupted (shouldn't happen in a thread, but defensive).
                     if proc.poll() is None:
-                        proc.kill()
+                        _signal_harbor_process(proc, force=True)
                         proc.communicate()
                 return (
                     stdout_bytes.decode("utf-8", errors="replace"),
@@ -708,28 +1151,43 @@ class SkillsBenchAdapter:
             stdout_str = ""
             stderr_str = ""
             returncode = 0
+            worker = loop.run_in_executor(None, _run_harbor_blocking)
             try:
-                stdout_str, stderr_str, returncode = await loop.run_in_executor(
-                    None, _run_harbor_blocking
-                )
+                stdout_str, stderr_str, returncode = await asyncio.shield(worker)
             except asyncio.CancelledError:
+                cancel_requested.set()
                 logger.warning(
                     f"harbor CLI subprocess cancelled for task {Path(task_path).name}; "
                     "killing process tree."
                 )
-                for p in proc_holder:
+                for proc in proc_holder:
+                    _signal_harbor_process(proc, force=False)
+                try:
+                    await asyncio.wait_for(asyncio.shield(worker), timeout=5)
+                except TimeoutError:
+                    for proc in proc_holder:
+                        _signal_harbor_process(proc, force=True)
                     try:
-                        p.kill()
-                        p.communicate()
+                        await asyncio.wait_for(asyncio.shield(worker), timeout=5)
                     except Exception:
                         pass
+                except Exception:
+                    pass
                 raise
 
             if returncode != 0:
                 logger.error(f"harbor CLI exited with {returncode}:\n{stderr_str}")
+                classification = classify_infra_error(
+                    stderr_str or stdout_str or f"harbor CLI exit {returncode}",
+                    default_type="harbor_runtime_error",
+                )
                 return SkillsBenchResult(
-                    reward=0.0,
+                    reward=None,
+                    outcome=OUTCOME_FATAL_ERROR if classification.fatal else OUTCOME_INFRA_ERROR,
                     error=f"harbor CLI failed (exit {returncode}): {stderr_str[:500]}",
+                    error_type=classification.error_type,
+                    retryable=classification.retryable,
+                    fatal=classification.fatal,
                     agent_log=stdout_str,
                 )
 
@@ -748,14 +1206,22 @@ class SkillsBenchAdapter:
                 # an environment/Docker build failure. Flag it as an infra error
                 # so the retry logic in run_task() can pick it up.
                 return SkillsBenchResult(
-                    reward=0.0,
+                    reward=None,
+                    outcome=OUTCOME_INFRA_ERROR,
                     error=(
                         "harbor produced no trial result directory "
                         "(likely environment/Docker build failure)"
                     ),
+                    error_type="harbor_environment_error",
+                    retryable=True,
                     agent_log=stdout_str,
                 )
             else:
+                payload = self._read_json_artifact(trial_result_dir, "infra_error.json")
+                if payload:
+                    result = self._infra_result_from_payload(payload, agent_log=stdout_str)
+                    result.trajectory = self._build_trajectory_json(trial_result_dir)
+                    return result
                 result_json_path = trial_result_dir / "result.json"
                 if result_json_path.exists():
                     try:
@@ -765,6 +1231,24 @@ class SkillsBenchAdapter:
                             logger.warning(
                                 f"Task exception: {exc.get('exception_message', '')[:1000]}\n"
                                 f"Traceback: {exc.get('exception_traceback', '')[:2000]}"
+                            )
+                            message = exc.get("exception_message", "Harbor trial exception")
+                            classification = classify_infra_error(
+                                message, default_type="harbor_runtime_error"
+                            )
+                            return SkillsBenchResult(
+                                reward=None,
+                                outcome=(
+                                    OUTCOME_FATAL_ERROR
+                                    if classification.fatal
+                                    else OUTCOME_INFRA_ERROR
+                                ),
+                                error=message,
+                                error_type=classification.error_type,
+                                retryable=classification.retryable,
+                                fatal=classification.fatal,
+                                agent_log=stdout_str,
+                                trajectory=self._build_trajectory_json(trial_result_dir),
                             )
                     except Exception:
                         pass
@@ -778,14 +1262,27 @@ class SkillsBenchAdapter:
             reward = self._extract_reward_from_result_json(trial_result_dir)
             if reward is None:
                 reward = self._extract_reward_from_dir(trial_result_dir)
-                if reward == 0.0:
+                if reward is None:
                     # Last resort: check the whole trials_dir (harbor might use different layout)
                     reward = self._extract_reward_from_dir(trials_dir)
+            if reward is None:
+                return SkillsBenchResult(
+                    reward=None,
+                    outcome=OUTCOME_INFRA_ERROR,
+                    error="Harbor completed without a verifier reward",
+                    error_type="reward_file_missing",
+                    retryable=False,
+                    agent_log=stdout_str,
+                    trajectory=self._build_trajectory_json(trial_result_dir),
+                )
             trajectory = self._build_trajectory_json(trial_result_dir)
+            metadata = self._read_json_artifact(trial_result_dir, "agent_run_metadata.json") or {}
             return SkillsBenchResult(
                 reward=reward,
                 trajectory=trajectory,
                 agent_log=stdout_str,
+                outcome=OUTCOME_VALID,
+                metadata=metadata,
             )
 
     # ------------------------------------------------------------------
@@ -793,7 +1290,36 @@ class SkillsBenchAdapter:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _extract_reward(run_result: Any, root_dir: Path) -> float:
+    def _read_json_artifact(root_dir: Path, filename: str) -> dict[str, Any] | None:
+        for path in root_dir.rglob(filename):
+            try:
+                value = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(value, dict):
+                    return value
+            except (json.JSONDecodeError, OSError):
+                continue
+        return None
+
+    @staticmethod
+    def _infra_result_from_payload(
+        payload: dict[str, Any],
+        *,
+        agent_log: str = "",
+    ) -> SkillsBenchResult:
+        fatal = bool(payload.get("fatal", False))
+        return SkillsBenchResult(
+            reward=None,
+            outcome=OUTCOME_FATAL_ERROR if fatal else OUTCOME_INFRA_ERROR,
+            error=str(payload.get("message") or "SkillsBench infrastructure error"),
+            error_type=str(payload.get("error_type") or "harbor_error"),
+            retryable=bool(payload.get("retryable", False)),
+            fatal=fatal,
+            agent_log=agent_log,
+            metadata={"infra_error": payload},
+        )
+
+    @staticmethod
+    def _extract_reward(run_result: Any, root_dir: Path) -> float | None:
         """Extract reward from harbor run result object or fallback to log files."""
         # harbor Python API result object may expose .reward directly
         if hasattr(run_result, "reward") and run_result.reward is not None:
@@ -842,7 +1368,7 @@ class SkillsBenchAdapter:
         return None
 
     @staticmethod
-    def _extract_reward_from_dir(root_dir: Path) -> float:
+    def _extract_reward_from_dir(root_dir: Path) -> float | None:
         """
         Search recursively under root_dir for reward.txt or reward.json.
 
@@ -873,8 +1399,8 @@ class SkillsBenchAdapter:
             except (json.JSONDecodeError, OSError):
                 continue
 
-        logger.warning(f"No reward file found under {root_dir}; defaulting to 0.0")
-        return 0.0
+        logger.warning(f"No reward file found under {root_dir}")
+        return None
 
     @staticmethod
     def _build_trajectory_json(root_dir: Path) -> str:

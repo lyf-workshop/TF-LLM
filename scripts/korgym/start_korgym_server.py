@@ -2,8 +2,8 @@
 Quick script to start a KORGym game server.
 
 Usage:
-    python scripts/start_korgym_server.py 3-2048
-    python scripts/start_korgym_server.py 4-SudoKu --port 8776
+    uv run python scripts/korgym/start_korgym_server.py 3-2048
+    uv run python scripts/korgym/start_korgym_server.py 4-SudoKu --port 8776
 """
 
 import argparse
@@ -35,7 +35,7 @@ def main():
     args = parser.parse_args()
     
     # Find game directory
-    game_lib_path = Path(__file__).parent.parent / "KORGym" / "game_lib"
+    game_lib_path = Path(__file__).resolve().parents[2] / "KORGym" / "game_lib"
     game_path = game_lib_path / args.game_name / "game_lib.py"
     
     if not game_path.exists():
