@@ -39,8 +39,9 @@ try:
 except ImportError:
     yaml = None
 
-from utu.db import DatasetSample, DBService
-from utu.utils import SQLModelUtils, get_logger
+from utu.db import DatasetSample, DBService  # noqa: E402
+from utu.skillsbench_data import assert_task_ids_disjoint, load_task_split_manifest  # noqa: E402
+from utu.utils import SQLModelUtils, get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -169,6 +170,14 @@ def _collect_skills_text(skills_dir: Path) -> str:
     return "\n\n".join(texts)
 
 
+def _string_list(value) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        value = [value]
+    return sorted({str(item).strip() for item in value if str(item).strip()})
+
+
 def _load_task_manifest(path: Path | None) -> dict[str, dict]:
     """Load an optional paper-alignment manifest keyed by task_id."""
     if path is None:
@@ -192,7 +201,7 @@ def _load_task_manifest(path: Path | None) -> dict[str, dict]:
         parts = line.split("\t")
         if len(parts) != len(header):
             raise ValueError(f"Malformed manifest row {lineno} in {path}: {line}")
-        row = dict(zip(header, (p.strip() for p in parts)))
+        row = dict(zip(header, (p.strip() for p in parts), strict=True))
         task_id = row["task_id"]
         if task_id in manifest:
             raise ValueError(f"Duplicate task_id in manifest {path}: {task_id}")
@@ -282,6 +291,13 @@ def parse_skillsbench_tasks(
                 difficulty = "medium"
 
         instruction = _read_instruction(task_dir)
+        task_types = _string_list(metadata.get("task_type"))
+        required_tools = _string_list(metadata.get("interface"))
+        required_capabilities = _string_list(metadata.get("skill_type"))
+        if manifest_row is not None and manifest_row.get("capability"):
+            required_capabilities = sorted(
+                set(required_capabilities) | {manifest_row["capability"]}
+            )
 
         # Skills directory (if the task ships curated skills)
         skills_dir_name = env_section.get("skills_dir")
@@ -317,6 +333,10 @@ def parse_skillsbench_tasks(
                 "skills_dir": str(skills_dir_path.resolve()) if skills_dir_path else "",
                 "skills_text": skills_text,
                 "description": task_section.get("description", metadata.get("subcategory", "")),
+                "task_family": task_types[0] if task_types else "unknown",
+                "all_task_types": task_types,
+                "required_tools": required_tools,
+                "required_capabilities": required_capabilities,
                 "paper_domain": manifest_row.get("domain") if manifest_row is not None else "",
                 "paper_capability": manifest_row.get("capability") if manifest_row is not None else "",
                 "paper_diff": manifest_row.get("diff") if manifest_row is not None else "",
@@ -353,8 +373,11 @@ def create_skillsbench_datasets(
     task_manifest: Path | None = None,
     eval_only: bool = False,
     allow_missing_manifest_tasks: bool = False,
+    split_manifest_path: Path | None = None,
+    split_name: str | None = None,
+    dry_run: bool = False,
     force: bool = False,
-) -> None:
+) -> dict | None:
     """
     Parse SkillsBench tasks and write two DatasetSample collections to the DB.
 
@@ -370,6 +393,7 @@ def create_skillsbench_datasets(
             pool) byte-for-byte identical to previous runs, so prior eval results
             stay comparable, while removing tasks that can never produce a GRPO
             learning signal from training.
+        dry_run: Validate and return the exact task lists without a database write.
         force: If True, delete any existing rows of the target datasets before
             re-inserting (otherwise existing task_ids are skipped / de-duped).
     """
@@ -391,7 +415,36 @@ def create_skillsbench_datasets(
         logger.error("No tasks parsed. Check the repo_path structure.")
         return
 
-    if eval_only:
+    split_metadata: dict = {}
+    if split_manifest_path or split_name:
+        if not split_manifest_path or not split_name:
+            raise ValueError("Both split_manifest_path and split_name are required")
+        split_manifest = load_task_split_manifest(split_manifest_path)
+        try:
+            split = split_manifest["splits"][split_name]
+        except KeyError as error:
+            raise ValueError(f"Unknown split {split_name!r} in {split_manifest_path}") from error
+        train_ids = list(split["train_task_ids"])
+        eval_ids = list(split["eval_task_ids"])
+        assert_task_ids_disjoint(train_ids, eval_ids)
+        by_id = {task["task_id"]: task for task in tasks}
+        missing = sorted((set(train_ids) | set(eval_ids)) - set(by_id))
+        if missing:
+            raise ValueError(f"Split {split_name!r} references missing tasks: {missing}")
+        train_tasks = [by_id[task_id] for task_id in train_ids]
+        eval_tasks = [by_id[task_id] for task_id in eval_ids]
+        dataset_metadata = split_manifest["dataset"]
+        split_metadata = {
+            "dataset_version": dataset_metadata["version"],
+            "repository_commit": dataset_metadata["repository_commit"],
+            "inventory_sha256": dataset_metadata["inventory_sha256"],
+            "manifest_sha256": split_manifest["manifest_sha256"],
+            "split_name": split_name,
+            "split_sha256": split["split_sha256"],
+            "train_task_ids_sha256": split["train_task_ids_sha256"],
+            "eval_task_ids_sha256": split["eval_task_ids_sha256"],
+        }
+    elif eval_only:
         # Paper-aligned evaluation uses the fixed manifest order and no train split.
         train_tasks = []
         eval_tasks = tasks
@@ -409,7 +462,7 @@ def create_skillsbench_datasets(
     # Remove environment-broken / unscorable tasks from TRAINING only.
     # We intentionally filter *after* the split so the eval membership and the
     # shuffle pool are unchanged (prior eval numbers stay comparable).
-    if exclude_broken_from_train:
+    if exclude_broken_from_train and not split_metadata:
         broken = BROKEN_ENV_TASKS | UNSCORABLE_OR_SLOW_TASKS
         dropped = [t["task_id"] for t in train_tasks if t["task_id"] in broken]
         train_tasks = [t for t in train_tasks if t["task_id"] not in broken]
@@ -440,11 +493,31 @@ def create_skillsbench_datasets(
                 "paper_domain": task.get("paper_domain", ""),
                 "paper_capability": task.get("paper_capability", ""),
                 "paper_diff": task.get("paper_diff", ""),
+                "task_family": task["task_family"],
+                "all_task_types": task["all_task_types"],
+                "required_tools": task["required_tools"],
+                "required_capabilities": task["required_capabilities"],
+                **split_metadata,
             },
         )
 
     eval_samples = [_make_sample(t, eval_dataset_name, "eval") for t in eval_tasks]
     train_samples = [_make_sample(t, train_dataset_name, "train") for t in train_tasks]
+
+    preparation_report = {
+        "dry_run": dry_run,
+        "train_dataset_name": train_dataset_name,
+        "eval_dataset_name": eval_dataset_name,
+        "train_task_ids": [task["task_id"] for task in train_tasks],
+        "eval_task_ids": [task["task_id"] for task in eval_tasks],
+        "split_metadata": split_metadata,
+    }
+    assert_task_ids_disjoint(
+        preparation_report["train_task_ids"], preparation_report["eval_task_ids"]
+    )
+    if dry_run:
+        logger.info("SkillsBench dataset dry run (database unchanged): %s", preparation_report)
+        return preparation_report
 
     if not SQLModelUtils.check_db_available():
         logger.error("Database is not available. Please check your UTU_DB_URL environment variable.")
@@ -513,6 +586,7 @@ def create_skillsbench_datasets(
     logger.info(f"  Eval  → {eval_dataset_name}  ({len(eval_samples)} tasks)")
     if not eval_only:
         logger.info(f"  Train → {train_dataset_name} ({len(train_samples)} tasks)")
+    return preparation_report
 
 
 if __name__ == "__main__":
@@ -584,6 +658,23 @@ if __name__ == "__main__":
              "(use this to rebuild the training set after editing exclusion lists)",
     )
     parser.add_argument(
+        "--dry_run",
+        action="store_true",
+        help="Validate and print exact task lists without writing to the database.",
+    )
+    parser.add_argument(
+        "--split_manifest",
+        type=str,
+        default=None,
+        help="Versioned JSON task inventory/split manifest.",
+    )
+    parser.add_argument(
+        "--split_name",
+        type=str,
+        default=None,
+        help="Exact split key to materialize from --split_manifest.",
+    )
+    parser.add_argument(
         "--shuffle_seed",
         type=int,
         default=42,
@@ -598,7 +689,7 @@ if __name__ == "__main__":
         args.eval_only = True
         args.include_external_api = True
 
-    create_skillsbench_datasets(
+    report = create_skillsbench_datasets(
         repo_path=Path(args.repo_path),
         eval_dataset_name=args.eval_dataset_name,
         train_dataset_name=args.train_dataset_name,
@@ -609,5 +700,10 @@ if __name__ == "__main__":
         task_manifest=Path(args.task_manifest) if args.task_manifest else None,
         eval_only=args.eval_only,
         allow_missing_manifest_tasks=args.allow_missing_manifest_tasks,
+        split_manifest_path=Path(args.split_manifest) if args.split_manifest else None,
+        split_name=args.split_name,
+        dry_run=args.dry_run,
         force=args.force,
     )
+    if args.dry_run and report is not None:
+        print(json.dumps(report, ensure_ascii=False, indent=2))

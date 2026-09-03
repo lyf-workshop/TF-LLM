@@ -1,12 +1,15 @@
 # ruff: noqa
-from agents.run import set_default_agent_runner
+import os
 
-from .utils import EnvUtils, setup_logging
-from .patch.runner import UTUAgentRunner
-from .tracing import setup_tracing
+if os.getenv("UTU_SKIP_AUTO_SETUP") != "1":
+    from agents.run import set_default_agent_runner
 
-EnvUtils.assert_env(["UTU_LLM_TYPE", "UTU_LLM_MODEL"])
-setup_logging(EnvUtils.get_env("UTU_LOG_LEVEL", "WARNING"))
-setup_tracing()
-# patched runner
-set_default_agent_runner(UTUAgentRunner())
+    from .utils import EnvUtils, setup_logging
+    from .patch.runner import UTUAgentRunner
+    from .tracing import setup_tracing
+
+    EnvUtils.assert_env(["UTU_LLM_TYPE", "UTU_LLM_MODEL"])
+    setup_logging(EnvUtils.get_env("UTU_LOG_LEVEL", "WARNING"))
+    setup_tracing()
+    # patched runner
+    set_default_agent_runner(UTUAgentRunner())

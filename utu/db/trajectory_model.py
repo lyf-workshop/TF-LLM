@@ -1,6 +1,7 @@
 import json
 from typing import TYPE_CHECKING
 
+from sqlalchemy import Index
 from sqlmodel import Field, SQLModel
 
 if TYPE_CHECKING:
@@ -9,6 +10,7 @@ if TYPE_CHECKING:
 
 class TrajectoryModel(SQLModel, table=True):
     __tablename__ = "trajectory"
+    __table_args__ = (Index("ix_trajectory_trace_id", "trace_id"),)
 
     id: int | None = Field(default=None, primary_key=True)
 

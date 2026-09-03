@@ -20,6 +20,9 @@ class BaseDataManager(abc.ABC):
 
     def __init__(self, config: EvalConfig) -> None:
         self.config = config
+        # EvalConfig.db_url is authoritative. Previously the data manager
+        # ignored it and always used the process environment's URL.
+        SQLModelUtils.configure(config.db_url)
 
     @abc.abstractmethod
     def load(self) -> list[EvaluationSample]:
@@ -41,7 +44,7 @@ class DBDataManager(BaseDataManager):
     """Database data manager for loading and saving data."""
 
     def __init__(self, config: EvalConfig) -> None:
-        self.config = config
+        super().__init__(config)
 
     def load(self) -> list[EvaluationSample]:
         if self._check_exp_id():

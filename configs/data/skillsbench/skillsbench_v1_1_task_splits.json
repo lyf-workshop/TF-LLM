@@ -1,0 +1,2817 @@
+{
+  "schema_version": "1.1",
+  "dataset": {
+    "name": "SkillsBench",
+    "version": "v1.1",
+    "repository_commit": "b63b7b2850226b6aa4fb5929a8c1ac7bc4d9a6af",
+    "paper_manifest": "configs/eval/skillsbench/skillsbench_paper_87_tasks.tsv",
+    "paper_manifest_sha256": "b4079dbf8cba15eed18232d726cac01b3422572912c4de70c88af2b7e3c86533",
+    "inventory_sha256": "130e4ec78f3259e80417a21cfbfd7f426c05e494b6c0bae1d370d88be99db6bf",
+    "inventory_task_count": 101,
+    "paper_task_count": 87
+  },
+  "field_mapping": {
+    "domain": "paper TSV domain when available, else task metadata.category/domain",
+    "task_family": "lexicographically first normalized task metadata.task_type; all values retained in all_task_families",
+    "required_tools": "task metadata.interface",
+    "required_capabilities": "task metadata.skill_type plus paper TSV capability"
+  },
+  "tasks": [
+    {
+      "task_id": "3d-scan-calc",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "calculation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "file-format-knowledge",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "calculation",
+        "extraction"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "ada-bathroom-plan-repair",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "extraction",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "file-format-knowledge"
+      ],
+      "all_task_families": [
+        "extraction",
+        "repair"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "adaptive-cruise-control",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "implementation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "implementation",
+        "simulation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "azure-bgp-oscillation-route-leak",
+      "domain": "Software Engineering",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure"
+      ],
+      "all_task_families": [
+        "analysis",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "bike-rebalance",
+      "domain": "Mathematics & OR",
+      "task_family": "optimization",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "optimization",
+        "planning"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "citation-check",
+      "domain": "Office & White Collar",
+      "task_family": "search",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Search & Research",
+        "domain-procedure",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "search",
+        "verification"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "civ6-adjacency-optimizer",
+      "domain": "Mathematics & OR",
+      "task_family": "optimization",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "optimization",
+        "planning"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "cobol-gl-batch-reconcile",
+      "domain": "software-engineering",
+      "task_family": "unknown",
+      "required_tools": [],
+      "required_capabilities": [],
+      "all_task_families": [],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": []
+    },
+    {
+      "task_id": "court-form-filling",
+      "domain": "Office & White Collar",
+      "task_family": "extraction",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "domain-procedure",
+        "file-format-knowledge"
+      ],
+      "all_task_families": [
+        "extraction",
+        "generation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "crystallographic-wyckoff-position-analysis",
+      "domain": "Natural Science",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "dapt-intrusion-detection",
+      "domain": "Cybersecurity",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "data-to-d3",
+      "domain": "Software Engineering",
+      "task_family": "generation",
+      "required_tools": [
+        "browser",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "library-api-usage",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "generation",
+        "implementation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "debug-trl-grpo",
+      "domain": "Software Engineering",
+      "task_family": "debugging",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "debugging-heuristic",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "debugging",
+        "repair"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "dialogue-parser",
+      "domain": "Software Engineering",
+      "task_family": "implementation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "file-format-knowledge",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "implementation",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "diff-transformer_impl",
+      "domain": "software-engineering",
+      "task_family": "unknown",
+      "required_tools": [],
+      "required_capabilities": [],
+      "all_task_families": [],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": []
+    },
+    {
+      "task_id": "drone-planning-control",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "implementation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "implementation",
+        "optimization",
+        "simulation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "dynamic-object-aware-egomotion",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "analysis",
+        "classification",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "earthquake-phase-association",
+      "domain": "Natural Science",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "analysis",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "earthquake-plate-calculation",
+      "domain": "Natural Science",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "econ-detrending-correlation",
+      "domain": "Finance & Economics",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "edit-pdf",
+      "domain": "Office & White Collar",
+      "task_family": "formatting",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "file-format-knowledge",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "formatting",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "energy-ac-optimal-power-flow",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "optimization",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "optimization",
+        "verification"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "energy-market-pricing",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "analysis",
+        "optimization"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "energy-unit-commitment",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "optimization",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "optimization",
+        "planning"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "enterprise-information-search",
+      "domain": "Office & White Collar",
+      "task_family": "extraction",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Search & Research",
+        "domain-procedure",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "extraction",
+        "search"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "exam-block-sequencing",
+      "domain": "Mathematics & OR",
+      "task_family": "optimization",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "mathematical-method",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "optimization",
+        "planning"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "exceltable-in-ppt",
+      "domain": "Office & White Collar",
+      "task_family": "extraction",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "file-format-knowledge",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "extraction",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "exoplanet-detection-period",
+      "domain": "Natural Science",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "analysis",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "financial-modeling-qa",
+      "domain": "Finance & Economics",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "domain-procedure",
+        "file-format-knowledge"
+      ],
+      "all_task_families": [
+        "analysis",
+        "extraction"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "find-topk-similiar-chemicals",
+      "domain": "natural-science",
+      "task_family": "calculation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "calculation",
+        "ranking"
+      ],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": [
+        "SkillsBench-Eval-77"
+      ]
+    },
+    {
+      "task_id": "fix-build-agentops",
+      "domain": "Software Engineering",
+      "task_family": "debugging",
+      "required_tools": [
+        "compiler-toolchain",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "debugging-heuristic",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "debugging",
+        "repair"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "fix-build-google-auto",
+      "domain": "Software Engineering",
+      "task_family": "debugging",
+      "required_tools": [
+        "compiler-toolchain",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "debugging-heuristic",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "debugging",
+        "repair"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "fix-druid-loophole-cve",
+      "domain": "Cybersecurity",
+      "task_family": "repair",
+      "required_tools": [
+        "compiler-toolchain",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "debugging-heuristic",
+        "domain-procedure"
+      ],
+      "all_task_families": [
+        "repair"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "fix-erlang-ssh-cve",
+      "domain": "Cybersecurity",
+      "task_family": "debugging",
+      "required_tools": [
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "debugging-heuristic",
+        "domain-procedure"
+      ],
+      "all_task_families": [
+        "debugging",
+        "repair"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "fix-visual-stability",
+      "domain": "Software Engineering",
+      "task_family": "debugging",
+      "required_tools": [
+        "browser",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "debugging-heuristic",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "debugging",
+        "repair"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "flink-query",
+      "domain": "Software Engineering",
+      "task_family": "analysis",
+      "required_tools": [
+        "compiler-toolchain",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "analysis",
+        "implementation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "flood-risk-analysis",
+      "domain": "Natural Science",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "data-cleaning-procedure",
+        "domain-procedure"
+      ],
+      "all_task_families": [
+        "analysis",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "gh-repo-analytics",
+      "domain": "software-engineering",
+      "task_family": "analysis",
+      "required_tools": [
+        "terminal"
+      ],
+      "required_capabilities": [
+        "library-api-usage",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": [
+        "SkillsBench-Eval-77"
+      ]
+    },
+    {
+      "task_id": "glm-lake-mendota",
+      "domain": "Natural Science",
+      "task_family": "calculation",
+      "required_tools": [
+        "simulation-tool",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "calculation",
+        "simulation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "gpu-cluster-online-scheduling",
+      "domain": "software-engineering",
+      "task_family": "unknown",
+      "required_tools": [],
+      "required_capabilities": [],
+      "all_task_families": [],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": []
+    },
+    {
+      "task_id": "gravitational-wave-detection",
+      "domain": "Natural Science",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "analysis",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "grid-dispatch-operator",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "calculation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "calculation",
+        "optimization"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "hvac-control",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "implementation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "implementation",
+        "simulation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "invoice-fraud-detection",
+      "domain": "Finance & Economics",
+      "task_family": "detection",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "data-cleaning-procedure",
+        "domain-procedure"
+      ],
+      "all_task_families": [
+        "detection",
+        "verification"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "jax-computing-basics",
+      "domain": "Software Engineering",
+      "task_family": "calculation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "library-api-usage",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "calculation",
+        "implementation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "jpg-ocr-stat",
+      "domain": "Office & White Collar",
+      "task_family": "extraction",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "library-api-usage",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "extraction",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "lab-unit-harmonization",
+      "domain": "Natural Science",
+      "task_family": "transformation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "data-cleaning-procedure",
+        "domain-procedure"
+      ],
+      "all_task_families": [
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "lake-warming-attribution",
+      "domain": "Natural Science",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "latex-formula-extraction",
+      "domain": "Office & White Collar",
+      "task_family": "extraction",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "domain-procedure",
+        "file-format-knowledge"
+      ],
+      "all_task_families": [
+        "extraction",
+        "repair"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "lean4-proof",
+      "domain": "Mathematics & OR",
+      "task_family": "implementation",
+      "required_tools": [
+        "formal-prover",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "implementation",
+        "verification"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "llm-prefix-cache-replay",
+      "domain": "Software Engineering",
+      "task_family": "implementation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "domain-procedure",
+        "evaluation-protocol"
+      ],
+      "all_task_families": [
+        "implementation",
+        "simulation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "manufacturing-codebook-normalization",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "classification",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "data-cleaning-procedure",
+        "domain-procedure"
+      ],
+      "all_task_families": [
+        "classification",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "manufacturing-equipment-maintenance",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "evaluation-protocol"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "manufacturing-fjsp-optimization",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "optimization",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "optimization",
+        "planning"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "mario-coin-counting",
+      "domain": "Media & Content Production",
+      "task_family": "detection",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "library-api-usage",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "detection",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "mars-clouds-clustering",
+      "domain": "Natural Science",
+      "task_family": "classification",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "library-api-usage",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "classification",
+        "optimization"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "mhc-layer-impl",
+      "domain": "software-engineering",
+      "task_family": "unknown",
+      "required_tools": [],
+      "required_capabilities": [],
+      "all_task_families": [],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": [
+        "SkillsBench-Eval-77"
+      ]
+    },
+    {
+      "task_id": "multilingual-video-dubbing",
+      "domain": "Media & Content Production",
+      "task_family": "generation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "library-api-usage",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "generation",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "nda-playbook-review",
+      "domain": "office-white-collar",
+      "task_family": "unknown",
+      "required_tools": [],
+      "required_capabilities": [],
+      "all_task_families": [],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": []
+    },
+    {
+      "task_id": "offer-letter-generator",
+      "domain": "Office & White Collar",
+      "task_family": "formatting",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "file-format-knowledge",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "formatting",
+        "generation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "organize-messy-files",
+      "domain": "Office & White Collar",
+      "task_family": "classification",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "file-format-knowledge",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "classification"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "paper-anonymizer",
+      "domain": "Office & White Collar",
+      "task_family": "detection",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "domain-procedure",
+        "file-format-knowledge"
+      ],
+      "all_task_families": [
+        "detection",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "parallel-tfidf-search",
+      "domain": "Software Engineering",
+      "task_family": "implementation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "library-api-usage",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "implementation",
+        "optimization"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "paratransit-routing",
+      "domain": "Mathematics & OR",
+      "task_family": "optimization",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "library-api-usage",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "optimization",
+        "planning"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "pddl-airport-planning",
+      "domain": "Mathematics & OR",
+      "task_family": "planning",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "planning"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "pddl-tpp-planning",
+      "domain": "Mathematics & OR",
+      "task_family": "generation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "file-format-knowledge"
+      ],
+      "all_task_families": [
+        "generation",
+        "planning"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "pdf-excel-diff",
+      "domain": "Office & White Collar",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "data-cleaning-procedure",
+        "file-format-knowledge"
+      ],
+      "all_task_families": [
+        "analysis",
+        "extraction"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "pedestrian-traffic-counting",
+      "domain": "media-content-production",
+      "task_family": "calculation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "calculation",
+        "detection"
+      ],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": [
+        "SkillsBench-Eval-77"
+      ]
+    },
+    {
+      "task_id": "pg-essay-to-audiobook",
+      "domain": "media-content-production",
+      "task_family": "generation",
+      "required_tools": [
+        "browser",
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "library-api-usage",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "generation",
+        "transformation"
+      ],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": []
+    },
+    {
+      "task_id": "powerlifting-coef-calc",
+      "domain": "Office & White Collar",
+      "task_family": "calculation",
+      "required_tools": [
+        "spreadsheet-app"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "mathematical-method",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "calculation",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "pptx-reference-formatting",
+      "domain": "Office & White Collar",
+      "task_family": "formatting",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "file-format-knowledge",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "formatting",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "protein-expression-analysis",
+      "domain": "Natural Science",
+      "task_family": "analysis",
+      "required_tools": [
+        "spreadsheet-app"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "python-scala-translation",
+      "domain": "Software Engineering",
+      "task_family": "implementation",
+      "required_tools": [
+        "compiler-toolchain",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "implementation",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "quantum-numerical-simulation",
+      "domain": "Natural Science",
+      "task_family": "calculation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "calculation",
+        "simulation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "r2r-mpc-control",
+      "domain": "Industrial & Physical Systems",
+      "task_family": "implementation",
+      "required_tools": [
+        "python",
+        "simulation-tool",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "implementation",
+        "simulation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "radar-vital-signs",
+      "domain": "Natural Science",
+      "task_family": "calculation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "calculation",
+        "extraction"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "react-performance-debugging",
+      "domain": "Software Engineering",
+      "task_family": "debugging",
+      "required_tools": [
+        "browser",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "debugging-heuristic",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "debugging",
+        "optimization"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "reserves-at-risk-calc",
+      "domain": "Finance & Economics",
+      "task_family": "analysis",
+      "required_tools": [
+        "browser",
+        "spreadsheet-app"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "sales-pivot-analysis",
+      "domain": "Office & White Collar",
+      "task_family": "analysis",
+      "required_tools": [
+        "spreadsheet-app"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "domain-procedure",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "analysis",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "scheduling-email-assistant",
+      "domain": "office-white-collar",
+      "task_family": "unknown",
+      "required_tools": [],
+      "required_capabilities": [],
+      "all_task_families": [],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": []
+    },
+    {
+      "task_id": "sec-financial-report",
+      "domain": "Finance & Economics",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Search & Research",
+        "domain-procedure",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "analysis",
+        "search"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "seismic-phase-picking",
+      "domain": "Natural Science",
+      "task_family": "classification",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "classification",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "setup-fuzzing-py",
+      "domain": "Cybersecurity",
+      "task_family": "implementation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "evaluation-protocol",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "implementation",
+        "verification"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "shock-analysis-demand",
+      "domain": "Finance & Economics",
+      "task_family": "analysis",
+      "required_tools": [
+        "browser",
+        "spreadsheet-app"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "shock-analysis-supply",
+      "domain": "Finance & Economics",
+      "task_family": "analysis",
+      "required_tools": [
+        "browser",
+        "spreadsheet-app"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "simpo-code-reproduction",
+      "domain": "Software Engineering",
+      "task_family": "implementation",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "library-api-usage",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "implementation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "software-dependency-audit",
+      "domain": "Cybersecurity",
+      "task_family": "analysis",
+      "required_tools": [
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Search & Research",
+        "domain-procedure",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "analysis",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "speaker-diarization-subtitles",
+      "domain": "media-content-production",
+      "task_family": "unknown",
+      "required_tools": [],
+      "required_capabilities": [],
+      "all_task_families": [],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": []
+    },
+    {
+      "task_id": "spring-boot-jakarta-migration",
+      "domain": "Software Engineering",
+      "task_family": "transformation",
+      "required_tools": [
+        "compiler-toolchain",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "domain-procedure",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "suricata-custom-exfil",
+      "domain": "Cybersecurity",
+      "task_family": "detection",
+      "required_tools": [
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "domain-procedure",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "detection",
+        "implementation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "syzkaller-ppdev-syzlang",
+      "domain": "Cybersecurity",
+      "task_family": "implementation",
+      "required_tools": [
+        "compiler-toolchain",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Agentic Coding",
+        "domain-procedure",
+        "file-format-knowledge"
+      ],
+      "all_task_families": [
+        "implementation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "taxonomy-tree-merge",
+      "domain": "office-white-collar",
+      "task_family": "classification",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "data-cleaning-procedure",
+        "domain-procedure"
+      ],
+      "all_task_families": [
+        "classification",
+        "transformation"
+      ],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": [
+        "SkillsBench-Eval-77"
+      ]
+    },
+    {
+      "task_id": "threejs-structure-parser",
+      "domain": "Media & Content Production",
+      "task_family": "extraction",
+      "required_tools": [
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "file-format-knowledge",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "extraction",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "threejs-to-obj",
+      "domain": "Media & Content Production",
+      "task_family": "transformation",
+      "required_tools": [
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "file-format-knowledge",
+        "library-api-usage"
+      ],
+      "all_task_families": [
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "tictoc-unnecessary-abort-detection",
+      "domain": "Software Engineering",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Reasoning",
+        "debugging-heuristic",
+        "domain-procedure"
+      ],
+      "all_task_families": [
+        "analysis",
+        "detection"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "travel-planning",
+      "domain": "Mathematics & OR",
+      "task_family": "planning",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Search & Research",
+        "domain-procedure",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "planning",
+        "search"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Paper-87",
+        "SkillsBench-Train-40"
+      ]
+    },
+    {
+      "task_id": "video-filler-word-remover",
+      "domain": "media-content-production",
+      "task_family": "detection",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "library-api-usage",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "detection",
+        "transformation"
+      ],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": [
+        "SkillsBench-Eval-77"
+      ]
+    },
+    {
+      "task_id": "video-silence-remover",
+      "domain": "Media & Content Production",
+      "task_family": "detection",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Multimodal",
+        "library-api-usage",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "detection",
+        "transformation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "video-tutorial-indexer",
+      "domain": "media-content-production",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "domain-procedure",
+        "tool-workflow"
+      ],
+      "all_task_families": [
+        "analysis",
+        "extraction"
+      ],
+      "source_scope": "tasks-extra",
+      "paper_87": false,
+      "database_datasets": []
+    },
+    {
+      "task_id": "weighted-gdp-calc",
+      "domain": "Finance & Economics",
+      "task_family": "calculation",
+      "required_tools": [
+        "spreadsheet-app"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "domain-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    },
+    {
+      "task_id": "xlsx-recover-data",
+      "domain": "Finance & Economics",
+      "task_family": "analysis",
+      "required_tools": [
+        "python",
+        "terminal"
+      ],
+      "required_capabilities": [
+        "Tool Use",
+        "data-cleaning-procedure",
+        "mathematical-method"
+      ],
+      "all_task_families": [
+        "analysis",
+        "calculation"
+      ],
+      "source_scope": "tasks",
+      "paper_87": true,
+      "database_datasets": [
+        "SkillsBench-Eval-77",
+        "SkillsBench-Paper-87"
+      ]
+    }
+  ],
+  "exclusions": {
+    "runtime_invalid": {
+      "flink-query": "container never becomes healthy in observed runs",
+      "multilingual-video-dubbing": "environment build never succeeded in observed runs",
+      "parallel-tfidf-search": "invalid Harbor task name prevents agent execution",
+      "simpo-code-reproduction": "all observed attempts exceeded configured timeout",
+      "suricata-custom-exfil": "environment build failures dominated observed runs"
+    },
+    "external_api": {
+      "enterprise-information-search": "requires external API credentials",
+      "citation-check": "requires external API credentials",
+      "azure-bgp-oscillation-route-leak": "requires external API credentials",
+      "energy-market-pricing": "requires external API credentials",
+      "energy-ac-optimal-power-flow": "requires external API credentials",
+      "earthquake-phase-association": "requires external API credentials",
+      "dapt-intrusion-detection": "requires external API credentials",
+      "dynamic-object-aware-egomotion": "requires external API credentials",
+      "exoplanet-detection-period": "requires external API credentials"
+    }
+  },
+  "split_analysis": {
+    "strict_all_task_types_holdout_feasible": false,
+    "reason": "Among the 73 self-contained eligible paper tasks, multi-label task_type co-occurrence forms one connected component. A non-empty train/eval split cannot keep every task_type label disjoint. The family-holdout splits therefore use the documented singular primary task_family field."
+  },
+  "splits": {
+    "in_family_self_contained_v1": {
+      "kind": "task-id-disjoint, primary-family-overlapping transfer; runtime-invalid and external-API tasks plus singleton families excluded",
+      "random_seed": 42,
+      "train_task_ids": [
+        "bike-rebalance",
+        "court-form-filling",
+        "data-to-d3",
+        "dialogue-parser",
+        "econ-detrending-correlation",
+        "edit-pdf",
+        "energy-unit-commitment",
+        "financial-modeling-qa",
+        "fix-build-agentops",
+        "fix-erlang-ssh-cve",
+        "flood-risk-analysis",
+        "glm-lake-mendota",
+        "grid-dispatch-operator",
+        "hvac-control",
+        "invoice-fraud-detection",
+        "jpg-ocr-stat",
+        "lab-unit-harmonization",
+        "lake-warming-attribution",
+        "latex-formula-extraction",
+        "lean4-proof",
+        "manufacturing-fjsp-optimization",
+        "mars-clouds-clustering",
+        "pdf-excel-diff",
+        "powerlifting-coef-calc",
+        "pptx-reference-formatting",
+        "python-scala-translation",
+        "quantum-numerical-simulation",
+        "r2r-mpc-control",
+        "react-performance-debugging",
+        "seismic-phase-picking",
+        "shock-analysis-demand",
+        "shock-analysis-supply",
+        "spring-boot-jakarta-migration",
+        "tictoc-unnecessary-abort-detection",
+        "travel-planning",
+        "video-silence-remover",
+        "xlsx-recover-data"
+      ],
+      "eval_task_ids": [
+        "3d-scan-calc",
+        "ada-bathroom-plan-repair",
+        "adaptive-cruise-control",
+        "civ6-adjacency-optimizer",
+        "crystallographic-wyckoff-position-analysis",
+        "debug-trl-grpo",
+        "drone-planning-control",
+        "earthquake-plate-calculation",
+        "exam-block-sequencing",
+        "exceltable-in-ppt",
+        "fix-build-google-auto",
+        "fix-visual-stability",
+        "gravitational-wave-detection",
+        "jax-computing-basics",
+        "llm-prefix-cache-replay",
+        "manufacturing-codebook-normalization",
+        "manufacturing-equipment-maintenance",
+        "mario-coin-counting",
+        "offer-letter-generator",
+        "organize-messy-files",
+        "paper-anonymizer",
+        "paratransit-routing",
+        "pddl-airport-planning",
+        "pddl-tpp-planning",
+        "protein-expression-analysis",
+        "radar-vital-signs",
+        "reserves-at-risk-calc",
+        "sales-pivot-analysis",
+        "sec-financial-report",
+        "setup-fuzzing-py",
+        "software-dependency-audit",
+        "syzkaller-ppdev-syzlang",
+        "threejs-structure-parser",
+        "threejs-to-obj",
+        "weighted-gdp-calc"
+      ],
+      "excluded_task_ids": [
+        "azure-bgp-oscillation-route-leak",
+        "citation-check",
+        "dapt-intrusion-detection",
+        "dynamic-object-aware-egomotion",
+        "earthquake-phase-association",
+        "energy-ac-optimal-power-flow",
+        "energy-market-pricing",
+        "enterprise-information-search",
+        "exoplanet-detection-period",
+        "fix-druid-loophole-cve",
+        "flink-query",
+        "multilingual-video-dubbing",
+        "parallel-tfidf-search",
+        "simpo-code-reproduction",
+        "suricata-custom-exfil"
+      ],
+      "train_task_ids_sha256": "d986ee2d9180148ced816267b642acbfff6377a90ab18409fe7046feeeef5bff",
+      "eval_task_ids_sha256": "f7ef00fdf4519f773592be201e94e0ebf993dcadc0bf764fb1672c5d30dcf827",
+      "split_sha256": "580b057e6362568787f8e129a266cdfba230642d4109cbc57c25c9ec7e97e005",
+      "train_families": [
+        "analysis",
+        "calculation",
+        "classification",
+        "debugging",
+        "detection",
+        "extraction",
+        "formatting",
+        "generation",
+        "implementation",
+        "optimization",
+        "planning",
+        "transformation"
+      ],
+      "eval_families": [
+        "analysis",
+        "calculation",
+        "classification",
+        "debugging",
+        "detection",
+        "extraction",
+        "formatting",
+        "generation",
+        "implementation",
+        "optimization",
+        "planning",
+        "transformation"
+      ]
+    },
+    "in_family_v1": {
+      "kind": "task-id-disjoint, family-overlapping transfer; singleton families excluded",
+      "random_seed": 42,
+      "train_task_ids": [
+        "bike-rebalance",
+        "court-form-filling",
+        "data-to-d3",
+        "dialogue-parser",
+        "earthquake-phase-association",
+        "econ-detrending-correlation",
+        "edit-pdf",
+        "energy-market-pricing",
+        "energy-unit-commitment",
+        "exceltable-in-ppt",
+        "exoplanet-detection-period",
+        "financial-modeling-qa",
+        "fix-build-agentops",
+        "fix-erlang-ssh-cve",
+        "flood-risk-analysis",
+        "glm-lake-mendota",
+        "grid-dispatch-operator",
+        "hvac-control",
+        "invoice-fraud-detection",
+        "jpg-ocr-stat",
+        "lab-unit-harmonization",
+        "lake-warming-attribution",
+        "latex-formula-extraction",
+        "lean4-proof",
+        "manufacturing-fjsp-optimization",
+        "mars-clouds-clustering",
+        "paratransit-routing",
+        "pdf-excel-diff",
+        "powerlifting-coef-calc",
+        "pptx-reference-formatting",
+        "python-scala-translation",
+        "quantum-numerical-simulation",
+        "r2r-mpc-control",
+        "react-performance-debugging",
+        "seismic-phase-picking",
+        "shock-analysis-demand",
+        "shock-analysis-supply",
+        "spring-boot-jakarta-migration",
+        "tictoc-unnecessary-abort-detection",
+        "travel-planning",
+        "video-silence-remover",
+        "xlsx-recover-data"
+      ],
+      "eval_task_ids": [
+        "3d-scan-calc",
+        "ada-bathroom-plan-repair",
+        "adaptive-cruise-control",
+        "azure-bgp-oscillation-route-leak",
+        "civ6-adjacency-optimizer",
+        "crystallographic-wyckoff-position-analysis",
+        "dapt-intrusion-detection",
+        "debug-trl-grpo",
+        "drone-planning-control",
+        "dynamic-object-aware-egomotion",
+        "earthquake-plate-calculation",
+        "energy-ac-optimal-power-flow",
+        "enterprise-information-search",
+        "exam-block-sequencing",
+        "fix-build-google-auto",
+        "fix-visual-stability",
+        "gravitational-wave-detection",
+        "jax-computing-basics",
+        "llm-prefix-cache-replay",
+        "manufacturing-codebook-normalization",
+        "manufacturing-equipment-maintenance",
+        "mario-coin-counting",
+        "offer-letter-generator",
+        "organize-messy-files",
+        "paper-anonymizer",
+        "pddl-airport-planning",
+        "pddl-tpp-planning",
+        "protein-expression-analysis",
+        "radar-vital-signs",
+        "reserves-at-risk-calc",
+        "sales-pivot-analysis",
+        "sec-financial-report",
+        "setup-fuzzing-py",
+        "software-dependency-audit",
+        "syzkaller-ppdev-syzlang",
+        "threejs-structure-parser",
+        "threejs-to-obj",
+        "weighted-gdp-calc"
+      ],
+      "excluded_task_ids": [
+        "citation-check",
+        "fix-druid-loophole-cve",
+        "flink-query",
+        "multilingual-video-dubbing",
+        "parallel-tfidf-search",
+        "simpo-code-reproduction",
+        "suricata-custom-exfil"
+      ],
+      "train_task_ids_sha256": "1d10a3efa7256ee03bafd331a1af4317298856f66a71723510732f435e879034",
+      "eval_task_ids_sha256": "e160092d797a416362dce86c54a59e0ee97fdb793fe446f5a46921f8dc5fc458",
+      "split_sha256": "8aec878dbfa98027f01b7a2afe831ca581b796a8fae12be9ce52c386fc9f8e09",
+      "train_families": [
+        "analysis",
+        "calculation",
+        "classification",
+        "debugging",
+        "detection",
+        "extraction",
+        "formatting",
+        "generation",
+        "implementation",
+        "optimization",
+        "planning",
+        "transformation"
+      ],
+      "eval_families": [
+        "analysis",
+        "calculation",
+        "classification",
+        "debugging",
+        "detection",
+        "extraction",
+        "formatting",
+        "generation",
+        "implementation",
+        "optimization",
+        "planning",
+        "transformation"
+      ]
+    },
+    "family_holdout_v1": {
+      "kind": "task-family-disjoint transfer over paper tasks after observed runtime exclusions",
+      "random_seed": 42,
+      "train_task_ids": [
+        "adaptive-cruise-control",
+        "azure-bgp-oscillation-route-leak",
+        "bike-rebalance",
+        "civ6-adjacency-optimizer",
+        "crystallographic-wyckoff-position-analysis",
+        "dapt-intrusion-detection",
+        "data-to-d3",
+        "dialogue-parser",
+        "drone-planning-control",
+        "dynamic-object-aware-egomotion",
+        "earthquake-phase-association",
+        "earthquake-plate-calculation",
+        "econ-detrending-correlation",
+        "energy-ac-optimal-power-flow",
+        "energy-market-pricing",
+        "energy-unit-commitment",
+        "exam-block-sequencing",
+        "exoplanet-detection-period",
+        "financial-modeling-qa",
+        "flood-risk-analysis",
+        "gravitational-wave-detection",
+        "hvac-control",
+        "invoice-fraud-detection",
+        "lake-warming-attribution",
+        "lean4-proof",
+        "llm-prefix-cache-replay",
+        "manufacturing-equipment-maintenance",
+        "manufacturing-fjsp-optimization",
+        "mario-coin-counting",
+        "paper-anonymizer",
+        "paratransit-routing",
+        "pddl-tpp-planning",
+        "pdf-excel-diff",
+        "protein-expression-analysis",
+        "python-scala-translation",
+        "r2r-mpc-control",
+        "reserves-at-risk-calc",
+        "sales-pivot-analysis",
+        "sec-financial-report",
+        "setup-fuzzing-py",
+        "shock-analysis-demand",
+        "shock-analysis-supply",
+        "software-dependency-audit",
+        "syzkaller-ppdev-syzlang",
+        "tictoc-unnecessary-abort-detection",
+        "video-silence-remover",
+        "xlsx-recover-data"
+      ],
+      "eval_task_ids": [
+        "3d-scan-calc",
+        "ada-bathroom-plan-repair",
+        "citation-check",
+        "court-form-filling",
+        "debug-trl-grpo",
+        "edit-pdf",
+        "enterprise-information-search",
+        "exceltable-in-ppt",
+        "fix-build-agentops",
+        "fix-build-google-auto",
+        "fix-druid-loophole-cve",
+        "fix-erlang-ssh-cve",
+        "fix-visual-stability",
+        "glm-lake-mendota",
+        "grid-dispatch-operator",
+        "jax-computing-basics",
+        "jpg-ocr-stat",
+        "lab-unit-harmonization",
+        "latex-formula-extraction",
+        "manufacturing-codebook-normalization",
+        "mars-clouds-clustering",
+        "offer-letter-generator",
+        "organize-messy-files",
+        "pddl-airport-planning",
+        "powerlifting-coef-calc",
+        "pptx-reference-formatting",
+        "quantum-numerical-simulation",
+        "radar-vital-signs",
+        "react-performance-debugging",
+        "seismic-phase-picking",
+        "spring-boot-jakarta-migration",
+        "threejs-structure-parser",
+        "threejs-to-obj",
+        "travel-planning",
+        "weighted-gdp-calc"
+      ],
+      "excluded_task_ids": [
+        "flink-query",
+        "multilingual-video-dubbing",
+        "parallel-tfidf-search",
+        "simpo-code-reproduction",
+        "suricata-custom-exfil"
+      ],
+      "train_task_ids_sha256": "cb1bb47d601cce7cf6b26e1bec84e65687264bb00ff6bad7c38c3749bc9ea30c",
+      "eval_task_ids_sha256": "d43e19c542cf5d8b2de95bc0594ff06df90dd27b2430bd6d52f61a4634e280be",
+      "split_sha256": "c2525a5adc679a2182361c4bc75a8efe375e95d2a81b1af2b0faa5288070ff6e",
+      "train_families": [
+        "analysis",
+        "detection",
+        "generation",
+        "implementation",
+        "optimization"
+      ],
+      "eval_families": [
+        "calculation",
+        "classification",
+        "debugging",
+        "extraction",
+        "formatting",
+        "planning",
+        "repair",
+        "search",
+        "transformation"
+      ]
+    },
+    "family_holdout_self_contained_v1": {
+      "kind": "task-family-disjoint transfer; observed runtime failures and external-API tasks excluded",
+      "random_seed": 42,
+      "train_task_ids": [
+        "adaptive-cruise-control",
+        "bike-rebalance",
+        "civ6-adjacency-optimizer",
+        "crystallographic-wyckoff-position-analysis",
+        "data-to-d3",
+        "dialogue-parser",
+        "drone-planning-control",
+        "earthquake-plate-calculation",
+        "econ-detrending-correlation",
+        "energy-unit-commitment",
+        "exam-block-sequencing",
+        "financial-modeling-qa",
+        "flood-risk-analysis",
+        "gravitational-wave-detection",
+        "hvac-control",
+        "invoice-fraud-detection",
+        "lake-warming-attribution",
+        "lean4-proof",
+        "llm-prefix-cache-replay",
+        "manufacturing-equipment-maintenance",
+        "manufacturing-fjsp-optimization",
+        "mario-coin-counting",
+        "paper-anonymizer",
+        "paratransit-routing",
+        "pddl-tpp-planning",
+        "pdf-excel-diff",
+        "protein-expression-analysis",
+        "python-scala-translation",
+        "r2r-mpc-control",
+        "reserves-at-risk-calc",
+        "sales-pivot-analysis",
+        "sec-financial-report",
+        "setup-fuzzing-py",
+        "shock-analysis-demand",
+        "shock-analysis-supply",
+        "software-dependency-audit",
+        "syzkaller-ppdev-syzlang",
+        "tictoc-unnecessary-abort-detection",
+        "video-silence-remover",
+        "xlsx-recover-data"
+      ],
+      "eval_task_ids": [
+        "3d-scan-calc",
+        "ada-bathroom-plan-repair",
+        "court-form-filling",
+        "debug-trl-grpo",
+        "edit-pdf",
+        "exceltable-in-ppt",
+        "fix-build-agentops",
+        "fix-build-google-auto",
+        "fix-druid-loophole-cve",
+        "fix-erlang-ssh-cve",
+        "fix-visual-stability",
+        "glm-lake-mendota",
+        "grid-dispatch-operator",
+        "jax-computing-basics",
+        "jpg-ocr-stat",
+        "lab-unit-harmonization",
+        "latex-formula-extraction",
+        "manufacturing-codebook-normalization",
+        "mars-clouds-clustering",
+        "offer-letter-generator",
+        "organize-messy-files",
+        "pddl-airport-planning",
+        "powerlifting-coef-calc",
+        "pptx-reference-formatting",
+        "quantum-numerical-simulation",
+        "radar-vital-signs",
+        "react-performance-debugging",
+        "seismic-phase-picking",
+        "spring-boot-jakarta-migration",
+        "threejs-structure-parser",
+        "threejs-to-obj",
+        "travel-planning",
+        "weighted-gdp-calc"
+      ],
+      "excluded_task_ids": [
+        "azure-bgp-oscillation-route-leak",
+        "citation-check",
+        "dapt-intrusion-detection",
+        "dynamic-object-aware-egomotion",
+        "earthquake-phase-association",
+        "energy-ac-optimal-power-flow",
+        "energy-market-pricing",
+        "enterprise-information-search",
+        "exoplanet-detection-period",
+        "flink-query",
+        "multilingual-video-dubbing",
+        "parallel-tfidf-search",
+        "simpo-code-reproduction",
+        "suricata-custom-exfil"
+      ],
+      "train_task_ids_sha256": "6bef649fa1f813d9bff51619bd1f66c46ac7b4edb34e216a5231144fb4326ea0",
+      "eval_task_ids_sha256": "6f1f603a0021ca40650ac9106146bf9b964b73b466f546b1dd1a079851b91203",
+      "split_sha256": "9c2b21e7671f2e72978807e1f113eddb60ca21ab745c123ba9523939067d9166",
+      "train_families": [
+        "analysis",
+        "detection",
+        "generation",
+        "implementation",
+        "optimization"
+      ],
+      "eval_families": [
+        "calculation",
+        "classification",
+        "debugging",
+        "extraction",
+        "formatting",
+        "planning",
+        "repair",
+        "transformation"
+      ]
+    }
+  },
+  "manifest_sha256": "18469a9056cf3d3ec7085617a3ae3d4d9d628ac6e6b83bafb0b784760e21efcf"
+}

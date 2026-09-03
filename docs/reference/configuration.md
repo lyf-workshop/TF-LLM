@@ -14,6 +14,12 @@
 | `SERPER_API_KEY` | Web 任务 | 搜索服务密钥 |
 | `JINA_API_KEY` | Web 任务 | 网页内容读取服务密钥 |
 | `UTU_DB_URL` | 否 | 默认 `sqlite:///test.db` |
+| `UTU_DB_POOL_SIZE` | 否 | 连接池常驻连接数；SQLite 默认 5，服务端数据库默认 20 |
+| `UTU_DB_MAX_OVERFLOW` | 否 | 连接池临时溢出连接数；SQLite 默认 10，服务端数据库默认 20 |
+| `UTU_DB_POOL_TIMEOUT` | 否 | 等待连接池可用连接的秒数，默认 30 |
+| `UTU_DB_POOL_RECYCLE` | 否 | 服务端数据库连接回收秒数，默认 1800 |
+| `UTU_DB_SQLITE_TIMEOUT` | 否 | SQLite 等待文件锁的秒数，默认 30 |
+| `UTU_DB_SQLITE_WAL` | 否 | 是否对文件型 SQLite 启用 WAL，默认 `true` |
 | `UTU_LOG_LEVEL` | 否 | 日志级别 |
 | `PHOENIX_*` | 否 | OpenTelemetry/Phoenix tracing |
 
@@ -60,3 +66,14 @@ EXP_ID="aime24_experience_${RUN_TAG}"
 并发、`pass_k`、温度和任务超时由具体配置决定。增加并发只缩短墙钟时间，不减少请求总数。受到 429 限流时先降低并发；真正的任务超时仍是有效失败，不能无限补跑。
 
 各数据集的固定参数和额外服务见[数据集索引](../datasets/index.md)。
+
+## 数据库索引
+
+新建数据库会自动包含高频查询索引。已有数据库不会在程序导入时自动执行耗时的索引迁移；先检查缺失索引（不创建索引），再在没有实验写入的维护窗口执行：
+
+```bash
+uv run python scripts/db/ensure_indexes.py
+uv run python scripts/db/ensure_indexes.py --apply
+```
+
+大型 SQLite 数据库创建索引需要额外磁盘空间并会暂时持有写锁，执行前应备份数据库并停止 rollout、judge 和 tracing 写入。

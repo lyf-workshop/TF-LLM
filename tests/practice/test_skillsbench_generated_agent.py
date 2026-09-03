@@ -1,3 +1,4 @@
+import ast
 import asyncio
 import json
 from types import SimpleNamespace
@@ -44,6 +45,40 @@ def test_generated_agent_uses_paper_runtime_settings():
     assert "max_retries=0" in source
     assert "temperature=0.2" not in source
     assert "infra_error.json" in source
+
+
+def test_generated_agent_treats_quota_exhaustion_as_fatal():
+    source = _build_standalone_agent_source(
+        experiences_json="[]",
+        inject_curated_skills=False,
+        skills_text_json='""',
+        model_name="deepseek-v4-pro",
+        max_iterations=30,
+        temperature=0.0,
+        connect_timeout_sec=10,
+        read_timeout_sec=120,
+        llm_max_retries=4,
+        retry_initial_delay_sec=2,
+        retry_max_delay_sec=30,
+    )
+    tree = ast.parse(source)
+    classifier = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_classify_llm_error"
+    )
+    module = ast.fix_missing_locations(ast.Module(body=[classifier], type_ignores=[]))
+    namespace: dict = {}
+    exec(compile(module, "<generated-classifier>", "exec"), namespace)
+
+    classification = namespace["_classify_llm_error"](
+        RuntimeError("Error code: 405 - quota_not_enough")
+    )
+    assert classification == {
+        "error_type": "api_configuration_error",
+        "retryable": False,
+        "fatal": True,
+    }
 
 
 @pytest.mark.asyncio

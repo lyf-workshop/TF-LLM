@@ -1,0 +1,13 @@
+# @package _global_
+defaults:
+  - skillsbench_practice
+  - _self_
+
+# Legacy filename retained; unified condition C is metadata-constrained clustering.
+exp_id: "skillsbench_hierarchy_ablation_b_20260830T094944Z"
+practice:
+  hierarchical_learning:
+    clustering_enabled: true
+    aggregation_temperature: 0.0
+    experience_save_path: workspace/hierarchical_experiences/skillsbench_ablation_b.json
+    clustering_audit_path: workspace/hierarchical_experiences/skillsbench_ablation_b.clusters.jsonl

@@ -1,187 +1,67 @@
-#!/usr/bin/env python3
-"""
-Test hierarchical experience generation (L0/L1/L2).
-"""
+"""Offline integration test for the hierarchical manager."""
 
-import asyncio
-import sys
-from pathlib import Path
+from __future__ import annotations
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+import json
+from types import SimpleNamespace
 
-from utu.config import AgentConfig
+from utu.practice.experience_clusterer import HashingEmbeddingProvider
 from utu.practice.hierarchical_experience_manager import HierarchicalExperienceManager
 
 
-class MockHierarchicalConfig:
-    """Mock hierarchical learning configuration."""
-    enabled = True
-    l1_aggregation_threshold = 5
-    l2_aggregation_threshold = 3
-    max_l0_per_problem = 1
-    max_l1_total = 50
-    max_l2_total = 10
-    include_l0_in_prompt = True
-    max_l0_recent = 10
-    l1_confidence_threshold = 0.7
-    l2_confidence_threshold = 0.8
-    experience_save_path = "workspace/hierarchical_experiences/test_hierarchical.json"
+class MockLLM:
+    async def query_one(self, **_kwargs):
+        return json.dumps(
+            {
+                "decision": "aggregate",
+                "title": "Constraint table workflow",
+                "principle": "Record constraints in one table and validate each assignment immediately.",
+                "applicable_when": ["a task has interdependent finite constraints"],
+                "not_applicable_when": ["the task has no cross-dependent constraints"],
+                "recommended_actions": ["build the table", "check every assignment"],
+                "evidence_summary": "The supplied cases use explicit constraint tracking and validation.",
+                "confidence": 0.9,
+            }
+        )
 
 
-async def test_hierarchical_experience():
-    """Test hierarchical experience generation."""
-    
-    print("=" * 80)
-    print("Testing Hierarchical Experience Manager (L0/L1/L2)")
-    print("=" * 80)
-    
-    # Mock agent config
-    from utu.config import ConfigLoader
-    agent_config = ConfigLoader.load_agent_config("agents/practice/logic_agent_hierarchical_learning")
-    
-    # Create hierarchical experience manager
-    h_config = MockHierarchicalConfig()
+async def test_hierarchical_experience(tmp_path):
+    hierarchy = SimpleNamespace(
+        experience_save_path=str(tmp_path / "hierarchy.json"),
+        clustering_audit_path=str(tmp_path / "clusters.jsonl"),
+        clustering_enabled=False,
+        min_l0_per_l1=2,
+        min_l1_per_l2=2,
+        max_cluster_size=20,
+        max_l0_per_problem=10,
+        max_l1_total=50,
+        max_l2_total=10,
+        l1_confidence_threshold=0.7,
+        l2_confidence_threshold=0.8,
+        aggregation_temperature=0.0,
+        include_l0_in_prompt=True,
+        max_l0_recent=10,
+        random_seed=42,
+    )
     manager = HierarchicalExperienceManager(
-        config=agent_config,
-        hierarchical_config=h_config,
+        config=SimpleNamespace(),
+        hierarchical_config=hierarchy,
         agent_objective="Solve logic puzzles",
         learning_objective="Improve logical reasoning",
+        llm=MockLLM(),
+        embedding_provider=HashingEmbeddingProvider(seed=42),
     )
-    
-    print(f"\n✓ Manager initialized")
-    print(f"  - L0 experiences: {len(manager.l0_experiences)}")
-    print(f"  - L1 experiences: {len(manager.l1_experiences)}")
-    print(f"  - L2 experiences: {len(manager.l2_experiences)}")
-    
-    # Simulate adding experiences from multiple steps
-    print("\n" + "=" * 80)
-    print("Simulating Training Steps")
-    print("=" * 80)
-    
-    # Step 0: 9 experiences from 30 problems
-    step0_experiences = {
-        "G0": "Constraint validation: Validate interdependent positional clues immediately during assignment to avoid logical contradictions.",
-        "G1": "Grid initialization: Use a grid/table to track attributes per house from the beginning for better uniqueness enforcement.",
-        "G2": "Grid cross-referencing: Validate clue relationships proactively during assignment using a grid-based method.",
-        "G3": "Track alternatives: Explicitly document alternative placements for positional constraints.",
-        "G4": "Positional constraints: Explicitly reference all clues related to relative positions simultaneously.",
-        "G5": "Interdependency handling: Integrate interdependent clues early in deduction processes.",
-        "G6": "Structure-First Principle: Build a formal grid/table to track all attributes from the start.",
-        "G7": "Uniqueness tracking: Use centralized tracking to enforce uniqueness constraints explicitly.",
-        "G8": "Assumption logging: Document assumptions immediately and test them against all constraints.",
-    }
-    
-    print(f"\nStep 0: Processing {len(step0_experiences)} experiences from 30 problems...")
-    await manager.process_step_experiences(list(step0_experiences.values()), step=0)
-    print(f"  ✓ L0: {len(manager.l0_experiences)} | L1: {len(manager.l1_experiences)} | L2: {len(manager.l2_experiences)}")
-    
-    # Step 1: 14 experiences from 29 problems
-    step1_experiences = {
-        "G0": "Constraint validation: Validate interdependent positional clues immediately.",
-        "G1": "Grid initialization: Use a grid/table starting with deterministic clues.",
-        "G2": "Grid cross-referencing: Proactively validate clue relationships during assignment.",
-        "G3": "Track alternatives: Explicitly document alternative placements for adjacency constraints.",
-        "G4": "Positional constraints: Explicitly reference all relative position clues.",
-        "G9": "Proactive Validation: Enforce positional constraints during assignment.",
-        "G10": "Constraint-Driven Reasoning: Systematically validate all clues at each deduction step.",
-        "G11": "Proactive Cross-Referencing: Standardize real-time cross-checking of all constraints.",
-        "G12": "Clue validation: Explicitly check positional relationships during attribute application.",
-        "G13": "Constraint Validation as a Meta-Strategy: Explicitly map interdependent clues to the grid.",
-    }
-    
-    print(f"\nStep 1: Processing {len(step1_experiences)} experiences from 29 problems...")
-    await manager.process_step_experiences(list(step1_experiences.values()), step=1)
-    print(f"  ✓ L0: {len(manager.l0_experiences)} | L1: {len(manager.l1_experiences)} | L2: {len(manager.l2_experiences)}")
-    
-    # Step 2: 15 experiences from 28 problems
-    step2_experiences = {
-        "G0": "Constraint validation: Validate interdependent positional clues immediately.",
-        "G1": "Grid initialization: Use a grid/table starting with deterministic clues.",
-        "G2": "Grid cross-referencing: Proactively validate clue relationships.",
-        "G3": "Track alternatives: Explicitly document alternative placements.",
-        "G4": "Positional constraints: Explicitly reference all relative position clues.",
-        "G14": "Chain Tracking: Systematically represent interdependent attribute chains in the grid.",
-    }
-    
-    print(f"\nStep 2: Processing {len(step2_experiences)} experiences from 28 problems...")
-    await manager.process_step_experiences(list(step2_experiences.values()), step=2)
-    print(f"  ✓ L0: {len(manager.l0_experiences)} | L1: {len(manager.l1_experiences)} | L2: {len(manager.l2_experiences)}")
-
-    # End of epoch: aggregate L1 (from L0) and L2 (from L1) via LLM merge.
-    print("\nAggregating L1/L2 at end of epoch 0...")
+    await manager.process_step_experiences(
+        [
+            {"content": f"Track constraint group {index} in a table.", "source_task_ids": [f"task-{index}"]}
+            for index in range(6)
+        ],
+        step=0,
+    )
     await manager.aggregate_epoch(epoch=0)
-    print(f"  ✓ L0: {len(manager.l0_experiences)} | L1: {len(manager.l1_experiences)} | L2: {len(manager.l2_experiences)}")
-    
-    # Display summary
-    print("\n" + "=" * 80)
-    print("Final Summary")
-    print("=" * 80)
-    print(f"\nTotal Experiences Generated:")
-    print(f"  • L0 (Case-Specific):   {len(manager.l0_experiences)} experiences")
-    print(f"  • L1 (Pattern-Level):   {len(manager.l1_experiences)} experiences")
-    print(f"  • L2 (Meta-Strategy):   {len(manager.l2_experiences)} experiences")
-    
-    # Show L2 experiences
-    if manager.l2_experiences:
-        print(f"\n" + "=" * 80)
-        print("L2 Meta-Strategies")
-        print("=" * 80)
-        for l2 in manager.l2_experiences:
-            print(f"\n[{l2['id']}]")
-            print(f"  {l2['content']}")
-    
-    # Show L1 experiences
-    if manager.l1_experiences:
-        print(f"\n" + "=" * 80)
-        print("L1 Patterns")
-        print("=" * 80)
-        for l1 in manager.l1_experiences:
-            print(f"\n[{l1['id']}]")
-            print(f"  {l1['content']}")
-    
-    # Show recent L0 experiences
-    recent_l0 = manager.get_recent_l0_experiences(5)
-    if recent_l0:
-        print(f"\n" + "=" * 80)
-        print("Recent L0 Cases (Last 5)")
-        print("=" * 80)
-        for l0 in recent_l0:
-            print(f"\n[{l0['id']}]")
-            print(f"  {l0['content'][:100]}...")
-    
-    print(f"\n" + "=" * 80)
-    print("✓ Test completed successfully!")
-    print(f"✓ Experiences saved to: {h_config.experience_save_path}")
-    print("=" * 80)
 
-
-if __name__ == "__main__":
-    asyncio.run(test_hierarchical_experience())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    assert len(manager.l0_experiences) == 6
+    assert len(manager.l1_experiences) == 3
+    assert len(manager.l2_experiences) == 1
+    assert all(item["source_l0_ids"] == item["parent_ids"] for item in manager.l1_experiences)
+    assert manager.l2_experiences[0]["source_l1_ids"] == manager.l2_experiences[0]["parent_ids"]

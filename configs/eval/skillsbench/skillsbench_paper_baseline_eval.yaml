@@ -4,10 +4,10 @@ defaults:
   - _self_
 
 # Paper-aligned condition A: no Skills, task instruction only.
-exp_id: "skillsbench_paper_baseline_eval_v4"
+exp_id: "skillsbench_family_holdout_no_experience"
 
 data:
-  dataset: "SkillsBench-Paper-87"
+  dataset: "SkillsBench-v1.1-FamilyHoldout-SelfContained-Eval"
   type: "single"
 
 concurrency: 2
@@ -24,6 +24,11 @@ agent:
 
 skillsbench:
   enabled: true
+  experience_condition: no_experience
+  train_dataset_for_overlap_check: "SkillsBench-v1.1-FamilyHoldout-SelfContained-Train"
+  require_disjoint_train_eval: true
+  task_split_manifest_path: configs/data/skillsbench/skillsbench_v1_1_task_splits.json
+  task_split_name: family_holdout_self_contained_v1
   inject_curated_skills: false
   task_timeout_sec: 900
   max_agent_iterations: 30
@@ -42,5 +47,5 @@ skillsbench:
   circuit_breaker_cooldown_sec: 60
   healthcheck_enabled: true
   healthcheck_attempts: 3
-  expected_num_tasks: 87
+  expected_num_tasks: 33
   require_complete_coverage: true

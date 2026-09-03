@@ -15,7 +15,7 @@ from ...skillsbench_reliability import (
     FatalSkillsBenchError,
     FixedCooldownCircuitBreaker,
 )
-from ...utils import AgentsUtils, get_logger
+from ...utils import AgentsUtils, get_logger, redact_sensitive_data
 from ..data import DBDataManager, EvaluationSample
 from ..experience_filter import ExperienceFilter
 from ..processer import PROCESSER_FACTORY, BaseProcesser
@@ -86,7 +86,8 @@ class BaseBenchmark:
     async def main(self):
         with trace(f"[{self.config.exp_id}] Evaluation", trace_id=gen_trace_id()):
             logger.info(
-                f"> Running with config: \n{json.dumps(self.config.model_dump(), indent=2, ensure_ascii=False)}"
+                "> Running with config: \n%s",
+                json.dumps(redact_sensitive_data(self.config.model_dump()), indent=2, ensure_ascii=False),
             )
             
             # Apply experience filtering (async)
@@ -117,15 +118,28 @@ class BaseBenchmark:
         instructions = ""
         if self.config.agent and self.config.agent.agent:
             instructions = self.config.agent.agent.instructions or ""
+        model_payload = (
+            redact_sensitive_data(self.config.agent.model.model_dump(mode="json")) if self.config.agent else {}
+        )
+        model_fingerprint = hashlib.sha256(
+            json.dumps(model_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
         return {
             "evaluation_protocol": "skillsbench_v4",
             "config_fingerprint": self._config_fingerprint,
             "prompt_fingerprint": hashlib.sha256(instructions.encode("utf-8")).hexdigest()[:16],
             "requested_model": self._skillsbench_model_name(),
+            "model_config_sha256": model_fingerprint,
             "temperature": self._skillsbench_temperature(),
             "healthcheck_models": list(self._skillsbench_health_models),
             "expected_num_tasks": getattr(self.config.skillsbench, "expected_num_tasks", None),
             "expected_trials_per_task": self.config.pass_k,
+            "experience_condition": self.config.skillsbench.experience_condition,
+            "task_split_name": self.config.skillsbench.task_split_name,
+            "task_split_manifest_path": self.config.skillsbench.task_split_manifest_path,
+            "train_dataset_for_overlap_check": self.config.skillsbench.train_dataset_for_overlap_check,
+            "injected_token_count": self.config.skillsbench.declared_injected_token_count,
+            "injected_tokenizer": self.config.skillsbench.injected_tokenizer,
         }
 
     async def _probe_skillsbench_once(self) -> None:

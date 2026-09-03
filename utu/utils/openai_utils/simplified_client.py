@@ -6,6 +6,7 @@ from openai import AsyncOpenAI, AsyncStream
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from openai.types.responses import Response, ResponseStreamEvent
 
+from ..security import redact_sensitive_data
 from .types import (
     OpenAIChatCompletionParams,
     OpenAIChatCompletionParamsKeys,
@@ -29,9 +30,13 @@ class SimplifiedAsyncOpenAI(AsyncOpenAI):
         # default configs
         **kwargs: dict,
     ) -> None:
-        logger.info(f"> type: {type}, base_url: {base_url}, kwargs: {kwargs}")
+        logger.info(
+            "> OpenAI client config: %s",
+            redact_sensitive_data({"type": type, "base_url": base_url, "kwargs": kwargs}),
+        )
         super().__init__(
-            api_key=api_key or os.getenv("UTU_LLM_API_KEY") or "xxx", base_url=base_url or os.getenv("UTU_LLM_BASE_URL")
+            api_key=api_key or os.getenv("UTU_LLM_API_KEY") or "xxx",
+            base_url=base_url or os.getenv("UTU_LLM_BASE_URL"),
         )
         self.type = type or os.getenv("UTU_LLM_TYPE", "chat.completions")
         self.type_create_params = (

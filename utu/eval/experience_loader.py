@@ -10,100 +10,113 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .experience_filter import ParsedExperience
 from ..utils import get_logger
+from .experience_filter import ParsedExperience
 
 logger = get_logger(__name__)
 
 
 class ExperienceLoader:
     """Load hierarchical experiences from JSON files."""
-    
+
     def __init__(self, experience_path: str | Path):
         """Initialize experience loader.
-        
+
         Args:
             experience_path: Path to hierarchical experiences JSON file
         """
         self.experience_path = Path(experience_path)
         if not self.experience_path.exists():
             raise FileNotFoundError(f"Experience file not found: {self.experience_path}")
-    
+
     def load(self) -> list[ParsedExperience]:
         """Load experiences from JSON file.
-        
+
         Returns:
             List of ParsedExperience objects
         """
         logger.info(f"Loading experiences from {self.experience_path}")
-        
-        with open(self.experience_path, 'r', encoding='utf-8') as f:
+
+        with open(self.experience_path, encoding="utf-8") as f:
             data = json.load(f)
-        
+
         experiences = []
         order = 0
-        
-        # Load L2 experiences first (highest level)
-        if 'l2_experiences' in data:
-            for exp_data in data['l2_experiences']:
-                experiences.append(self._parse_experience(exp_data, 'L2', order))
+
+        # Load L2 experiences first (highest level).  Both the legacy list and
+        # the historical ``id -> content`` dictionary format are accepted.
+        if "l2_experiences" in data:
+            for exp_data in self._iter_experiences(data["l2_experiences"], "L2"):
+                experiences.append(self._parse_experience(exp_data, "L2", order))
                 order += 1
-        
+
         # Load L1 experiences (pattern level)
-        if 'l1_experiences' in data:
-            for exp_data in data['l1_experiences']:
-                experiences.append(self._parse_experience(exp_data, 'L1', order))
+        if "l1_experiences" in data:
+            for exp_data in self._iter_experiences(data["l1_experiences"], "L1"):
+                experiences.append(self._parse_experience(exp_data, "L1", order))
                 order += 1
-        
+
         # Load L0 experiences (case level)
-        if 'l0_experiences' in data:
-            for exp_data in data['l0_experiences']:
-                experiences.append(self._parse_experience(exp_data, 'L0', order))
+        if "l0_experiences" in data:
+            for exp_data in self._iter_experiences(data["l0_experiences"], "L0"):
+                experiences.append(self._parse_experience(exp_data, "L0", order))
                 order += 1
-        
-        logger.info(f"Loaded {len(experiences)} experiences: "
-                   f"L2={sum(1 for e in experiences if e.level=='L2')}, "
-                   f"L1={sum(1 for e in experiences if e.level=='L1')}, "
-                   f"L0={sum(1 for e in experiences if e.level=='L0')}")
-        
+
+        logger.info(
+            f"Loaded {len(experiences)} experiences: "
+            f"L2={sum(1 for e in experiences if e.level == 'L2')}, "
+            f"L1={sum(1 for e in experiences if e.level == 'L1')}, "
+            f"L0={sum(1 for e in experiences if e.level == 'L0')}"
+        )
+
         return experiences
-    
+
+    @staticmethod
+    def _iter_experiences(raw: Any, level: str) -> list[dict[str, Any]]:
+        if isinstance(raw, dict):
+            result = []
+            for exp_id, value in raw.items():
+                if isinstance(value, dict):
+                    item = dict(value)
+                    item.setdefault("id", str(exp_id))
+                else:
+                    item = {"id": str(exp_id), "level": level, "content": str(value)}
+                result.append(item)
+            return result
+        if isinstance(raw, list):
+            return [
+                item if isinstance(item, dict) else {"id": f"{level}_{index}", "content": str(item)}
+                for index, item in enumerate(raw)
+            ]
+        return []
+
     def _parse_experience(self, exp_data: dict[str, Any], level: str, order: int) -> ParsedExperience:
         """Parse a single experience from JSON data.
-        
+
         Args:
             exp_data: Experience data dictionary
             level: Experience level (L0, L1, L2)
             order: Order in the sequence
-            
+
         Returns:
             ParsedExperience object
         """
-        exp_id = exp_data.get('id', f'{level}_{order}')
-        content = exp_data.get('content', '')
-        
+        exp_id = exp_data.get("id", f"{level}_{order}")
+        content = exp_data.get("content", "")
+
         # Format content with level tag for display
         formatted_content = f"[{level}-{self._get_level_name(level)}] {content}"
-        
-        return ParsedExperience(
-            id=exp_id,
-            level=level,
-            content=formatted_content,
-            order=order
-        )
-    
+
+        return ParsedExperience(id=exp_id, level=level, content=formatted_content, order=order)
+
     def _get_level_name(self, level: str) -> str:
         """Get human-readable level name.
-        
+
         Args:
             level: Level code (L0, L1, L2)
-            
+
         Returns:
             Level name
         """
-        level_names = {
-            'L2': 'Meta',
-            'L1': 'Pattern',
-            'L0': 'Case'
-        }
-        return level_names.get(level, 'Unknown')
+        level_names = {"L2": "Meta", "L1": "Pattern", "L0": "Case"}
+        return level_names.get(level, "Unknown")

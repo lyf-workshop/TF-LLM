@@ -22,7 +22,7 @@ class DataConfig(ConfigBaseModel):
 
 class LLMRerankConfig(ConfigBaseModel):
     """LLM-based experience reranking configuration."""
-    
+
     enabled: bool = False
     """Whether LLM reranking is enabled"""
     model: str = "qwen3-32b"
@@ -43,7 +43,7 @@ class LLMRerankConfig(ConfigBaseModel):
 
 class RecallConfig(ConfigBaseModel):
     """Recall stage configuration for two-stage filtering."""
-    
+
     method: Literal["static", "bm25", "all"] = "static"
     """Recall method: 'static' = fixed limits, 'bm25' = BM25 retrieval, 'all' = no filtering"""
     max_l2: int | None = None
@@ -56,15 +56,15 @@ class RecallConfig(ConfigBaseModel):
 
 class ExperienceFilterConfig(ConfigBaseModel):
     """Experience filter configuration for controlling which experiences to inject into agent."""
-    
+
     enabled: bool = False
     """Whether experience filtering is enabled. If False, all experiences are used."""
-    
+
     # Experience source
     experience_source: str | None = None
-    """Path to hierarchical experiences JSON file (e.g., 'workspace/hierarchical_experiences/wordle_practice_2.json'). 
+    """Path to hierarchical experiences JSON file (e.g., 'workspace/hierarchical_experiences/wordle_practice_2.json').
     If None, experiences are parsed from agent instructions."""
-    
+
     # Legacy single-stage filtering
     strategy: Literal["static", "retrieval", "llm_rerank"] = "static"
     """Filtering strategy: 'static' = fixed counts per level, 'retrieval' = BM25-based, 'llm_rerank' = LLM-based"""
@@ -74,13 +74,13 @@ class ExperienceFilterConfig(ConfigBaseModel):
     """Maximum number of L1 (pattern-level) experiences to include. None = include all"""
     max_l0: int | None = None
     """Maximum number of L0 (case-level) experiences to include. None = include all"""
-    
+
     # Retrieval-based filtering
     retrieval_top_k: int = 5
     """Number of experiences to retrieve per query when using 'retrieval' strategy"""
     retrieval_min_score: float = 0.0
     """Minimum relevance score threshold for retrieval"""
-    
+
     # Two-stage filtering: recall + rerank
     recall: RecallConfig = Field(default_factory=RecallConfig)
     """Recall stage configuration (first stage)"""
@@ -90,7 +90,7 @@ class ExperienceFilterConfig(ConfigBaseModel):
 
 class KORGymConfig(ConfigBaseModel):
     """KORGym game configuration"""
-    
+
     enabled: bool = False
     """Whether KORGym evaluation is enabled"""
     game_name: str = "3-2048"
@@ -162,6 +162,26 @@ class SkillsBenchConfig(ConfigBaseModel):
     """Expected benchmark task count. Paper-aligned SkillsBench uses 87."""
     require_complete_coverage: bool = True
     """Do not publish headline metrics until every expected trial is valid."""
+    experience_condition: Literal[
+        "unspecified",
+        "no_experience",
+        "sequential",
+        "clustered",
+        "task_local_skills",
+    ] = "unspecified"
+    """Declared treatment condition for leakage checks and ablation reports."""
+    train_dataset_for_overlap_check: str | None = None
+    """Dataset that produced learned experiences; absent for no-experience/task-local conditions."""
+    require_disjoint_train_eval: bool = True
+    """Abort before rollout when learned-experience train IDs overlap evaluation IDs."""
+    task_split_manifest_path: str | None = None
+    """Machine-readable versioned task inventory/split manifest."""
+    task_split_name: str | None = None
+    """Split key whose exact train/eval lists must match the database datasets."""
+    declared_injected_token_count: int | None = Field(default=None, ge=0)
+    """Static experience-only prompt token delta recorded for experiment auditing."""
+    injected_tokenizer: str | None = None
+    """Tokenizer used for declared_injected_token_count."""
 
 
 class EvalConfig(ConfigBaseModel):
@@ -196,7 +216,7 @@ class EvalConfig(ConfigBaseModel):
     """Optional: Python filename under `utu/train/verify/` that contains a verify function."""
     verify_func_name: str | None = None
     """Optional: The function name inside the verify file to call for judgement."""
-    
+
     # KORGym specific configuration
     korgym: KORGymConfig = Field(default_factory=KORGymConfig)
     """KORGym game evaluation configuration"""

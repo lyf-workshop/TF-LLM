@@ -1,140 +1,92 @@
-# Prompt templates for hierarchical experience generation (L1 and L2)
+# Structured prompts for within-cluster hierarchical aggregation.
 
-# L1 aggregation: Generate pattern-level experience from L0 cases
 L1_AGGREGATION_PROMPT:
   system: |
-    You are an expert at distilling SHARP, distinctive problem-solving patterns from specific cases.
+    You distill a set of semantically related, case-level experiences into ONE
+    operational pattern. The input has already been clustered. Use only common,
+    evidence-backed behavior in this cluster.
 
-    **Task**: Analyze multiple case-specific experiences (L0) and extract ONE pattern-level strategy (L1).
+    Agent objective: {{ agent_objective }}
+    Learning objective: {{ learning_objective }}
 
-    **Context**:
-    - Agent Objective: {{ agent_objective }}
-    - Learning Objective: {{ learning_objective }}
+    Do not concatenate or paraphrase every item. Do not hide contradictions with
+    vague advice such as "plan carefully" or "verify results". The principle must
+    name a concrete trigger and an executable technique. State when the pattern
+    should not be used.
 
-    **What L1 should be**:
-    - L0 (Case-Specific): Concrete lessons from individual problem instances (with tool names, commands, etc.)
-    - L1 (Pattern-Level): A SINGLE reusable technique abstracted from these cases — but still SPECIFIC enough to be distinguishable from other patterns.
+    If the experiences do not support one reliable common pattern, return exactly:
+    {"decision":"conflict","conflict_reasons":["<specific conflict or missing evidence>"]}
 
-    **CRITICAL — avoid generic, interchangeable patterns**:
-    Many cases superficially share generic engineering virtues ("decompose the task", "validate inputs",
-    "verify outputs", "use fallbacks"). DO NOT output these vague, universal statements — they apply to
-    everything, are indistinguishable from each other, and create redundant near-duplicate patterns.
-    Instead, name the SPECIFIC recurring technique these particular cases reveal.
-
-    **Required output format** (exactly ONE line, no preamble):
-    `<Distinctive Pattern Name>: WHEN <specific triggering situation>, <concrete action/technique> — <why it helps>.`
-
-    Rules for sharpness:
-    1. **Name** = the specific method, NOT a generic virtue.
-       Bad names: "Validation-first workflow", "Modular decomposition", "Systematic verification".
-       Good names: "Recalc-then-reload Excel check", "Preflight connectivity bypass", "Heredoc script persistence".
-    2. **Trigger** = a concrete WHEN. If you cannot state a specific situation that activates this pattern,
-       it is too generic — sharpen it or pick a different, more specific commonality.
-    3. **One sentence.** Drop case-specific identifiers (problem IDs, exact filenames) but KEEP the
-       distinguishing technique/tool family that makes this pattern unique.
-
-    **Example**:
-    - Input L0 cases: "Excel autograder reads cell values; forced libreoffice recalc then reloaded with data_only=True",
-      "Spreadsheet eval failed until values were recomputed independently and compared"
-    - Output L1: `Recalc-then-reload Excel verification: WHEN an external grader reads spreadsheet cell VALUES, force a headless libreoffice recalculation and reload with data_only=True to compare against independently computed expected values — guarantees the artifact passes value-based graders.`
+    Otherwise return only one JSON object with exactly these fields:
+    {
+      "decision": "aggregate",
+      "title": "distinctive pattern name",
+      "principle": "specific reusable rule grounded in this cluster",
+      "applicable_when": ["observable trigger"],
+      "not_applicable_when": ["observable exclusion or conflicting condition"],
+      "recommended_actions": ["ordered, executable action"],
+      "evidence_summary": "how the supplied cases jointly support the rule",
+      "confidence": 0.0
+    }
+    confidence must be between 0 and 1. Do not include Markdown fences or prose.
 
   user: |
-    **L0 Case-Specific Experiences**:
+    Clustered L0 evidence:
     {% for exp in l0_experiences %}
-    - [{{ exp.id }}] {{ exp.content }}
+    - id={{ exp.id }}
+      content={{ exp.content }}
+      domain={{ exp.domain }}; task_family={{ exp.task_family }};
+      failure_mode={{ exp.failure_mode }}; strategy_type={{ exp.strategy_type }};
+      tool_type={{ exp.tool_type }}; task_stage={{ exp.task_stage }}
     {% endfor %}
 
-    **Task**: Extract ONE SHARP pattern-level strategy (L1) that captures the SPECIFIC recurring technique
-    across these cases. Follow the required output format exactly: `<Name>: WHEN <trigger>, <action> — <why>.`
+    Produce one validated L1 pattern shared by this cluster, or explicitly report
+    that reliable aggregation is impossible.
 
-    Do NOT produce a generic statement about decomposition / validation / verification that could apply to
-    any task. Name the distinctive method. Output exactly one line, nothing else.
-
-    **L1 Pattern (one line)**:
-
-# L2 aggregation: Generate meta-strategy from L1 patterns and their source L0 cases
 L2_AGGREGATION_PROMPT:
   system: |
-    You are an expert in extracting high-level meta-strategies from problem-solving patterns.
-    
-    **Task**: Analyze multiple pattern-level strategies (L1) and their source case-specific experiences (L0) to extract a cross-task meta-strategy (L2).
-    
-    **Context**:
-    - Agent Objective: {{ agent_objective }}
-    - Learning Objective: {{ learning_objective }}
-    
-    **Guidelines**:
-    - L0 (Case-Specific): Concrete lessons from individual problems
-    - L1 (Pattern-Level): General strategies for similar tasks
-    - L2 (Meta-Strategy): High-level principles that transfer across different task types
-    
-    **Your role**:
-    1. Analyze both the L1 patterns and their source L0 cases
-    2. Identify the fundamental principle behind these patterns
-    3. Abstract to the highest level - what's the core insight?
-    4. Make it transferable to completely different domains
-    5. Focus on "why" this approach works, not just "how"
-    
-    **Output format**: 
-    - Start with "Principle: [core principle]"
-    - Explain why it works (1 sentence)
-    - Describe the benefits (1 sentence)
-    - Total: 2-3 sentences maximum
-    
-    Example:
-    - Input L1: "Use a grid to track constraints", "Validate dependencies proactively"
-    - Input L0: "Checked clue 3 against clue 5", "Built table for problem 7"
-    - Output L2: "Principle: Formalize problem structure early through explicit representation (grids, diagrams, tables). This reduces cognitive load by externalizing complexity and enables systematic validation of relationships. Early structure investment prevents cascading errors and accelerates solution discovery."
+    You distill a set of semantically related L1 patterns into ONE higher-level
+    strategy. The result must remain conditional and executable rather than a
+    universal slogan.
+
+    Agent objective: {{ agent_objective }}
+    Learning objective: {{ learning_objective }}
+
+    Use only principles supported by the supplied L1 parents and their exact L0
+    evidence. Explain applicability, exclusions, and concrete actions. Never
+    invent evidence and never reconcile genuine conflicts with vague compromise.
+
+    If the L1 patterns do not support one reliable higher-level strategy, return:
+    {"decision":"conflict","conflict_reasons":["<specific conflict or missing evidence>"]}
+
+    Otherwise return only one JSON object with exactly these fields:
+    {
+      "decision": "aggregate",
+      "title": "distinctive meta-strategy name",
+      "principle": "conditional cross-pattern rule",
+      "applicable_when": ["observable trigger"],
+      "not_applicable_when": ["observable exclusion or conflicting condition"],
+      "recommended_actions": ["ordered, executable action"],
+      "evidence_summary": "which parent patterns and cases support the rule",
+      "confidence": 0.0
+    }
+    confidence must be between 0 and 1. Do not include Markdown fences or prose.
 
   user: |
-    **L1 Pattern-Level Strategies**:
+    Clustered L1 parents:
     {% for exp in l1_experiences %}
-    - [{{ exp.id }}] {{ exp.content }}
-      Source L0 cases: {{ exp.source_l0_ids|join(', ') }}
+    - id={{ exp.id }}
+      content={{ exp.content }}
+      direct_source_l0_ids={{ exp.source_l0_ids|join(', ') }}
+      domain={{ exp.domain }}; task_family={{ exp.task_family }};
+      failure_mode={{ exp.failure_mode }}; strategy_type={{ exp.strategy_type }};
+      tool_type={{ exp.tool_type }}; task_stage={{ exp.task_stage }}
     {% endfor %}
-    
-    **Source L0 Case-Specific Experiences** (from the above L1 patterns):
+
+    Exact L0 evidence reachable from those L1 parents:
     {% for exp in l0_experiences %}
     - [{{ exp.id }}] {{ exp.content }}
     {% endfor %}
-    
-    **Task**: Extract ONE meta-strategy (L2) that captures the fundamental principle behind these patterns.
-    
-    Consider both:
-    1. The L1 patterns (what strategies emerged)
-    2. The L0 cases (what specific situations led to these patterns)
-    
-    This dual view helps you understand the deeper "why" behind the "how".
-    
-    Abstract to the highest level - what core principle makes these approaches effective across different domains?
-    
-    **Format**: "Principle: [principle]. [why it works]. [benefits]."
-    
-    **L2 Meta-Strategy**:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    Produce one validated L2 strategy shared by these parents, or explicitly
+    report that reliable aggregation is impossible.

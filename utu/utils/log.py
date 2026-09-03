@@ -6,11 +6,45 @@ from typing import Literal
 
 from colorlog import ColoredFormatter
 
+from .security import redact_sensitive_data, redact_sensitive_text
+
 DIR_LOGS = pathlib.Path(__file__).parent.parent.parent / "logs"
 DIR_LOGS.mkdir(exist_ok=True)
 
 # Flag to track if logging has been set up
 _LOGGING_INITIALIZED = False
+
+
+class SensitiveDataFilter(logging.Filter):
+    """Remove credentials from log messages and lazy formatting arguments."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        try:
+            record.msg = redact_sensitive_data(record.msg)
+            if record.args:
+                record.args = redact_sensitive_data(record.args)
+            # Render after recursively sanitizing structured arguments so the
+            # final text is also protected against embedded Bearer tokens/URLs.
+            record.msg = redact_sensitive_text(record.getMessage())
+            record.args = ()
+        except Exception:  # noqa: BLE001
+            # Logging must never become a new application failure path.
+            pass
+        return True
+
+
+class RedactingFormatter(logging.Formatter):
+    """Redact the final formatted record, including exception tracebacks."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        return redact_sensitive_text(super().format(record))
+
+
+class RedactingColoredFormatter(ColoredFormatter):
+    """Colored console formatter with the same final redaction pass."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        return redact_sensitive_text(super().format(record))
 
 
 def setup_logging(level: Literal["WARNING", "INFO", "DEBUG"] = "WARNING") -> None:
@@ -27,7 +61,7 @@ def setup_logging(level: Literal["WARNING", "INFO", "DEBUG"] = "WARNING") -> Non
 
     console_handler = logging.StreamHandler()
     console_handler.setLevel(level)
-    color_formatter = ColoredFormatter(
+    color_formatter = RedactingColoredFormatter(
         "%(green)s%(asctime)s%(reset)s[%(blue)s%(name)s%(reset)s] - "
         "%(log_color)s%(levelname)s%(reset)s - %(filename)s:%(lineno)d - %(green)s%(message)s%(reset)s",
         # " - %(cyan)s%(threadName)s%(reset)s",
@@ -46,14 +80,17 @@ def setup_logging(level: Literal["WARNING", "INFO", "DEBUG"] = "WARNING") -> Non
         DIR_LOGS / "utu.log", when="midnight", interval=1, backupCount=30, encoding="utf-8"
     )
     file_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
+    formatter = RedactingFormatter(
         "%(asctime)s[%(name)s] - %(levelname)s - %(filename)s:%(lineno)d - %(message)s - %(threadName)s"
     )
     file_handler.setFormatter(formatter)
 
+    sensitive_data_filter = SensitiveDataFilter()
+    console_handler.addFilter(sensitive_data_filter)
+    file_handler.addFilter(sensitive_data_filter)
     utu_logger.addHandler(console_handler)
     utu_logger.addHandler(file_handler)
-    utu_logger.info(f"Logging initialized with level {level}.")
+    utu_logger.info("Logging initialized with level %s.", level)
 
     # Mark logging as initialized
     _LOGGING_INITIALIZED = True

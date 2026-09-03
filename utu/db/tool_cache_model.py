@@ -1,11 +1,12 @@
 from typing import Any
 
-from sqlalchemy import JSON
+from sqlalchemy import JSON, Index
 from sqlmodel import Column, Field, Float, SQLModel, String
 
 
 class ToolCacheModel(SQLModel, table=True):
     __tablename__ = "cache_tool"
+    __table_args__ = (Index("ix_cache_tool_function_key", "function", "cache_key"),)
 
     id: int | None = Field(default=None, primary_key=True)
 

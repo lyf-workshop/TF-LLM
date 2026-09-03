@@ -8,7 +8,6 @@ Usage:
 """
 
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -18,18 +17,34 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 EXPERIENCES_JSON = REPO_ROOT / "workspace" / "hierarchical_experiences" / "skillsbench_practice.json"
-BASE_AGENT_YAML  = REPO_ROOT / "configs" / "agents" / "practice" / "skillsbench_agent.yaml"
-OUT_YAML         = REPO_ROOT / "configs" / "agents" / "practice" / "skillsbench_practice_agent.yaml"
-MAX_L0_RECENT    = 40   # keep in sync with skillsbench_practice.yaml → max_l0_recent
+BASE_AGENT_YAML = REPO_ROOT / "configs" / "agents" / "practice" / "skillsbench_agent.yaml"
+OUT_YAML = REPO_ROOT / "configs" / "agents" / "practice" / "skillsbench_practice_agent.yaml"
+MAX_L0_RECENT = 40  # keep in sync with skillsbench_practice.yaml → max_l0_recent
 
 
 def load_experiences(path: Path) -> tuple[list, list, list]:
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
+
+    def as_list(raw: object, level: str) -> list[dict]:
+        if isinstance(raw, list):
+            return [
+                item if isinstance(item, dict) else {"id": f"{level}_{index}", "content": str(item)}
+                for index, item in enumerate(raw)
+            ]
+        if isinstance(raw, dict):
+            result = []
+            for exp_id, value in raw.items():
+                item = dict(value) if isinstance(value, dict) else {"content": str(value)}
+                item.setdefault("id", str(exp_id))
+                result.append(item)
+            return result
+        return []
+
     return (
-        data.get("l2_experiences", []),
-        data.get("l1_experiences", []),
-        data.get("l0_experiences", []),
+        as_list(data.get("l2_experiences", []), "L2"),
+        as_list(data.get("l1_experiences", []), "L1"),
+        as_list(data.get("l0_experiences", []), "L0"),
     )
 
 
@@ -75,9 +90,7 @@ def main() -> None:
     with open(BASE_AGENT_YAML, encoding="utf-8") as f:
         base_cfg = yaml.safe_load(f)
 
-    base_instructions = base_cfg.get("agent", {}).get(
-        "instructions", "You are a helpful assistant."
-    )
+    base_instructions = base_cfg.get("agent", {}).get("instructions", "You are a helpful assistant.")
 
     new_instructions = build_instructions(base_instructions, l2, l1, l0)
 

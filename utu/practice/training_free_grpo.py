@@ -9,6 +9,7 @@ from agents import custom_span, function_span, gen_trace_id, trace
 
 from ..config import TrainingFreeGRPOConfig
 from ..config.eval_config import DataConfig
+from ..skillsbench_data import assert_datasets_disjoint
 from ..utils import DIR_ROOT, get_logger
 from ..utils.experience_cache import ExperienceCache
 from .data_manager import TrainingFreeGRPODataManager
@@ -76,10 +77,31 @@ class TrainingFreeGRPO:
                 f"Practice dataset {self.config.data.practice_dataset_name} does not exist in db. Please load it first."
             )
         # load eval dataset if not exists
-        if self.config.evaluation.data and self.config.evaluation.data.dataset and not data_manager.check_dataset(self.config.evaluation.data.dataset):
+        if (
+            self.config.evaluation.data
+            and self.config.evaluation.data.dataset
+            and not data_manager.check_dataset(self.config.evaluation.data.dataset)
+        ):
             raise ValueError(
                 f"Evaluation dataset {self.config.evaluation.data.dataset} does not exist in db. Please load it first."
             )
+
+        skillsbench = getattr(self.config.evaluation, "skillsbench", None)
+        if (
+            skillsbench
+            and getattr(skillsbench, "enabled", False)
+            and getattr(skillsbench, "require_disjoint_train_eval", True)
+            and self.config.evaluation.data
+            and self.config.evaluation.data.dataset
+        ):
+            evidence = assert_datasets_disjoint(
+                self.config.data.practice_dataset_name,
+                self.config.evaluation.data.dataset,
+                db_url=self.config.evaluation.db_url,
+                split_manifest_path=getattr(skillsbench, "task_split_manifest_path", None),
+                split_name=getattr(skillsbench, "task_split_name", None),
+            )
+            logger.info("SkillsBench train/eval overlap assertion passed: %s", evidence)
 
         # 2. Create practice rollout manager
         practice_eval_config = self.config.evaluation.model_copy()
@@ -87,19 +109,19 @@ class TrainingFreeGRPO:
         self.original_temperature = practice_eval_config.agent.model.model_settings.temperature
         practice_eval_config.agent.model.model_settings.temperature = self.config.practice.rollout_temperature
         practice_eval_config.data = DataConfig(dataset=self.config.data.practice_dataset_name)
-        
+
         # Pass KORGym configuration to practice eval config
         logger.info(f"TrainingFreeGRPO build: hasattr(self.config, 'korgym')={hasattr(self.config, 'korgym')}")
-        if hasattr(self.config, 'korgym'):
+        if hasattr(self.config, "korgym"):
             logger.info(f"TrainingFreeGRPO build: self.config.korgym={self.config.korgym}")
             if self.config.korgym:
                 practice_eval_config.korgym = self.config.korgym
                 logger.info(f"✓ Passed korgym config to practice_eval_config: {self.config.korgym}")
-        
+
         self.practice_rollout_manager = RolloutManager(
             config=practice_eval_config,
             batch_size=self.config.practice.batch_size,
-            task_timeout=self.config.practice.task_timeout
+            task_timeout=self.config.practice.task_timeout,
         )
 
         # 3. Create eval rollout manager (if different from practice)
@@ -109,22 +131,20 @@ class TrainingFreeGRPO:
             eval_eval_config.exp_id = eval_eval_config.exp_id + "_eval"
             # eval_eval_config.data = DataConfig(dataset=self.config.data.eval_dataset_name)
             # Pass KORGym configuration to eval eval config
-            if hasattr(self.config, 'korgym') and self.config.korgym:
+            if hasattr(self.config, "korgym") and self.config.korgym:
                 eval_eval_config.korgym = self.config.korgym
             self.eval_rollout_manager = RolloutManager(
                 config=eval_eval_config,
                 batch_size=self.config.practice.batch_size,
-                task_timeout=self.config.practice.task_timeout
+                task_timeout=self.config.practice.task_timeout,
             )
 
         # 4. Create experience updater
         # 使用环境无关的经验提取逻辑（支持所有 reward 类型：0/1、连续、>1 等）
         self.experience_updater = ExperienceUpdater(
-            self.config.evaluation.agent, 
-            self.config.practice.agent_objective, 
-            self.config.practice.learning_objective
+            self.config.evaluation.agent, self.config.practice.agent_objective, self.config.practice.learning_objective
         )
-        
+
         # 5. Create hierarchical experience manager if enabled
         self.hierarchical_experience_manager = None
         if self.config.practice.hierarchical_learning.enabled:
@@ -212,7 +232,7 @@ class TrainingFreeGRPO:
                         # Raw L0 candidates (pre-merge per-problem insights) for the
                         # hierarchical manager. Only available on a fresh run; cached
                         # steps were already folded into L0 on the original run.
-                        l0_candidates: list[str] = []
+                        l0_candidates: list[dict] = []
                         if cached_experiences is not None and self._should_use_cache(step):
                             logger.info(
                                 f"Experiences for step {step} already exist in database, skipping experience update."
@@ -251,9 +271,7 @@ class TrainingFreeGRPO:
                                 l0_candidates=l0_candidates,
                                 step=step,
                             )
-                            logger.info(
-                                f"L0 pool size: {len(self.hierarchical_experience_manager.l0)}"
-                            )
+                            logger.info(f"L0 pool size: {len(self.hierarchical_experience_manager.l0)}")
 
                         stats[f"step_{step}"]["complete"] = True
                         self.recorder.stat_update({f"step_{step}": stats[f"step_{step}"]})
@@ -350,10 +368,7 @@ class TrainingFreeGRPO:
             # --- ZONE 2: L1 patterns appended as an operational guideline section ---
             if all_l1:
                 l1_bullets = "\n".join(f"• {exp['content']}" for exp in all_l1)
-                l1_block = (
-                    "\n\nProven patterns from past tasks:\n"
-                    f"{l1_bullets}"
-                )
+                l1_block = f"\n\nProven patterns from past tasks:\n{l1_bullets}"
                 current_instructions = current_instructions + l1_block
 
             # --- ZONE 3: L0 case lessons (optional, kept brief) ---
@@ -363,10 +378,7 @@ class TrainingFreeGRPO:
                 )
                 if recent_l0:
                     l0_bullets = "\n".join(f"• {exp['content']}" for exp in recent_l0)
-                    l0_block = (
-                        "\n\nSpecific lessons from recent tasks:\n"
-                        f"{l0_bullets}"
-                    )
+                    l0_block = f"\n\nSpecific lessons from recent tasks:\n{l0_bullets}"
                     current_instructions = current_instructions + l0_block
             else:
                 recent_l0 = []

@@ -1,11 +1,20 @@
 from typing import Any
 
-from sqlalchemy import JSON, Integer
+from sqlalchemy import JSON, Index, Integer
 from sqlmodel import Column, Field, Float, SQLModel, String
 
 
 class ExperienceCacheModel(SQLModel, table=True):
     __tablename__ = "cache_experience"
+    __table_args__ = (
+        Index(
+            "ix_cache_experience_name_epoch_batch",
+            "experiment_name",
+            "epoch",
+            "batch",
+        ),
+        Index("ix_cache_experience_name_step", "experiment_name", "step"),
+    )
 
     id: int | None = Field(default=None, primary_key=True)
 

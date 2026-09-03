@@ -9,6 +9,7 @@ from tqdm import tqdm
 from ..config import ConfigLoader, EvalConfig
 from ..eval.benchmarks.base_benchmark import BaseBenchmark
 from ..eval.data import EvaluationSample
+from ..skillsbench_reliability import FatalSkillsBenchError
 from ..utils import get_logger
 from .data_manager import TrainingFreeGRPODataManager
 from .mistake_bank import MistakeBank
@@ -138,6 +139,11 @@ class RolloutManager(BaseBenchmark):
                         # Apply timeout to rollout_one call
                         result = await asyncio.wait_for(self.rollout_one(item), timeout=self.task_timeout)
                         return result
+                    except FatalSkillsBenchError:
+                        # Configuration failures (invalid credentials, exhausted
+                        # quota, unsupported endpoint, etc.) affect the whole run.
+                        # Retrying them per sample only creates more invalid trials.
+                        raise
                     except TimeoutError:
                         logger.warning(
                             f"Rollout timeout ({self.task_timeout}s) on attempt {attempt + 1}/{self.max_retries}"
@@ -152,12 +158,18 @@ class RolloutManager(BaseBenchmark):
                 )
                 return None
 
-        tasks = [rollout_with_semaphore(item) for item in samples_to_process]
+        tasks = [asyncio.create_task(rollout_with_semaphore(item)) for item in samples_to_process]
         results = []
-        for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Rolling out batch"):
-            result = await task
-            if result is not None:
-                results.append(result)
+        try:
+            for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Rolling out batch"):
+                result = await task
+                if result is not None:
+                    results.append(result)
+        except FatalSkillsBenchError:
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            raise
 
         logger.info(f"Successfully rolled out {len(results)} samples in batch. Updated to db.")
         return results

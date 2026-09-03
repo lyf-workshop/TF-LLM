@@ -1,6 +1,7 @@
 import datetime
 from typing import Any
 
+from sqlalchemy import Index
 from sqlmodel import JSON, Column, Field, SQLModel
 
 from .utu_basemodel import UTUBaseModel
@@ -8,6 +9,7 @@ from .utu_basemodel import UTUBaseModel
 
 class DatasetSample(SQLModel, table=True):
     __tablename__ = "data"
+    __table_args__ = (Index("ix_data_dataset_index", "dataset", "index"),)
 
     id: int | None = Field(default=None, primary_key=True)
     dataset: str = ""  # dataset name, for exp
@@ -28,6 +30,14 @@ class DatasetSample(SQLModel, table=True):
 
 class EvaluationSample(UTUBaseModel, SQLModel, table=True):
     __tablename__ = "evaluation_data"
+    __table_args__ = (
+        Index(
+            "ix_evaluation_data_exp_stage_dataset_index",
+            "exp_id",
+            "stage",
+            "dataset_index",
+        ),
+    )
 
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime.datetime | None = Field(default_factory=datetime.datetime.now)

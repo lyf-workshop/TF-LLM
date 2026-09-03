@@ -35,6 +35,7 @@ class StatusError(Exception):
         (StatusError(429), "api_rate_limit", True, False),
         (StatusError(503), "api_5xx", True, False),
         (StatusError(401), "api_configuration_error", False, True),
+        (StatusError(405), "api_configuration_error", False, True),
         (RewardFileNotFoundError("missing"), "reward_file_missing", False, False),
         (RuntimeError("Docker environment build failed"), "harbor_environment_error", True, False),
     ],
@@ -44,6 +45,21 @@ def test_classify_infra_error(error, error_type, retryable, fatal):
     assert classification.error_type == error_type
     assert classification.retryable is retryable
     assert classification.fatal is fatal
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        RuntimeError("Error code: 405 - quota_not_enough"),
+        RuntimeError("Error code: 429 - insufficient_quota"),
+        RuntimeError("Error code: 405 - \u4f59\u989d\u4e0d\u8db3"),
+    ],
+)
+def test_quota_exhaustion_is_fatal_even_with_provider_specific_status(error):
+    classification = classify_infra_error(error)
+    assert classification.error_type == "api_configuration_error"
+    assert classification.retryable is False
+    assert classification.fatal is True
 
 
 def test_redact_command_hides_credentials():

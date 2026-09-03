@@ -231,6 +231,20 @@ def _classify_llm_error(error):
     status = getattr(error, "status_code", None)
     if status is None:
         status = getattr(getattr(error, "response", None), "status_code", None)
+    quota_markers = (
+        "quota_not_enough",
+        "insufficient_quota",
+        "insufficient quota",
+        "quota exceeded",
+        "quota exhausted",
+        "insufficient balance",
+        "balance not enough",
+        "billing hard limit",
+        "credit balance",
+        "\\u4f59\\u989d\\u4e0d\\u8db3",
+    )
+    if status == 402 or any(marker in text for marker in quota_markers):
+        return {{"error_type": "api_configuration_error", "retryable": False, "fatal": True}}
     if "apiconnectionerror" in name or "connection error" in text:
         return {{"error_type": "api_connection_error", "retryable": True, "fatal": False}}
     if "apitimeouterror" in name or "request timed out" in text or "read timeout" in text:
@@ -239,7 +253,7 @@ def _classify_llm_error(error):
         return {{"error_type": "api_rate_limit", "retryable": True, "fatal": False}}
     if (isinstance(status, int) and 500 <= status <= 599) or "internalservererror" in name:
         return {{"error_type": "api_5xx", "retryable": True, "fatal": False}}
-    if status in {{400, 401, 403, 404, 422}} or any(
+    if status in {{400, 401, 403, 404, 405, 422}} or any(
         token in name for token in ("authenticationerror", "badrequesterror", "notfounderror")
     ):
         return {{"error_type": "api_configuration_error", "retryable": False, "fatal": True}}

@@ -27,7 +27,7 @@ from ..env import BaseEnv, E2BEnv, get_env
 from ..hooks import get_run_hooks
 from ..tools import TOOLKIT_MAP, AsyncBaseToolkit
 from ..tools.utils import AgentsMCPUtils
-from ..utils import AgentsUtils, get_logger, load_class_from_file
+from ..utils import AgentsUtils, get_logger, load_class_from_file, redact_sensitive_data
 from .common import QueueCompleteSentinel, TaskRecorder
 
 logger = get_logger(__name__)
@@ -203,7 +203,11 @@ class SimpleAgent:
         return toolkit
 
     async def _load_mcp_server(self, toolkit_config: ToolkitConfig) -> MCPServer:
-        logger.info(f"Loading MCP server `{toolkit_config.name}` with params {toolkit_config.config}")
+        logger.info(
+            "Loading MCP server `%s` with params %s",
+            toolkit_config.name,
+            redact_sensitive_data(toolkit_config.config),
+        )
         mcp_server = AgentsMCPUtils.get_mcp_server(toolkit_config)
         server = await self._mcps_exit_stack.enter_async_context(mcp_server)
         self._mcp_servers.append(server)

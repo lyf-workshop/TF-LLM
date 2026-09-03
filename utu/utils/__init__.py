@@ -7,6 +7,7 @@ from .log import get_logger, oneline_object, setup_logging
 from .openai_utils import OpenAIUtils, SimplifiedAsyncOpenAI
 from .path import CACHE_DIR, DIR_ROOT, FileUtils
 from .print_utils import PrintUtils
+from .security import redact_sensitive_data, redact_sensitive_text
 from .sqlmodel_utils import SQLModelUtils
 from .token import TokenUtils
 from .tool_cache import async_file_cache
@@ -32,4 +33,6 @@ __all__ = [
     "EnvUtils",
     "LLMOutputParser",
     "encode_image",
+    "redact_sensitive_data",
+    "redact_sensitive_text",
 ]

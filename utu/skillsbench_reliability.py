@@ -63,6 +63,27 @@ def classify_infra_error(
     text = str(error).lower()
     status = _status_code(error)
 
+    # Providers do not agree on a status code for exhausted credit: observed
+    # responses include 402, 405, and even 429. Detect the provider payload
+    # before the generic rate-limit branch so a depleted account stops the
+    # whole run instead of consuming hundreds of invalid trials.
+    quota_markers = (
+        "quota_not_enough",
+        "insufficient_quota",
+        "insufficient quota",
+        "quota exceeded",
+        "quota exhausted",
+        "insufficient balance",
+        "balance not enough",
+        "billing hard limit",
+        "credit balance",
+        "\u4f59\u989d\u4e0d\u8db3",
+    )
+    if status == 402 or any(marker in text for marker in quota_markers):
+        return InfraErrorClassification(
+            "api_configuration_error", retryable=False, fatal=True
+        )
+
     if "apiconnectionerror" in name or "api connection" in text or "connection error" in text:
         return InfraErrorClassification("api_connection_error", retryable=True)
     if (
@@ -84,7 +105,7 @@ def classify_infra_error(
     if "no reward file" in text or "no verifier result" in text or "empty rewards" in text:
         return InfraErrorClassification("reward_file_missing", retryable=False)
     if (
-        status in {400, 401, 403, 404, 422}
+        status in {400, 401, 403, 404, 405, 422}
         or "authenticationerror" in name
         or "permissiondeniederror" in name
         or "badrequesterror" in name

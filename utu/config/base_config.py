@@ -3,21 +3,18 @@ from typing import Any
 
 from pydantic import BaseModel
 
-ReprArgs: type = Iterable[tuple[str | None, Any]]
+from ..utils.security import is_sensitive_key, redact_sensitive_data
 
-SECURE_FIELDS = ("api_key", "base_url")
+ReprArgs: type = Iterable[tuple[str | None, Any]]
 
 
 def if_need_secure(key: str) -> bool:
-    return any(f in key.lower() for f in SECURE_FIELDS)
+    return is_sensitive_key(key)
 
 
 def secure_repr(obj: ReprArgs) -> ReprArgs:
     for k, v in obj:
-        if if_need_secure(k):
-            yield k, "***"
-        else:
-            yield k, v
+        yield k, redact_sensitive_data(v, _parent_key=k)
 
 
 class ConfigBaseModel(BaseModel):

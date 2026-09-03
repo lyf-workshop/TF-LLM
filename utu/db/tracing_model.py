@@ -2,13 +2,14 @@ from collections.abc import Mapping, Sequence
 from typing import Any, Literal
 
 # from agents.tracing import FunctionSpanData, GenerationSpanData
-from sqlalchemy import JSON
+from sqlalchemy import JSON, Index
 from sqlmodel import Column, Field, SQLModel, String
 
 
 # FunctionSpanData
 class ToolTracingModel(SQLModel, table=True):
     __tablename__ = "tracing_tool"
+    __table_args__ = (Index("ix_tracing_tool_trace_span", "trace_id", "span_id"),)
 
     id: int | None = Field(default=None, primary_key=True)
     trace_id: str = ""
@@ -23,6 +24,7 @@ class ToolTracingModel(SQLModel, table=True):
 # GenerationSpanData
 class GenerationTracingModel(SQLModel, table=True):
     __tablename__ = "tracing_generation"
+    __table_args__ = (Index("ix_tracing_generation_trace_span", "trace_id", "span_id"),)
 
     id: int | None = Field(default=None, primary_key=True)
     trace_id: str = ""

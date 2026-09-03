@@ -11,6 +11,7 @@ from sqlmodel import select
 
 from ..db import GRPODatasetSnapshotModel, GRPORunModel, GRPOStepModel
 from .log import get_logger
+from .security import redact_sensitive_data
 from .sqlmodel_utils import SQLModelUtils
 
 logger = get_logger(__name__)
@@ -72,9 +73,11 @@ class GRPOLogger:
                     status="running",
                     start_time=self.start_time,
                     start_datetime=datetime.fromtimestamp(self.start_time).isoformat(),
-                    config=self.config.model_dump() if hasattr(self.config, "model_dump") else dict(self.config),
-                    agent_config=agent_config,
-                    llm_config=model_config,
+                    config=redact_sensitive_data(
+                        self.config.model_dump() if hasattr(self.config, "model_dump") else dict(self.config)
+                    ),
+                    agent_config=redact_sensitive_data(agent_config),
+                    llm_config=redact_sensitive_data(model_config),
                     practice_dataset_name=practice_dataset_name,
                     practice_dataset_size=practice_dataset_size,
                     eval_dataset_name=eval_dataset_name,

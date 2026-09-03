@@ -84,7 +84,7 @@ Evaluate each experience and return the JSON array with scores."""
                 base_url = EnvUtils.get_env("OPENAI_BASE_URL", None)
             
             self.client = AsyncOpenAI(api_key=api_key, base_url=base_url)
-            logger.info(f"Initialized LLM client with base_url: {base_url or 'default'}")
+            logger.info("Initialized LLM client with %s base URL", "configured" if base_url else "default")
         return self.client
     
     async def rerank(

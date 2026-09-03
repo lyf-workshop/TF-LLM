@@ -8,7 +8,7 @@ from agents.tracing.span_data import (
 )
 
 from ..db import GenerationTracingModel, ToolTracingModel
-from ..utils import OpenAIUtils, SQLModelUtils, get_logger
+from ..utils import OpenAIUtils, SQLModelUtils, get_logger, redact_sensitive_data
 
 logger = get_logger(__name__)
 
@@ -46,10 +46,10 @@ class DBTracingProcessor(TracingProcessor):
                     GenerationTracingModel(
                         trace_id=get_current_trace().trace_id,
                         span_id=span.span_id,
-                        input=data.input,
-                        output=data.output,
+                        input=redact_sensitive_data(data.input),
+                        output=redact_sensitive_data(data.output),
                         model=data.model,
-                        model_configs=data.model_config,
+                        model_configs=redact_sensitive_data(data.model_config),
                         usage=data.usage,
                     )
                 )
@@ -61,10 +61,10 @@ class DBTracingProcessor(TracingProcessor):
                     GenerationTracingModel(
                         trace_id=get_current_trace().trace_id,
                         span_id=span.span_id,
-                        input=data.input,
-                        output=OpenAIUtils.get_response_output(data.response),
+                        input=redact_sensitive_data(data.input),
+                        output=redact_sensitive_data(OpenAIUtils.get_response_output(data.response)),
                         model=OpenAIUtils.maybe_basemodel_to_dict(data.response.model),
-                        model_configs=OpenAIUtils.get_response_configs(data.response),
+                        model_configs=redact_sensitive_data(OpenAIUtils.get_response_configs(data.response)),
                         usage=OpenAIUtils.maybe_basemodel_to_dict(data.response.usage),
                         type="responses",
                         response_id=data.response.id,
@@ -76,9 +76,9 @@ class DBTracingProcessor(TracingProcessor):
                 session.add(
                     ToolTracingModel(
                         name=data.name,
-                        input=data.input,
-                        output=data.output,
-                        mcp_data=data.mcp_data,
+                        input=redact_sensitive_data(data.input),
+                        output=redact_sensitive_data(data.output),
+                        mcp_data=redact_sensitive_data(data.mcp_data),
                         trace_id=get_current_trace().trace_id,
                         span_id=span.span_id,
                     )
