@@ -88,6 +88,9 @@ def hierarchy_config(tmp_path, **overrides):
         "max_l0_recent": 10,
         "l1_confidence_threshold": 0.7,
         "l2_confidence_threshold": 0.8,
+        "l0_candidate_review_enabled": False,
+        "l1_candidate_review_enabled": False,
+        "l2_candidate_review_enabled": False,
     }
     values.update(overrides)
     return SimpleNamespace(**values)
@@ -227,6 +230,38 @@ def test_similar_metadata_compatible_experiences_cluster_together():
     assert report.clusters[0].metadata_consistency == pytest.approx(1.0)
 
 
+def test_public_pair_score_is_the_score_used_by_production_merging():
+    clusterer = ExperienceClusterer(
+        KeywordEmbedding(),
+        hard_constraint_fields=["task_stage", "failure_mode"],
+        soft_constraint_fields=["domain"],
+    )
+    left = record("alpha same semantic vector", domain="math")
+    right = record("alpha same semantic vector two", domain="office")
+
+    score = clusterer.score_pair(left, right, semantic_similarity=1.0)
+    assert score.semantic_similarity == pytest.approx(1.0)
+    assert score.adjusted_similarity == pytest.approx(0.9)
+    assert score.passes_threshold(0.95) is False
+
+    report = clusterer.cluster([left, right], level="L0", similarity_threshold=0.95)
+    assert sorted(len(cluster.experience_ids) for cluster in report.clusters) == [1, 1]
+    contract = clusterer.pair_score_contract()
+    assert contract["name"] == "metadata_constrained_pair_score_v1"
+    assert contract["threshold_score"] == "adjusted_similarity"
+    assert contract["soft_constraint_fields"] == ["domain"]
+
+
+def test_manager_uses_every_configured_runtime_soft_score_field(tmp_path):
+    instance, _ = manager(tmp_path)
+    assert instance.clusterer.soft_constraint_fields == (
+        "domain",
+        "task_family",
+        "tool_type",
+        "strategy_type",
+    )
+
+
 def test_unrecognised_hard_metadata_is_normalised_to_unknown_and_does_not_split():
     left = record("alpha same strategy", failure_mode="model guessed root cause", task_stage="middle")
     right = record("alpha same procedure", failure_mode="another guess", task_stage="somewhere")
@@ -355,6 +390,17 @@ def test_optional_real_sentence_embedding_semantics(tmp_path):
     assert detect_strategy_conflicts(opposites, lexical_overlap_threshold=0.65)
 
 
+@pytest.mark.parametrize("negation", ["不要", "不得", "不能", "不可", "切勿", "无需", "无须"])
+def test_chinese_explicit_negation_forms_use_cjk_overlap(negation):
+    opposites = [
+        record("提交前检查最终答案。"),
+        record(f"提交前{negation}检查最终答案。"),
+    ]
+    conflicts = detect_strategy_conflicts(opposites, lexical_overlap_threshold=0.65)
+    assert len(conflicts) == 1
+    assert conflicts[0]["lexical_overlap"] >= 0.65
+
+
 @pytest.mark.asyncio
 async def test_five_plus_one_creates_only_valid_cluster_and_leaves_tail_pending(tmp_path):
     instance, llm = manager(
@@ -430,6 +476,34 @@ async def test_opposite_strategy_cluster_stays_pending_without_llm_call(tmp_path
 
 
 @pytest.mark.asyncio
+async def test_chinese_opposite_strategy_cluster_stays_pending_without_llm_call(tmp_path):
+    instance, llm = manager(
+        tmp_path,
+        [],
+        min_l0_per_l1=2,
+        strategy_conflict_check_enabled=True,
+        strategy_conflict_lexical_overlap=0.65,
+    )
+    await instance.process_step_experiences(
+        [
+            "提交前检查最终答案。",
+            "提交前不要检查最终答案。",
+        ],
+        step=0,
+    )
+
+    await instance._aggregate_l1(epoch=0)
+
+    assert llm.calls == 0
+    assert not instance.l1_experiences
+    assert all(item["aggregation_status"] == "pending" for item in instance.l0_experiences)
+    audits = [json.loads(line) for line in (tmp_path / "clusters.jsonl").read_text().splitlines()]
+    attempt = audits[-1]["aggregation_attempts"][0]
+    assert attempt["status"] == "pending_conflict"
+    assert attempt["conflicts"][0]["reason"] == "explicit_negation_with_high_lexical_overlap"
+
+
+@pytest.mark.asyncio
 async def test_provisional_threshold_blocks_clustered_aggregation(tmp_path):
     instance, llm = manager(
         tmp_path,
@@ -444,6 +518,44 @@ async def test_provisional_threshold_blocks_clustered_aggregation(tmp_path):
     assert all(item["aggregation_status"] == "pending" for item in instance.l0_experiences)
     audit = json.loads((tmp_path / "clusters.jsonl").read_text().splitlines()[-1])
     assert audit["status"] == "waiting_for_threshold_calibration"
+
+
+@pytest.mark.asyncio
+async def test_layer_threshold_gates_release_l0_before_l1(tmp_path):
+    instance, llm = manager(
+        tmp_path,
+        [
+            aggregation_json("Shared first pattern"),
+            aggregation_json("Shared second pattern"),
+            aggregation_json("Shared meta pattern"),
+        ],
+        min_l0_per_l1=2,
+        min_l1_per_l2=2,
+        l0_similarity_threshold_provisional=False,
+        l1_similarity_threshold_provisional=True,
+    )
+    await instance.process_step_experiences(
+        ["alpha one", "alpha two", "beta one", "beta two"],
+        step=0,
+    )
+
+    await instance.aggregate_epoch(epoch=0)
+
+    assert llm.calls == 2
+    assert len(instance.l1_experiences) == 2
+    assert not instance.l2_experiences
+    assert all(item["aggregation_status"] == "pending" for item in instance.l1_experiences)
+    audits = [json.loads(line) for line in (tmp_path / "clusters.jsonl").read_text().splitlines()]
+    blocked = audits[-1]
+    assert blocked["status"] == "waiting_for_threshold_calibration"
+    assert blocked["calibration_level"] == "L1"
+    assert blocked["threshold_config_field"] == "l1_similarity_threshold"
+
+    instance.h_config.l1_similarity_threshold_provisional = False
+    await instance._aggregate_l2(epoch=1)
+
+    assert llm.calls == 3
+    assert len(instance.l2_experiences) == 1
 
 
 @pytest.mark.asyncio

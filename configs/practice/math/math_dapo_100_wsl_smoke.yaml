@@ -1,0 +1,26 @@
+# @package _global_
+# One-item real-API WSL smoke test for the DAPO experience pipeline.
+# This file intentionally has its own experiment and artifact namespace.
+defaults:
+  - /practice/math/math_dapo_100_aime24_smoke
+  - _self_
+
+exp_id: "math_dapo_random_100_wsl_smoke_20260915"
+
+practice:
+  epochs: 1
+  batch_size: 1
+  grpo_n: 1
+  rollout_concurrency: 1
+  rollout_data_truncate: 1
+
+  hierarchical_learning:
+    # Keep the smoke compatible with the frozen v2 source snapshot.
+    experience_output_language: same_as_input
+    embedding_cache_path: workspace/cache/experience_embeddings_math_dapo_random_100_wsl_smoke_20260915.sqlite3
+    experience_save_path: workspace/hierarchical_experiences/math_dapo_random_100_wsl_smoke_20260915.json
+    clustering_audit_path: workspace/hierarchical_experiences/math_dapo_random_100_wsl_smoke_20260915.clusters.jsonl
+
+evaluation:
+  exp_id: "math_dapo_random_100_wsl_smoke_20260915"
+  concurrency: 1

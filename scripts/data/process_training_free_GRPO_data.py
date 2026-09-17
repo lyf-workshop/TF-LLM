@@ -8,13 +8,62 @@ from datasets import load_dataset
 from huggingface_hub import snapshot_download
 from sqlmodel import select
 
+from utu import utils as utu_utils
 from utu.db.eval_datapoint import DatasetSample
-from utu.utils import DIR_ROOT
-from utu.utils.sqlmodel_utils import SQLModelUtils
+
+DIR_ROOT = utu_utils.DIR_ROOT
+SQLModelUtils = utu_utils.SQLModelUtils
 
 rng = random.Random(42)
 feat_path = "utu/train/dataset"
 DATASET_NAMES = ("AIME24", "AIME25", "DAPO-Math-17k", "AFM_web_RL", "WebWalkerQA")
+UPSTREAM_METADATA_KEY = "_tf_llm_upstream"
+
+
+def _transform_dapo_record(record: dict[str, Any]) -> dict[str, Any]:
+    """Keep the native DAPO provenance that the historical importer dropped.
+
+    ``ability`` is the only upstream field that can justify a broad domain
+    label.  It is deliberately stored as evidence rather than converted to a
+    fine-grained ``task_family``: DAPO does not provide such a label.
+    """
+
+    data_source = record.get("data_source")
+    ability = record.get("ability")
+    extra_info = record.get("extra_info")
+    if not isinstance(data_source, str) or not data_source.strip():
+        raise ValueError("DAPO record is missing non-empty upstream data_source")
+    if not isinstance(ability, str) or not ability.strip():
+        raise ValueError("DAPO record is missing non-empty upstream ability")
+    if not isinstance(extra_info, dict):
+        raise ValueError("DAPO record is missing upstream extra_info mapping")
+
+    prompt = record.get("prompt")
+    if not isinstance(prompt, list) or not prompt or not isinstance(prompt[0], dict):
+        raise ValueError("DAPO record has invalid prompt structure")
+    prompt_content = prompt[0].get("content")
+    reward_model = record.get("reward_model")
+    if not isinstance(prompt_content, str) or not isinstance(reward_model, dict):
+        raise ValueError("DAPO record has invalid prompt or reward_model")
+    if "ground_truth" not in reward_model:
+        raise ValueError("DAPO record reward_model is missing ground_truth")
+
+    problem = prompt_content.replace(
+        "Solve the following math problem step by step. The last line of your response should be of the "
+        "form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\n\n",
+        "",
+    ).replace('\n\nRemember to put your answer on its own line after "Answer:".', "")
+    return {
+        "problem": problem,
+        "groundtruth": reward_model["ground_truth"],
+        "meta": {
+            UPSTREAM_METADATA_KEY: {
+                "data_source": data_source,
+                "ability": ability,
+                "extra_info": extra_info,
+            }
+        },
+    }
 
 
 def _check_exists(name: str, save_type: Literal["db", "file"]) -> list[DatasetSample] | list[dict[str, Any]]:
@@ -45,6 +94,10 @@ def _save_dataset(
                     source="training_free_grpo",
                     question=record["problem"],
                     answer=record["groundtruth"],
+                    topic=record.get("topic", ""),
+                    level=record.get("level", 0),
+                    file_name=record.get("file_name", ""),
+                    meta=record.get("meta"),
                 )
                 samples.append(sample)
             session.add_all(samples)
@@ -81,19 +134,13 @@ def load_data(name: str, save_type: Literal["db", "file"] = "db") -> list[Datase
             ignore_patterns=[".gitattributes", "README.md"],
         )
         dataset = load_dataset("parquet", data_files=str(local_dir / "data" / "dapo-math-17k.parquet"))["train"]
-        transformed = {}
+        transformed: dict[str, dict[str, Any]] = {}
         for record in dataset.to_list():
-            prompt = (
-                record["prompt"][0]["content"]
-                .replace(
-                    "Solve the following math problem step by step. The last line of your response should be of the "
-                    "form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\n\n",
-                    "",
-                )
-                .replace('\n\nRemember to put your answer on its own line after "Answer:".', "")
-            )
-            transformed[prompt] = record["reward_model"]["ground_truth"]
-        dataset = [{"problem": problem, "groundtruth": answer} for problem, answer in transformed.items()]
+            transformed_record = _transform_dapo_record(record)
+            # Preserve the historical last-write-wins de-duplication semantics
+            # while retaining the winning row's complete upstream evidence.
+            transformed[transformed_record["problem"]] = transformed_record
+        dataset = list(transformed.values())
         rng.shuffle(dataset)
 
     elif name == "AFM_web_RL":

@@ -18,6 +18,8 @@ class TaskRecorder:
     """Name of the experiment"""
     experiences: dict[str, str] = None
     """Mapping from experience ID to experience content"""
+    l0_injection_top_k: int = 0
+    """Maximum task-relevant L0 experiences injected per rollout; zero keeps all."""
     stats: dict[str, Any] = None
     """Mapping from stat name to stat value"""
 

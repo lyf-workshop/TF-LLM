@@ -28,18 +28,25 @@ def load_experiences(path: Path) -> tuple[list, list, list]:
 
     def as_list(raw: object, level: str) -> list[dict]:
         if isinstance(raw, list):
-            return [
+            result = [
                 item if isinstance(item, dict) else {"id": f"{level}_{index}", "content": str(item)}
                 for index, item in enumerate(raw)
             ]
-        if isinstance(raw, dict):
+        elif isinstance(raw, dict):
             result = []
             for exp_id, value in raw.items():
                 item = dict(value) if isinstance(value, dict) else {"content": str(value)}
                 item.setdefault("id", str(exp_id))
                 result.append(item)
-            return result
-        return []
+        else:
+            result = []
+        # Old snapshots have no lifecycle field and remain compatible. New
+        # inactive or needs-review records must never reach generated prompts.
+        return [
+            item
+            for item in result
+            if str(item.get("lifecycle_status", "active")).lower() == "active"
+        ]
 
     return (
         as_list(data.get("l2_experiences", []), "L2"),

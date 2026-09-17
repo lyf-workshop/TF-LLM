@@ -1,8 +1,9 @@
-"""Reusable LLM-based experience pool merge (ADD/UPDATE/DELETE/NONE).
+"""LLM helpers for legacy flat merging and strict L0 candidate review.
 
-Extracted from :class:`ExperienceUpdater` so that *every* experience pool — the
-flat pool and the hierarchical L0/L1/L2 pools — shares ONE semantic
-dedup/consolidation mechanism instead of brittle token-similarity heuristics.
+The original two-stage helpers remain the compatibility path for the flat
+pool. Hierarchical L0 uses the strict single-candidate reviewer defined here,
+while :class:`HierarchicalExperienceManager` is the sole state-change owner so
+stable IDs, provenance, archives, and parent links cannot be lost.
 
 The merge is a two-stage LLM process, identical to the flat-pool logic:
 
@@ -23,9 +24,133 @@ import json
 import re
 from typing import Any
 
+from jinja2 import Template
+from pydantic import ValidationError
+
 from ..utils import FileUtils, get_logger
+from .experience_models import (
+    ExperienceCandidateRecord,
+    ExperienceReviewDecision,
+    L0CandidateRecord,
+    L0ReviewDecision,
+)
 
 logger = get_logger(__name__)
+
+
+class CandidateReviewError(RuntimeError):
+    """A candidate review could not be parsed or safely interpreted."""
+
+
+def parse_candidate_review(response: str) -> L0ReviewDecision:
+    """Parse one strict ADD/UPDATE/DELETE/KEEP decision.
+
+    Markdown JSON fences are accepted for robustness, but surrounding prose,
+    arrays, unknown fields, and action-specific violations are rejected.
+    """
+
+    text = (response or "").strip()
+    if "```" in text:
+        parts = text.split("```")
+        if len(parts) != 3 or parts[0].strip() or parts[2].strip():
+            raise CandidateReviewError("review output must contain only one JSON object")
+        text = parts[1].strip()
+        if text.lower().startswith("json"):
+            text = text[4:].strip()
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as error:
+        raise CandidateReviewError(f"invalid candidate review JSON: {error}") from error
+    if not isinstance(payload, dict):
+        raise CandidateReviewError("candidate review output must be a JSON object")
+    try:
+        return L0ReviewDecision.model_validate(payload)
+    except ValidationError as error:
+        raise CandidateReviewError(f"candidate review schema validation failed: {error}") from error
+
+
+async def review_l0_candidate(
+    llm: Any,
+    prompts: dict[str, Any],
+    agent_objective: str,
+    learning_objective: str,
+    candidate: L0CandidateRecord,
+    related_experiences: list[dict[str, Any]],
+    *,
+    candidate_view: dict[str, Any] | None = None,
+    allowed_evidence_ids: list[str],
+    comparison_scope: str,
+    model_params: dict[str, Any] | None = None,
+    temperature: float = 0.0,
+    experience_output_language_instruction: str = (
+        "Use the same language as the input trajectory and supplied experiences."
+    ),
+) -> L0ReviewDecision:
+    """Review exactly one candidate against a fresh active-pool view."""
+
+    return await review_experience_candidate(
+        llm,
+        prompts,
+        agent_objective,
+        learning_objective,
+        candidate,
+        related_experiences,
+        prompt_name="L0_CANDIDATE_REVIEW_PROMPT",
+        candidate_view=candidate_view,
+        allowed_evidence_ids=allowed_evidence_ids,
+        comparison_scope=comparison_scope,
+        model_params=model_params,
+        temperature=temperature,
+        experience_output_language_instruction=experience_output_language_instruction,
+    )
+
+
+async def review_experience_candidate(
+    llm: Any,
+    prompts: dict[str, Any],
+    agent_objective: str,
+    learning_objective: str,
+    candidate: ExperienceCandidateRecord,
+    related_experiences: list[dict[str, Any]],
+    *,
+    prompt_name: str,
+    candidate_view: dict[str, Any] | None = None,
+    allowed_evidence_ids: list[str],
+    comparison_scope: str,
+    model_params: dict[str, Any] | None = None,
+    temperature: float = 0.0,
+    experience_output_language_instruction: str = (
+        "Use the same language as the input trajectory and supplied experiences."
+    ),
+) -> ExperienceReviewDecision:
+    """Review one candidate using the level-specific policy and shared schema."""
+
+    prompt = prompts[prompt_name]
+    system_prompt = Template(prompt["system"]).render(
+        agent_objective=agent_objective,
+        learning_objective=learning_objective,
+        experience_output_language_instruction=experience_output_language_instruction,
+    )
+    user_prompt = Template(prompt["user"]).render(
+        candidate_json=json.dumps(
+            candidate_view if candidate_view is not None else candidate.public_dict(),
+            ensure_ascii=False,
+            sort_keys=True,
+        ),
+        related_experiences_json=json.dumps(related_experiences, ensure_ascii=False, sort_keys=True),
+        allowed_evidence_ids_json=json.dumps(sorted(allowed_evidence_ids), ensure_ascii=False),
+        comparison_scope=comparison_scope,
+    )
+    params = dict(model_params or {})
+    params["temperature"] = temperature
+    response = await llm.query_one(
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        **params,
+    )
+    return parse_candidate_review(response)
 
 
 def split_experiences(text: str) -> list[str]:
@@ -145,6 +270,9 @@ async def propose_operations(
     chunk_size: int = 10,
     max_retries: int = 5,
     base_delay: float = 10.0,
+    experience_output_language_instruction: str = (
+        "Use the same language as the input trajectory and supplied experiences."
+    ),
 ) -> list[dict]:
     """Stage 1: emit ADD/UPDATE/DELETE/NONE operations for ``candidates``."""
     model_params = model_params or {}
@@ -159,6 +287,7 @@ async def propose_operations(
     sp = FileUtils.get_jinja_template_str(prompts["GROUP_EXPERIENCE_UPDATE_TEMPLATE_SP"]).render(
         agent_objective=agent_objective,
         learning_objective=learning_objective,
+        experience_output_language_instruction=experience_output_language_instruction,
     )
     semaphore = asyncio.Semaphore(concurrency)
 
@@ -208,6 +337,9 @@ async def consolidate_and_apply(
     model_params: dict | None = None,
     id_prefix: str = "",
     max_retries: int = 3,
+    experience_output_language_instruction: str = (
+        "Use the same language as the input trajectory and supplied experiences."
+    ),
 ) -> dict[str, str]:
     """Stage 2: reconcile ``operations`` into a revision plan and apply it."""
     model_params = model_params or {}
@@ -217,6 +349,7 @@ async def consolidate_and_apply(
     sp = FileUtils.get_jinja_template_str(prompts["BATCH_EXPERIENCE_UPDATE_TEMPLATE_SP"]).render(
         agent_objective=agent_objective,
         learning_objective=learning_objective,
+        experience_output_language_instruction=experience_output_language_instruction,
     )
     revision_plan: list[dict] = []
     for _ in range(max_retries):
@@ -251,12 +384,15 @@ async def pool_merge(
     id_prefix: str = "",
     concurrency: int = 8,
     chunk_size: int = 10,
+    experience_output_language_instruction: str = (
+        "Use the same language as the input trajectory and supplied experiences."
+    ),
 ) -> dict[str, str]:
     """End-to-end LLM merge: compare ``candidates`` against the pool, consolidate
     the resulting operations, and apply them.
 
-    Returns the updated pool as an ``{id: content}`` dict.  This is the single
-    dedup/consolidation primitive shared by the flat pool and L0/L1/L2.
+    Returns the updated pool as an ``{id: content}`` dict. This permissive
+    numeric-ID helper is intentionally limited to the legacy flat path.
     """
     candidates = [c.strip() for c in candidates if c and c.strip()]
     if not candidates:
@@ -272,6 +408,7 @@ async def pool_merge(
         model_params=model_params,
         concurrency=concurrency,
         chunk_size=chunk_size,
+        experience_output_language_instruction=experience_output_language_instruction,
     )
     return await consolidate_and_apply(
         llm,
@@ -282,4 +419,5 @@ async def pool_merge(
         operations,
         model_params=model_params,
         id_prefix=id_prefix,
+        experience_output_language_instruction=experience_output_language_instruction,
     )

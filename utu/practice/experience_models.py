@@ -9,78 +9,248 @@ particular persistence backend.
 
 from __future__ import annotations
 
-import hashlib
-import json
-import re
 from datetime import UTC, datetime
-from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-ExperienceLevel = Literal["L0", "L1", "L2"]
-AggregationStatus = Literal["pending", "aggregated", "terminal"]
-
-
-class TaskStage(str, Enum):
-    """Controlled task phase used by the clustering hard constraint."""
-
-    PLANNING = "planning"
-    EXECUTION = "execution"
-    RECOVERY = "recovery"
-    VERIFICATION = "verification"
-    SUBMISSION = "submission"
-    UNKNOWN = "unknown"
-
-
-class FailureMode(str, Enum):
-    """Failure evidence that can be derived from rollout/verifier state.
-
-    These values deliberately avoid free-form, LLM-inferred diagnoses.  A
-    missing or unrecognised signal is ``unknown`` and therefore does not act as
-    a hard clustering constraint.
-    """
-
-    NONE = "none"
-    VERIFIER_FAILURE = "verifier_failure"
-    INFRASTRUCTURE_ERROR = "infrastructure_error"
-    TIMEOUT = "timeout"
-    EXECUTION_ERROR = "execution_error"
-    MIXED_OUTCOME = "mixed_outcome"
-    UNKNOWN = "unknown"
+from .domain.contracts import (
+    AggregationStatus,
+    CandidateAction,
+    CandidateResolution,
+    CandidateStatus,
+    ExperienceLevel,
+    ExperienceLifecycleStatus,
+    ExperienceOutputLanguage,
+    FailureMode,
+    TaskStage,
+)
+from .domain.identity import (
+    normalise_content as _normalise_content,
+    stable_experience_candidate_id,
+    stable_experience_id,
+    stable_l0_candidate_id,
+)
+from .domain.language import experience_output_language_instruction, validate_experience_output_language
 
 
 def _utc_now() -> str:
     return datetime.now(UTC).isoformat()
 
 
-def _normalise_content(content: str) -> str:
-    return re.sub(r"\s+", " ", content or "").strip()
+class L0ReviewDecision(BaseModel):
+    """Strict action decision shared by L0, L1, and L2 candidates.
 
-
-def stable_experience_id(
-    level: ExperienceLevel,
-    content: str,
-    parent_ids: list[str] | tuple[str, ...] | None = None,
-    *,
-    identity_context: list[str] | tuple[str, ...] | None = None,
-) -> str:
-    """Return a deterministic ID that is independent of insertion order.
-
-    L0 is content-addressed with optional classification context, so identical
-    observations with compatible metadata merge their source evidence while
-    known conflicting classifications remain separate. L1/L2 also include the
-    sorted parent set: equal prose from different evidence remains auditable.
+    The historical name remains public for compatibility.  ``level`` and the
+    structured payload are optional for legacy L0 responses; upper-level
+    reviewers validate both against the candidate before committing.
     """
 
-    payload = {
-        "level": level,
-        "content": _normalise_content(content),
-        "parents": sorted(parent_ids or []),
-        "identity_context": sorted(identity_context or []),
-    }
-    digest = hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()[:20]
-    return f"{level}_{digest}"
+    model_config = ConfigDict(extra="forbid")
+
+    action: CandidateAction
+    candidate_id: str = Field(min_length=1)
+    level: ExperienceLevel | None = None
+    target_id: str | None = None
+    # Filled by the manager from the displayed target immediately after the
+    # model response. It is never trusted as model-supplied evidence.
+    target_version_fingerprint: str | None = None
+    new_content: str | None = None
+    new_structured_content: dict[str, Any] | None = None
+    reason: str = Field(min_length=1)
+    evidence_ids: list[str] = Field(default_factory=list)
+
+    @field_validator("candidate_id", "target_id", "new_content", "reason", mode="before")
+    @classmethod
+    def strip_optional_text(cls, value: Any) -> Any:
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("evidence_ids", mode="before")
+    @classmethod
+    def normalise_evidence_ids(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise ValueError("evidence_ids must be a JSON array")
+        result = [str(item).strip() for item in value]
+        if not all(result):
+            raise ValueError("evidence_ids must not contain empty IDs")
+        if len(result) != len(set(result)):
+            raise ValueError("evidence_ids must not contain duplicates")
+        return result
+
+    @model_validator(mode="after")
+    def validate_action_fields(self):
+        if self.action in {"UPDATE", "DELETE"} and not self.target_id:
+            raise ValueError(f"{self.action} requires target_id")
+        if self.action in {"ADD", "UPDATE"} and not self.new_content:
+            raise ValueError(f"{self.action} requires non-empty new_content")
+        if self.action == "ADD" and self.target_id is not None:
+            raise ValueError("ADD must not specify target_id")
+        if self.action in {"DELETE", "KEEP"} and self.new_content is not None:
+            raise ValueError(f"{self.action} must not specify new_content")
+        if self.action in {"DELETE", "KEEP"} and self.new_structured_content is not None:
+            raise ValueError(f"{self.action} must not specify new_structured_content")
+        if self.action == "KEEP" and self.target_id is not None:
+            raise ValueError("KEEP must not specify target_id")
+        return self
+
+
+class L0CandidateEvidence(BaseModel):
+    """Compact, auditable rollout evidence supplied to the L0 reviewer."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(min_length=1)
+    task_id: str | None = None
+    reward: float | int | bool | str | None = None
+    outcome: str | None = None
+    error_type: str | None = None
+    infra_error_type: str | None = None
+    trajectory_summary: str | None = None
+    verifier_feedback: str | None = None
+
+    @field_validator(
+        "id",
+        "task_id",
+        "outcome",
+        "error_type",
+        "infra_error_type",
+        "trajectory_summary",
+        "verifier_feedback",
+        mode="before",
+    )
+    @classmethod
+    def strip_evidence_text(cls, value: Any) -> Any:
+        return value.strip() if isinstance(value, str) else value
+
+
+class L0CandidateRecord(BaseModel):
+    """Persisted candidate and review lifecycle for any hierarchy level.
+
+    The legacy class name and default ``level=L0`` keep existing snapshots and
+    callers valid.  L1/L2 candidates additionally pin their direct parent IDs,
+    source-version fingerprints, and structured aggregation result.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    level: ExperienceLevel = "L0"
+    content: str = Field(min_length=1)
+    source_task_ids: list[str] = Field(default_factory=list)
+    source_rollout_ids: list[str] = Field(default_factory=list)
+    source_evidence: list[L0CandidateEvidence] = Field(default_factory=list)
+    domain: str | None = None
+    task_family: str | None = None
+    failure_mode: FailureMode = FailureMode.UNKNOWN
+    strategy_type: str | None = None
+    tool_type: str | None = None
+    task_stage: TaskStage = TaskStage.UNKNOWN
+    parent_ids: list[str] = Field(default_factory=list)
+    source_l0_ids: list[str] = Field(default_factory=list)
+    source_l1_ids: list[str] = Field(default_factory=list)
+    source_versions: dict[str, str] = Field(default_factory=dict)
+    source_fingerprint: str | None = None
+    generation_fingerprint: str | None = None
+    cluster_id: str | None = None
+    structured_content: dict[str, Any] | None = None
+    step: int = Field(default=0, ge=0)
+    run_id: str | None = None
+    epoch: int | None = Field(default=None, ge=0)
+    batch: int | None = Field(default=None, ge=0)
+    batch_fingerprint: str | None = None
+    status: CandidateStatus = "pending"
+    attempt_count: int = Field(default=0, ge=0)
+    last_error: str | None = None
+    review_decision: L0ReviewDecision | None = None
+    resolution: CandidateResolution | None = None
+    result_experience_id: str | None = None
+    created_at: str = Field(default_factory=_utc_now)
+    reviewed_at: str | None = None
+    generator_version: str = "l0-summary-v1"
+
+    @field_validator("content", mode="before")
+    @classmethod
+    def normalise_candidate_content(cls, value: Any) -> str:
+        text = _normalise_content(str(value or ""))
+        if not text:
+            raise ValueError("candidate content must be non-empty")
+        return text
+
+    @field_validator(
+        "source_task_ids",
+        "source_rollout_ids",
+        "parent_ids",
+        "source_l0_ids",
+        "source_l1_ids",
+        mode="before",
+    )
+    @classmethod
+    def normalise_source_ids(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, (str, int)):
+            value = [value]
+        return sorted({str(item).strip() for item in value if str(item).strip()})
+
+    @field_validator("task_stage", mode="before")
+    @classmethod
+    def normalise_task_stage(cls, value: Any) -> TaskStage:
+        return ExperienceRecord.normalise_task_stage(value)
+
+    @field_validator("failure_mode", mode="before")
+    @classmethod
+    def normalise_failure_mode(cls, value: Any) -> FailureMode:
+        return ExperienceRecord.normalise_failure_mode(value)
+
+    @model_validator(mode="after")
+    def validate_source_evidence(self):
+        evidence_ids = [evidence.id for evidence in self.source_evidence]
+        if len(evidence_ids) != len(set(evidence_ids)):
+            raise ValueError("source_evidence must not contain duplicate rollout IDs")
+        unknown_ids = sorted(set(evidence_ids) - set(self.source_rollout_ids))
+        if unknown_ids:
+            raise ValueError(f"source_evidence contains IDs absent from source_rollout_ids: {unknown_ids}")
+        unknown_task_ids = sorted(
+            {
+                evidence.task_id
+                for evidence in self.source_evidence
+                if evidence.task_id is not None and evidence.task_id not in self.source_task_ids
+            }
+        )
+        if unknown_task_ids:
+            raise ValueError(
+                f"source_evidence contains task IDs absent from source_task_ids: {unknown_task_ids}"
+            )
+        if self.level == "L0":
+            if self.parent_ids or self.source_versions:
+                raise ValueError("L0 candidates must not declare hierarchical parents")
+        else:
+            if not self.parent_ids:
+                raise ValueError(f"{self.level} candidates require direct parent_ids")
+            if set(self.source_versions) != set(self.parent_ids):
+                raise ValueError("source_versions keys must exactly match parent_ids")
+            if not self.generation_fingerprint:
+                raise ValueError(f"{self.level} candidates require generation_fingerprint")
+            if not self.source_fingerprint:
+                raise ValueError(f"{self.level} candidates require source_fingerprint")
+            if not isinstance(self.structured_content, dict):
+                raise ValueError(f"{self.level} candidates require structured_content")
+            if self.level == "L1" and set(self.source_l0_ids) != set(self.parent_ids):
+                raise ValueError("L1 source_l0_ids must match its direct L0 parents")
+            if self.level == "L2" and set(self.source_l1_ids) != set(self.parent_ids):
+                raise ValueError("L2 source_l1_ids must match its direct L1 parents")
+        return self
+
+    def public_dict(self) -> dict[str, Any]:
+        return self.model_dump(mode="json")
+
+
+# Generic names for new code; legacy imports continue to use the L0-prefixed
+# aliases without changing persisted data or public APIs.
+ExperienceReviewDecision = L0ReviewDecision
+ExperienceCandidateRecord = L0CandidateRecord
 
 
 class AggregatedExperienceContent(BaseModel):
@@ -149,9 +319,22 @@ class ExperienceRecord(BaseModel):
     source_l1_ids: list[str] = Field(default_factory=list)
     cluster_id: str | None = None
     aggregated_into_cluster_id: str | None = None
+    aggregated_into_experience_id: str | None = None
     aggregation_status: AggregationStatus = "pending"
+    lifecycle_status: ExperienceLifecycleStatus = "active"
+    revision_number: int = Field(default=1, ge=1)
+    lineage_root_id: str | None = None
+    supersedes_id: str | None = None
+    superseded_by_id: str | None = None
+    archived_at: str | None = None
+    archive_reason: str | None = None
+    review_candidate_ids: list[str] = Field(default_factory=list)
+    parent_version_fingerprints: dict[str, str] = Field(default_factory=dict)
+    source_version_fingerprint: str | None = None
+    invalidated_by_ids: list[str] = Field(default_factory=list)
+    needs_review_reason: str | None = None
     created_at: str = Field(default_factory=_utc_now)
-    version: str = "2.0"
+    version: str = "3.0"
     structured_content: AggregatedExperienceContent | None = None
 
     @field_validator("task_stage", mode="before")
@@ -233,3 +416,29 @@ class ExperienceRecord(BaseModel):
 
     def public_dict(self) -> dict[str, Any]:
         return self.model_dump(mode="json")
+
+
+__all__ = [
+    "AggregatedExperienceContent",
+    "AggregationConflict",
+    "AggregationStatus",
+    "CandidateAction",
+    "CandidateResolution",
+    "CandidateStatus",
+    "ExperienceCandidateRecord",
+    "ExperienceLifecycleStatus",
+    "ExperienceLevel",
+    "ExperienceOutputLanguage",
+    "ExperienceRecord",
+    "ExperienceReviewDecision",
+    "FailureMode",
+    "L0CandidateEvidence",
+    "L0CandidateRecord",
+    "L0ReviewDecision",
+    "TaskStage",
+    "experience_output_language_instruction",
+    "stable_experience_candidate_id",
+    "stable_experience_id",
+    "stable_l0_candidate_id",
+    "validate_experience_output_language",
+]

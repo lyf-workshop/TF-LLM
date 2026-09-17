@@ -1,0 +1,100 @@
+# @package _global_
+# Validated template for the versioned SkillsBench family-holdout split.
+defaults:
+  - /eval/skillsbench/skillsbench_paper_baseline_eval@evaluation
+  - _self_
+
+exp_id: "template_skillsbench_family_holdout"
+
+practice:
+  epochs: 3
+  batch_size: 10
+  grpo_n: 5
+  rollout_concurrency: 2
+  rollout_temperature: 0.7
+  rollout_data_truncate: 40
+  task_timeout: 3600
+  shuffle_data: true
+  do_eval: false
+  eval_strategy: "epoch"
+  agent_objective: |
+    input: A technical task to complete in an isolated Linux environment
+    output: A verified task result produced through appropriate shell and tool use
+  learning_objective: |
+    Extract evidence-backed, reusable technical procedures with explicit
+    applicability, failure boundaries, tool assumptions, and verification steps.
+  given_ground_truth: true
+  num_experiences_per_query: 1
+
+  hierarchical_learning:
+    enabled: true
+    clustering_enabled: true
+    clustering_method: agglomerative
+    embedding_provider: sentence_transformer
+    embedding_model_name: sentence-transformers/all-MiniLM-L6-v2
+    embedding_model_revision: c9745ed1d9f207416be6d2e6f8de32d1f16199bf
+    embedding_dimensions: 384
+    embedding_device: cpu
+    embedding_batch_size: 32
+    embedding_cache_path: workspace/cache/experience_embeddings.sqlite3
+    embedding_local_files_only: true
+    l0_similarity_threshold: 0.60
+    l1_similarity_threshold: 0.55
+    similarity_thresholds_provisional: true
+    allow_provisional_aggregation: false
+    min_l0_per_l1: 5
+    min_l1_per_l2: 3
+    max_cluster_size: 20
+    use_metadata_constraints: true
+    hard_constraint_fields: [task_stage, failure_mode]
+    soft_constraint_fields: [domain, task_family, tool_type, strategy_type]
+    random_seed: 42
+    aggregation_temperature: 0.0
+    l0_candidate_review_enabled: true
+    l1_candidate_review_enabled: true
+    l2_candidate_review_enabled: true
+    l0_review_temperature: 0.0
+    l0_review_retrieval: semantic
+    max_l0_per_problem: 0
+    include_l0_in_prompt: true
+    max_l0_recent: 40
+    experience_save_path: workspace/hierarchical_experiences/template_skillsbench_family_holdout.json
+    clustering_audit_path: workspace/hierarchical_experiences/template_skillsbench_family_holdout.clusters.jsonl
+
+data:
+  practice_dataset_name: "SkillsBench-v1.1-FamilyHoldout-SelfContained-Train"
+
+# SkillsBench settings belong under evaluation, not at the training root.
+evaluation:
+  concurrency: 2
+  judge_concurrency: 4
+  data:
+    dataset: "SkillsBench-v1.1-FamilyHoldout-SelfContained-Eval"
+    type: "single"
+  skillsbench:
+    enabled: true
+    experience_condition: clustered
+    train_dataset_for_overlap_check: "SkillsBench-v1.1-FamilyHoldout-SelfContained-Train"
+    require_disjoint_train_eval: true
+    task_split_manifest_path: configs/data/skillsbench/skillsbench_v1_1_task_splits.json
+    task_split_name: family_holdout_self_contained_v1
+    inject_curated_skills: false
+    task_timeout_sec: 900
+    max_agent_iterations: 30
+    env_build_timeout_multiplier: 3.0
+    docker_cleanup_after_task: true
+    docker_cleanup_builder_every_n: 10
+    max_retries: 2
+    retry_on_timeout: false
+    llm_connect_timeout_sec: 10
+    llm_read_timeout_sec: 120
+    llm_max_retries: 4
+    llm_retry_initial_delay_sec: 2
+    llm_retry_max_delay_sec: 30
+    circuit_breaker_enabled: true
+    circuit_breaker_failure_threshold: 3
+    circuit_breaker_cooldown_sec: 60
+    healthcheck_enabled: true
+    healthcheck_attempts: 3
+    expected_num_tasks: 33
+    require_complete_coverage: true

@@ -1,0 +1,215 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: deepseek-v4-flash
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: math_agent
+  instructions: "Solve the following problem step by step. You now have the ability\
+    \ to selectively write executable Python code to enhance your reasoning process,\
+    \ e.g., calulating numbers and verifying math computations. Never directly just\
+    \ printing your textual reasoning in Python. The Python code will be executed\
+    \ by an external sandbox, and the output (returned as a dict with the message\
+    \ in the \"message\" field) can be returned to aid your reasoning and help you\
+    \ arrive at the final answer. The Python code should be complete scripts, including\
+    \ necessary imports. \nEach code snippet is wrapped with \n```python\ncode snippet\n\
+    ```.\n\nThe last part of your final response should be in the following format:\n\
+    <answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\nSpecific lessons\
+    \ from recent tasks:\n• When extracting the coefficient of \\(x^k\\) from a product\
+    \ of polynomials, use the convolution rule \\([x^k](PQ)=\\sum_{i+j=k}a_i b_j\\\
+    ), enumerate all valid degree pairs including constants, carry signs exactly,\
+    \ and treat this manual enumeration as the primary method; if a computational\
+    \ tool fails with the same environment-level error twice before executing the\
+    \ intended math, stop retrying and verify the result by a second independent enumeration\
+    \ or full expansion.\n• When \\(k\\) participants can use a shared resource simultaneously\
+    \ for total duration \\(T\\) and \\(n\\) participants must share time equally\
+    \ with no idle time, compute total participant-time as \\(kT\\), set each participant’s\
+    \ share to \\(\\frac{kT}{n}\\), and verify by checking \\(n \\cdot \\text{share}\
+    \ = kT\\), checking units, and when needed constructing a feasible schedule. For\
+    \ example, in the pairball problem, \\(2 \\times 90 / 5 = 36\\), verified by \\\
+    (5 \\times 36 = 180 = 2 \\times 90\\) and by a five-block schedule such as \\\
+    (AB, BC, CD, DE, EA\\) over \\(18\\)-minute intervals.\n• When a peg/color-count\
+    \ problem places multiplicities \\(n,n-1,\\dots,1\\) on a triangular or Ferrers\
+    \ board and forbids repeated colors in rows/columns, first disambiguate the intended\
+    \ geometry: for the standard left-aligned staircase, row lengths are \\(1,\\dots,n\\\
+    ) and column lengths are \\(n,\\dots,1\\). Then apply the forced-matching principle:\
+    \ the color with \\(n\\) pegs must occupy exactly one cell in each of the \\(n\\\
+    ) rows and \\(n\\) columns; on the staircase, the size-1 row/column forces a unique\
+    \ diagonal, and after deleting that diagonal the remaining cells form a smaller\
+    \ staircase, so each next color is forced to the next diagonal. Verify by drawing\
+    \ the forced staircase and checking every row and column, and by small cases such\
+    \ as \\(n=2,3\\). If a computational tool returns the same infrastructure/init\
+    \ error after one minimal smoke test, stop retrying and pivot to this manual forcing\
+    \ argument; if color counts are tied, multiply by permutations among tied colors,\
+    \ and if same-color pegs are distinguishable, multiply by the corresponding factorials.\n\
+    • When summing powers of chord lengths of all edges and diagonals of a regular\
+    \ \\(n\\)-gon inscribed in a unit circle, group unordered chords by the minimal\
+    \ cyclic gap \\(k=1,\\dots,\\lfloor (n-1)/2\\rfloor\\), use length \\(2\\sin(k\\\
+    pi/n)\\), and for odd \\(n\\) assign exactly \\(n\\) chords to each distinct gap;\
+    \ before finalizing, verify the multiplicity by checking that the total number\
+    \ of chord occurrences equals \\(\\binom{n}{2}\\), and if a computational tool\
+    \ fails with an environment-level error such as `InteractiveShell` not defined,\
+    \ pivot to analytic power-reduction/root-of-unity methods and run a manual count/factor\
+    \ check rather than retrying the broken tool.\n• When a competition geometry problem\
+    \ includes Asymptote or other coordinate diagram code, first parse the `fill`/`draw`\
+    \ commands to extract exact vertices; then place the figure on axes, choose an\
+    \ axis-aligned base if possible, compute the height as the perpendicular distance\
+    \ to the line containing that base, derive regular-polygon coordinates from side\
+    \ length (e.g. equilateral altitude \\(s\\sqrt3/2\\)), and verify the area independently\
+    \ by shoelace/determinant or \\(\\frac12ab\\sin C\\), while watching for failure\
+    \ boundaries such as trusting the visual diagram, using a non-perpendicular height,\
+    \ or forgetting that in an obtuse triangle the altitude foot may lie outside the\
+    \ base segment.\n• When solving an extremum of a rational complex modulus under\
+    \ an affine modulus constraint, first normalize the constraint to a circle \\\
+    (|z-C|=r\\), then factor and cancel the rational expression only after checking\
+    \ that the canceled denominator zero is not on the circle. Reduce the problem\
+    \ to maximizing \\(|z-P|\\) on that circle, for which the maximum is \\(|C-P|+r\\\
+    ). Verify the result by constructing the extremal point \\(z=C+r\\frac{C-P}{|C-P|}\\\
+    ), and if a computational check fails with a deterministic environment error,\
+    \ stop retrying and proceed with this analytic/geometric chain.\n• When a geometry\
+    \ problem presents a right triangle with a segment from the right angle perpendicular\
+    \ to the hypotenuse, immediately identify the hypotenuse segments and apply the\
+    \ geometric-mean relations \\(h^2=pq\\), \\(\\text{leg}_1^2=\\text{hypotenuse}\\\
+    cdot p\\), and \\(\\text{leg}_2^2=\\text{hypotenuse}\\cdot q\\); explicitly check\
+    \ that the altitude foot lies on the hypotenuse between its endpoints, then verify\
+    \ the result independently by a Pythagorean identity, an alternate leg/altitude\
+    \ relation, or coordinate distance, and take only the positive root for a length.\n\
+    • When solving symmetric quadratic Diophantine equations of the form p^2+pq+q^2=r^2,\
+    \ first rewrite as (p+q-r)(p+q+r)=pq and prove both factors are positive via r<p+q.\
+    \ Before enumerating factor pairs of pq, explicitly rule out edge cases: if p=2\
+    \ or q=2, use a modulo 4 parity contradiction; if p=q, use 3p^2=r^2 or prime-exponent\
+    \ parity to show impossibility. Then use WLOG ordering and the prime structure\
+    \ of pq to enumerate factor pairs, solve the resulting linear system, and verify\
+    \ the candidate by direct substitution. If computational tools are attempted,\
+    \ treat them only as bounded heuristic checks; if the tool fails identically even\
+    \ on a minimal call such as print('hello'), abandon it immediately and proceed\
+    \ analytically. Finally, when a proof divides by 4 or applies coprime divisibility,\
+    \ justify the division explicitly to avoid hidden compositeness or factor-pair\
+    \ gaps.\n• When counting divisors of \\(N\\) that are divisible by \\(d\\), factor\
+    \ both numbers, impose exponent lower bounds \\(a_i\\ge f_i\\) for each prime\
+    \ in \\(d\\), and count the allowable exponent choices; verify independently by\
+    \ either listing the small-case factors or using the quotient bijection \\(\\\
+    tau(N/d)\\) when \\(d\\mid N\\), while explicitly checking positive-divisor convention\
+    \ and exponent upper/lower bounds.\n• When a problem asks for the least integer\
+    \ k > 1 such that m | n^k - n for every positive integer n, factor m. If m is\
+    \ squarefree, reduce by CRT to prime moduli. For each odd prime p | m, the universal\
+    \ condition is equivalent to p - 1 | k - 1: prove necessity via the cyclic group\
+    \ of units modulo p or a primitive root; the case p | n is automatic, and p =\
+    \ 2 imposes no condition. Therefore the minimal exponent is k = 1 + lcm_{p | m,\
+    \ p odd}(p - 1) = 1 + lambda(m), where lambda is the Carmichael function restricted\
+    \ to this squarefree setting. Verify minimality by proving every valid k must\
+    \ satisfy this lcm | k - 1. Record the sharp boundary: if p^2 | m, then no k >\
+    \ 1 works, because n = p gives v_p(n^k - n) = 1. If computational tools fail with\
+    \ the same infrastructure error repeatedly, stop retrying and pivot to this hand\
+    \ proof with small symbolic checks.\n• When solving a regular-polygon angle problem,\
+    \ especially one with an Asymptote diagram, parse the vertex indices/labels, compute\
+    \ the central angle \\(360^\\circ/n\\), identify the angle vertex, select the\
+    \ intercepted arc not containing that vertex, count its sides \\(k\\), and apply\
+    \ \\(\\theta=k\\cdot 180^\\circ/n\\); then verify independently with a cyclic-quadrilateral\
+    \ supplementary-angle check, a quadrilateral angle-sum check, or a triangle angle-sum\
+    \ check. If a computational tool fails with an environment-level error (e.g.,\
+    \ `InteractiveShell` undefined), do not repeatedly retry it; after at most one\
+    \ retry or smoke test, switch to analytic verification.\n• When a tangent-circle\
+    \ problem involves a common external tangent and asks only for \\(m+n\\) from\
+    \ a fraction \\(m/n\\), solve for and verify the actual radius before trusting\
+    \ the final sum: normalize the tangent line to an axis, use the horizontal-separation\
+    \ lemma \\(2\\sqrt{Rr}\\) (or center-distance equations with external tangency\
+    \ \\(d=R+r\\)), select the additive or subtractive configuration from the diagram,\
+    \ and then check the radius by back-substitution and diagram scale—because coincident-sum\
+    \ values such as \\(4/9\\) and \\(9/4\\) both give \\(m+n=13\\) and can hide a\
+    \ wrong coordinate placement or tangency assumption.\n• When a convex polygon\
+    \ problem requires \\(\\tan(\\theta)\\) to be an integer or rational for each\
+    \ interior angle, first normalize all angles to acute form: replace any obtuse\
+    \ angle \\(\\alpha\\) with \\(\\pi-\\alpha\\) (or use exterior angles \\(\\beta=\\\
+    pi-\\alpha\\)), so the relevant tangent becomes a positive integer. Then use \\\
+    (\\theta\\ge \\pi/4\\) for \\(\\theta\\in(0,\\pi/2)\\) with \\(\\tan\\theta\\\
+    in\\mathbb Z_{>0}\\), apply the angle-sum identity, and split cases by whether\
+    \ any acute angles occur. The extremal maximum is usually attained when all angles\
+    \ are obtuse with \\(\\theta=\\pi/4\\) after normalization, i.e. all interior\
+    \ angles \\(3\\pi/4\\). Always verify sharpness with an explicit convex construction\
+    \ such as the regular octagon, check the equality/tightness condition, and explicitly\
+    \ exclude \\(\\theta=\\pi/2\\) because tangent is undefined and \\(\\tan\\theta=0\\\
+    ) because it would force \\(\\theta=0\\) or \\(\\pi\\).\n• When a planar area\
+    \ problem involves a rectangle, midpoints of sides, and an intersection of cevians,\
+    \ embed the rectangle in coordinates, derive the line equations for the two cevians,\
+    \ solve for their intersection point exactly, compute the target quadrilateral\
+    \ area by shoelace or by decomposition, and verify independently by complement\
+    \ subtraction or diagonal decomposition. Record the reusable configuration-specific\
+    \ pattern \\([ACGF]=\\frac38 wh\\) for the rectangle setup where the shaded quadrilateral\
+    \ is formed from a side-midpoint construction and the cevian intersection. If\
+    \ a computation tool returns the same deterministic infrastructure error twice,\
+    \ stop retrying it and switch to manual symbolic or geometric verification.\n\
+    • When a problem states that \\(N\\) objects occupy an \\(r\\)-row rectangular\
+    \ formation with \\(e\\) empty positions, model it as \\(N=rc-e\\), so \\(N\\\
+    equiv -e\\pmod r\\). After combining congruences via LCM/CRT, filter the resulting\
+    \ arithmetic progression by the interval, verify by checking \\(N+e\\) is divisible\
+    \ by \\(r\\) with an integral positive row length, and explicitly check CRT compatibility\
+    \ modulo \\(\\gcd\\) if the moduli are not coprime.\n• When a competition problem\
+    \ asks for the least perimeter of an integer-sided triangle under a cyclic midpoint/centroid\
+    \ condition, use this reusable pipeline: (i) place one concyclic vertex at the\
+    \ origin or use vector notation, write the circle equation through the origin,\
+    \ substitute the midpoint/centroid expressions, and simplify to a quadratic side\
+    \ relation, here \\(a^2+b^2=2c^2\\); (ii) convert the relation to a Pythagorean\
+    \ triple via \\(p=\\frac{a+b}{2},\\ q=\\frac{a-b}{2}\\), so \\(p^2+q^2=c^2\\)\
+    \ and the perimeter is \\(2p+c\\); (iii) prove minimality by bounding the search,\
+    \ e.g. \\(2p+c<37\\Rightarrow c\\le18\\), and enumerate all relevant Pythagorean\
+    \ triples or all triples satisfying the triangle inequalities \\(2q<c<2p\\); (iv)\
+    \ verify parity/integrality, the non-equilateral condition \\(q\\ne0\\), triangle\
+    \ inequalities, and, when possible, the converse that the side relation actually\
+    \ forces \\(D,C,E,G\\) to be concyclic. If a computational tool fails twice with\
+    \ the same environment error, stop retrying and switch to this analytic pipeline\
+    \ with manual bounded enumeration.\n• When a quartic polynomial in an integer\
+    \ variable is required to be a perfect square, first try to rewrite it as \\(Q(n)^2-C\\\
+    ) for a quadratic \\(Q(n)\\) and a small positive integer \\(C\\) (often by shifting\
+    \ to remove the cubic term or by completing the square). Then set \\(Q(n)^2-m^2=C\\\
+    ), factor as \\((Q(n)-m)(Q(n)+m)=C\\), enumerate positive divisor pairs \\((d,e)\\\
+    ), require \\(d\\equiv e\\pmod 2\\) when \\(C\\) is even so \\(Q(n)=\\frac{d+e}{2}\\\
+    ) and \\(m=\\frac{e-d}{2}\\) are integers, solve \\(Q(n)=\\frac{d+e}{2}\\) in\
+    \ the allowed integer domain, and substitute every candidate back into the original\
+    \ polynomial. This transfers to related equations such as \\(y^2=x^4+Ax^2+B\\\
+    ), where comparing with \\((x^2+C)^2\\) converts the problem into a finite divisor\
+    \ enumeration.\n• When solving work-rate problems with mixed solo, sequential,\
+    \ and together phases, define one solo time per person-task; translate “alone”\
+    \ and “A then B” statements into additive time equations; use any extra ratio\
+    \ condition to close the system; then for together work add rates and take reciprocals.\
+    \ Verify all original equations including redundant ones, keep exact rational\
+    \ arithmetic, check \\(\\gcd(m,n)=1\\), and if an execution tool fails twice with\
+    \ the same environment error, switch to manual exact rational solving rather than\
+    \ repeatedly retrying the tool.\n• When a polynomial \\(P(x)\\) has coefficients\
+    \ restricted to \\(\\{0,1,\\dots,b-1\\}\\) and satisfies \\(P(b)=N\\), its coefficients\
+    \ are exactly the base-\\(b\\) digits of \\(N\\); this converts remainder conditions\
+    \ into base conversion. Convert \\(N\\) to base \\(b\\), read the coefficient\
+    \ of \\(x^k\\) as the \\(k\\)-th digit, and use uniqueness to conclude that any\
+    \ requested least/greatest coefficient is forced. Verify by reconstructing \\\
+    (N\\) as a weighted sum, or by extracting the relevant digit with \\(\\left\\\
+    lfloor N/b^k\\right\\rfloor \\bmod b\\). Boundary: if coefficients may exceed\
+    \ \\(b-1\\), be negative, or are not exactly a complete residue system modulo\
+    \ \\(b\\), uniqueness can fail and the problem may become an actual optimization\
+    \ involving carries or borrowing.\n• When a family of lines ax+by=c is constrained\
+    \ by a linear relation among a,b,c (for example, ordered arithmetic progression\
+    \ c=2b-a), eliminate one coefficient and rewrite the family as a linear expression\
+    \ in the remaining independent parameters, such as a(x+1)+b(y-2)=0. A common point\
+    \ for all admissible parameters must make each parameter coefficient vanish; solve\
+    \ the resulting simultaneous equations. Then verify by back-substitution into\
+    \ the original relation and check boundary conditions: exclude degenerate a=b=0,\
+    \ confirm the intended ordered interpretation of any progression, and recognize\
+    \ that if parameter independence is lost, the common set may not be a unique point."
+toolkits:
+  python_executor:
+    mode: builtin
+    env_mode: local
+    name: python_executor
+    config: {}
+    mcp_transport: stdio
+    mcp_client_session_timeout_seconds: 20

@@ -70,6 +70,25 @@ practice:
       - strategy_type
     random_seed: 42
     aggregation_temperature: 0.0
+    # Raw summaries are persisted first, then reviewed serially against the
+    # latest committed active L0 view. Zero disables the old per-task quota;
+    # deduplication and revisions are decisions with recorded evidence.
+    l0_candidate_review_enabled: true
+    # Upper summaries are candidates too. They are persisted and reviewed in
+    # deterministic order before they can become active L1/L2 experiences.
+    l1_candidate_review_enabled: true
+    l2_candidate_review_enabled: true
+    l0_review_temperature: 0.0
+    l0_review_full_pool_limit: 50
+    l0_review_retrieval: semantic
+    l0_review_top_k: 12
+    l0_review_evidence_per_experience: 4
+    l0_review_rollout_evidence_per_candidate: 2
+    l0_review_source_ids_per_item: 32
+    l0_review_content_chars: 8000
+    l0_review_max_supporting_evidence_chars: 40000
+    l0_review_max_attempts: 3
+    max_l0_per_problem: 0
     include_l0_in_prompt: true    # also append recent L0 cases to the agent prompt
     max_l0_recent: 40             # how many recent L0 to inject into the prompt
     experience_save_path: workspace/hierarchical_experiences/skillsbench_practice.json

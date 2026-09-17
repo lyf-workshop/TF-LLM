@@ -18,6 +18,12 @@ class DataConfig(ConfigBaseModel):
     """Question field name in the dataset"""
     gt_field: str = "answer"
     """Ground truth field name in the dataset"""
+    task_order: list[str] | None = None
+    """Optional exact, namespaced task order supplied by a signed experiment protocol."""
+    task_order_sha256: str | None = None
+    """Canonical hash of task_order; validated before evaluation rows are created."""
+    protocol_metadata: dict | None = None
+    """Signed ablation metadata copied into every persisted evaluation trial."""
 
 
 class LLMRerankConfig(ConfigBaseModel):

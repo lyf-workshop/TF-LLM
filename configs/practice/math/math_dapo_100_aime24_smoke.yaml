@@ -1,0 +1,36 @@
+# @package _global_
+# Isolated paid smoke test for the fixed DAPO-100 learning configuration.
+# It intentionally uses distinct IDs and artifact paths so it cannot seed or
+# resume the measured 100-problem run.
+# This smoke test deliberately keeps the frozen v2 sample: it validates the
+# execution path but is not valid input for semantic-threshold calibration.
+defaults:
+  - /practice/math/math_dapo_100_aime24
+  - _self_
+
+exp_id: "math_dapo_random_100_aime24_deepseek_v4_flash_seed42_smoke_v2"
+
+practice:
+  epochs: 1
+  batch_size: 1
+  grpo_n: 1
+  rollout_concurrency: 1
+  rollout_data_truncate: 1
+
+  hierarchical_learning:
+    # Preserve the already-created smoke_v2 snapshot's historical language
+    # contract. A new English smoke must use a new exp_id and artifact paths.
+    experience_output_language: same_as_input
+    embedding_cache_path: workspace/cache/experience_embeddings_math_dapo_random_100_aime24_deepseek_v4_flash_seed42_smoke_v2.sqlite3
+    experience_save_path: workspace/hierarchical_experiences/math_dapo_random_100_aime24_deepseek_v4_flash_seed42_smoke_v2.json
+    clustering_audit_path: workspace/hierarchical_experiences/math_dapo_random_100_aime24_deepseek_v4_flash_seed42_smoke_v2.clusters.jsonl
+
+data:
+  practice_dataset_name: "DAPO-Math-17k-Random-100-Seed42-No-AIME24-v2"
+  # This one-item execution-path smoke test predates the reviewed v3 manifest
+  # and is not a measured/calibration run.
+  require_practice_manifest: false
+
+evaluation:
+  exp_id: "math_dapo_random_100_aime24_deepseek_v4_flash_seed42_smoke_v2"
+  concurrency: 1

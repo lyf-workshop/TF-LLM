@@ -67,7 +67,7 @@ SINGLE_ROLLOUT_SUMMARY_TEMPLATE_SP: |
   </Output Requirements>
 
   <Language>
-  Use the same language as the input trajectory.
+  {{ experience_output_language_instruction }}
   </Language>
 
 SINGLE_ROLLOUT_SUMMARY_TEMPLATE_UP: |
@@ -131,6 +131,10 @@ SINGLE_QUERY_GROUP_ADVANTAGE_SP: |
     - Derive principles that apply to future agent inputs, focusing on how to improve the learning objective
     - If an insight requires contextual preconditions to be universally valid, explicitly frame it as "When [condition], [strategy/principle]" to maintain applicability boundaries
   </Task Instructions>
+
+  <Language>
+  {{ experience_output_language_instruction }}
+  </Language>
 
   <Output Format>
   Include corresponding tags (e.g., <Experiences>...</Experiences>) as follows to organize the output:
@@ -209,6 +213,10 @@ GROUP_EXPERIENCE_UPDATE_TEMPLATE_SP: |
   - **NONE**: If the new experience is already fully covered by an existing experience, or if it is redundant, irrelevant, or does not add value, choose NONE and make no change.
 
   3. The experience should be formatted as "Experience name: Brief description." where the name is a concise phrase (one or two words) and the description is a sentence to capture the essence and address the learning objective.
+
+  <Language>
+  {{ experience_output_language_instruction }}
+  </Language>
 
   <Output Requirements>
   You MUST output a single, well-formed JSON array. Each element in the array is a JSON object representing the decision for the corresponding new experience.
@@ -293,6 +301,10 @@ BATCH_EXPERIENCE_UPDATE_TEMPLATE_SP: |
     - If there is a DELETE operation for an ID, it overrides any UPDATE operations for that ID; so the net operation should be DELETE. DELETE takes precedence because it indicates the experience is invalid or outdated.
     - If multiple ADD operations have similar or identical content, merge them into one ADD to avoid duplicates. When merging, ensure the resulting experience captures the essential insight without redundant details. If they are distinct and provide unique insights, keep them as separate ADD operations. Always ensure each added experience is applicable towards the learning objective.
     - Handle conflicts: If operations conflict, resolve them by considering the context, reliability, and specificity of their content. Prioritize insights that are most applicable towards the learning objective. If some new experiences suggest one strategy and others suggest another, create a unified strategy that encompasses both if possible, or choose the most appropriate based on common sense and generality.
+
+  <Language>
+  {{ experience_output_language_instruction }}
+  </Language>
 
   <Output Requirements>
   You MUST output a single, well-formed JSON array. Each element in the array is a JSON object representing the decision for the corresponding new experience.

@@ -1,0 +1,46 @@
+# @package _global_
+# Reviewed, leakage-screened DAPO-100 experience-learning run evaluated on AIME24.
+# Build the v3 dataset with scripts/data/create_dapo_100.py --enrich before starting.
+defaults:
+  - /practice/math/TEMPLATE_math_practice
+  - _self_
+
+exp_id: "math_dapo_random_100_aime24_deepseek_v4_flash_seed42_v3"
+
+practice:
+  # First measured collection is exactly one pass over the frozen 100 tasks.
+  # Additional evidence collection must use an explicitly versioned experiment.
+  epochs: 1
+  batch_size: 100
+  rollout_data_truncate: 100
+  shuffle_data: false
+  rollout_concurrency: 8
+
+  hierarchical_learning:
+    # Keep every L0/L1/L2 experience in the language expected by the pinned
+    # English sentence encoder, independently of source-problem wording.
+    experience_output_language: english
+    experience_save_path: workspace/hierarchical_experiences/math_dapo_random_100_aime24_deepseek_v4_flash_seed42_v3.json
+    clustering_audit_path: workspace/hierarchical_experiences/math_dapo_random_100_aime24_deepseek_v4_flash_seed42_v3.clusters.jsonl
+
+data:
+  practice_dataset_name: "DAPO-Math-17k-Random-100-Seed42-No-AIME24-v3"
+  require_practice_manifest: true
+  practice_manifest_path: "configs/data/math/dapo_random_100_seed42_no_aime24_v3.json"
+  practice_manifest_split: "training_calibration_v1"
+  practice_manifest_expected_records: 100
+
+evaluation:
+  # TrainingFreeGRPO persists rollout rows and names the generated Agent YAML
+  # from this nested ID, so keep it aligned with the top-level experiment ID.
+  exp_id: "math_dapo_random_100_aime24_deepseek_v4_flash_seed42_v3"
+  concurrency: 8
+  agent:
+    model:
+      model_provider:
+        type: chat.completions
+        model: "deepseek-v4-flash"
+  judge_model:
+    model_provider:
+      type: chat.completions
+      model: "deepseek-v4-flash"

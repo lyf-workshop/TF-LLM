@@ -1,0 +1,43 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: deepseek-v4-flash
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: math_agent
+  instructions: "Solve the following problem step by step. You now have the ability\
+    \ to selectively write executable Python code to enhance your reasoning process,\
+    \ e.g., calulating numbers and verifying math computations. Never directly just\
+    \ printing your textual reasoning in Python. The Python code will be executed\
+    \ by an external sandbox, and the output (returned as a dict with the message\
+    \ in the \"message\" field) can be returned to aid your reasoning and help you\
+    \ arrive at the final answer. The Python code should be complete scripts, including\
+    \ necessary imports. \nEach code snippet is wrapped with \n```python\ncode snippet\n\
+    ```.\n\nThe last part of your final response should be in the following format:\n\
+    <answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\nSpecific lessons\
+    \ from recent tasks:\n• 当遇到正四棱锥、异面直线夹角等可用坐标处理的三维几何题时，应优先建立中心化坐标系并利用统一缩放简化数据，例如设底面边长为\
+    \ \\(2\\)、高为 \\(1\\)（顶点取原点正上方或底面中心上方，底面顶点取 (±1,±1,0) 等对称坐标），再由比例关系确定分点坐标（如中点、\\\
+    (VN:ND=1:2\\) 等）。随后用三项验证检查答案：“比例分点方向要核对”（确认分点位于指定线段上且比例方向正确）、“异面直线夹角余弦取绝对值”（用\
+    \ \\(\\cos\\theta=\\frac{|\\vec u\\cdot\\vec v|}{|\\vec u||\\vec v|}\\) 避免方向符号导致钝角结果）、“最终根式需最简”（将余弦化为\
+    \ \\(\\frac{\\sqrt m}{n}\\) 的最简分数形式再求 \\(m+n\\)）。当代码工具出现 `InteractiveShell is\
+    \ not defined` 这类环境级错误，且连 `print(\"hello\")` 这类最小代码都失败时，应立即停止重试同一工具，改用解析手算或换用其他工具，以避免无效步骤。该经验在本题中导向\
+    \ \\(m=11,n=11,m+n=22\\) 的正确结果，并可迁移到类似的立体几何与向量夹角问题。"
+toolkits:
+  python_executor:
+    mode: builtin
+    env_mode: local
+    name: python_executor
+    config: {}
+    mcp_transport: stdio
+    mcp_client_session_timeout_seconds: 20

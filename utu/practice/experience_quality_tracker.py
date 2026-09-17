@@ -188,6 +188,60 @@ class ExperienceQualityTracker:
             f"(mean_reward={mean_reward:.3f})"
         )
 
+    def record_outcomes_by_experience(
+        self,
+        rollouts_by_experience: dict[str, list[EvaluationSample]],
+        step: int,
+    ) -> None:
+        """Record outcomes only for rollouts that received each experience."""
+        if not rollouts_by_experience:
+            return
+
+        now = datetime.datetime.now().isoformat()
+        with self._lock, self._connect() as conn:
+            for experience_id, rollouts in rollouts_by_experience.items():
+                if not rollouts:
+                    continue
+                num_rollouts = len(rollouts)
+                num_successes = sum(
+                    1
+                    for rollout in rollouts
+                    if rollout.reward is not None
+                    and rollout.reward >= self.reward_threshold
+                )
+                rewards = [rollout.reward for rollout in rollouts if rollout.reward is not None]
+                mean_reward = sum(rewards) / max(len(rewards), 1)
+                conn.execute(
+                    """
+                    UPDATE experience_quality
+                    SET inject_count  = inject_count  + ?,
+                        success_count = success_count + ?
+                    WHERE experience_id = ?
+                    """,
+                    (num_rollouts, num_successes, experience_id),
+                )
+                conn.execute(
+                    """
+                    INSERT INTO injection_log
+                        (step, experience_id, num_rollouts,
+                         num_successes, mean_reward, recorded_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        step,
+                        experience_id,
+                        num_rollouts,
+                        num_successes,
+                        mean_reward,
+                        now,
+                    ),
+                )
+        logger.info(
+            "Step %s: recorded task-specific outcomes for %d experiences",
+            step,
+            len(rollouts_by_experience),
+        )
+
     # ------------------------------------------------------------------
     #  Quality scoring
     # ------------------------------------------------------------------

@@ -1,0 +1,77 @@
+# @package _global_
+# Validated template for the KORGym Alphabetical Sorting train/eval datasets.
+defaults:
+  - /eval/korgym/alphabetical_sorting_eval@evaluation
+  - _self_
+
+exp_id: "template_korgym_alphabetical_sorting"
+
+practice:
+  epochs: 3
+  batch_size: 20
+  grpo_n: 3
+  rollout_concurrency: 4
+  rollout_temperature: 0.7
+  rollout_data_truncate: 100
+  task_timeout: 600
+  shuffle_data: true
+  do_eval: false
+  eval_strategy: "epoch"
+  agent_objective: |
+    input: A 3x3 letter grid containing a hidden nine-letter orthogonal path
+    output: The valid English word formed by visiting every grid cell once
+  learning_objective: |
+    Extract reusable candidate generation, letter accounting, path search, and
+    final-answer verification strategies grounded in actual game outcomes.
+  given_ground_truth: true
+  num_experiences_per_query: 1
+
+  hierarchical_learning:
+    enabled: true
+    clustering_enabled: true
+    clustering_method: agglomerative
+    embedding_provider: sentence_transformer
+    embedding_model_name: sentence-transformers/all-MiniLM-L6-v2
+    embedding_model_revision: c9745ed1d9f207416be6d2e6f8de32d1f16199bf
+    embedding_dimensions: 384
+    embedding_device: cpu
+    embedding_batch_size: 32
+    embedding_cache_path: workspace/cache/experience_embeddings.sqlite3
+    embedding_local_files_only: true
+    l0_similarity_threshold: 0.60
+    l1_similarity_threshold: 0.55
+    similarity_thresholds_provisional: true
+    allow_provisional_aggregation: false
+    min_l0_per_l1: 5
+    min_l1_per_l2: 3
+    max_cluster_size: 20
+    use_metadata_constraints: true
+    hard_constraint_fields: [task_stage, failure_mode]
+    soft_constraint_fields: [domain, task_family, tool_type, strategy_type]
+    random_seed: 42
+    aggregation_temperature: 0.0
+    l0_candidate_review_enabled: true
+    l1_candidate_review_enabled: true
+    l2_candidate_review_enabled: true
+    l0_review_temperature: 0.0
+    l0_review_retrieval: semantic
+    max_l0_per_problem: 0
+    include_l0_in_prompt: true
+    max_l0_recent: 20
+    experience_save_path: workspace/hierarchical_experiences/template_korgym_alphabetical_sorting.json
+    clustering_audit_path: workspace/hierarchical_experiences/template_korgym_alphabetical_sorting.clusters.jsonl
+
+data:
+  practice_dataset_name: "KORGym-AlphabeticalSorting-Train-100"
+
+korgym:
+  enabled: true
+  game_name: "22-alphabetical_sorting"
+  game_host: "localhost"
+  game_port: 8776
+  level: 3
+  num_seeds: 100
+  max_rounds: 1
+
+evaluation:
+  concurrency: 4

@@ -117,6 +117,23 @@ class TestRecordOutcomes:
         assert row["inject_count"] == 1
         assert row["success_count"] == 0
 
+    def test_records_only_rollouts_selected_for_each_experience(
+        self, tracker: ExperienceQualityTracker
+    ):
+        tracker.record_injection(["G0", "G1"], step=0)
+        tracker.record_outcomes_by_experience(
+            {
+                "G0": [_make_sample(1.0), _make_sample(0.0)],
+                "G1": [_make_sample(1.0)],
+            },
+            step=0,
+        )
+
+        assert tracker.get_stats("G0")["inject_count"] == 2
+        assert tracker.get_stats("G0")["success_count"] == 1
+        assert tracker.get_stats("G1")["inject_count"] == 1
+        assert tracker.get_stats("G1")["success_count"] == 1
+
 
 # ------------------------------------------------------------------ #
 #  get_quality_score

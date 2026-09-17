@@ -26,6 +26,5 @@ korgym:
   game_port: 8775
   level: 1  # ✅ 添加level参数
   max_rounds: 1  # Single-turn game
-  timeout_per_game: 600
 
 

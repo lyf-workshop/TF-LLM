@@ -1,0 +1,80 @@
+# @package _global_
+# Practical end-to-end DAPO-100 experience-learning run.
+#
+# This deliberately uses the already available frozen v2 sample and permits
+# provisional similarity thresholds. It is intended to generate and inspect a
+# complete L0 -> L1 -> L2 hierarchy, not to claim calibrated experiment results.
+defaults:
+  - /practice/math/TEMPLATE_math_practice
+  - _self_
+
+exp_id: "math_dapo_random_100_full_hierarchy_en_v1"
+
+practice:
+  epochs: 1
+  batch_size: 100
+  grpo_n: 5
+  rollout_concurrency: 32
+  rollout_data_truncate: 100
+  shuffle_data: false
+  do_eval: false
+  num_experiences_per_query: 1
+
+  hierarchical_learning:
+    enabled: true
+    experience_output_language: english
+    clustering_enabled: true
+    embedding_provider: sentence_transformer
+    embedding_model_name: sentence-transformers/all-MiniLM-L6-v2
+    embedding_model_revision: c9745ed1d9f207416be6d2e6f8de32d1f16199bf
+    embedding_dimensions: 384
+    embedding_device: cpu
+    embedding_batch_size: 32
+    embedding_cache_path: workspace/cache/experience_embeddings_math_dapo_100_full_hierarchy_en_v1.sqlite3
+    embedding_local_files_only: true
+
+    # Operational starting points only. They intentionally remain labelled
+    # provisional, while this run explicitly permits using them.
+    l0_similarity_threshold: 0.60
+    l1_similarity_threshold: 0.55
+    l0_similarity_threshold_provisional: true
+    l1_similarity_threshold_provisional: true
+    allow_provisional_aggregation: true
+    min_l0_per_l1: 5
+    min_l1_per_l2: 3
+    max_cluster_size: 20
+
+    # Do not gate admission on an LLM's self-reported confidence. Structural
+    # validation, conflict detection, evidence checks, and candidate review
+    # remain authoritative.
+    l1_confidence_threshold: 0.0
+    l2_confidence_threshold: 0.0
+
+    aggregation_temperature: 0.0
+    l0_candidate_review_enabled: true
+    l1_candidate_review_enabled: true
+    l2_candidate_review_enabled: true
+    l0_review_temperature: 0.0
+
+    experience_save_path: workspace/hierarchical_experiences/math_dapo_random_100_full_hierarchy_en_v1.json
+    clustering_audit_path: workspace/hierarchical_experiences/math_dapo_random_100_full_hierarchy_en_v1.clusters.jsonl
+
+data:
+  practice_dataset_name: "DAPO-Math-17k-Random-100-Seed42-No-AIME24-v2"
+  require_practice_manifest: false
+
+evaluation:
+  exp_id: "math_dapo_random_100_full_hierarchy_en_v1"
+  concurrency: 8
+  agent:
+    model:
+      model_provider:
+        type: chat.completions
+        model: "deepseek-v4-flash"
+      model_params:
+        temperature: 0.2
+        top_p: 0.95
+  judge_model:
+    model_provider:
+      type: chat.completions
+      model: "deepseek-v4-flash"

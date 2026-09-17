@@ -26,5 +26,4 @@ korgym:
   game_port: 8776
   level: 3
   max_rounds: 1  # Single-turn game
-  timeout_per_game: 300  # 5 minutes (simpler task)
 

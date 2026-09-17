@@ -1,0 +1,258 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: deepseek-v4-flash
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params:
+    temperature: 0.2
+    top_p: 0.95
+agent:
+  name: math_agent
+  instructions: "Solve the following problem step by step. You now have the ability\
+    \ to selectively write executable Python code to enhance your reasoning process,\
+    \ e.g., calulating numbers and verifying math computations. Never directly just\
+    \ printing your textual reasoning in Python. The Python code will be executed\
+    \ by an external sandbox, and the output (returned as a dict with the message\
+    \ in the \"message\" field) can be returned to aid your reasoning and help you\
+    \ arrive at the final answer. The Python code should be complete scripts, including\
+    \ necessary imports. \nEach code snippet is wrapped with \n```python\ncode snippet\n\
+    ```.\n\nThe last part of your final response should be in the following format:\n\
+    <answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\nSpecific lessons\
+    \ from recent tasks:\n• When solving small finite probability/counting problems\
+    \ involving mean vs. median or order statistics, sort the outcomes as \\(x \\\
+    le y \\le z\\), reduce the target inequality to a gap or complement condition\
+    \ such as \\(x+z>2y\\). When the range is symmetric (e.g., dice values \\(1,\\\
+    dots,n\\)), use the reflection \\(d \\mapsto n+1-d\\) to equate the two strict\
+    \ inequalities and count only equality cases, which often form arithmetic progressions\
+    \ with correct ordered multiplicities. Count sorted cases with correct multiplicities,\
+    \ reduce the final fraction and check \\(\\gcd(m,n)=1\\) when extracting \\(m+n\\\
+    ), and verify independently via symmetry, complement, or tie-counting. If a computational\
+    \ tool fails with the same environment-level error even on trivial input, stop\
+    \ retrying and pivot to manual reasoning or another method.\n• When a problem\
+    \ imposes a pairwise sign condition on slopes between lattice points, translate\
+    \ it into a monotone-chain condition: positive slope for \\(x_i<x_j\\) means \\\
+    (y_i<y_j\\), so all \\(x\\)- and \\(y\\)-coordinates must be distinct and ordered\
+    \ consistently (equal \\(x\\)-coordinates give infinite slope and equal \\(y\\\
+    )-coordinates give zero slope; both are excluded by 'positive'). For size \\(k\\\
+    ), choose \\(k\\) \\(x\\)-values and \\(k\\) \\(y\\)-values independently and\
+    \ pair them increasingly; this pairing is unique. Include \\(k=0\\) for the empty\
+    \ set, so an \\(n\\times n\\) grid gives \\(\\sum_{k=0}^n\\binom{n}{k}^2=\\binom{2n}{n}\\\
+    ). Verify with feasible small cases such as \\(n=1,2,3\\) giving \\(2,6,20\\),\
+    \ an independent DP recurrence, or direct expansion, not infeasible full brute\
+    \ force, and parameterize carefully (e.g. coordinates \\(\\{0,\\dots,6\\}\\) mean\
+    \ \\(N=7\\), not \\(8\\)). If a code-execution tool fails with a persistent environment-level\
+    \ error such as `InteractiveShell is not defined`, stop retrying and fall back\
+    \ to manual/symbolic verification plus independent small-case or DP checks.\n\
+    • When a problem gives cyclic reciprocal equations \\(a+\\frac1b=p,\\ b+\\frac1c=q,\\\
+    \ c+\\frac1a=r\\) and asks for \\(abc+\\frac1{abc}\\), multiply the three equations\
+    \ and add the three original equations: the product expansion is \\(abc+\\frac1{abc}+\\\
+    left(a+b+c+\\frac1a+\\frac1b+\\frac1c\\right)\\), while the sum is \\(p+q+r=a+b+c+\\\
+    frac1a+\\frac1b+\\frac1c\\), so \\(abc+\\frac1{abc}=pqr-(p+q+r)\\). Verify nonzero\
+    \ variables, check the expansion matches the cyclic sum, and confirm arithmetic;\
+    \ if the equations are not cyclic or variables may vanish, this shortcut is not\
+    \ valid and requires another method with domain checks. If a computational tool\
+    \ fails with the same infrastructure error, pivot to manual expansion rather than\
+    \ retrying the same tool.\n• When solving 3D tangency problems involving spheres\
+    \ tangent to two intersecting planes, reduce immediately to a 2D cross-section\
+    \ perpendicular to the intersection line \\(\\ell\\); parametrize a radius-\\\
+    (r\\) sphere on the internal bisector by center distance \\(r\\csc\\theta\\) and\
+    \ tangency-point distance \\(r\\cot\\theta\\), and on the external bisector by\
+    \ \\(r\\sec\\theta\\) and \\(r\\tan\\theta\\). Write external tangency as \\(d_{ij}^2+(z_i-z_j)^2=(r_i+r_j)^2\\\
+    ), then explicitly enumerate or analytically reject same-ray, opposite-ray, and\
+    \ mixed-bisector placements using inequalities such as \\(d_{\\min}\\ge r_i+r_j\\\
+    ) or discriminant negativity. After solving, back-substitute the angle into all\
+    \ center-distance equations, check \\(\\csc\\theta>1\\), positivity, \\(\\gcd(m,n)=1\\\
+    ), and \\(m+n\\). If a computational tool fails with the same environment-level\
+    \ error, e.g. `InteractiveShell is not defined`, retry at most once, then pivot\
+    \ to analytic reasoning—but still perform manually the enumeration and verification\
+    \ steps the tool was meant to cover.\n• When finding the last k digits of a power\
+    \ whose base is divisible by 5 (e.g., 5^n), reduce modulo 10^k=2^k5^k. If the\
+    \ exponent n is at least k, the component modulo 5^k is 0, so reduce the other\
+    \ component modulo 2^k using the multiplicative order (or Carmichael exponent)\
+    \ rather than only Euler’s totient. Solve the resulting CRT linear congruence\
+    \ with a modular inverse—for example write x=5^k t and solve t≡5^n·(5^k)^{-1}\
+    \ mod 2^k—and verify by checking both CRT residues and any available periodicity\
+    \ or smaller-modulus check; pad the residue to exactly k digits. Boundary: if\
+    \ n<k, the zero-residue shortcut fails and the 5-adic valuation must be handled\
+    \ explicitly. If a computation tool fails with a systemic environment error unrelated\
+    \ to the submitted code, retry at most once or diagnose minimally, then switch\
+    \ to manual reasoning.\n• 当题目要求含参数圆盘或垂直凸集 \\(N\\) 完全落入 \\(y\\ge g(x)\\) 型区域 \\\
+    (M\\) 时，先将 \\(M\\cap N=N\\) 化为 \\(N\\subseteq M\\)，再按 \\(N\\) 的 \\(x\\) 投影逐列比较最低点，把条件化为\
+    \ \\(a\\ge \\max(g(x)+\\text{下边界偏移})\\)；用对称换元降为一维后，必须同时检查驻点、端点（含导数无定义端点）和导数符号（或二阶导），并用切点或取等点验证充分性；注意该换元的适用边界：若圆盘为\
+    \ \\((x-c)^2+(y-a)^2\\le r^2\\)（中心可不在 \\(y\\) 轴上），投影区间变为 \\([c-r,c+r]\\)，仍可用逐列最低点法，但不可盲目套用\
+    \ \\(t=x^2\\) 之类的对称换元，需重新分析该区间上的最值；若计算工具出现确定性环境错误（如 InteractiveShell 未定义），一次失败即回退解析推导或最小测试，不重复同一调用；最后按题目要求输出\
+    \ \\(k+m\\) 并确认分数最简。\n• When a problem asks for the largest possible number of\
+    \ terms \\(n\\) of an arithmetic progression (or similar structured sum) subject\
+    \ to a quadratic inequality, treat the free parameter as continuous unless the\
+    \ statement explicitly imposes integrality, and reduce the condition to a one-variable\
+    \ bound on \\(n\\) by completing the square. Example (first term \\(a\\), common\
+    \ difference 4, sum from the second term on): the condition is \\(a^2+(n-1)a+2n(n-1)<100\\\
+    ), i.e. \\(\\left(a+\\frac{n-1}{2}\\right)^2+\\frac{(n-1)(7n+1)}{4}<100\\). Since\
+    \ the square is nonnegative, the condition is satisfiable for a given \\(n\\)\
+    \ exactly when \\(\\frac{(n-1)(7n+1)}{4}<100\\), i.e. \\(7n^2-6n-401<0\\), giving\
+    \ \\(n<\\frac{3+16\\sqrt{11}}{7}\\approx 8.009\\), so \\(n\\le 8\\). This minimum-based\
+    \ form is a necessary AND sufficient condition for existence of a real \\(a\\\
+    ), not merely a necessary one, so state the existence quantifier explicitly. Always\
+    \ prove sharpness by constructing an admissible equality/attainment case: with\
+    \ \\(a=-\\frac72\\) (where the square vanishes) and \\(n=8\\), the original expression\
+    \ equals \\(\\frac{399}{4}=99.75<100\\). Record the boundary that unstated integrality\
+    \ of \\(a\\) changes the answer: if \\(a\\in\\mathbb Z\\) were required, \\(a=-\\\
+    frac72\\) is inadmissible and the maximum drops to \\(n=7\\); also note the degenerate\
+    \ \\(n=1\\) empty-sum convention. Verification: re-substitute the constructed\
+    \ equality case into the ORIGINAL (not only the completed-square) expression,\
+    \ and check the inequality \\(n<\\) root with the exact radical rather than a\
+    \ rounded decimal. If a computational tool fails with an environment-level error\
+    \ (e.g. `InteractiveShell is not defined`), stop retrying code variants and evaluate\
+    \ the closed-form minimum formula \\(\\frac{(n-1)(7n+1)}{4}\\) manually.\n• When\
+    \ solving a problem of the form “all contiguous substrings of a number/string\
+    \ satisfy property \\(P\\)” (especially primality), first derive constraints from\
+    \ the shortest substrings: length-1 substrings restrict the allowed alphabet/digits,\
+    \ and length-2 substrings restrict allowed adjacent transitions. Build a directed\
+    \ graph or automaton of valid short blocks, handle leading-digit exceptions explicitly\
+    \ (e.g., \\(2\\) and \\(5\\) can appear only first because internal occurrences\
+    \ create composite endings), and use forbidden repeated blocks or composite prefixes\
+    \ to prune branches monotonically. Then prove finiteness either by finding a short\
+    \ forbidden substring or by showing that the only surviving short block cannot\
+    \ overlap consistently to extend further; enumerate all survivors, verify their\
+    \ primality and all their substrings, and re-sum independently. If a computation\
+    \ tool fails with a systemic environment/wrapper error, do not keep changing the\
+    \ code—after at most one diagnostic retry, switch to this manual constraint-graph\
+    \ reasoning and use small targeted checks only if a working tool is available.\n\
+    • When counting arrangements/orders of identical objects with endpoint constraints\
+    \ expressed as an inclusive “or,” model the orders as multiset sequences by choosing\
+    \ positions for one object type; for “first A or last A or both,” count the desired\
+    \ union via inclusion–exclusion |A|+|B|-|A∩B| or complement counting (“neither\
+    \ endpoint is A” becomes “both endpoints are the other type”), and independently\
+    \ verify with a disjoint endpoint-case partition and/or the other method. Explicitly\
+    \ check boundaries: identical vs. distinct objects, inclusive vs. exclusive “or,”\
+    \ and whether there are enough objects to place the required endpoints. If a computational\
+    \ tool fails at the environment level, stop after one minimal diagnostic, switch\
+    \ to analytic verification, and do not claim unexecuted brute-force evidence.\n\
+    • When solving integer cuboid-cutting optimization problems, first justify that\
+    \ each straight cut yielding cuboids must be face-parallel, reducing the geometry\
+    \ to integer partitions of side lengths; then use WLOG symmetry, dominance pruning,\
+    \ and half-volume/balancing lower bounds (splitting volume V leaves a piece of\
+    \ volume at least V/2) to prove a lower bound, and always pair the bound with\
+    \ an explicit integral construction attaining it. Verify integrality, volume conservation,\
+    \ the equality case, and that all final volumes sum to the original volume. Failure\
+    \ boundary for tooling: if a computational verification tool returns a framework-level\
+    \ error such as `InteractiveShell is not defined`, do not treat it as a math error;\
+    \ after at most one diagnostic retry (e.g. a minimal code probe to confirm the\
+    \ environment is broken) pivot immediately to manual case analysis or another\
+    \ independent check rather than repeatedly retrying.\n• When a competition problem\
+    \ requires a quadratic expression in \\(n\\) to be a perfect square, complete\
+    \ the square to obtain a difference of squares. For \\(n^2+Bn+c=m^2\\), write\
+    \ \\((n+B/2)^2-m^2=(B/2)^2-c=K\\), so \\((n+B/2-m)(n+B/2+m)=K\\). If \\(B\\) is\
+    \ odd, use the doubled form \\((2n+B)^2-(2m)^2=B^2-4c\\) to avoid fractions. Factor\
+    \ the constant and enumerate divisor pairs, enforcing parity of the factor sums,\
+    \ sign restrictions, positivity of \\(n\\), and the \\(m=0\\) boundary case. Compute\
+    \ each candidate \\(n\\) and verify it by direct substitution. Ensure the divisor\
+    \ list is complete, e.g. by confirming primality of remaining factors. Treat computational\
+    \ brute force only as a check unless a completeness bound is proved; if the code\
+    \ tool fails with the same environment-level error after limited retries, stop\
+    \ retrying and pivot immediately to the analytic method rather than repeating\
+    \ similar calls.\n• 当遇到“含参数三角式对任意 x∈R 恒成立且参数有区间约束”的竞赛题时：先将和角展开并合并为 A cos x + B\
+    \ sin x ≡ 0，由 {cos x, sin x} 线性无关得 A=B=0；随后用区间与象限定号缩小范围，完整列出反三角分支（如 cos β=sin\
+    \ α 需列 β=2kπ±(π/2−α)）并用另一系数方程排除伪解；再用 sin²+cos²=1 消元求主参数，但该消元只给必要条件，最后必须回代两个系数方程或原恒等式，并检查开区间端点、分支遗漏和分数约分。失效边界：系数为零法仅适用于对整个\
+    \ R 恒成立；若只在子区间恒成立则不能直接推出系数为零。工具边界：若使用计算工具，应在符号推导后独立求解或验证，不要先硬编码候选答案做循环验证；遇到环境级错误一次后停止重试，转手工推导或独立回代。本题据此得到\
+    \ α=3π/4，β=7π/4，m+n+p+q=18。\n• When solving bounded divisor-sum competition problems,\
+    \ classify integers with exactly four divisors as \\(p^3\\) or \\(pq\\), use \\\
+    (\\sigma(p^3)=1+p+p^2+p^3\\) and \\(\\sigma(pq)=(p+1)(q+1)\\). In the \\(pq\\\
+    ) case reduce the condition to \\(n=(p+1)(q+1)\\), enumerate factor pairs \\(ab=n\\\
+    ) with \\(a=p+1\\), \\(b=q+1\\), require \\(a-1,b-1\\) prime and distinct, and\
+    \ when \\(p<q\\) use \\(p+1\\le \\sqrt n\\) to sharply bound the search. In the\
+    \ \\(p^3\\) case use monotonicity of \\(1+p+p^2+p^3\\) to rule out intervals by\
+    \ checking adjacent primes, and apply parity and monotonic bracketing to reduce\
+    \ cases. Always verify by re-substituting the actual divisors and recomputing\
+    \ the divisor sum; if a computational tool fails identically even on a minimal\
+    \ diagnostic with an environment-level error such as `InteractiveShell is not\
+    \ defined`, stop retrying and pivot to a fully manual proof, using exhaustive\
+    \ factor-pair checks and back-substitution of witnesses.\n• When a problem asks\
+    \ for the last \\(k\\) digits of \\(N\\) in base \\(b\\), compute \\(N\\bmod b^k\\\
+    ); simplify the base modulo \\(b^k\\); if \\(\\gcd(\\text{base},b^k)=1\\), reduce\
+    \ the exponent modulo \\(\\varphi(b^k)\\), Carmichael’s \\(\\lambda(b^k)\\), or\
+    \ the actual multiplicative order; otherwise use CRT, prime-power decomposition,\
+    \ or valuation arguments. Convert the final residue to exactly \\(k\\) base-\\\
+    (b\\) digits, padding with leading zeros as needed, and verify with an independent\
+    \ modulo-\\(b^k\\) computation rather than only a smaller-modulus check. For example,\
+    \ \\(2018^{2018} \\bmod 49\\): \\(2018\\equiv 9\\), \\(\\varphi(49)=42\\), \\\
+    (2018\\equiv 2\\pmod{42}\\), so \\(9^{2018}\\equiv 9^2\\equiv 32\\pmod{49}\\),\
+    \ giving \\((44)_7\\). If a computation tool returns an environment-level error\
+    \ such as `InteractiveShell is not defined`, make at most one minimal diagnostic\
+    \ and then switch to manual reasoning.\n• When a process consists of repeated\
+    \ independent trials and absorption/ruin requires exactly \\(r\\) occurrences\
+    \ of a fixed event with probability \\(p\\), reduce the expected time to \\(r/p\\\
+    ) (negative binomial/geometric waiting time), treating no-change outcomes as self-loops\
+    \ that still consume time. Verify with first-step equations \\(E_m=1+\\sum P(m\\\
+    to n)E_n\\) and \\(E_0=0\\), or with self-loop elimination \\(E=1/p+E_{\\text{next}}\\\
+    ). Before using this shortcut, check that the initial amount is an exact multiple\
+    \ of the fixed step, probabilities are constant, there are no gains or variable\
+    \ steps, and the final absorbing trial is counted in “until” time. Cross-check\
+    \ by decomposing into \\(r\\) geometric waits of mean \\(1/p\\), by expected no-change\
+    \ weeks \\(r(1-p)/p\\), and by substituting solved values back into the recurrence;\
+    \ if any condition fails, switch to a full Markov-chain state-space analysis.\n\
+    • When solving cyclic integer-sequence problems with a local signed condition\
+    \ such as \\(a-b+c-d+e=C\\), first reduce it to a subset-sum/pair-sum equation\
+    \ \\(Q=(S-C)/2\\), then use sliding-window sums \\(W_i\\) and their differences\
+    \ \\(W_{i+1}-W_i=x_{i+5}-x_i\\) to propagate congruences; use \\(\\gcd(k,N)=1\\\
+    ) to make this propagation global. Prove the final vanishing by an explicit \\\
+    (2\\)-adic induction or infinite descent, including the preservation/lifting step,\
+    \ verify the constant solution, and state the boundary that non-coprime \\(k,N\\\
+    ) may allow nonconstant solutions. If an exploratory code tool fails with an infrastructure\
+    \ error such as `InteractiveShell is not defined`, do not retry it; pivot to manual\
+    \ reasoning. Finally, match the evaluator’s requested final-answer format: for\
+    \ non-multiple-choice numeric answers, output the isolated numeric value \\(29\\\
+    ) rather than only the full tuple.\n• When an equation separates as \\(f(x)+f(y)=c\\\
+    ) and each \\(f\\) is a nested absolute value, rewrite \\(f(t)=\\operatorname{dist}(t,A)\\\
+    ) with \\(A\\) the finite zero-set; then the solution set is the union of boundaries\
+    \ of \\(L_1\\)-balls of radius \\(c\\) centered at \\(A\\times A\\). Before adding\
+    \ perimeters, prove the balls’ interiors are disjoint and intersections have zero\
+    \ length—e.g., adjacent centers at \\(L_1\\) distance \\(2c\\) touch only at points.\
+    \ If centers are closer than \\(2c\\), do not simply add perimeters; merge overlapping\
+    \ segments or use inclusion-exclusion. When using symmetry, check that axes or\
+    \ shared boundaries contain only isolated points; if positive-length portions\
+    \ lie there, count them separately. Finally, verify the requested form \\(k\\\
+    sqrt m+n\\) with \\(m\\) squarefree and recompute \\(k+m+n\\).\n• When a problem\
+    \ involves two mirror-symmetric walkers reflecting or swapping directions on a\
+    \ curve (e.g. y=x^2 with directions of slope ±1), reduce meetings to crossings\
+    \ of the symmetry axis. For the parabola y=x^2, use the chord-slope lemma: the\
+    \ chord through (a,a^2) and (b,b^2) has slope a+b, so slope +1 gives a+b=1 and\
+    \ slope -1 gives a+b=-1. Parameterize bounce points by an integer n, derive the\
+    \ relevant line equations and verify them by endpoint substitution; compute meeting\
+    \ points by intersecting the actual line segments rather than assuming a midpoint.\
+    \ Count meetings with the origin as index 0, recognize enclosed regions as squares\
+    \ from perpendicular equal diagonals (or compute areas via side lengths), and\
+    \ check small cases and the off-by-one count. If a computational tool fails with\
+    \ the same environment-level error twice (e.g. InteractiveShell is not defined),\
+    \ abandon it and switch to manual arithmetic or analytic verification rather than\
+    \ retrying with cosmetic code changes.\n• 当题目涉及“数等于各位数字的阶乘/幂之和”且题干存在“个位/各位”歧义时，先按整体题意澄清并建立方程；随后用阶乘增长与位置上界压缩数字范围（如\
+    \ \\(7!>999\\)，\\(6!\\) 需结合百位进一步排除），按最高位或大阶乘数字分类，对缩小后的有限集合显式枚举或用区间、次大值、方程证明唯一性；得到候选后必须代回原方程并检查最终问的是数位和；若代码工具连续出现同一环境级错误且最小复现也失败，立即停止改代码，转手动推理或替代工具。\n\
+    • When solving a circle-tangency problem with a common external tangent, place\
+    \ that tangent as the x-axis and use the lemma that a circle of radius r tangent\
+    \ to the line and externally tangent to same-side circles of radii R_i tangent\
+    \ to that line has horizontal center separation |x-a_i|=2√(R_i r) for each tangency.\
+    \ Solve all sign branches, then use the diagram or “as shown” condition to select\
+    \ the intended configuration; for the two-circle configuration this yields x=4/3,\
+    \ r=4/9 and rejects the alternate x=-4, r=4. Finally verify by substituting the\
+    \ selected center and radius into all original center-distance equations, checking\
+    \ line tangency y=r, and confirming the requested reduced-fraction/gcd form. If\
+    \ a computational tool fails with an environment-level error, retry at most once,\
+    \ then switch to manual algebra."
+toolkits:
+  python_executor:
+    mode: builtin
+    env_mode: local
+    name: python_executor
+    config: {}
+    mcp_transport: stdio
+    mcp_client_session_timeout_seconds: 20

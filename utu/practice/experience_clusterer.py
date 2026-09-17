@@ -24,6 +24,15 @@ from typing import Protocol
 
 from .experience_models import ExperienceRecord
 
+TASK_FAMILY_PROXY_LABEL = "task_family"
+DEFAULT_HARD_CONSTRAINT_FIELDS = ("task_stage", "failure_mode")
+DEFAULT_CONFIGURED_SOFT_CONSTRAINT_FIELDS = (
+    "domain",
+    TASK_FAMILY_PROXY_LABEL,
+    "tool_type",
+    "strategy_type",
+)
+
 
 class EmbeddingProvider(Protocol):
     """Minimal replaceable embedding interface."""
@@ -293,6 +302,19 @@ def cosine_similarity(left: Sequence[float], right: Sequence[float]) -> float:
 
 
 @dataclass(frozen=True)
+class ExperiencePairScore:
+    """One pair's complete production threshold decision."""
+
+    semantic_similarity: float
+    adjusted_similarity: float
+    hard_compatible: bool
+    hard_constraint_field: str | None = None
+
+    def passes_threshold(self, threshold: float) -> bool:
+        return self.hard_compatible and self.adjusted_similarity >= threshold
+
+
+@dataclass(frozen=True)
 class ExperienceCluster:
     cluster_id: str
     experience_ids: list[str]
@@ -333,6 +355,10 @@ class ClusteringReport:
 class ExperienceClusterer:
     """Metadata-constrained, threshold-based agglomerative clusterer."""
 
+    PAIR_SCORE_CONTRACT = "metadata_constrained_pair_score_v1"
+    SOFT_MATCH_BONUS = 0.02
+    SOFT_MISMATCH_PENALTY = 0.10
+
     def __init__(
         self,
         embedding_provider: EmbeddingProvider,
@@ -340,13 +366,8 @@ class ExperienceClusterer:
         method: str = "agglomerative",
         max_cluster_size: int = 20,
         use_metadata_constraints: bool = True,
-        hard_constraint_fields: Sequence[str] = ("task_stage", "failure_mode"),
-        soft_constraint_fields: Sequence[str] = (
-            "domain",
-            "task_family",
-            "tool_type",
-            "strategy_type",
-        ),
+        hard_constraint_fields: Sequence[str] = DEFAULT_HARD_CONSTRAINT_FIELDS,
+        soft_constraint_fields: Sequence[str] = DEFAULT_CONFIGURED_SOFT_CONSTRAINT_FIELDS,
         random_seed: int = 42,
     ):
         if method != "agglomerative":
@@ -408,7 +429,44 @@ class ExperienceClusterer:
         # Soft metadata may refine a semantic decision but can never override a
         # hard constraint.  A mismatch is intentionally more costly than a
         # match is beneficial, making cross-tool/domain merges conservative.
-        return semantic_similarity + 0.02 * (matches / known_pairs) - 0.10 * (mismatches / known_pairs)
+        return (
+            semantic_similarity
+            + self.SOFT_MATCH_BONUS * (matches / known_pairs)
+            - self.SOFT_MISMATCH_PENALTY * (mismatches / known_pairs)
+        )
+
+    def score_pair(
+        self,
+        left: ExperienceRecord,
+        right: ExperienceRecord,
+        *,
+        semantic_similarity: float,
+    ) -> ExperiencePairScore:
+        """Score one pair with exactly the contract used by cluster merging."""
+
+        hard_compatible, hard_constraint_field = self._hard_compatible(left, right)
+        return ExperiencePairScore(
+            semantic_similarity=float(semantic_similarity),
+            adjusted_similarity=self._adjusted_similarity(left, right, semantic_similarity),
+            hard_compatible=hard_compatible,
+            hard_constraint_field=hard_constraint_field,
+        )
+
+    def pair_score_contract(self) -> dict[str, object]:
+        """Return a machine-readable description of the active score contract."""
+
+        return {
+            "name": self.PAIR_SCORE_CONTRACT,
+            "semantic_metric": "cosine_similarity",
+            "threshold_score": "adjusted_similarity",
+            "threshold_rule": "hard_compatible and adjusted_similarity >= threshold",
+            "cluster_linkage": "average_cross_pair_adjusted_similarity",
+            "use_metadata_constraints": self.use_metadata_constraints,
+            "hard_constraint_fields": list(self.hard_constraint_fields),
+            "soft_constraint_fields": list(self.soft_constraint_fields),
+            "soft_match_bonus": self.SOFT_MATCH_BONUS,
+            "soft_mismatch_penalty": self.SOFT_MISMATCH_PENALTY,
+        }
 
     def _metadata_metrics(self, records: Sequence[ExperienceRecord]) -> tuple[float, float]:
         fields = self.hard_constraint_fields + self.soft_constraint_fields
@@ -533,12 +591,16 @@ class ExperienceClusterer:
                     compatible = True
                     for left in left_cluster:
                         for right in right_cluster:
-                            hard_ok, _ = self._hard_compatible(left, right)
-                            if not hard_ok:
+                            semantic = semantic_pairs[tuple(sorted((left.id, right.id)))]
+                            pair_score = self.score_pair(
+                                left,
+                                right,
+                                semantic_similarity=semantic,
+                            )
+                            if not pair_score.hard_compatible:
                                 compatible = False
                                 break
-                            semantic = semantic_pairs[tuple(sorted((left.id, right.id)))]
-                            cross_scores.append(self._adjusted_similarity(left, right, semantic))
+                            cross_scores.append(pair_score.adjusted_similarity)
                         if not compatible:
                             break
                     if not compatible or not cross_scores:
@@ -620,7 +682,32 @@ class ExperienceClusterer:
         )
 
 
-_EXPLICIT_NEGATION = re.compile(r"\b(?:not|never|cannot|can't|must\s+not|should\s+not|do\s+not|don't)\b", re.I)
+_EXPLICIT_NEGATION = re.compile(
+    r"(?:\b(?:not|never|cannot|can't|must\s+not|should\s+not|do\s+not|don't)\b|"
+    r"不要|不得|不能|不可|切勿|无需|无须)",
+    re.I,
+)
+_LATIN_TOKEN = re.compile(r"[a-z0-9_]+", re.I)
+_CJK_RUN = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]+")
+
+
+def _conflict_lexical_tokens(text: str) -> set[str]:
+    """Tokenize Latin words and local CJK bigrams after removing negation.
+
+    CJK text normally has no spaces, so the former Latin-only tokenizer made
+    two otherwise identical Chinese instructions appear to have zero lexical
+    overlap. Bigrams are deliberately local to each contiguous run: this is a
+    conservative contradiction guard, not a general Chinese segmenter.
+    """
+
+    normalized = _EXPLICIT_NEGATION.sub(" ", text.lower())
+    tokens = set(_LATIN_TOKEN.findall(normalized))
+    for run in _CJK_RUN.findall(normalized):
+        if len(run) == 1:
+            tokens.add(run)
+        else:
+            tokens.update(run[index : index + 2] for index in range(len(run) - 1))
+    return tokens
 
 
 def detect_strategy_conflicts(
@@ -644,8 +731,8 @@ def detect_strategy_conflicts(
             right_negated = bool(_EXPLICIT_NEGATION.search(right.content))
             if left_negated == right_negated:
                 continue
-            left_words = set(re.findall(r"[a-z0-9_]+", _EXPLICIT_NEGATION.sub(" ", left.content.lower())))
-            right_words = set(re.findall(r"[a-z0-9_]+", _EXPLICIT_NEGATION.sub(" ", right.content.lower())))
+            left_words = _conflict_lexical_tokens(left.content)
+            right_words = _conflict_lexical_tokens(right.content)
             union = left_words | right_words
             overlap = len(left_words & right_words) / len(union) if union else 0.0
             if overlap >= lexical_overlap_threshold:

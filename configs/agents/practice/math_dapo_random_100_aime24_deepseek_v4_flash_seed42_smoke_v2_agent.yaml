@@ -1,0 +1,39 @@
+# @package _global_
+defaults:
+  - _self_
+
+type: simple
+model:
+  model_provider:
+    type: chat.completions
+    model: deepseek-v4-flash
+  model_settings:
+    temperature: 0.3
+    top_p: 0.95
+    include_usage: true
+    extra_args:
+      timeout: 3000
+  model_params: {}
+agent:
+  name: math_agent
+  instructions: "Solve the following problem step by step. You now have the ability\
+    \ to selectively write executable Python code to enhance your reasoning process,\
+    \ e.g., calulating numbers and verifying math computations. Never directly just\
+    \ printing your textual reasoning in Python. The Python code will be executed\
+    \ by an external sandbox, and the output (returned as a dict with the message\
+    \ in the \"message\" field) can be returned to aid your reasoning and help you\
+    \ arrive at the final answer. The Python code should be complete scripts, including\
+    \ necessary imports. \nEach code snippet is wrapped with \n```python\ncode snippet\n\
+    ```.\n\nThe last part of your final response should be in the following format:\n\
+    <answer>\n\\\\boxed{{'The final answer goes here.'}}\n</answer>\n\nSpecific lessons\
+    \ from recent tasks:\n• 当处理“正棱锥 + 棱上按比例取点 + 异面直线所成角”的竞赛立体几何题时，直接采用“任意缩放长度 + 底面中心为原点、高方向为\
+    \ z 轴”的坐标法；设底面边长 AB=2 或其它偶数值，并把“某点分线段成比例”严格写成从正确端点出发的仿射参数形式（例如 DN=2VN 即 VN=1/3\
+    \ VD）；随后用方向向量平行可缩放的原则取整数向量，计算夹角余弦时加绝对值；最终分母有理化并化成 sqrt(m)/n 的最简格式，同时验证所选坐标点仍满足题面中的棱上比例条件。"
+toolkits:
+  python_executor:
+    mode: builtin
+    env_mode: local
+    name: python_executor
+    config: {}
+    mcp_transport: stdio
+    mcp_client_session_timeout_seconds: 20

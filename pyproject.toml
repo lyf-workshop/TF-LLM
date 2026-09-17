@@ -41,6 +41,10 @@ Documentation = "https://tencentcloudadp.github.io/youtu-agent/"
 Repository = "https://github.com/TencentCloudADP/youtu-agent"
 
 [project.optional-dependencies]
+practice = [
+    "math-verify[antlr4-9-3]==0.9.0",
+    "sentence-transformers==3.4.1",
+]
 litllm = [
     "litellm>=1.77.0",
 ]

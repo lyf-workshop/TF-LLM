@@ -24,9 +24,13 @@ def main() -> None:
     parser.add_argument("--clustered-exp-id")
     parser.add_argument(
         "--split-manifest",
-        default="configs/data/skillsbench/skillsbench_v1_1_task_splits.json",
+        default=None,
     )
-    parser.add_argument("--split-name", default="family_holdout_self_contained_v1")
+    parser.add_argument("--split-name", default=None)
+    parser.add_argument(
+        "--experiment-protocol",
+        help="Signed protocol emitted by run_hierarchical_ablation.py (required for DAPO/AIME).",
+    )
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     paths = {
@@ -41,6 +45,10 @@ def main() -> None:
     }
     if any(not (paths[name] or exp_ids[name]) for name in paths):
         parser.error("provide an evaluation file or experiment ID for every one of the three conditions")
+    if args.experiment_protocol and (args.split_manifest or args.split_name):
+        parser.error("use either --experiment-protocol or --split-manifest/--split-name")
+    if not args.experiment_protocol and not (args.split_manifest and args.split_name):
+        parser.error("provide --experiment-protocol or both --split-manifest and --split-name")
 
     output = Path(args.output)
     if output.exists():
@@ -52,6 +60,7 @@ def main() -> None:
         clustered_hierarchy=args.clustered_hierarchy,
         split_manifest_path=args.split_manifest,
         split_name=args.split_name,
+        experiment_protocol_path=args.experiment_protocol,
         sequential_audit=args.sequential_audit,
         clustered_audit=args.clustered_audit,
     )

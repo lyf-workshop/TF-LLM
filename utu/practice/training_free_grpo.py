@@ -2,6 +2,8 @@
 Main module for experience generation. Control the process of Training-free GRPO.
 """
 
+import hashlib
+import json
 import os
 
 import yaml
@@ -12,7 +14,10 @@ from ..config.eval_config import DataConfig
 from ..skillsbench_data import assert_datasets_disjoint
 from ..utils import DIR_ROOT, get_logger
 from ..utils.experience_cache import ExperienceCache
+from ..utils.experience_injection import INJECTED_EXPERIENCE_IDS_META_KEY
+from .application import candidate_cache
 from .data_manager import TrainingFreeGRPODataManager
+from .dataset_manifest_guard import validate_practice_dataset_manifest
 from .experience_quality_tracker import ExperienceQualityTracker
 from .experience_updater import ExperienceUpdater
 from .hierarchical_experience_manager import HierarchicalExperienceManager
@@ -21,6 +26,8 @@ from .utils import TaskRecorder
 
 logger = get_logger(__name__)
 
+HIERARCHICAL_CANDIDATE_CACHE_KIND = candidate_cache.HIERARCHICAL_CANDIDATE_CACHE_KIND
+HIERARCHICAL_FLAT_CACHE_KIND = candidate_cache.HIERARCHICAL_FLAT_CACHE_KIND
 
 class TrainingFreeGRPO:
     config: TrainingFreeGRPOConfig = None
@@ -34,7 +41,14 @@ class TrainingFreeGRPO:
     def __init__(self, config: TrainingFreeGRPOConfig):
         """Initialize TrainingFreeGRPO with unified configuration."""
         self.config = config
-        self.recorder: TaskRecorder = TaskRecorder(experiment_name=config.exp_id)
+        self.recorder: TaskRecorder = TaskRecorder(
+            experiment_name=config.exp_id,
+            l0_injection_top_k=(
+                config.practice.hierarchical_learning.l0_injection_top_k
+                if config.practice.hierarchical_learning.enabled
+                else 0
+            ),
+        )
 
     async def run(self) -> str:
         """Run the complete experience generation process.
@@ -67,6 +81,25 @@ class TrainingFreeGRPO:
 
     async def build(self):
         """Build all components needed for training-free GRPO."""
+
+        # 0. A measured snapshot is verified before constructing any rollout,
+        # model-backed updater, or hierarchical manager.  This is deliberately
+        # fail-closed: a renamed/mutated DB snapshot must never spend API calls.
+        if self.config.data.require_practice_manifest:
+            evaluation_dataset = (
+                self.config.evaluation.data.dataset
+                if self.config.evaluation.data is not None
+                else None
+            )
+            evidence = validate_practice_dataset_manifest(
+                practice_dataset=self.config.data.practice_dataset_name,
+                manifest_path=self.config.data.practice_manifest_path,
+                split_name=self.config.data.practice_manifest_split,
+                expected_record_count=self.config.data.practice_manifest_expected_records,
+                evaluation_dataset=evaluation_dataset,
+                db_url=self.config.evaluation.db_url,
+            )
+            logger.info("Strict practice dataset manifest assertion passed: %s", evidence)
 
         # 1. Load dataset
         # check if dataset exists
@@ -141,8 +174,20 @@ class TrainingFreeGRPO:
 
         # 4. Create experience updater
         # 使用环境无关的经验提取逻辑（支持所有 reward 类型：0/1、连续、>1 等）
+        experience_output_language = getattr(
+            self.config.practice.hierarchical_learning,
+            "experience_output_language",
+            "same_as_input",
+        )
         self.experience_updater = ExperienceUpdater(
-            self.config.evaluation.agent, self.config.practice.agent_objective, self.config.practice.learning_objective
+            self.config.evaluation.agent,
+            self.config.practice.agent_objective,
+            self.config.practice.learning_objective,
+            experience_output_language=experience_output_language,
+            generation_cache_path=str(
+                DIR_ROOT / "workspace" / "cache" / "experience_generation"
+                / (hashlib.sha256(self.config.exp_id.encode()).hexdigest() + ".sqlite3")
+            ),
         )
 
         # 5. Create hierarchical experience manager if enabled
@@ -155,6 +200,11 @@ class TrainingFreeGRPO:
                 agent_objective=self.config.practice.agent_objective,
                 learning_objective=self.config.practice.learning_objective,
             )
+            if self.config.practice.restart_step is not None:
+                self.hierarchical_experience_manager.assert_restart_step_safe(
+                    self.config.practice.restart_step
+                )
+            self._sync_hierarchical_recorder()
             logger.info("Hierarchical experience manager initialized")
 
         # 6. Create experience quality tracker
@@ -164,6 +214,167 @@ class TrainingFreeGRPO:
         logger.info("Experience quality tracker initialized")
 
         logger.info("Training-free GRPO components built successfully")
+
+    def _uses_candidate_review(self) -> bool:
+        if self.hierarchical_experience_manager is None:
+            return False
+        return bool(
+            getattr(
+                self.config.practice.hierarchical_learning,
+                "l0_candidate_review_enabled",
+                False,
+            )
+        )
+
+    def _sync_hierarchical_recorder(self) -> dict[str, str]:
+        """Make the hierarchy's injectable view the only rollout experience pool."""
+
+        if self.hierarchical_experience_manager is None:
+            return dict(self.recorder.experiences or {})
+        experiences = self.hierarchical_experience_manager.get_injectable_experience_pool()
+        self.recorder.experiences_update(experiences)
+        return experiences
+
+    @staticmethod
+    def _candidate_cache_payload(candidates: list[dict], *, batch_fingerprint: str) -> dict:
+        return candidate_cache.candidate_cache_payload(
+            candidates,
+            batch_fingerprint=batch_fingerprint,
+        )
+
+    @staticmethod
+    def _flat_experiences_from_cache(payload: object) -> dict[str, str] | None:
+        """Accept only the legacy flat cache shape, never an unknown envelope."""
+
+        return candidate_cache.flat_experiences_from_cache(payload)
+
+    @classmethod
+    def _hierarchical_flat_cache_payload(
+        cls,
+        experiences: dict[str, str],
+        candidates: list[dict],
+        *,
+        batch_fingerprint: str,
+    ) -> dict:
+        return candidate_cache.hierarchical_flat_cache_payload(
+            experiences,
+            candidates,
+            batch_fingerprint=batch_fingerprint,
+        )
+
+    @classmethod
+    def _hierarchical_flat_from_cache(
+        cls,
+        payload: object,
+        *,
+        expected_batch_fingerprint: str,
+    ) -> tuple[dict[str, str], list[dict]] | None:
+        """Decode the review-off hierarchy cache needed for crash-safe replay."""
+
+        return candidate_cache.hierarchical_flat_from_cache(
+            payload,
+            expected_batch_fingerprint=expected_batch_fingerprint,
+        )
+
+    @staticmethod
+    def _candidates_from_cache(
+        payload: object,
+        *,
+        expected_batch_fingerprint: str | None = None,
+        expected_run_id: str | None = None,
+        expected_epoch: int | None = None,
+        expected_batch: int | None = None,
+    ) -> list[dict] | None:
+        return candidate_cache.candidates_from_cache(
+            payload,
+            expected_batch_fingerprint=expected_batch_fingerprint,
+            expected_run_id=expected_run_id,
+            expected_epoch=expected_epoch,
+            expected_batch=expected_batch,
+        )
+
+    @staticmethod
+    def _rollout_batch_fingerprint(rollouts: list) -> str:
+        """Bind a candidate cache entry to the exact unordered rollout batch."""
+
+        return candidate_cache.rollout_batch_fingerprint(rollouts)
+
+    def _candidate_generation_fingerprint(self, rollouts: list) -> str:
+        return candidate_cache.candidate_generation_fingerprint(
+            self.config,
+            self.experience_updater,
+            rollouts,
+        )
+
+    def _recover_hierarchical_candidates(
+        self,
+        *,
+        step: int,
+        run_id: str,
+        epoch: int,
+        batch: int,
+        batch_fingerprint: str,
+        cached_experiences: object,
+        cache_reuse_allowed: bool,
+    ) -> tuple[list[dict] | None, bool]:
+        """Choose an exact persisted candidate batch before regenerating it.
+
+        Candidate staging and review share the hierarchy JSON transaction, so
+        that snapshot is the crash-recovery authority. The database row is an
+        auxiliary cache and is used only when the hierarchy has not staged the
+        step yet. ``None`` means generation is required. Empty candidate
+        envelopes are invalid because every practice batch contains rollouts
+        and the generator itself rejects an empty result.
+        """
+
+        persisted_fingerprints = (
+            self.hierarchical_experience_manager.get_l0_candidate_fingerprints_for_batch(
+                run_id=run_id,
+                epoch=epoch,
+                batch=batch,
+            )
+        )
+        if persisted_fingerprints and persisted_fingerprints != {batch_fingerprint}:
+            raise RuntimeError(
+                "L0 candidate generation fingerprint changed for an already persisted "
+                f"batch run={run_id!r} epoch={epoch} batch={batch}: "
+                f"stored={sorted(str(item) for item in persisted_fingerprints)} "
+                f"current={batch_fingerprint}. Use a new exp_id and experience_save_path."
+            )
+        if not cache_reuse_allowed:
+            return None, True
+        cached_candidates = self._candidates_from_cache(
+            cached_experiences,
+            expected_batch_fingerprint=batch_fingerprint,
+            expected_run_id=run_id,
+            expected_epoch=epoch,
+            expected_batch=batch,
+        )
+        persisted_candidates = (
+            self.hierarchical_experience_manager.get_l0_candidate_inputs_for_step(
+                step,
+                run_id=run_id,
+                epoch=epoch,
+                batch=batch,
+                batch_fingerprint=batch_fingerprint,
+            )
+        )
+        if persisted_candidates:
+            logger.info(
+                "Recovering %d L0 candidates for step %s from the hierarchy snapshot",
+                len(persisted_candidates),
+                step,
+            )
+            return persisted_candidates, cached_candidates != persisted_candidates
+        if cached_candidates is not None:
+            return cached_candidates, False
+        if cached_experiences is not None:
+            logger.warning(
+                "Regenerating L0 candidates for hierarchical step %s because its cache "
+                "is legacy or malformed; the flat payload will not be injected",
+                step,
+            )
+        return None, True
 
     async def practice(self):
         """Run practice process."""
@@ -204,10 +415,6 @@ class TrainingFreeGRPO:
                         stats[f"step_{step}"] = {"epoch": epoch, "batch": batch_idx, "complete": False}
 
                     # 1. Rollout batch data
-                    injected_ids = list((self.recorder.experiences or {}).keys())
-                    if self.experience_quality_tracker is not None and injected_ids:
-                        self.experience_quality_tracker.record_injection(injected_ids, step)
-
                     with custom_span("Process the batch data"):
                         rollouts, stat = await self.practice_rollout_manager.main(
                             batch_idx=batch_idx,
@@ -216,8 +423,33 @@ class TrainingFreeGRPO:
                         )
                         stats[f"step_{step}"]["rollout"] = stat
 
-                    if self.experience_quality_tracker is not None and injected_ids:
-                        self.experience_quality_tracker.record_outcomes(rollouts, step, injected_ids)
+                    if self.experience_quality_tracker is not None:
+                        rollouts_by_experience: dict[str, list] = {}
+                        fallback_ids = list((self.recorder.experiences or {}).keys())
+                        for rollout in rollouts:
+                            meta = rollout.meta
+                            if isinstance(meta, str):
+                                try:
+                                    meta = json.loads(meta)
+                                except json.JSONDecodeError:
+                                    meta = None
+                            selected_ids = (
+                                meta.get(INJECTED_EXPERIENCE_IDS_META_KEY)
+                                if isinstance(meta, dict)
+                                else None
+                            )
+                            if not isinstance(selected_ids, list):
+                                selected_ids = fallback_ids
+                            for experience_id in selected_ids:
+                                if isinstance(experience_id, str):
+                                    rollouts_by_experience.setdefault(experience_id, []).append(rollout)
+                        injected_ids = sorted(rollouts_by_experience)
+                        if injected_ids:
+                            self.experience_quality_tracker.record_injection(injected_ids, step)
+                            self.experience_quality_tracker.record_outcomes_by_experience(
+                                rollouts_by_experience,
+                                step,
+                            )
 
                     # 2. Update experiences based on rollouts
                     with custom_span("Generate batch experiences"):
@@ -229,49 +461,149 @@ class TrainingFreeGRPO:
                             epoch=epoch,
                             batch=batch_idx,
                         )
-                        # Raw L0 candidates (pre-merge per-problem insights) for the
-                        # hierarchical manager. Only available on a fresh run; cached
-                        # steps were already folded into L0 on the original run.
-                        l0_candidates: list[dict] = []
-                        if cached_experiences is not None and self._should_use_cache(step):
-                            logger.info(
-                                f"Experiences for step {step} already exist in database, skipping experience update."
-                            )
-                            new_experiences = cached_experiences
-                            self.recorder.experiences_update(new_experiences)
-                        else:
-                            # If not cached, run experience updater
-                            # Use lower concurrency for experience updates to avoid rate limiting
-                            # Experience updates involve LLM calls which are more rate-limited than rollouts
-                            experience_concurrency = min(self.config.practice.rollout_concurrency, 16)
-                            new_experiences = await self.experience_updater.run(
-                                rollouts=rollouts,
-                                recorder=self.recorder,
-                                concurrency=experience_concurrency,
-                                given_ground_truth=self.config.practice.given_ground_truth,
-                                num_experiences=self.config.practice.num_experiences_per_query,
-                            )
+                        cache_reuse_allowed = self._should_use_cache(step)
+                        self.experience_updater.reuse_generation_cache = cache_reuse_allowed
+                        use_cached = cached_experiences is not None and cache_reuse_allowed
+                        experience_concurrency = min(self.config.practice.rollout_concurrency, 16)
+                        batch_fingerprint = self._candidate_generation_fingerprint(rollouts)
 
-                            # Save to database cache
-                            ExperienceCache.save_experiences(
-                                experiment_name=self.recorder.experiment_name,
+                        if self._uses_candidate_review():
+                            l0_candidates, repair_candidate_cache = (
+                                self._recover_hierarchical_candidates(
+                                    step=step,
+                                    run_id=self.recorder.experiment_name,
+                                    epoch=epoch,
+                                    batch=batch_idx,
+                                    batch_fingerprint=batch_fingerprint,
+                                    cached_experiences=cached_experiences,
+                                    cache_reuse_allowed=cache_reuse_allowed,
+                                )
+                            )
+                            if l0_candidates is None:
+                                l0_candidates = await self.experience_updater.generate_l0_candidates(
+                                    rollouts=rollouts,
+                                    concurrency=experience_concurrency,
+                                    given_ground_truth=self.config.practice.given_ground_truth,
+                                    num_experiences=self.config.practice.num_experiences_per_query,
+                                )
+
+                            await self.hierarchical_experience_manager.process_step_experiences(
+                                l0_candidates=l0_candidates or [],
                                 step=step,
-                                experiences=new_experiences,
+                                run_id=self.recorder.experiment_name,
                                 epoch=epoch,
                                 batch=batch_idx,
+                                batch_fingerprint=batch_fingerprint,
                             )
-                            logger.info(f"Step {step} completed. New experiences added: {len(new_experiences)}")
-                            # Raw, pre-merge insights produced by this step's updater run.
-                            l0_candidates = list(getattr(self.experience_updater, "last_l0_candidates", []) or [])
+                            new_experiences = self._sync_hierarchical_recorder()
+                            if repair_candidate_cache:
+                                canonical_candidates = (
+                                    self.hierarchical_experience_manager.get_l0_candidate_inputs_for_step(
+                                        step,
+                                        run_id=self.recorder.experiment_name,
+                                        epoch=epoch,
+                                        batch=batch_idx,
+                                        batch_fingerprint=batch_fingerprint,
+                                    )
+                                )
+                                cache_saved = ExperienceCache.save_experiences(
+                                    experiment_name=self.recorder.experiment_name,
+                                    step=step,
+                                    experiences=self._candidate_cache_payload(
+                                        canonical_candidates,
+                                        batch_fingerprint=batch_fingerprint,
+                                    ),
+                                    epoch=epoch,
+                                    batch=batch_idx,
+                                )
+                                if not cache_saved:
+                                    logger.warning(
+                                        "Hierarchy is committed, but candidate cache save failed for step %s; "
+                                        "a restart may regenerate summaries",
+                                        step,
+                                    )
+                            logger.info(
+                                "Step %s candidate review complete: raw=%d active hierarchy=%d",
+                                step,
+                                len(l0_candidates or []),
+                                len(new_experiences),
+                            )
+                        else:
+                            # Compatibility path for non-hierarchical runs and
+                            # explicit review-off ablations.
+                            l0_candidates: list[dict] = []
+                            cached_flat: dict[str, str] | None = None
+                            if use_cached and self.hierarchical_experience_manager is not None:
+                                decoded = self._hierarchical_flat_from_cache(
+                                    cached_experiences,
+                                    expected_batch_fingerprint=batch_fingerprint,
+                                )
+                                if decoded is not None:
+                                    cached_flat, l0_candidates = decoded
+                            elif use_cached:
+                                cached_flat = self._flat_experiences_from_cache(
+                                    cached_experiences
+                                )
 
-                        # Per-step: accumulate L0 only. L1/L2 are aggregated at epoch end.
-                        if self.hierarchical_experience_manager is not None:
-                            logger.info(f"Merging L0 candidates for step {step} ({len(l0_candidates)} candidates)...")
-                            await self.hierarchical_experience_manager.process_step_experiences(
-                                l0_candidates=l0_candidates,
-                                step=step,
-                            )
-                            logger.info(f"L0 pool size: {len(self.hierarchical_experience_manager.l0)}")
+                            if use_cached and cached_flat is None:
+                                logger.warning(
+                                    "Ignoring malformed, stale, or incompatible experience cache "
+                                    "for review-off step %s; regenerating the legacy flat pool",
+                                    step,
+                                )
+                                use_cached = False
+                            if use_cached:
+                                logger.info(
+                                    "Experiences for step %s already exist in database, skipping update.",
+                                    step,
+                                )
+                                new_experiences = cached_flat
+                                self.recorder.experiences_update(new_experiences)
+                            else:
+                                new_experiences = await self.experience_updater.run(
+                                    rollouts=rollouts,
+                                    recorder=self.recorder,
+                                    concurrency=experience_concurrency,
+                                    given_ground_truth=self.config.practice.given_ground_truth,
+                                    num_experiences=self.config.practice.num_experiences_per_query,
+                                )
+                                l0_candidates = list(
+                                    getattr(self.experience_updater, "last_l0_candidates", []) or []
+                                )
+
+                            if not use_cached:
+                                cache_payload: dict = new_experiences
+                                if self.hierarchical_experience_manager is not None:
+                                    cache_payload = self._hierarchical_flat_cache_payload(
+                                        new_experiences,
+                                        l0_candidates,
+                                        batch_fingerprint=batch_fingerprint,
+                                    )
+                                cache_saved = ExperienceCache.save_experiences(
+                                    experiment_name=self.recorder.experiment_name,
+                                    step=step,
+                                    experiences=cache_payload,
+                                    epoch=epoch,
+                                    batch=batch_idx,
+                                )
+                                if not cache_saved:
+                                    if self.hierarchical_experience_manager is not None:
+                                        raise RuntimeError(
+                                            "Could not persist the replayable sequential-ablation "
+                                            f"cache for step {step}; hierarchy was not modified"
+                                        )
+                                    logger.warning("Flat experience cache save failed for step %s", step)
+
+                            # For the sequential hierarchy ablation, the cache
+                            # stores both the pre-hierarchy flat result and raw
+                            # candidates first. If hierarchy persistence then
+                            # fails, restart can restore the same flat baseline
+                            # and idempotently replay those candidates.
+                            if self.hierarchical_experience_manager is not None:
+                                await self.hierarchical_experience_manager.process_step_experiences(
+                                    l0_candidates=l0_candidates,
+                                    step=step,
+                                )
 
                         stats[f"step_{step}"]["complete"] = True
                         self.recorder.stat_update({f"step_{step}": stats[f"step_{step}"]})
@@ -304,6 +636,8 @@ class TrainingFreeGRPO:
             if self.hierarchical_experience_manager is not None:
                 logger.info(f"Aggregating hierarchical experiences at end of epoch {epoch}...")
                 await self.hierarchical_experience_manager.aggregate_epoch(epoch)
+                if self._uses_candidate_review():
+                    self._sync_hierarchical_recorder()
 
     def _should_use_cache(self, step: int) -> bool:
         """Determine if cached results should be used for current step.
@@ -350,8 +684,8 @@ class TrainingFreeGRPO:
         # is highest, rather than being buried after the base instructions.
         if self.hierarchical_experience_manager is not None:
             logger.info("Using hierarchical experiences (L0/L1/L2)")
-            all_l2 = self.hierarchical_experience_manager.get_all_l2_experiences()
-            all_l1 = self.hierarchical_experience_manager.get_all_l1_experiences()
+            all_l2 = self.hierarchical_experience_manager.get_injectable_l2_experiences()
+            all_l1 = self.hierarchical_experience_manager.get_injectable_l1_experiences()
 
             current_instructions = config_dict.get("agent", {}).get("instructions", "You are a helpful assistant.")
 
@@ -373,7 +707,7 @@ class TrainingFreeGRPO:
 
             # --- ZONE 3: L0 case lessons (optional, kept brief) ---
             if self.config.practice.hierarchical_learning.include_l0_in_prompt:
-                recent_l0 = self.hierarchical_experience_manager.get_recent_l0_experiences(
+                recent_l0 = self.hierarchical_experience_manager.get_recent_injectable_l0_experiences(
                     self.config.practice.hierarchical_learning.max_l0_recent
                 )
                 if recent_l0:

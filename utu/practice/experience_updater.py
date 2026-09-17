@@ -17,11 +17,22 @@ from tqdm import tqdm
 from ..config import AgentConfig
 from ..db import EvaluationSample
 from ..utils import FileUtils, SimplifiedAsyncOpenAI, get_logger
-from .experience_models import FailureMode, TaskStage
+from .experience_models import (
+    FailureMode,
+    TaskStage,
+    experience_output_language_instruction,
+    validate_experience_output_language,
+)
 from .experience_pool import consolidate_and_apply, split_experiences
+from .generation.recovery import GenerationOutputError, GenerationRecovery, error_detail
 from .utils import TaskRecorder
 
 logger = get_logger(__name__)
+L0_CANDIDATE_GENERATOR_VERSION = "l0-summary-v3-language-contract"
+
+
+class L0CandidateGenerationError(RuntimeError):
+    """A parallel summary stage failed, so no partial candidate batch is safe."""
 
 
 @dataclass(frozen=True)
@@ -33,16 +44,74 @@ class _RolloutGroupStats:
 
 
 class ExperienceUpdater:
-    def __init__(self, config: AgentConfig, agent_objective: str, learning_objective: str):
+    def __init__(
+        self,
+        config: AgentConfig,
+        agent_objective: str,
+        learning_objective: str,
+        *,
+        experience_output_language: str = "same_as_input",
+        generation_cache_path: str | None = None,
+    ):
         self.config = config
         self.agent_objective = agent_objective
         self.learning_objective = learning_objective
+        self.experience_output_language = experience_output_language
+        self.experience_output_language_instruction = experience_output_language_instruction(
+            experience_output_language
+        )
         self.prompts = FileUtils.load_prompts("practice/experience.yaml")
         self.llm = SimplifiedAsyncOpenAI(**config.model.model_provider.model_dump())
+        self.llm.max_retries = 0  # The recovery layer owns the bounded retry budget.
+        self.generation_recovery = GenerationRecovery(generation_cache_path)
+        self.reuse_generation_cache = True
         # Raw, per-problem case insights from the most recent run() — consumed by
         # the hierarchical manager as L0 candidates (set at the end of run()).
         self.last_l0_candidates: list[dict[str, Any]] = []
+        self.last_generated_experience_groups: list[dict[str, Any]] = []
         self.last_l0_metadata_coverage: dict[str, dict[str, float | int]] = {}
+
+    async def _query_generation(self, *, stage: str, source_ids: list[str], messages: list[dict]) -> str:
+        recovery = getattr(self, "generation_recovery", None)
+        if recovery is None:
+            recovery = self.generation_recovery = GenerationRecovery()
+
+        def validate(response: str) -> None:
+            if not isinstance(response, str) or not response.strip():
+                raise GenerationOutputError(f"{stage} returned empty content")
+            if stage == "group_advantage":
+                match = re.search(r"<Experiences>\s*(.*?)\s*</Experiences>", response, re.DOTALL | re.IGNORECASE)
+                if not match or not split_experiences(match.group(1)):
+                    raise GenerationOutputError("group advantage returned no parseable <Experiences> items")
+                try:
+                    for candidate in split_experiences(match.group(1)):
+                        validate_experience_output_language(
+                            candidate,
+                            self._configured_output_language(),
+                            label="generated L0 candidate",
+                        )
+                except ValueError as error:
+                    raise GenerationOutputError(str(error)) from error
+
+        return await recovery.query(
+            self.llm,
+            request={"messages": messages, **self.config.model.model_params.model_dump()},
+            identity={"generator": L0_CANDIDATE_GENERATOR_VERSION, "stage": stage, "source_ids": source_ids},
+            validate=validate,
+            reuse_cache=getattr(self, "reuse_generation_cache", True),
+        )
+
+    def _configured_output_language(self) -> str:
+        """Return the language while tolerating legacy ``__new__`` test fixtures."""
+
+        return getattr(self, "experience_output_language", "same_as_input")
+
+    def _output_language_instruction(self) -> str:
+        return getattr(
+            self,
+            "experience_output_language_instruction",
+            experience_output_language_instruction(self._configured_output_language()),
+        )
 
     async def run(
         self,
@@ -51,39 +120,26 @@ class ExperienceUpdater:
         concurrency: int = 16,
         given_ground_truth: bool = True,
         num_experiences: int = 2,
-    ) -> None:
-        """Update experiences based on rollouts."""
-        # 1. Summarize trajectory for each rollout
-        with custom_span("Trajectory Summarization"):
-            problem_to_summarized_rollouts = await self._single_rollout_summary(
-                rollouts=rollouts, concurrency=concurrency, given_ground_truth=given_ground_truth
-            )
+        maintain_flat_pool: bool = True,
+    ) -> dict[str, str]:
+        """Generate candidates and optionally run the legacy flat-pool merge.
 
-        # 2. Generate semantic group advantages based on summarized rollouts
-        with custom_span("Semantic Group Advantage"):
-            new_experiences = await self._group_advantage(
-                problem_to_summarized_rollouts=problem_to_summarized_rollouts,
-                concurrency=concurrency,
-                given_ground_truth=given_ground_truth,
-                num_experiences=num_experiences,
-            )
-
-        # Stash the raw, pre-merge per-problem insights as L0 candidates.
-        # These are the most concrete/primitive lessons, before the flat pool's
-        # LLM merge abstracts/consolidates them.
-        l0_candidates: list[dict[str, Any]] = []
-        for item in new_experiences:
-            metadata = self._l0_source_metadata(item.get("rollouts", []))
-            for content in split_experiences(item.get("experiences", "")):
-                l0_candidates.append({"content": content, **metadata})
-        self.last_l0_candidates = l0_candidates
-        self.last_l0_metadata_coverage = self._metadata_coverage(l0_candidates)
-        logger.info(
-            "Generated L0 metadata coverage: %s",
-            json.dumps(self.last_l0_metadata_coverage, sort_keys=True),
+        Hierarchical callers pass ``maintain_flat_pool=False`` (or call
+        :meth:`generate_l0_candidates` directly) so an unreviewed summary can
+        never enter a second, flat experience pool.
+        """
+        await self.generate_l0_candidates(
+            rollouts=rollouts,
+            concurrency=concurrency,
+            given_ground_truth=given_ground_truth,
+            num_experiences=num_experiences,
         )
+        if not maintain_flat_pool:
+            return dict(recorder.experiences or {})
 
-        # 3. group update experiences
+        new_experiences = self.last_generated_experience_groups
+
+        # Legacy non-hierarchical path: group then batch update.
         with custom_span("Group update"):
             critiques = await self._group_update(
                 recorder=recorder,
@@ -91,43 +147,168 @@ class ExperienceUpdater:
                 concurrency=concurrency,
             )
 
-        # 4. batch update experiences
         with custom_span("Batch update"):
             new_experiences = await self._batch_update(
                 recorder=recorder,
                 critiques=critiques,
             )
 
-        # 5. assign new experience IDs
         new_experiences = {f"G{i}": exp for i, exp in enumerate(new_experiences.values())}
         recorder.experiences_update(new_experiences)
         return new_experiences
 
+    async def generate_l0_candidates(
+        self,
+        rollouts: list[EvaluationSample],
+        concurrency: int = 16,
+        given_ground_truth: bool = True,
+        num_experiences: int = 2,
+    ) -> list[dict[str, Any]]:
+        """Generate raw per-task candidates in parallel without changing a pool."""
+
+        # Never expose data from a previous call after a partial generation
+        # failure. A failed batch raises below and remains wholly retryable.
+        self.last_l0_candidates = []
+        self.last_generated_experience_groups = []
+        self.last_l0_metadata_coverage = {}
+
+        with custom_span("Trajectory Summarization"):
+            problem_to_summarized_rollouts = await self._single_rollout_summary(
+                rollouts=rollouts, concurrency=concurrency, given_ground_truth=given_ground_truth
+            )
+        if rollouts and not problem_to_summarized_rollouts:
+            raise L0CandidateGenerationError(
+                "non-empty rollout batch produced no task summaries; refusing an empty candidate cache"
+            )
+
+        with custom_span("Semantic Group Advantage"):
+            new_experiences = await self._group_advantage(
+                problem_to_summarized_rollouts=problem_to_summarized_rollouts,
+                concurrency=concurrency,
+                given_ground_truth=given_ground_truth,
+                num_experiences=num_experiences,
+            )
+        self.last_generated_experience_groups = new_experiences
+
+        l0_candidates: list[dict[str, Any]] = []
+        for item in new_experiences:
+            metadata = self._l0_source_metadata(item.get("rollouts", []))
+            for content in split_experiences(item.get("experiences", "")):
+                try:
+                    validate_experience_output_language(
+                        content,
+                        self._configured_output_language(),
+                        label="generated L0 candidate",
+                    )
+                except ValueError as error:
+                    self.last_generated_experience_groups = []
+                    raise L0CandidateGenerationError(str(error)) from error
+                l0_candidates.append(
+                    {
+                        "content": content,
+                        **metadata,
+                        "generator_version": L0_CANDIDATE_GENERATOR_VERSION,
+                    }
+                )
+        if rollouts and not l0_candidates:
+            self.last_generated_experience_groups = []
+            raise L0CandidateGenerationError(
+                "non-empty rollout batch produced no L0 candidates; refusing an empty candidate cache"
+            )
+        self.last_l0_candidates = l0_candidates
+        self.last_l0_metadata_coverage = self._metadata_coverage(l0_candidates)
+        logger.info(
+            "Generated L0 metadata coverage: %s",
+            json.dumps(self.last_l0_metadata_coverage, sort_keys=True),
+        )
+        return l0_candidates
+
     @staticmethod
-    def _stable_task_id(rollout: dict[str, Any]) -> str:
+    def _stable_task_id(rollout: EvaluationSample | dict[str, Any]) -> str:
         meta = ExperienceUpdater._rollout_meta(rollout)
         explicit_task_id = meta.get("task_id")
-        source = str(rollout.get("source") or "").strip()
+        get_value = rollout.get if isinstance(rollout, dict) else lambda key: getattr(rollout, key, None)
+        source = str(get_value("source") or "").strip()
         if explicit_task_id is not None and str(explicit_task_id).strip():
             prefix = source or "task"
             return f"{prefix}:{explicit_task_id}"
-        dataset = str(rollout.get("dataset") or "").strip()
-        dataset_index = rollout.get("dataset_index")
+        dataset = str(get_value("dataset") or "").strip()
+        dataset_index = get_value("dataset_index")
         if dataset and dataset_index is not None:
             return f"{dataset}:{dataset_index}"
-        question = str(rollout.get("raw_question") or "").strip()
+        question = str(get_value("raw_question") or "").strip()
         digest = hashlib.sha256(question.encode("utf-8")).hexdigest()[:16]
         return f"task:{digest}"
 
     @staticmethod
-    def _rollout_meta(rollout: dict[str, Any]) -> dict[str, Any]:
-        meta = rollout.get("meta")
+    def _rollout_meta(rollout: EvaluationSample | dict[str, Any]) -> dict[str, Any]:
+        meta = rollout.get("meta") if isinstance(rollout, dict) else getattr(rollout, "meta", None)
         if isinstance(meta, str):
             try:
                 meta = json.loads(meta)
             except json.JSONDecodeError:
                 return {}
         return meta if isinstance(meta, dict) else {}
+
+    @staticmethod
+    def _stable_rollout_id(rollout: EvaluationSample | dict[str, Any]) -> str:
+        get_value = rollout.get if isinstance(rollout, dict) else lambda key: getattr(rollout, key, None)
+        rollout_id = get_value("trace_id") or get_value("id")
+        if rollout_id is not None:
+            return str(rollout_id)
+        evidence = json.dumps(
+            {
+                "task": ExperienceUpdater._stable_task_id(rollout),
+                "response": get_value("response"),
+                "trajectory": get_value("trajectories") or get_value("trajectory"),
+                "reward": get_value("reward"),
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+            default=str,
+        )
+        digest = hashlib.sha256(evidence.encode("utf-8")).hexdigest()[:16]
+        return f"rollout:{digest}"
+
+    @staticmethod
+    def _compact_evidence_text(value: Any, limit: int = 2000) -> str | None:
+        text = str(value or "").strip()
+        if not text:
+            return None
+        return text if len(text) <= limit else f"{text[:limit]}..."
+
+    def _source_evidence(self, rollouts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        evidence_by_id: dict[str, dict[str, Any]] = {}
+        for rollout in rollouts:
+            meta = self._rollout_meta(rollout)
+            reward = rollout.get("reward")
+            if not isinstance(reward, (str, int, float, bool, type(None))):
+                reward = str(reward)
+            item = {
+                "id": self._stable_rollout_id(rollout),
+                "task_id": self._stable_task_id(rollout),
+                "reward": reward,
+                "outcome": self._compact_evidence_text(
+                    meta.get("trial_outcome") or meta.get("outcome"), 200
+                ),
+                "error_type": self._compact_evidence_text(meta.get("error_type"), 200),
+                "infra_error_type": self._compact_evidence_text(
+                    meta.get("infra_error_type"), 200
+                ),
+                "trajectory_summary": self._compact_evidence_text(
+                    rollout.get("trajectory_summary")
+                ),
+                "verifier_feedback": self._compact_evidence_text(
+                    rollout.get("reasoning"), 1000
+                ),
+            }
+            existing = evidence_by_id.get(item["id"])
+            if existing is not None and existing != item:
+                raise L0CandidateGenerationError(
+                    f"rollout evidence ID collision with different payload: {item['id']}"
+                )
+            evidence_by_id[item["id"]] = item
+        return [evidence_by_id[item_id] for item_id in sorted(evidence_by_id)]
 
     @staticmethod
     def _metadata_coverage(candidates: list[dict[str, Any]]) -> dict[str, dict[str, float | int]]:
@@ -207,6 +388,7 @@ class ExperienceUpdater:
             return {
                 "source_task_ids": [],
                 "source_rollout_ids": [],
+                "source_evidence": [],
                 "domain": None,
                 "task_family": None,
                 "failure_mode": FailureMode.UNKNOWN.value,
@@ -215,23 +397,7 @@ class ExperienceUpdater:
                 "task_stage": TaskStage.UNKNOWN.value,
             }
         task_ids = sorted({self._stable_task_id(rollout) for rollout in rollouts})
-        rollout_ids = []
-        for rollout in rollouts:
-            rollout_id = rollout.get("trace_id") or rollout.get("id")
-            if rollout_id is None:
-                evidence = json.dumps(
-                    {
-                        "task": self._stable_task_id(rollout),
-                        "response": rollout.get("response"),
-                        "trajectory": rollout.get("trajectories") or rollout.get("trajectory"),
-                        "reward": rollout.get("reward"),
-                    },
-                    ensure_ascii=False,
-                    sort_keys=True,
-                )
-                digest = hashlib.sha256(evidence.encode("utf-8")).hexdigest()[:16]
-                rollout_id = f"rollout:{digest}"
-            rollout_ids.append(str(rollout_id))
+        rollout_ids = [self._stable_rollout_id(rollout) for rollout in rollouts]
         metas = [self._rollout_meta(rollout) for rollout in rollouts]
         domains = {str(meta.get("domain")).strip() for meta in metas if meta.get("domain")}
         task_families = {
@@ -251,6 +417,7 @@ class ExperienceUpdater:
         return {
             "source_task_ids": task_ids,
             "source_rollout_ids": sorted(set(rollout_ids)),
+            "source_evidence": self._source_evidence(rollouts),
             "domain": next(iter(domains)) if len(domains) == 1 else None,
             "task_family": next(iter(task_families)) if len(task_families) == 1 else None,
             "failure_mode": self._failure_mode_from_evidence(rollouts).value,
@@ -275,10 +442,18 @@ class ExperienceUpdater:
         """
         # group by problems
         problems_to_rollouts = defaultdict(list)
+        missing_questions = [
+            self._stable_rollout_id(rollout)
+            for rollout in rollouts
+            if not str(rollout.raw_question or "").strip()
+        ]
+        if missing_questions:
+            raise L0CandidateGenerationError(
+                "rollouts missing raw_question; refusing a partial summary batch: "
+                + json.dumps(sorted(missing_questions))
+            )
         for rollout in rollouts:
-            if not rollout.raw_question:
-                continue
-            problems_to_rollouts[rollout.raw_question].append(rollout)
+            problems_to_rollouts[self._stable_task_id(rollout)].append(rollout)
 
         all_rollouts_to_process: list[EvaluationSample] = []
         for grouped_rollouts in problems_to_rollouts.values():
@@ -288,65 +463,82 @@ class ExperienceUpdater:
 
         async def summarize_with_semaphore(item: EvaluationSample):
             async with semaphore:
-                max_retries = 5
-                base_delay = 2.0
-                for attempt in range(max_retries):
-                    try:
-                        with custom_span("summary single rollout"):
-                            sp = FileUtils.get_jinja_template_str(
-                                self.prompts["SINGLE_ROLLOUT_SUMMARY_TEMPLATE_SP"]
-                            ).render(
-                                agent_objective=self.agent_objective,
-                                learning_objective=self.learning_objective,
-                            )
-                            trajectory_data = self._extract_trajectory_for_prompt(item)
-
-                            up = FileUtils.get_jinja_template_str(
-                                self.prompts["SINGLE_ROLLOUT_SUMMARY_TEMPLATE_UP"]
-                            ).render(
-                                question=item.raw_question,
-                                trajectory=trajectory_data,
-                                answer=item.correct_answer if given_ground_truth else "[REDACTED]",
-                                critique=item.reasoning or "[No critique provided]",
-                                reward=item.reward,
-                                response=item.response or "",
-                            )
-                            response = await self.llm.query_one(
-                                messages=[
-                                    {"role": "system", "content": sp},
-                                    {"role": "user", "content": up},
-                                ],
-                                **self.config.model.model_params.model_dump(),
-                            )
-                        return {"trajectory_summary": response, "meta": item.meta, **item.model_dump()}
-                    except Exception as e:
-                        error_str = str(e)
-                        is_rate_limit = (
-                            "429" in error_str or "rate limit" in error_str.lower() or "TPM limit" in error_str
+                try:
+                    with custom_span("summary single rollout"):
+                        sp = FileUtils.get_jinja_template_str(
+                            self.prompts["SINGLE_ROLLOUT_SUMMARY_TEMPLATE_SP"]
+                        ).render(
+                            agent_objective=self.agent_objective,
+                            learning_objective=self.learning_objective,
+                            experience_output_language_instruction=(
+                                self._output_language_instruction()
+                            ),
                         )
+                        trajectory_data = self._extract_trajectory_for_prompt(item)
 
-                        if is_rate_limit and attempt < max_retries - 1:
-                            delay = base_delay * (2**attempt) + (attempt * 0.5)
-                            logger.warning(
-                                f"Rate limit hit in summary (attempt {attempt + 1}/{max_retries}), "
-                                f"retrying after {delay:.1f}s"
-                            )
-                            await asyncio.sleep(delay)
-                            continue
-                        else:
-                            logger.warning(f"Warning: failed in single rollout summary, {e}")
-                            return None
-                return None
+                        up = FileUtils.get_jinja_template_str(
+                            self.prompts["SINGLE_ROLLOUT_SUMMARY_TEMPLATE_UP"]
+                        ).render(
+                            question=item.raw_question,
+                            trajectory=trajectory_data,
+                            answer=item.correct_answer if given_ground_truth else "[REDACTED]",
+                            critique=item.reasoning or "[No critique provided]",
+                            reward=item.reward,
+                            response=item.response or "",
+                        )
+                        response = await self._query_generation(
+                            stage="summary",
+                            source_ids=[self._stable_task_id(item), self._stable_rollout_id(item)],
+                            messages=[
+                                {"role": "system", "content": sp},
+                                {"role": "user", "content": up},
+                            ],
+                        )
+                        if not isinstance(response, str) or not response.strip():
+                            raise GenerationOutputError("single-rollout summary returned empty content")
+                    return {
+                        "trajectory_summary": response,
+                        **item.model_dump(),
+                        # EvaluationSample.model_dump() deliberately omits
+                        # both fields, but they are required for provenance
+                        # and verifier-backed candidate review.
+                        "meta": item.meta,
+                        "reasoning": item.reasoning,
+                        # UTU's EvaluationSample.model_dump() omits the DB
+                        # primary key. Preserve it so trace-less rollouts do
+                        # not collapse onto the same fallback evidence ID.
+                        "id": item.id,
+                    }
+                except Exception as e:
+                    return {
+                        "_generation_error": error_detail(e),
+                        "_stage": "single_rollout_summary",
+                        "_task_id": self._stable_task_id(item),
+                        "_rollout_id": self._stable_rollout_id(item),
+                    }
 
         # parallel running
         tasks = [summarize_with_semaphore(item) for item in all_rollouts_to_process]
         results = defaultdict(list)
+        failures: list[dict[str, Any]] = []
         for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Single rollout summary"):
             result = await task
-            if result is not None:
-                problem = result["raw_question"]
-                results[problem].append(result)
-        return results
+            if result.get("_generation_error"):
+                failures.append(result)
+                continue
+            task_id = self._stable_task_id(result)
+            results[task_id].append(result)
+        if failures:
+            raise L0CandidateGenerationError(
+                "single-rollout summary failed; refusing a partial candidate batch: "
+                + json.dumps(
+                    {"failed_count": len(failures), "examples": failures[:5]}, ensure_ascii=False, sort_keys=True
+                )
+            )
+        return {
+            task_id: sorted(items, key=self._stable_rollout_id)
+            for task_id, items in sorted(results.items())
+        }
 
     async def _group_advantage(
         self,
@@ -371,72 +563,80 @@ class ExperienceUpdater:
 
         async def critique_with_semaphore(rollouts_per_problem: list[dict]):
             async with semaphore:
-                max_retries = 10
-                base_delay = 10.0
-                for attempt in range(max_retries):
-                    try:
-                        with custom_span("single query group advantage"):
-                            formatted_trajectories = self._format_counterfactual_trajectories(
-                                rollouts_per_problem=rollouts_per_problem,
-                                given_ground_truth=given_ground_truth,
-                            )
-                            sp = FileUtils.get_jinja_template_str(
-                                self.prompts["SINGLE_QUERY_GROUP_ADVANTAGE_SP"]
-                            ).render(
-                                agent_objective=self.agent_objective,
-                                learning_objective=self.learning_objective,
-                                num_experiences=num_experiences,
-                            )
-                            up = FileUtils.get_jinja_template_str(
-                                self.prompts["SINGLE_QUERY_GROUP_ADVANTAGE_UP"]
-                            ).render(
-                                question=rollouts_per_problem[0]["raw_question"],
-                                answer=rollouts_per_problem[0]["correct_answer"]
-                                if given_ground_truth
-                                else "[REDACTED]",
-                                trajectories=formatted_trajectories,
-                            )
-                            response = await self.llm.query_one(
-                                messages=[
-                                    {"role": "system", "content": sp},
-                                    {"role": "user", "content": up},
-                                ],
-                                **self.config.model.model_params.model_dump(),
-                            )
-
-                            # extract experiences from the response
-                            pattern = re.compile(r"<Experiences>\s*(.*?)\s*</Experiences>", re.DOTALL | re.IGNORECASE)
-                            match = pattern.search(response)
-                            experiences = match.group(1).strip() if match else ""
-                        return {"rollouts": rollouts_per_problem, "critique": response, "experiences": experiences}
-                    except Exception as e:
-                        error_str = str(e)
-                        is_rate_limit = (
-                            "429" in error_str or "rate limit" in error_str.lower() or "TPM limit" in error_str
+                try:
+                    with custom_span("single query group advantage"):
+                        formatted_trajectories = self._format_counterfactual_trajectories(
+                            rollouts_per_problem=rollouts_per_problem,
+                            given_ground_truth=given_ground_truth,
+                        )
+                        sp = FileUtils.get_jinja_template_str(
+                            self.prompts["SINGLE_QUERY_GROUP_ADVANTAGE_SP"]
+                        ).render(
+                            agent_objective=self.agent_objective,
+                            learning_objective=self.learning_objective,
+                            num_experiences=num_experiences,
+                            experience_output_language_instruction=(
+                                self._output_language_instruction()
+                            ),
+                        )
+                        up = FileUtils.get_jinja_template_str(
+                            self.prompts["SINGLE_QUERY_GROUP_ADVANTAGE_UP"]
+                        ).render(
+                            question=rollouts_per_problem[0]["raw_question"],
+                            answer=rollouts_per_problem[0]["correct_answer"]
+                            if given_ground_truth
+                            else "[REDACTED]",
+                            trajectories=formatted_trajectories,
+                        )
+                        response = await self._query_generation(
+                            stage="group_advantage",
+                            source_ids=[self._stable_rollout_id(item) for item in rollouts_per_problem],
+                            messages=[
+                                {"role": "system", "content": sp},
+                                {"role": "user", "content": up},
+                            ],
                         )
 
-                        if is_rate_limit and attempt < max_retries - 1:
-                            delay = base_delay * (2**attempt) + (attempt * 0.5)
-                            logger.warning(
-                                f"Rate limit hit in group advantage (attempt {attempt + 1}/{max_retries}), "
-                                f"retrying after {delay:.1f}s"
-                            )
-                            await asyncio.sleep(delay)
-                            continue
-                        else:
-                            logger.warning(f"Warning: failed in single group advantage, {e}")
-                            return None
-                return None
+                        # extract experiences from the response
+                        pattern = re.compile(r"<Experiences>\s*(.*?)\s*</Experiences>", re.DOTALL | re.IGNORECASE)
+                        match = pattern.search(response)
+                        experiences = match.group(1).strip() if match else ""
+                        if not experiences or not split_experiences(experiences):
+                            raise GenerationOutputError("group advantage returned no parseable <Experiences> items")
+                    return {"rollouts": rollouts_per_problem, "critique": response, "experiences": experiences}
+                except Exception as e:
+                    return {
+                        "_generation_error": error_detail(e),
+                        "_stage": "single_query_group_advantage",
+                        "_task_id": self._stable_task_id(rollouts_per_problem[0]),
+                    }
 
         # parallel running
         results = []
+        failures: list[dict[str, Any]] = []
         tasks = [critique_with_semaphore(rollouts_per_problem) for rollouts_per_problem in all_rollouts]
         for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Single query group advantage"):
             result = await task
-            if result is not None:
-                results.append(result)
+            if result.get("_generation_error"):
+                failures.append(result)
+                continue
+            results.append(result)
 
-        return results
+        if failures:
+            raise L0CandidateGenerationError(
+                "group-advantage generation failed; refusing a partial candidate batch: "
+                + json.dumps(
+                    {"failed_count": len(failures), "examples": failures[:5]}, ensure_ascii=False, sort_keys=True
+                )
+            )
+
+        return sorted(
+            results,
+            key=lambda item: (
+                self._stable_task_id(item["rollouts"][0]),
+                tuple(self._stable_rollout_id(rollout) for rollout in item["rollouts"]),
+            ),
+        )
 
     async def _group_update(
         self,
@@ -466,6 +666,9 @@ class ExperienceUpdater:
                             ).render(
                                 agent_objective=self.agent_objective,
                                 learning_objective=self.learning_objective,
+                                experience_output_language_instruction=(
+                                    self._output_language_instruction()
+                                ),
                             )
                             up = FileUtils.get_jinja_template_str(
                                 self.prompts["GROUP_EXPERIENCE_UPDATE_TEMPLATE_UP"]
@@ -519,9 +722,8 @@ class ExperienceUpdater:
     ) -> dict[str, dict]:
         """Batch update experiences based on critiques.
 
-        Delegates the consolidation + apply to the shared ``pool_merge`` machinery
-        (see ``experience_pool.consolidate_and_apply``) so the flat pool and the
-        hierarchical L0/L1/L2 pools share one merge implementation.
+        Delegates consolidation to the legacy flat-pool helper. Hierarchical L0
+        review intentionally bypasses this permissive numeric-ID path.
         """
         logger.info("Batch update")
         all_operations = []
@@ -540,7 +742,18 @@ class ExperienceUpdater:
             model_params=self.config.model.model_params.model_dump(),
             id_prefix="",
             max_retries=max_retries,
+            experience_output_language_instruction=(
+                self._output_language_instruction()
+            ),
         )
+        for experience_id, content in new_experiences.items():
+            if experiences.get(experience_id) == content:
+                continue
+            validate_experience_output_language(
+                content,
+                self._configured_output_language(),
+                label=f"reviewed flat experience {experience_id}",
+            )
         print("- Num of candidate experiences:", len(new_experiences))
         return new_experiences
 
@@ -575,37 +788,55 @@ class ExperienceUpdater:
     ) -> list[EvaluationSample]:
         if not rollouts:
             return []
-        if len(rollouts) <= max_items:
-            return rollouts
+        ordered = sorted(rollouts, key=self._stable_rollout_id)
+        if len(ordered) <= max_items:
+            return ordered
 
-        rewards = [self._safe_reward(r.reward) for r in rollouts]
-        best_idx = max(range(len(rollouts)), key=lambda i: rewards[i])
-        worst_idx = min(range(len(rollouts)), key=lambda i: rewards[i])
-        selected_indices = [best_idx] if best_idx == worst_idx else [best_idx, worst_idx]
-        for i in range(len(rollouts)):
-            if len(selected_indices) >= max_items:
+        best = min(
+            ordered,
+            key=lambda rollout: (-self._safe_reward(rollout.reward), self._stable_rollout_id(rollout)),
+        )
+        worst = min(
+            ordered,
+            key=lambda rollout: (self._safe_reward(rollout.reward), self._stable_rollout_id(rollout)),
+        )
+        selected = [best] if best is worst else [best, worst]
+        for rollout in ordered:
+            if len(selected) >= max_items:
                 break
-            if i not in selected_indices:
-                selected_indices.append(i)
-        return [rollouts[i] for i in selected_indices]
+            if rollout not in selected:
+                selected.append(rollout)
+        return selected
 
     def _select_counterfactual_summaries(
         self, summaries: list[dict[str, Any]], max_items: int = 4
     ) -> list[dict[str, Any]]:
         if not summaries:
             return []
-        if len(summaries) <= max_items:
-            return summaries
-        rewards = [self._safe_reward(s.get("reward")) for s in summaries]
-        best_idx = max(range(len(summaries)), key=lambda i: rewards[i])
-        worst_idx = min(range(len(summaries)), key=lambda i: rewards[i])
-        selected_indices = [best_idx] if best_idx == worst_idx else [best_idx, worst_idx]
-        for i in range(len(summaries)):
-            if len(selected_indices) >= max_items:
+        ordered = sorted(summaries, key=self._stable_rollout_id)
+        if len(ordered) <= max_items:
+            return ordered
+        best = min(
+            ordered,
+            key=lambda summary: (
+                -self._safe_reward(summary.get("reward")),
+                self._stable_rollout_id(summary),
+            ),
+        )
+        worst = min(
+            ordered,
+            key=lambda summary: (
+                self._safe_reward(summary.get("reward")),
+                self._stable_rollout_id(summary),
+            ),
+        )
+        selected = [best] if best is worst else [best, worst]
+        for summary in ordered:
+            if len(selected) >= max_items:
                 break
-            if i not in selected_indices:
-                selected_indices.append(i)
-        return [summaries[i] for i in selected_indices]
+            if summary not in selected:
+                selected.append(summary)
+        return selected
 
     def _format_counterfactual_trajectories(
         self, rollouts_per_problem: list[dict[str, Any]], given_ground_truth: bool

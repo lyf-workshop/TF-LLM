@@ -12,6 +12,10 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
+from sqlmodel import select
+
+from ..db import DatasetSample
+from ..utils import SQLModelUtils, redact_sensitive_data
 from .experience_models import ExperienceRecord
 
 CONDITIONS = ("no_experience", "sequential", "clustered")
@@ -20,6 +24,148 @@ CONDITIONS = ("no_experience", "sequential", "clustered")
 def _canonical_sha256(value: Any) -> str:
     payload = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def config_sha256(config: Any) -> str:
+    """Fingerprint a resolved, redacted Pydantic configuration."""
+
+    payload = config.model_dump(mode="json") if hasattr(config, "model_dump") else config
+    return _canonical_sha256(redact_sensitive_data(payload))
+
+
+def sign_experiment_protocol(payload: dict[str, Any]) -> dict[str, Any]:
+    """Return a copy carrying a canonical integrity signature."""
+
+    unsigned = {key: value for key, value in payload.items() if key != "protocol_sha256"}
+    return {**unsigned, "protocol_sha256": _canonical_sha256(unsigned)}
+
+
+def load_experiment_protocol(
+    path: str | Path, *, require_ready: bool = False
+) -> dict[str, Any]:
+    """Load and verify a three-condition experiment protocol."""
+
+    protocol_path = Path(path)
+    with protocol_path.open("r", encoding="utf-8") as file:
+        protocol = json.load(file)
+    if not isinstance(protocol, dict):
+        raise ValueError(f"Experiment protocol must be a JSON object: {protocol_path}")
+    signature = protocol.get("protocol_sha256")
+    unsigned = {key: value for key, value in protocol.items() if key != "protocol_sha256"}
+    if not isinstance(signature, str) or signature != _canonical_sha256(unsigned):
+        raise ValueError(f"Experiment protocol signature mismatch: {protocol_path}")
+    if protocol.get("conditions") != list(CONDITIONS):
+        raise ValueError(f"Experiment protocol must declare exactly {CONDITIONS}")
+    if require_ready and protocol.get("status") != "ready":
+        raise ValueError("Experiment protocol is not ready for evaluation")
+    return protocol
+
+
+def _meta_dict(value: Any) -> dict[str, Any]:
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError:
+            return {}
+    return value if isinstance(value, dict) else {}
+
+
+def load_evaluation_inventory(
+    dataset: str,
+    *,
+    db_url: str | None = None,
+    default_domain: str | None = None,
+) -> dict[str, Any]:
+    """Read a deterministic, content-addressed evaluation inventory from DB.
+
+    The protocol identity is always namespaced by the concrete DB dataset. The
+    result identity mirrors evaluation reporting: an upstream ``task_id`` when
+    present, otherwise ``<dataset>:<index>``.
+    """
+
+    if db_url:
+        SQLModelUtils.configure(db_url, initialize_schema=False)
+    with SQLModelUtils.create_session() as session:
+        rows = session.exec(
+            select(DatasetSample)
+            .where(DatasetSample.dataset == dataset)
+            .order_by(DatasetSample.index)
+        ).all()
+        # Force JSON-backed attributes to materialize before closing the session.
+        for row in rows:
+            _ = row.meta
+    if not rows:
+        raise ValueError(f"Evaluation dataset {dataset!r} is missing or empty")
+    indices = [row.index for row in rows]
+    if any(isinstance(index, bool) or not isinstance(index, int) for index in indices):
+        raise ValueError(f"Evaluation dataset {dataset!r} must use integer indices")
+    if len(indices) != len(set(indices)):
+        raise ValueError(f"Evaluation dataset {dataset!r} contains duplicate indices")
+
+    tasks: list[dict[str, Any]] = []
+    seen_protocol_ids: set[str] = set()
+    seen_result_ids: set[str] = set()
+    for row in rows:
+        meta = _meta_dict(row.meta)
+        upstream_id = str(meta.get("task_id")) if meta.get("task_id") is not None else str(row.index)
+        namespaced_id = f"{dataset}:{upstream_id}"
+        result_id = upstream_id if meta.get("task_id") is not None else f"{dataset}:{row.index}"
+        if namespaced_id in seen_protocol_ids or result_id in seen_result_ids:
+            raise ValueError(f"Evaluation dataset {dataset!r} contains duplicate task identities")
+        seen_protocol_ids.add(namespaced_id)
+        seen_result_ids.add(result_id)
+        tasks.append(
+            {
+                "task_id": result_id,
+                "namespaced_task_id": namespaced_id,
+                "dataset_index": row.index,
+                "question_sha256": hashlib.sha256((row.question or "").encode("utf-8")).hexdigest(),
+                "domain": meta.get("domain") or default_domain,
+                "task_family": meta.get("task_family"),
+            }
+        )
+    task_order = [task["namespaced_task_id"] for task in tasks]
+    result_task_order = [task["task_id"] for task in tasks]
+    return {
+        "dataset": dataset,
+        "record_count": len(tasks),
+        "tasks": tasks,
+        "inventory_sha256": _canonical_sha256(tasks),
+        "task_order": task_order,
+        "task_order_sha256": _canonical_sha256(task_order),
+        "result_task_order": result_task_order,
+        "result_task_order_sha256": _canonical_sha256(result_task_order),
+        "metadata_defaults": {"domain": default_domain, "task_family": None},
+    }
+
+
+def validate_evaluation_inventory(
+    expected: dict[str, Any], *, db_url: str | None = None
+) -> dict[str, Any]:
+    """Re-read DB and prove that a frozen protocol inventory is unchanged."""
+
+    dataset = expected.get("dataset")
+    if not isinstance(dataset, str) or not dataset:
+        raise ValueError("Experiment protocol evaluation.dataset is missing")
+    defaults = expected.get("metadata_defaults") or {}
+    actual = load_evaluation_inventory(
+        dataset,
+        db_url=db_url,
+        default_domain=defaults.get("domain"),
+    )
+    for field in (
+        "record_count",
+        "inventory_sha256",
+        "task_order",
+        "task_order_sha256",
+        "result_task_order",
+        "result_task_order_sha256",
+    ):
+        if expected.get(field) != actual[field]:
+            raise ValueError(f"Evaluation inventory no longer matches protocol field {field}")
+    if expected.get("tasks") != actual["tasks"]:
+        raise ValueError("Evaluation task metadata/question hashes no longer match experiment protocol")
+    return actual
 
 
 def file_sha256(path: str | Path) -> str:
@@ -209,7 +355,15 @@ def hierarchy_metrics(
     *,
     max_l0_recent: int = 40,
 ) -> dict[str, Any]:
-    hierarchy = load_hierarchy(hierarchy_path)
+    loaded = load_hierarchy(hierarchy_path)
+    hierarchy = {
+        level: [
+            record
+            for record in loaded[level]
+            if record.get("lifecycle_status", "active") == "active"
+        ]
+        for level in ("L0", "L1", "L2")
+    }
     all_records = [record for level in ("L0", "L1", "L2") for record in hierarchy[level]]
     records_by_id = {record["id"]: record for record in all_records}
     pending = [
@@ -329,7 +483,15 @@ def _load_result_rows(path: str | Path | None, exp_id: str | None) -> list[dict[
             .where(EvaluationSample.exp_id == exp_id, EvaluationSample.stage == "judged")
             .order_by(EvaluationSample.id)
         ).all()
-    return [sample.model_dump(mode="json") for sample in samples]
+    rows = []
+    for sample in samples:
+        row = sample.model_dump(mode="json")
+        # EvaluationSample.model_dump intentionally omits meta from its public
+        # default payload, but a measured ablation report needs signed runtime
+        # metadata (condition, model, token count, protocol hash).
+        row["meta"] = sample.meta
+        rows.append(row)
+    return rows
 
 
 def _row_task_id(row: dict[str, Any]) -> str:
@@ -341,16 +503,15 @@ def _row_task_id(row: dict[str, Any]) -> str:
             meta = {}
     if not isinstance(meta, dict):
         meta = {}
-    value = (
-        row.get("task_id")
-        or row.get("source_task_id")
-        or meta.get("task_id")
-        or row.get("dataset_index")
-        or row.get("id")
-    )
-    if value is None:
-        raise ValueError("Evaluation row has no task identifier")
-    return str(value)
+    for value in (row.get("task_id"), row.get("source_task_id"), meta.get("task_id")):
+        if value is not None:
+            return str(value)
+    dataset_index = row.get("dataset_index")
+    if dataset_index is not None:
+        return f"{row.get('dataset', 'dataset')}:{dataset_index}"
+    if row.get("id") is not None:
+        return str(row["id"])
+    raise ValueError("Evaluation row has no task identifier")
 
 
 def _row_reward(row: dict[str, Any]) -> float | None:
@@ -380,16 +541,34 @@ def _row_injected_tokens(row: dict[str, Any]) -> float | None:
     return None
 
 
-def _collapse_results(rows: list[dict[str, Any]]) -> tuple[list[str], dict[str, dict[str, Any]]]:
+def _collapse_results(
+    rows: list[dict[str, Any]],
+    *,
+    expected_trials_per_task: int | None = None,
+) -> tuple[list[str], dict[str, dict[str, Any]]]:
     """Collapse pass-k trials while preserving the first task occurrence order."""
 
     order: list[str] = []
     collapsed: dict[str, dict[str, Any]] = {}
+    trial_indices: dict[str, set[int]] = {}
     for row in rows:
         task_id = _row_task_id(row)
         reward = _row_reward(row)
         if reward is None:
+            if expected_trials_per_task is not None:
+                raise ValueError(f"Measured evaluation row for {task_id} has no reward")
             continue
+        if expected_trials_per_task is not None:
+            if row.get("stage") != "judged":
+                raise ValueError(f"Measured evaluation row for {task_id} is not judged")
+            meta = _meta_dict(row.get("meta"))
+            trial_index = meta.get("trial_index")
+            if isinstance(trial_index, bool) or not isinstance(trial_index, int):
+                raise ValueError(f"Measured evaluation row for {task_id} has no integer trial_index")
+            observed = trial_indices.setdefault(task_id, set())
+            if trial_index in observed:
+                raise ValueError(f"Duplicate trial_index={trial_index} for task {task_id}")
+            observed.add(trial_index)
         if task_id not in collapsed:
             order.append(task_id)
             collapsed[task_id] = {"reward": reward, "injected_tokens": []}
@@ -398,18 +577,33 @@ def _collapse_results(rows: list[dict[str, Any]]) -> tuple[list[str], dict[str, 
         tokens = _row_injected_tokens(row)
         if tokens is not None:
             collapsed[task_id]["injected_tokens"].append(tokens)
+    if expected_trials_per_task is not None:
+        required = set(range(expected_trials_per_task))
+        incomplete = {
+            task_id: sorted(required - indices)
+            for task_id, indices in trial_indices.items()
+            if indices != required
+        }
+        if incomplete:
+            raise ValueError(f"Incomplete pass-k evaluation trials: {incomplete}")
     return order, collapsed
 
 
 def _runtime_signature(rows: list[dict[str, Any]]) -> dict[str, Any]:
     fields = (
         "model_config_sha256",
+        "agent_config_sha256",
+        "prompt_sha256",
         "requested_model",
         "temperature",
         "expected_trials_per_task",
         "task_split_name",
         "train_dataset_for_overlap_check",
         "injected_tokenizer",
+        "injected_token_count",
+        "experiment_protocol_sha256",
+        "evaluation_config_sha256",
+        "task_order_sha256",
     )
     collected: dict[str, set[Any]] = {field: set() for field in fields}
     conditions: set[str] = set()
@@ -511,8 +705,9 @@ def build_three_group_report(
     evaluation_exp_ids: dict[str, str | None] | None,
     sequential_hierarchy: str | Path,
     clustered_hierarchy: str | Path,
-    split_manifest_path: str | Path,
-    split_name: str,
+    split_manifest_path: str | Path | None = None,
+    split_name: str | None = None,
+    experiment_protocol_path: str | Path | None = None,
     sequential_audit: str | Path | None = None,
     clustered_audit: str | Path | None = None,
     max_l0_recent: int = 40,
@@ -526,11 +721,39 @@ def build_three_group_report(
     evaluation_exp_ids = evaluation_exp_ids or {}
     if set(evaluation_paths) != set(CONDITIONS):
         raise ValueError(f"evaluation_paths must contain exactly {CONDITIONS}")
-    manifest = load_task_split_manifest(split_manifest_path)
-    split = manifest["splits"][split_name]
-    expected_order = list(split["eval_task_ids"])
-    expected_set = set(expected_order)
-    task_metadata = {item["task_id"]: item for item in manifest["tasks"]}
+    protocol: dict[str, Any] | None = None
+    if experiment_protocol_path:
+        protocol = load_experiment_protocol(experiment_protocol_path, require_ready=True)
+        evaluation = protocol["evaluation"]
+        expected_order = list(evaluation["result_task_order"])
+        expected_set = set(expected_order)
+        task_metadata = {item["task_id"]: item for item in evaluation["tasks"]}
+        dataset_label: Any = {
+            "training": protocol["training"],
+            "evaluation": {
+                "dataset": evaluation["dataset"],
+                "record_count": evaluation["record_count"],
+                "snapshot_sha256": evaluation.get("snapshot_sha256"),
+                "inventory_sha256": evaluation["inventory_sha256"],
+            },
+        }
+        resolved_split_name = protocol["training"].get("split_name")
+        resolved_split_sha256 = protocol["training"].get("split_sha256")
+        protocol_sha256 = protocol["protocol_sha256"]
+    else:
+        if not split_manifest_path or not split_name:
+            raise ValueError(
+                "Provide either experiment_protocol_path or both split_manifest_path and split_name"
+            )
+        manifest = load_task_split_manifest(split_manifest_path)
+        split = manifest["splits"][split_name]
+        expected_order = list(split["eval_task_ids"])
+        expected_set = set(expected_order)
+        task_metadata = {item["task_id"]: item for item in manifest["tasks"]}
+        dataset_label = manifest["dataset"]
+        resolved_split_name = split_name
+        resolved_split_sha256 = split["split_sha256"]
+        protocol_sha256 = None
 
     collapsed: dict[str, dict[str, dict[str, Any]]] = {}
     observed_orders: dict[str, list[str]] = {}
@@ -538,15 +761,65 @@ def build_three_group_report(
     for condition in CONDITIONS:
         rows = _load_result_rows(evaluation_paths[condition], evaluation_exp_ids.get(condition))
         runtime_signatures[condition] = _runtime_signature(rows)
+        if protocol:
+            required_runtime_fields = (
+                "model_config_sha256",
+                "agent_config_sha256",
+                "prompt_sha256",
+                "requested_model",
+                "temperature",
+                "expected_trials_per_task",
+                "task_split_name",
+                "train_dataset_for_overlap_check",
+                "injected_tokenizer",
+                "injected_token_count",
+                "experiment_protocol_sha256",
+                "evaluation_config_sha256",
+                "task_order_sha256",
+            )
+            for row in rows:
+                meta = _meta_dict(row.get("meta"))
+                missing = [field for field in required_runtime_fields if meta.get(field) is None]
+                if missing:
+                    raise ValueError(
+                        f"{condition} measured row lacks required protocol metadata: {missing}"
+                    )
+            signature = runtime_signatures[condition]
+            contract = protocol["condition_configs"][condition]
+            expected_values = {
+                "agent_config_sha256": contract["agent_config_sha256"],
+                "prompt_sha256": contract["prompt_sha256"],
+                "injected_token_count": contract["declared_injected_token_count"],
+                "injected_tokenizer": contract["injected_tokenizer"],
+                "experiment_protocol_sha256": protocol["protocol_sha256"],
+                "evaluation_config_sha256": evaluation["resolved_config_sha256"],
+                "task_order_sha256": evaluation["task_order_sha256"],
+                "expected_trials_per_task": protocol["shared_parameters"]["pass_k"],
+                "train_dataset_for_overlap_check": protocol["training"]["dataset"],
+                "model_config_sha256": protocol["shared_parameters"]["model_config_sha256"],
+            }
+            for field, expected in expected_values.items():
+                if signature[field] != expected:
+                    raise ValueError(
+                        f"{condition} runtime {field} differs from signed protocol: "
+                        f"{signature[field]!r} != {expected!r}"
+                    )
         declared = runtime_signatures[condition]["experience_conditions"]
         if declared and declared != [condition]:
             raise ValueError(f"{condition} result declares the wrong treatment metadata: {declared}")
-        order, values = _collapse_results(rows)
+        if protocol and declared != [condition]:
+            raise ValueError(f"{condition} result must declare its signed treatment condition")
+        order, values = _collapse_results(
+            rows,
+            expected_trials_per_task=(
+                int(protocol["shared_parameters"]["pass_k"]) if protocol else None
+            ),
+        )
         if set(order) != expected_set:
             missing = sorted(expected_set - set(order))
             unexpected = sorted(set(order) - expected_set)
             raise ValueError(
-                f"{condition} evaluation task list differs from manifest {split_name}: "
+                f"{condition} evaluation task list differs from frozen protocol {resolved_split_name}: "
                 f"missing={missing}, unexpected={unexpected}"
             )
         if order != expected_order:
@@ -565,6 +838,12 @@ def build_three_group_report(
         "train_dataset_for_overlap_check",
         "injected_tokenizer",
     )
+    if protocol:
+        comparable_fields += (
+            "experiment_protocol_sha256",
+            "evaluation_config_sha256",
+            "task_order_sha256",
+        )
     verified_fields = []
     missing_fields = []
     for field in comparable_fields:
@@ -590,6 +869,30 @@ def build_three_group_report(
     clustered_source_hash = clustered_seed.get("source_l0_sha256")
     if not sequential_source_hash or sequential_source_hash != clustered_source_hash:
         raise ValueError("Sequential and clustered conditions do not share the same original L0 snapshot hash")
+    if protocol:
+        expected_source_hash = protocol["source_l0"]["source_l0_sha256"]
+        if sequential_source_hash != expected_source_hash:
+            raise ValueError("Hierarchy source L0 hash differs from signed experiment protocol")
+        for condition, path in (
+            ("sequential", sequential_hierarchy),
+            ("clustered", clustered_hierarchy),
+        ):
+            expected_file_hash = protocol["condition_configs"][condition].get(
+                "hierarchy_file_sha256"
+            )
+            if not expected_file_hash or file_sha256(path) != expected_file_hash:
+                raise ValueError(f"{condition} hierarchy file differs from signed protocol")
+        for condition, audit_path in (
+            ("sequential", sequential_audit),
+            ("clustered", clustered_audit),
+        ):
+            if audit_path is None:
+                raise ValueError(f"Protocol report requires the {condition} cluster audit")
+            expected_audit_hash = protocol["condition_configs"][condition].get(
+                "audit_file_sha256"
+            )
+            if not expected_audit_hash or file_sha256(audit_path) != expected_audit_hash:
+                raise ValueError(f"{condition} cluster audit differs from signed protocol")
 
     strict: dict[str, dict[str, int]] = {}
     group_metrics: dict[str, dict[str, Any]] = {}
@@ -603,6 +906,8 @@ def build_three_group_report(
             for task_id in expected_order
             if collapsed[condition][task_id]["injected_tokens"]
         ]
+        if protocol and not token_values:
+            raise ValueError(f"{condition} measured rows are missing injected token metadata")
         if condition == "no_experience":
             mean_tokens: float | None = statistics.fmean(token_values) if token_values else 0.0
             token_source = "evaluation_metadata" if token_values else "declared_no_experience"
@@ -666,12 +971,13 @@ def build_three_group_report(
     best = sorted(condition for condition, rate in rates.items() if rate == best_rate)
     conclusion = "tie" if len(best) > 1 else f"highest_observed_pass_rate:{best[0]}"
     return {
-        "schema_version": "three-condition-v1",
+        "schema_version": "three-condition-v2" if protocol else "three-condition-v1",
         "conditions": list(CONDITIONS),
         "integrity": {
-            "dataset": manifest["dataset"],
-            "split_name": split_name,
-            "split_sha256": split["split_sha256"],
+            "dataset": dataset_label,
+            "split_name": resolved_split_name,
+            "split_sha256": resolved_split_sha256,
+            "experiment_protocol_sha256": protocol_sha256,
             "task_order_sha256": canonical_sha256(expected_order),
             "identical_task_order": len({tuple(order) for order in observed_orders.values()}) == 1,
             "runtime_parameter_verification": {

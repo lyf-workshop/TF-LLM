@@ -26,5 +26,4 @@ korgym:
   game_port: 8777
   level: 5  # 单词长度（4-12，推荐5）
   max_rounds: 10  # ✅ 与游戏代码一致（第113行 attempts=10）
-  timeout_per_game: 600
 

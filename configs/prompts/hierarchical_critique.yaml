@@ -1,5 +1,161 @@
 # Structured prompts for within-cluster hierarchical aggregation.
 
+L0_CANDIDATE_REVIEW_PROMPT:
+  system: |
+    You maintain an evidence-backed pool of reusable L0 experiences. Review
+    exactly ONE raw candidate against the supplied current active-pool view and
+    choose exactly one action: ADD, UPDATE, DELETE, or KEEP.
+
+    Agent objective: {{ agent_objective }}
+    Learning objective: {{ learning_objective }}
+    Output language: {{ experience_output_language_instruction }}
+
+    Compare observable applicability conditions, recommended actions, and
+    execution evidence. Semantic similarity alone is not proof of duplication.
+    A single failure does not invalidate a general rule; prefer UPDATE when it
+    adds a supported boundary or exception. Surface contradictions may describe
+    different scenarios and must not be forcibly merged. An empty comparison
+    set does not automatically justify ADD. KEEP is correct when the candidate
+    is already covered, weak, non-reusable, or insufficiently evidenced.
+
+    Actions:
+    - ADD: add distinct, reusable, evidence-supported content. target_id must be
+      null and new_content must contain the complete experience.
+    - UPDATE: replace one displayed active experience with a corrected version.
+      target_id and complete new_content are required.
+    - DELETE: deactivate one displayed active experience only when supplied
+      evidence shows it is wrong, obsolete, or fully subsumed. target_id is
+      required and new_content must be null.
+    - KEEP: leave the pool unchanged. target_id and new_content must be null.
+
+    Cite only IDs from allowed_evidence_ids. Do not report confidence. Return
+    only one JSON object with exactly these fields:
+    {
+      "action": "ADD|UPDATE|DELETE|KEEP",
+      "candidate_id": "C0_...",
+      "target_id": null,
+      "new_content": null,
+      "reason": "evidence-based explanation",
+      "evidence_ids": ["an allowed ID"]
+    }
+
+  user: |
+    Comparison scope: {{ comparison_scope }}
+    Candidate (raw summary and provenance):
+    {{ candidate_json }}
+
+    Current active L0 experiences supplied for comparison:
+    {{ related_experiences_json }}
+
+    allowed_evidence_ids:
+    {{ allowed_evidence_ids_json }}
+
+    Decide the single safe action for this candidate.
+
+L1_CANDIDATE_REVIEW_PROMPT:
+  system: |
+    You maintain an evidence-backed pool of reusable L1 operational patterns.
+    Review exactly ONE generated L1 candidate against only the supplied active
+    L1 pool and choose exactly one action: ADD, UPDATE, DELETE, or KEEP.
+
+    Agent objective: {{ agent_objective }}
+    Learning objective: {{ learning_objective }}
+    Output language: {{ experience_output_language_instruction }}
+
+    A candidate is supported only by the displayed L0 parent versions and their
+    recorded task/rollout provenance. The aggregation model's prose and
+    confidence are not independent evidence. Compare concrete applicability
+    conditions, exclusions, ordered actions, and verification methods. Similar
+    wording with different conditions is not a duplicate. One failed case does
+    not invalidate an existing pattern; use UPDATE only when the supplied L0
+    evidence supports a complete corrected pattern.
+
+    ADD/UPDATE require both complete new_content and new_structured_content.
+    UPDATE/DELETE may target exactly one displayed active L1. KEEP changes
+    nothing and must not silently attach candidate evidence to an existing L1.
+    DELETE requires direct supplied evidence that the target is wrong, obsolete,
+    or fully subsumed; otherwise KEEP or UPDATE.
+
+    Cite only IDs from allowed_evidence_ids and cite at least one displayed L0
+    parent for every mutating action. Return only one JSON object:
+    {
+      "action": "ADD|UPDATE|DELETE|KEEP",
+      "candidate_id": "C1_...",
+      "level": "L1",
+      "target_id": null,
+      "new_content": null,
+      "new_structured_content": null,
+      "reason": "evidence-based explanation",
+      "evidence_ids": ["an allowed ID"]
+    }
+    For ADD/UPDATE, new_structured_content must use the exact aggregation schema:
+    decision, title, principle, applicable_when, not_applicable_when,
+    recommended_actions, evidence_summary, and confidence.
+
+  user: |
+    Comparison scope: {{ comparison_scope }}
+    Candidate L1 and exact L0 source versions:
+    {{ candidate_json }}
+
+    Current active L1 experiences supplied for comparison, with their sources:
+    {{ related_experiences_json }}
+
+    allowed_evidence_ids:
+    {{ allowed_evidence_ids_json }}
+
+    Decide the single safe action for this L1 candidate.
+
+L2_CANDIDATE_REVIEW_PROMPT:
+  system: |
+    You maintain an evidence-backed pool of L2 conditional meta-strategies.
+    Review exactly ONE generated L2 candidate against only the supplied active
+    L2 pool and choose exactly one action: ADD, UPDATE, DELETE, or KEEP.
+
+    Agent objective: {{ agent_objective }}
+    Learning objective: {{ learning_objective }}
+    Output language: {{ experience_output_language_instruction }}
+
+    Treat only the displayed active L1 parent versions and their reachable L0
+    provenance as evidence. Higher abstraction is not higher reliability, and
+    the aggregation model's confidence is not validation. Reject slogans and
+    generalizations beyond the sources. Compare observable preconditions,
+    exclusions, executable actions, and verification. Similar wording with
+    distinct applicability boundaries must remain separate.
+
+    ADD/UPDATE require both complete new_content and new_structured_content.
+    UPDATE/DELETE may target exactly one displayed active L2. KEEP changes
+    nothing and must not merge sources. DELETE requires supplied lower-level
+    evidence that the target is wrong, obsolete, or fully subsumed.
+
+    Cite only IDs from allowed_evidence_ids and cite at least one displayed L1
+    parent for every mutating action. Return only one JSON object:
+    {
+      "action": "ADD|UPDATE|DELETE|KEEP",
+      "candidate_id": "C2_...",
+      "level": "L2",
+      "target_id": null,
+      "new_content": null,
+      "new_structured_content": null,
+      "reason": "evidence-based explanation",
+      "evidence_ids": ["an allowed ID"]
+    }
+    For ADD/UPDATE, new_structured_content must use the exact aggregation schema:
+    decision, title, principle, applicable_when, not_applicable_when,
+    recommended_actions, evidence_summary, and confidence.
+
+  user: |
+    Comparison scope: {{ comparison_scope }}
+    Candidate L2 and exact L1/L0 source versions:
+    {{ candidate_json }}
+
+    Current active L2 experiences supplied for comparison, with their sources:
+    {{ related_experiences_json }}
+
+    allowed_evidence_ids:
+    {{ allowed_evidence_ids_json }}
+
+    Decide the single safe action for this L2 candidate.
+
 L1_AGGREGATION_PROMPT:
   system: |
     You distill a set of semantically related, case-level experiences into ONE
@@ -8,6 +164,7 @@ L1_AGGREGATION_PROMPT:
 
     Agent objective: {{ agent_objective }}
     Learning objective: {{ learning_objective }}
+    Output language: {{ experience_output_language_instruction }}
 
     Do not concatenate or paraphrase every item. Do not hide contradictions with
     vague advice such as "plan carefully" or "verify results". The principle must
@@ -51,6 +208,7 @@ L2_AGGREGATION_PROMPT:
 
     Agent objective: {{ agent_objective }}
     Learning objective: {{ learning_objective }}
+    Output language: {{ experience_output_language_instruction }}
 
     Use only principles supported by the supplied L1 parents and their exact L0
     evidence. Explain applicability, exclusions, and concrete actions. Never
