@@ -27,7 +27,6 @@ practice:
   learning_objective: |
     Help the agent to improve logical reasoning capability by extracting general problem-solving strategies and deductive reasoning guidelines.
   num_experiences_per_query: 1
-  verify_module: "utu.practice.verify.logic"  # Use logic verifier for reward calculation
 
 # Data Arguments  
 data:

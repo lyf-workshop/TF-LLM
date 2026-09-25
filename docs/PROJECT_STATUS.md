@@ -10,7 +10,7 @@ TF-LLM 从 Training-Free GRPO 出发，希望把一次性的经验提取扩展�
 - AIME、LiveCodeBench、WebWalkerQA、ZebraLogic、SkillsBench 和三类 KORGym 游戏适配。
 - 从多条 rollout 中提取经验并生成经验 Agent。
 - L0、L1、L2 分层经验的数据结构、更新和持久化代码。
-- 静态、BM25 检索和 LLM rerank 三种经验选择模式。
+- 静态、TF-IDF 检索和 LLM rerank 三种经验选择模式。
 - SkillsBench 成对调度、基础设施错误分类、无效试次补跑与发布门禁。
 - 经验审计、冲突检测和误差分析的辅助实现。
 

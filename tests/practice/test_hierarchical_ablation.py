@@ -111,16 +111,10 @@ class _EquidistantEmbedding:
         return {"provider": "equidistant-test"}
 
 
-def test_layered_provisional_flags_preserve_legacy_config_semantics():
+def test_layered_provisional_flags_are_independent():
     defaults = HierarchicalLearningConfig()
     assert defaults.l0_similarity_threshold_provisional is True
     assert defaults.l1_similarity_threshold_provisional is True
-    assert defaults.similarity_thresholds_provisional is None
-
-    legacy_open = HierarchicalLearningConfig(similarity_thresholds_provisional=False)
-    assert legacy_open.l0_similarity_threshold_provisional is False
-    assert legacy_open.l1_similarity_threshold_provisional is False
-
     layered = HierarchicalLearningConfig(
         l0_similarity_threshold_provisional=False,
         l1_similarity_threshold_provisional=True,
@@ -128,12 +122,6 @@ def test_layered_provisional_flags_preserve_legacy_config_semantics():
     assert layered.l0_similarity_threshold_provisional is False
     assert layered.l1_similarity_threshold_provisional is True
 
-    legacy_wins_when_mixed = HierarchicalLearningConfig(
-        l0_similarity_threshold_provisional=False,
-        similarity_thresholds_provisional=True,
-    )
-    assert legacy_wins_when_mixed.l0_similarity_threshold_provisional is True
-    assert legacy_wins_when_mixed.l1_similarity_threshold_provisional is True
 
 
 def test_ablation_seed_uses_exact_l0_and_never_copies_upper_levels(tmp_path):
@@ -748,7 +736,7 @@ def test_strict_math_manifest_plan_is_static_and_marks_eval_order_unavailable(tm
             practice_manifest_expected_records=1,
             practice_dataset_name="DAPO-v3-test",
         ),
-        evaluation=SimpleNamespace(data=SimpleNamespace(dataset="AIME24-test")),
+        runtime=SimpleNamespace(data=SimpleNamespace(dataset="AIME24-test")),
     )
 
     training, evaluation = ablation_cli._static_training_contract(config)

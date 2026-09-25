@@ -33,10 +33,20 @@ class SimpleWorkerAgent:
             task=subtask.task,
         )
 
-    def work_streamed(self, task_recorder: OrchestraTaskRecorder, subtask: Subtask) -> WorkerResult:
+    def work_streamed(
+        self,
+        task_recorder: OrchestraTaskRecorder,
+        subtask: Subtask,
+        *,
+        log_to_db: bool = True,
+    ) -> WorkerResult:
         # TODO: wrap WorkerResult with DataClassWithStreamEvents
         aug_task = self._format_task(task_recorder, subtask)
-        run_result_streaming = self.agent.run_streamed(aug_task, trace_id=task_recorder.trace_id)
+        run_result_streaming = self.agent.run_streamed(
+            aug_task,
+            trace_id=task_recorder.trace_id,
+            log_to_db=log_to_db,
+        )
         result = WorkerResult(
             task=subtask.task,
             output="",

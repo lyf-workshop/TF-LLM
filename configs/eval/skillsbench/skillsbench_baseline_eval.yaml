@@ -8,7 +8,6 @@ exp_id: "skillsbench_baseline_eval_12_ds"
 
 data:
   dataset: "SkillsBench-Eval-77"
-  type: "single"
 
 # Each task launches a Docker container; keep concurrency low to avoid
 # saturating the event loop and Docker daemon simultaneously.

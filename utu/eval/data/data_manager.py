@@ -1,22 +1,136 @@
 import abc
 import hashlib
 import json
+from pathlib import Path
 from typing import Literal
 
 from sqlmodel import select
 
 from ...config import EvalConfig
 from ...db import DatasetSample, EvaluationSample
-from ...utils import SQLModelUtils, get_logger
+from ...utils import SQLModelUtils, get_logger, redact_sensitive_data
 
 logger = get_logger(__name__)
 
 EvaluationStage = Literal["init", "rollout", "judged", "infra_error"]
 
+EVALUATION_IDENTITY_SCHEMA = "tf-llm-eval-cache-v1"
+EVALUATION_IDENTITY_KEY = "evaluation_identity_sha256"
+DATASET_SNAPSHOT_KEY = "evaluation_dataset_sha256"
+IDENTITY_SCHEMA_KEY = "evaluation_identity_schema"
+
 
 def _canonical_sha256(value: object) -> str:
-    payload = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    payload = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _normalise_meta(value: object) -> dict:
+    if isinstance(value, dict):
+        return dict(value)
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return {"source_meta": value}
+        if isinstance(parsed, dict):
+            return parsed
+    if value is None:
+        return {}
+    return {"source_meta": value}
+
+
+def _experience_source_sha256(config: EvalConfig) -> str | None:
+    # PracticeRuntimeConfig intentionally removes evaluation-only experience
+    # filtering.  Treat the absent filter as disabled instead of forcing
+    # practice to carry a dead duplicate field.
+    filter_config = getattr(config, "experience_filter", None)
+    if filter_config is None:
+        return None
+    if not filter_config.enabled or not filter_config.experience_source:
+        return None
+    source_path = Path(filter_config.experience_source)
+    if not source_path.is_file():
+        raise FileNotFoundError(
+            "Configured experience_source does not exist or is not a file: "
+            f"{source_path}. Refusing to create or reuse evaluation rows."
+        )
+    return hashlib.sha256(source_path.read_bytes()).hexdigest()
+
+
+def _endpoint_fingerprints(value: object, path: tuple[str, ...] = ()) -> dict[str, str]:
+    """Hash model endpoints without persisting their potentially sensitive URLs."""
+
+    if isinstance(value, dict):
+        result: dict[str, str] = {}
+        for key, item in value.items():
+            key_text = str(key)
+            normalized = key_text.lower().replace("-", "_")
+            item_path = (*path, key_text)
+            if normalized == "base_url" or normalized.endswith("_base_url"):
+                if item is not None:
+                    result[".".join(item_path)] = hashlib.sha256(
+                        str(item).encode("utf-8")
+                    ).hexdigest()
+            else:
+                result.update(_endpoint_fingerprints(item, item_path))
+        return result
+    if isinstance(value, (list, tuple)):
+        result = {}
+        for index, item in enumerate(value):
+            result.update(_endpoint_fingerprints(item, (*path, str(index))))
+        return result
+    return {}
+
+
+def evaluation_identity_sha256(config: EvalConfig) -> str:
+    """Hash every result-affecting evaluation option plus experience content.
+
+    Operational identifiers and parallelism are deliberately excluded: they
+    do not change the requested samples or model behaviour.  Secrets are
+    redacted before hashing so rotating an API key does not invalidate a run.
+    """
+
+    payload = config.model_dump(mode="python")
+    for field in (
+        "exp_id",
+        "db_url",
+        "concurrency",
+        "judge_concurrency",
+        "log_trajectory_to_db",
+        "allow_legacy_cache_reuse",
+    ):
+        payload.pop(field, None)
+    payload["runtime_endpoint_sha256_by_path"] = _endpoint_fingerprints(payload)
+    payload["experience_source_sha256"] = _experience_source_sha256(config)
+    return _canonical_sha256(redact_sensitive_data(payload))
+
+
+def dataset_snapshot_sha256(datapoints: list[DatasetSample]) -> str:
+    """Hash the exact source rows used to seed an evaluation run."""
+
+    return _canonical_sha256(
+        [
+            {
+                "dataset": row.dataset,
+                "index": row.index,
+                "source": row.source,
+                "source_index": row.source_index,
+                "question": row.question,
+                "answer": row.answer,
+                "level": row.level,
+                "file_name": row.file_name,
+                "meta": row.meta,
+            }
+            for row in datapoints
+        ]
+    )
 
 
 def _task_key(sample: DatasetSample | EvaluationSample) -> str:
@@ -124,16 +238,26 @@ class DBDataManager(BaseDataManager):
         )
 
     def load(self) -> list[EvaluationSample]:
-        if self._check_exp_id():
-            logger.warning(f"exp_id {self.config.exp_id} already exists in db")
-            return self.get_samples()
-
         with SQLModelUtils.create_session() as session:
             datapoints = session.exec(
                 select(DatasetSample).where(DatasetSample.dataset == self.config.data.dataset)
             ).all()
             datapoints = self._order_datapoints(list(datapoints))
             logger.info(f"Loaded {len(datapoints)} samples from {self.config.data.dataset}.")
+            identity_sha256 = evaluation_identity_sha256(self.config)
+            dataset_sha256 = dataset_snapshot_sha256(datapoints)
+
+            if self._check_exp_id():
+                logger.warning(f"exp_id {self.config.exp_id} already exists in db")
+                samples = self.get_samples()
+                self._validate_cached_samples(
+                    samples,
+                    datapoints=datapoints,
+                    identity_sha256=identity_sha256,
+                    dataset_sha256=dataset_sha256,
+                )
+                return samples
+
             samples = []
             logger.info(f"Duplicate {self.config.pass_k} times for each sample.")
             skillsbench_cfg = getattr(self.config, "skillsbench", None)
@@ -145,18 +269,13 @@ class DBDataManager(BaseDataManager):
             )
             for dp in datapoints:
                 for trial_index in range(self.config.pass_k):
-                    source_meta = dp.meta
-                    if isinstance(source_meta, str):
-                        try:
-                            source_meta = json.loads(source_meta)
-                        except json.JSONDecodeError:
-                            pass
-                    if isinstance(source_meta, dict):
-                        trial_meta = {**source_meta, "trial_index": trial_index}
-                    elif dp.meta is None:
-                        trial_meta = {"trial_index": trial_index}
-                    else:
-                        trial_meta = source_meta
+                    trial_meta = {
+                        **_normalise_meta(dp.meta),
+                        "trial_index": trial_index,
+                        IDENTITY_SCHEMA_KEY: EVALUATION_IDENTITY_SCHEMA,
+                        EVALUATION_IDENTITY_KEY: identity_sha256,
+                        DATASET_SNAPSHOT_KEY: dataset_sha256,
+                    }
                     if self.config.data.protocol_metadata:
                         if not isinstance(trial_meta, dict):
                             trial_meta = {"source_meta": trial_meta}
@@ -189,6 +308,88 @@ class DBDataManager(BaseDataManager):
             self.save(self.data)  # save to db
             return self.data
 
+    def _validate_cached_samples(
+        self,
+        samples: list[EvaluationSample],
+        *,
+        datapoints: list[DatasetSample],
+        identity_sha256: str,
+        dataset_sha256: str,
+    ) -> None:
+        """Reject an exp_id whose persisted contract differs from this run."""
+
+        if not samples:
+            raise ValueError(
+                f"exp_id {self.config.exp_id!r} exists but has no readable evaluation rows"
+            )
+        metas = [_normalise_meta(sample.meta) for sample in samples]
+        stored_identities = {meta.get(EVALUATION_IDENTITY_KEY) for meta in metas}
+        stored_datasets = {meta.get(DATASET_SNAPSHOT_KEY) for meta in metas}
+        stored_schemas = {meta.get(IDENTITY_SCHEMA_KEY) for meta in metas}
+        has_complete_fingerprint = (
+            None not in stored_identities
+            and None not in stored_datasets
+            and stored_schemas == {EVALUATION_IDENTITY_SCHEMA}
+        )
+
+        if has_complete_fingerprint:
+            if stored_identities != {identity_sha256}:
+                raise ValueError(
+                    f"exp_id {self.config.exp_id!r} was created with a different evaluation "
+                    "config/model/prompt/pass_k/experience snapshot. Use a new exp_id."
+                )
+            if stored_datasets != {dataset_sha256}:
+                raise ValueError(
+                    f"exp_id {self.config.exp_id!r} was created from a different dataset "
+                    "snapshot. Use a new exp_id."
+                )
+        elif self._matches_signed_protocol(metas):
+            logger.warning(
+                "Resuming legacy rows validated by the signed experiment protocol; "
+                "generic cache fingerprints were not present."
+            )
+        elif not self.config.allow_legacy_cache_reuse:
+            raise ValueError(
+                f"exp_id {self.config.exp_id!r} contains legacy rows without an evaluation "
+                "fingerprint. Refusing silent reuse because the original model/prompt/config "
+                "cannot be verified. Use a new exp_id, or explicitly set "
+                "allow_legacy_cache_reuse=true for a one-off legacy recovery."
+            )
+        else:
+            logger.warning(
+                "Explicitly reusing legacy exp_id %s without a verifiable model/prompt "
+                "fingerprint.",
+                self.config.exp_id,
+            )
+
+        expected_rows = len(datapoints) * self.config.pass_k
+        if len(samples) != expected_rows:
+            raise ValueError(
+                f"Cached exp_id {self.config.exp_id!r} has {len(samples)} rows, expected "
+                f"{expected_rows} for dataset={self.config.data.dataset!r}, pass_k={self.config.pass_k}."
+            )
+        if {sample.dataset for sample in samples} != {self.config.data.dataset}:
+            raise ValueError(
+                f"Cached exp_id {self.config.exp_id!r} belongs to a different dataset"
+            )
+        expected_pairs = {
+            (row.index, trial_index)
+            for row in datapoints
+            for trial_index in range(self.config.pass_k)
+        }
+        actual_pairs = {(row.dataset_index, _trial_index(row)) for row in samples}
+        if actual_pairs != expected_pairs or len(actual_pairs) != len(samples):
+            raise ValueError(
+                f"Cached exp_id {self.config.exp_id!r} has missing or duplicate "
+                "dataset_index/trial_index rows. Use a new exp_id."
+            )
+
+    def _matches_signed_protocol(self, metas: list[dict]) -> bool:
+        expected = self.config.data.protocol_metadata or {}
+        if not expected.get("experiment_protocol_sha256"):
+            return False
+        return all(all(meta.get(key) == value for key, value in expected.items()) for meta in metas)
+
     def get_samples(
         self, stage: EvaluationStage | None = None, limit: int = None
     ) -> list[EvaluationSample]:
@@ -212,13 +413,22 @@ class DBDataManager(BaseDataManager):
         """Update or add sample(s) to db."""
         if isinstance(samples, list):
             with SQLModelUtils.create_session() as session:
+                merged_rows = []
                 for sample in samples:
-                    session.merge(sample)  # merge instead of add to properly update existing objects
+                    merged_rows.append(session.merge(sample))
                 session.commit()
+                # merge() returns a managed copy and leaves a transient input
+                # unchanged. Propagate generated IDs so subsequent saves
+                # update these rows instead of inserting duplicates.
+                for original, merged in zip(samples, merged_rows, strict=True):
+                    session.refresh(merged)
+                    original.id = merged.id
         else:
             with SQLModelUtils.create_session() as session:
-                session.merge(samples)  # merge instead of add to properly update existing objects
+                merged = session.merge(samples)
                 session.commit()
+                session.refresh(merged)
+                samples.id = merged.id
 
     def delete_samples(self, samples: list[EvaluationSample] | EvaluationSample) -> None:
         """Delete sample(s) from db."""

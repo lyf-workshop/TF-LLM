@@ -1,15 +1,10 @@
-from typing import TypeVar
-
 from hydra import compose, initialize
 from omegaconf import OmegaConf
-from pydantic import BaseModel
 
 from .agent_config import AgentConfig, ToolkitConfig
 from .eval_config import EvalConfig
 from .model_config import ModelConfigs
 from .practice_config import TrainingFreeGRPOConfig
-
-TConfig = TypeVar("TConfig", bound=BaseModel)
 
 
 class ConfigLoader:
@@ -26,12 +21,6 @@ class ConfigLoader:
             OmegaConf.resolve(cfg)
         # return dict instead of DictConfig -- avoid JSON serialization error
         return OmegaConf.to_container(cfg, resolve=True)
-
-    # @classmethod
-    # def _load_config_to_cls(cls, name: str, config_type: Type[TConfig] = None) -> TConfig:
-    #     # TESTING
-    #     cfg = cls._load_config_to_dict(name)
-    #     return config_type(**cfg)
 
     @classmethod
     def load_model_config(cls, name: str = "base") -> ModelConfigs:

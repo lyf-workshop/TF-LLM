@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from ..utils import EnvUtils
 from .agent_config import AgentConfig, ModelConfigs
@@ -10,14 +10,8 @@ from .base_config import ConfigBaseModel
 class DataConfig(ConfigBaseModel):
     """Data config"""
 
-    dataset: str  # WebWalkerQA | GAIA_validation | XBench | BrowseComp
+    dataset: str = Field(min_length=1)  # WebWalkerQA | GAIA_validation | XBench | BrowseComp
     """Built-in dataset name or custom dataset path"""
-    type: Literal["single", "mixed"] = "single"
-    """Whether the dataset contains only single benchmark data or multiple benchmarks"""
-    question_field: str = "question"
-    """Question field name in the dataset"""
-    gt_field: str = "answer"
-    """Ground truth field name in the dataset"""
     task_order: list[str] | None = None
     """Optional exact, namespaced task order supplied by a signed experiment protocol."""
     task_order_sha256: str | None = None
@@ -29,36 +23,41 @@ class DataConfig(ConfigBaseModel):
 class LLMRerankConfig(ConfigBaseModel):
     """LLM-based experience reranking configuration."""
 
-    enabled: bool = False
-    """Whether LLM reranking is enabled"""
-    model: str = "qwen3-32b"
+    model: str = Field(default="qwen3-32b", min_length=1)
     """LLM model to use for reranking"""
-    temperature: float = 0.1
+    temperature: float = Field(default=0.1, ge=0.0)
     """Temperature for LLM inference (lower = more deterministic)"""
-    max_candidates: int = 20
+    max_candidates: int = Field(default=20, gt=0)
     """Maximum number of experiences to evaluate with LLM"""
-    final_top_k: int = 8
+    final_top_k: int = Field(default=8, gt=0)
     """Final number of experiences to return after reranking"""
     include_reasoning: bool = True
     """Whether to include reasoning in LLM output"""
     scoring_criteria: list[str] = Field(default_factory=lambda: ["relevance", "generalization", "actionability"])
     """Criteria for scoring experiences"""
-    timeout: int = 60
+    timeout: int = Field(default=60, gt=0)
     """Timeout for LLM API call in seconds"""
+
+    @model_validator(mode="after")
+    def validate_limits(self) -> "LLMRerankConfig":
+        if self.final_top_k > self.max_candidates:
+            raise ValueError("final_top_k cannot exceed max_candidates")
+        if not self.scoring_criteria or any(not item.strip() for item in self.scoring_criteria):
+            raise ValueError("scoring_criteria must contain at least one non-empty criterion")
+        return self
 
 
 class RecallConfig(ConfigBaseModel):
     """Recall stage configuration for two-stage filtering."""
 
-    method: Literal["static", "bm25", "all"] = "static"
-    """Recall method: 'static' = fixed limits, 'bm25' = BM25 retrieval, 'all' = no filtering"""
-    max_l2: int | None = None
+    method: Literal["static", "tfidf", "all"] = "static"
+    """Recall method: fixed limits, lexical TF-IDF retrieval, or no filtering."""
+    max_l2: int | None = Field(default=None, ge=0)
     """Maximum L2 experiences to recall. None = all"""
-    max_l1: int | None = None
+    max_l1: int | None = Field(default=None, ge=0)
     """Maximum L1 experiences to recall. None = all"""
-    max_l0: int | None = 50
+    max_l0: int | None = Field(default=None, ge=0)
     """Maximum L0 experiences to recall. None = all"""
-
 
 class ExperienceFilterConfig(ConfigBaseModel):
     """Experience filter configuration for controlling which experiences to inject into agent."""
@@ -71,20 +70,14 @@ class ExperienceFilterConfig(ConfigBaseModel):
     """Path to hierarchical experiences JSON file (e.g., 'workspace/hierarchical_experiences/wordle_practice_2.json').
     If None, experiences are parsed from agent instructions."""
 
-    # Legacy single-stage filtering
+    # Filtering strategy
     strategy: Literal["static", "retrieval", "llm_rerank"] = "static"
-    """Filtering strategy: 'static' = fixed counts per level, 'retrieval' = BM25-based, 'llm_rerank' = LLM-based"""
-    max_l2: int | None = None
-    """Maximum number of L2 (meta-strategy) experiences to include. None = include all"""
-    max_l1: int | None = None
-    """Maximum number of L1 (pattern-level) experiences to include. None = include all"""
-    max_l0: int | None = None
-    """Maximum number of L0 (case-level) experiences to include. None = include all"""
+    """Filtering strategy: fixed counts, lexical TF-IDF retrieval, or LLM reranking."""
 
     # Retrieval-based filtering
-    retrieval_top_k: int = 5
+    retrieval_top_k: int = Field(default=5, gt=0)
     """Number of experiences to retrieve per query when using 'retrieval' strategy"""
-    retrieval_min_score: float = 0.0
+    retrieval_min_score: float = Field(default=0.0, ge=0.0)
     """Minimum relevance score threshold for retrieval"""
 
     # Two-stage filtering: recall + rerank
@@ -93,24 +86,23 @@ class ExperienceFilterConfig(ConfigBaseModel):
     llm_rerank: LLMRerankConfig = Field(default_factory=LLMRerankConfig)
     """LLM reranking configuration (second stage)"""
 
-
 class KORGymConfig(ConfigBaseModel):
     """KORGym game configuration"""
 
     enabled: bool = False
     """Whether KORGym evaluation is enabled"""
-    game_name: str = "3-2048"
+    game_name: str = Field(default="3-2048", min_length=1)
     """Name of the KORGym game"""
-    game_host: str = "localhost"
+    game_host: str = Field(default="localhost", min_length=1)
     """Game server host"""
-    game_port: int = 8775
+    game_port: int = Field(default=8775, ge=1, le=65535)
     """Game server port"""
-    level: int = 3
-    """Game difficulty level (1-5)"""
-    num_seeds: int = 20
-    """Number of game instances to evaluate"""
-    max_rounds: int = 50
+    level: int = Field(default=3, ge=0)
+    """Game-specific difficulty/size parameter; zero is valid for games that ignore it."""
+    max_rounds: int = Field(default=50, gt=0)
     """Maximum rounds for multi-turn games"""
+    timeout_per_game: float = Field(default=600.0, gt=0)
+    """Wall-clock timeout for one complete game, in seconds."""
 
 
 class SkillsBenchConfig(ConfigBaseModel):
@@ -120,51 +112,51 @@ class SkillsBenchConfig(ConfigBaseModel):
     """Whether SkillsBench harbor execution is enabled."""
     inject_curated_skills: bool = False
     """If True, inject the task's curated Skills text into the agent system prompt."""
-    task_timeout_sec: int = 600
+    task_timeout_sec: int = Field(default=600, gt=0)
     """Wall-clock timeout per task in seconds."""
-    max_agent_iterations: int = 30
+    max_agent_iterations: int = Field(default=30, gt=0)
     """Maximum bash-tool iterations the agent may perform per task."""
-    env_build_timeout_multiplier: float = 3.0
+    env_build_timeout_multiplier: float = Field(default=3.0, gt=0)
     """Multiplier applied to harbor's default 200s Docker environment build timeout."""
     docker_cleanup_after_task: bool = True
     """Remove stopped containers and dangling images after every task to prevent
     the WSL ext4.vhdx from growing unboundedly."""
-    docker_cleanup_builder_every_n: int = 10
+    docker_cleanup_builder_every_n: int = Field(default=10, ge=0)
     """Also prune the Docker build-cache every N tasks (0 = never).
     Build cache is the largest space consumer; pruning every 10 tasks is a
     good balance between disk savings and rebuild speed."""
-    max_retries: int = 2
+    max_retries: int = Field(default=2, ge=0)
     """Number of extra attempts for a task when it fails due to an infrastructure
     error (Docker build failure, harbor crash, etc.). 0 disables retrying.
     A value of 2 means up to 3 total attempts. Retries are NOT triggered when the
     agent runs to completion and the verifier legitimately scores the task (even 0)."""
-    retry_delay_sec: float = 5.0
+    retry_delay_sec: float = Field(default=5.0, ge=0)
     """Seconds to wait between retry attempts (gives Docker/daemon time to recover)."""
     retry_on_timeout: bool = False
     """If True, also retry when a task hits its wall-clock timeout. Disabled by
     default because timeouts usually mean the agent is genuinely stuck and would
     time out again, wasting a lot of wall-clock time."""
-    llm_connect_timeout_sec: float = 10.0
+    llm_connect_timeout_sec: float = Field(default=10.0, gt=0)
     """Connection timeout for each model API request."""
-    llm_read_timeout_sec: float = 120.0
+    llm_read_timeout_sec: float = Field(default=120.0, gt=0)
     """Read timeout for each model API request."""
-    llm_max_retries: int = 4
+    llm_max_retries: int = Field(default=4, ge=0)
     """Extra attempts for transient model API errors within the same trial."""
-    llm_retry_initial_delay_sec: float = 2.0
+    llm_retry_initial_delay_sec: float = Field(default=2.0, ge=0)
     """Initial exponential-backoff delay for transient model API errors."""
-    llm_retry_max_delay_sec: float = 30.0
+    llm_retry_max_delay_sec: float = Field(default=30.0, ge=0)
     """Maximum model API retry delay."""
     circuit_breaker_enabled: bool = True
     """Pause new trials after repeated transient model API failures."""
-    circuit_breaker_failure_threshold: int = 3
+    circuit_breaker_failure_threshold: int = Field(default=3, gt=0)
     """Consecutive transient API failures that open the circuit."""
-    circuit_breaker_cooldown_sec: float = 60.0
+    circuit_breaker_cooldown_sec: float = Field(default=60.0, ge=0)
     """Fixed pause before a recovery probe; this value never grows exponentially."""
     healthcheck_enabled: bool = True
     """Probe the configured endpoint before measured SkillsBench trials."""
-    healthcheck_attempts: int = 3
+    healthcheck_attempts: int = Field(default=3, gt=0)
     """Number of successful startup probes required."""
-    expected_num_tasks: int | None = None
+    expected_num_tasks: int | None = Field(default=None, gt=0)
     """Expected benchmark task count. Paper-aligned SkillsBench uses 87."""
     require_complete_coverage: bool = True
     """Do not publish headline metrics until every expected trial is valid."""
@@ -190,46 +182,44 @@ class SkillsBenchConfig(ConfigBaseModel):
     """Tokenizer used for declared_injected_token_count."""
 
 
-class EvalConfig(ConfigBaseModel):
-    """Evaluation config"""
+class RuntimeConfig(ConfigBaseModel):
+    """Shared runtime dependencies for practice and standalone evaluation."""
+
+    db_url: str = EnvUtils.get_env("UTU_DB_URL", "sqlite:///test.db")
+    """Database URL."""
+    data: DataConfig | None = None
+    """Optional evaluation dataset configuration."""
+    agent: AgentConfig | None = None
+    """Agent configuration used for rollouts."""
+    judge_model: ModelConfigs = Field(default_factory=ModelConfigs)
+    """Judge model configuration."""
+    judge_concurrency: int = Field(default=1, gt=0)
+    """Parallelism for judgement calls."""
+    verify_filename: str | None = None
+    """Optional verifier module under ``utu/practice/verify``."""
+    verify_func_name: str | None = None
+    """Optional verifier function name."""
+    korgym: KORGymConfig = Field(default_factory=KORGymConfig)
+    """KORGym runtime configuration."""
+    skillsbench: SkillsBenchConfig = Field(default_factory=SkillsBenchConfig)
+    """SkillsBench runtime configuration."""
+
+
+class EvalConfig(RuntimeConfig):
+    """Standalone evaluation configuration."""
 
     exp_id: str = "default"
     """Experiment ID"""
 
-    # data
-    db_url: str = EnvUtils.get_env("UTU_DB_URL", "sqlite:///test.db")
-    """Database URL"""
-    data: DataConfig = None
-    """Data config"""
-
-    # rollout
-    agent: AgentConfig | None = None
-    """Agent config for rollout"""
-    concurrency: int = 1
+    # evaluation-specific rollout controls
+    concurrency: int = Field(default=1, gt=0)
     """Rollout parallelism"""
-    pass_k: int = 1
+    pass_k: int = Field(default=1, gt=0)
     """Rollout k for each sample"""
-
-    # judgement
-    judge_model: ModelConfigs = Field(default_factory=ModelConfigs)
-    """Judge model config"""
-    judge_concurrency: int = 1
-    """Judgement parallelism"""
-    eval_method: str = None
-    """Evaluation method"""
-    # optional verify function for custom judgement (used by `train` processors etc.)
-    verify_filename: str | None = None
-    """Optional: Python filename under `utu/train/verify/` that contains a verify function."""
-    verify_func_name: str | None = None
-    """Optional: The function name inside the verify file to call for judgement."""
-
-    # KORGym specific configuration
-    korgym: KORGymConfig = Field(default_factory=KORGymConfig)
-    """KORGym game evaluation configuration"""
-
-    # SkillsBench specific configuration
-    skillsbench: "SkillsBenchConfig" = Field(default_factory=lambda: SkillsBenchConfig())
-    """SkillsBench harbor-based evaluation configuration"""
+    log_trajectory_to_db: bool = True
+    """Persist the agent trajectory separately from the evaluation row."""
+    allow_legacy_cache_reuse: bool = False
+    """Explicit opt-in for resuming pre-fingerprint evaluation rows."""
 
     # Experience filtering configuration
     experience_filter: ExperienceFilterConfig = Field(default_factory=ExperienceFilterConfig)

@@ -4,6 +4,7 @@ import asyncio
 import json
 
 from agents import custom_span
+from agents.exceptions import MaxTurnsExceeded
 from tqdm import tqdm
 
 from ..config import ConfigLoader, EvalConfig
@@ -35,19 +36,66 @@ class RolloutManager(BaseBenchmark):
     curr_epoch: int
     batch_size: int
 
-    def __init__(self, config: EvalConfig, batch_size: int, task_timeout: int = 3600, max_retries: int = 10) -> None:
+    def __init__(
+        self,
+        config: EvalConfig,
+        batch_size: int,
+        task_timeout: int = 3600,
+        max_retries: int = 2,
+        mistake_focus_ratio: float | None = None,
+        data_seed: int = 42,
+        data_layout_context: dict | None = None,
+        allow_legacy_epoch_cache: bool = False,
+    ) -> None:
         """Initialize RolloutManager with batching support."""
         # config
         if isinstance(config, str):
             config = ConfigLoader.load_eval_config(name=config)
         self.config = config
         # rollout
+        if max_retries < 1:
+            raise ValueError("max_retries must include at least the initial rollout attempt")
         self.task_timeout = task_timeout
         self.max_retries = max_retries
+        # BaseBenchmark.__init__ is intentionally not used because practice
+        # owns a different data manager.  Keep its mutable runtime state
+        # instance-local nevertheless; otherwise judge processors leak across
+        # runs through BaseBenchmark's compatibility class attribute.
+        self._source_to_processer = {}
+        self.experience_filter = None
 
         # dataset
-        self.dataset = TrainingFreeGRPODataManager(config)
+        self.dataset = TrainingFreeGRPODataManager(
+            config,
+            mistake_focus_ratio=mistake_focus_ratio,
+            data_seed=data_seed,
+            data_layout_context=data_layout_context,
+            allow_legacy_epoch_cache=allow_legacy_epoch_cache,
+        )
         self.batch_size = batch_size
+
+    def has_epoch_data(self, epoch: int) -> bool:
+        """Return whether the immutable DB rows for an epoch already exist."""
+
+        return self.dataset._check_exp_id(f"{self.config.exp_id}_epoch_{epoch}")
+
+    def get_committed_batch_for_resume(self, batch_idx: int) -> list[EvaluationSample]:
+        """Read and validate one already judged batch without preprocessing it."""
+
+        samples = self._get_batch_samples(batch_idx=batch_idx)
+        expected = self.batch_size * self.config.pass_k
+        if len(samples) != expected:
+            raise RuntimeError(
+                "Cannot resume from hierarchy: DB batch is incomplete for "
+                f"epoch={self.curr_epoch} batch={batch_idx}: rows={len(samples)} expected={expected}"
+            )
+        invalid_stages = sorted({str(sample.stage) for sample in samples if sample.stage != "judged"})
+        if invalid_stages:
+            raise RuntimeError(
+                "Cannot resume from hierarchy: committed checkpoint batch contains non-judged "
+                f"rows for epoch={self.curr_epoch} batch={batch_idx}: {invalid_stages}"
+            )
+        return samples
 
     def load_epoch_data(self, epoch: int, shuffle: bool = True, truncate: int = None) -> None:
         """Prepare data for a specific epoch."""
@@ -65,10 +113,11 @@ class RolloutManager(BaseBenchmark):
             recorder (TaskRecorder, optional): Recorder to record the task progress.
             use_cache (bool, optional): Whether to use cached results. Defaults to True.
         """
-        rollouts, stat = await self._run_batch(batch_idx, recorder, use_cache)
-        logger.info("> Cleaning up...")
-        await self.cleanup()
-        return rollouts, stat
+        try:
+            return await self._run_batch(batch_idx, recorder, use_cache)
+        finally:
+            logger.info("> Cleaning up...")
+            await self.cleanup()
 
     async def _run_batch(
         self, batch_idx: int | None, recorder: TaskRecorder | None = None, use_cache: bool = True
@@ -114,13 +163,13 @@ class RolloutManager(BaseBenchmark):
         processed_sample = processer.preprocess_one(sample, recorder)
         if processed_sample is None:
             return None
-        
+
         # Use processed_sample (which has updates from processer) instead of original sample
         processed_sample.update(
             # make sure stage is set to 'init' after preprocessing, for resuming purposes
             stage="init",
         )
-        
+
         self.dataset.save(processed_sample)
         return processed_sample
 
@@ -134,6 +183,7 @@ class RolloutManager(BaseBenchmark):
 
         async def rollout_with_semaphore(item: EvaluationSample):
             async with semaphore:
+                last_error: BaseException | None = None
                 for attempt in range(self.max_retries):
                     try:
                         # Apply timeout to rollout_one call
@@ -144,17 +194,23 @@ class RolloutManager(BaseBenchmark):
                         # quota, unsupported endpoint, etc.) affect the whole run.
                         # Retrying them per sample only creates more invalid trials.
                         raise
-                    except TimeoutError:
+                    except MaxTurnsExceeded as exc:
+                        # More turns cannot repair a deterministic agent-loop
+                        # failure; retrying it only holds a concurrency slot.
+                        logger.warning("Rollout stopped without retry after max turns: %s", exc)
+                        return None
+                    except TimeoutError as error:
+                        last_error = error
                         logger.warning(
                             f"Rollout timeout ({self.task_timeout}s) on attempt {attempt + 1}/{self.max_retries}"
                         )
                     except Exception as e:  # pylint: disable=broad-except
+                        last_error = e
                         logger.warning(f"Rollout error on attempt {attempt + 1}/{self.max_retries} for sample: {e}")
                 # All retries failed
                 logger.error(
                     f">>>>>>>>>>>>>\nRollout failed after {self.max_retries} attempts "
-                    f"for sample '{item.raw_question}'\n<<<<<<<<<<<<",
-                    exc_info=True,
+                    f"for sample '{item.raw_question}': {last_error!r}\n<<<<<<<<<<<<",
                 )
                 return None
 
@@ -165,7 +221,7 @@ class RolloutManager(BaseBenchmark):
                 result = await task
                 if result is not None:
                     results.append(result)
-        except FatalSkillsBenchError:
+        except BaseException:
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -190,12 +246,18 @@ class RolloutManager(BaseBenchmark):
                     logger.error(f">>>>>>>>>>>>>\nError judging sample '{item}': {e}\n<<<<<<<<<<<<<", exc_info=True)
                     return None
 
-        tasks = [judge_with_semaphore(item) for item in samples_to_process]
+        tasks = [asyncio.create_task(judge_with_semaphore(item)) for item in samples_to_process]
         results = []
-        for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Judging batch"):
-            result = await task
-            if result is not None:
-                results.append(result)
+        try:
+            for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Judging batch"):
+                result = await task
+                if result is not None:
+                    results.append(result)
+        except BaseException:
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            raise
 
         # Update mistake bank based on judged results (for curriculum-like sampling in next epoch).
         try:

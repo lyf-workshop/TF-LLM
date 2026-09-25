@@ -42,7 +42,7 @@ from scripts.data.create_dapo_100 import (  # noqa: E402
     load_upstream_evidence,
     normalize_math_question,
 )
-from utu.config import ConfigLoader, TrainingFreeGRPOConfig  # noqa: E402
+from utu.config import ConfigLoader, EvalConfig, TrainingFreeGRPOConfig  # noqa: E402
 from utu.db import DatasetSample, EvaluationSample  # noqa: E402
 from utu.skillsbench_data import load_task_split_manifest  # noqa: E402
 from utu.utils import SQLModelUtils  # noqa: E402
@@ -878,12 +878,10 @@ def test_math_dapo_100_config_resolves_requested_model_and_dataset():
 
     assert config.data.practice_dataset_name == "DAPO-Math-17k-Random-100-Seed42-No-AIME24-v3"
     assert runtime_config.data.practice_dataset_name == config.data.practice_dataset_name
-    assert config.evaluation.exp_id == config.exp_id
-    assert runtime_config.evaluation.exp_id == runtime_config.exp_id
-    assert config.evaluation.data.dataset == "AIME24"
-    assert config.evaluation.agent.model.model_provider.model == "deepseek-v4-flash"
-    assert runtime_config.evaluation.agent.model.model_provider.model == "deepseek-v4-flash"
-    assert config.evaluation.judge_model.model_provider.model == "deepseek-v4-flash"
+    assert config.runtime.data.dataset == "AIME24"
+    assert config.runtime.agent.model.model_provider.model == "deepseek-v4-flash"
+    assert runtime_config.runtime.agent.model.model_provider.model == "deepseek-v4-flash"
+    assert config.runtime.judge_model.model_provider.model == "deepseek-v4-flash"
     assert config.practice.epochs == 1
     assert config.practice.batch_size == config.practice.rollout_data_truncate == 100
     assert config.practice.shuffle_data is False
@@ -896,15 +894,13 @@ def test_math_dapo_100_smoke_config_is_isolated_from_measured_run():
     smoke = ConfigLoader.load_training_free_grpo_config("math/math_dapo_100_aime24_smoke")
 
     assert smoke.exp_id.endswith("_smoke_v2")
-    assert smoke.evaluation.exp_id == smoke.exp_id
     assert smoke.exp_id != measured.exp_id
-    assert smoke.evaluation.exp_id != measured.evaluation.exp_id
     assert smoke.data.practice_dataset_name == "DAPO-Math-17k-Random-100-Seed42-No-AIME24-v2"
     assert smoke.data.practice_dataset_name != measured.data.practice_dataset_name
-    assert smoke.evaluation.data.dataset == measured.evaluation.data.dataset == "AIME24"
+    assert smoke.runtime.data.dataset == measured.runtime.data.dataset == "AIME24"
     assert (
-        smoke.evaluation.agent.model.model_provider.model
-        == measured.evaluation.agent.model.model_provider.model
+        smoke.runtime.agent.model.model_provider.model
+        == measured.runtime.agent.model.model_provider.model
         == "deepseek-v4-flash"
     )
     assert smoke.practice.epochs == 1
@@ -923,7 +919,6 @@ def test_math_dapo_100_smoke_config_is_isolated_from_measured_run():
     assert measured_hierarchy.experience_output_language == "english"
     assert smoke_hierarchy.l0_similarity_threshold_provisional is True
     assert smoke_hierarchy.l1_similarity_threshold_provisional is True
-    assert smoke_hierarchy.similarity_thresholds_provisional is None
     assert smoke_hierarchy.allow_provisional_aggregation is False
 
 
@@ -943,11 +938,24 @@ def test_math_dapo_v2_routes_through_training_processor_and_math_verifier(monkey
 
     monkeypatch.setattr(base_llm_processor, "SimplifiedAsyncOpenAI", NoNetworkClient)
     config = ConfigLoader.load_training_free_grpo_config("math/math_dapo_100_aime24_smoke")
-    assert config.evaluation.verify_filename == "math.py"
-    assert config.evaluation.verify_func_name == "verify_func"
+    assert config.runtime.verify_filename == "math.py"
+    assert config.runtime.verify_func_name == "verify_func"
 
     manager = RolloutManager.__new__(RolloutManager)
-    manager.config = config.evaluation
+    manager.config = EvalConfig(
+        exp_id=config.exp_id,
+        db_url=config.runtime.db_url,
+        data=config.runtime.data,
+        agent=config.runtime.agent,
+        concurrency=config.practice.rollout_concurrency,
+        pass_k=config.practice.grpo_n,
+        judge_model=config.runtime.judge_model,
+        judge_concurrency=config.runtime.judge_concurrency,
+        verify_filename=config.runtime.verify_filename,
+        verify_func_name=config.runtime.verify_func_name,
+        korgym=config.runtime.korgym,
+        skillsbench=config.runtime.skillsbench,
+    )
     manager._source_to_processer = {}
     saved: list[EvaluationSample] = []
     manager.dataset = type("DatasetSink", (), {"save": lambda self, sample: saved.append(sample)})()
@@ -958,7 +966,7 @@ def test_math_dapo_v2_routes_through_training_processor_and_math_verifier(monkey
         source="training_free_grpo",
         raw_question="What is 1 + 1?",
         correct_answer="2",
-        exp_id=f"{config.evaluation.exp_id}_epoch_0",
+        exp_id=f"{config.exp_id}_epoch_0",
     )
     processor = manager._get_processer(sample.source)
     assert isinstance(processor, TrainingFreeGRPOProcesser)
@@ -983,7 +991,20 @@ def test_explicit_math_verifier_load_failure_does_not_fall_back_to_llm_judge():
     from utu.eval.processer import TrainingFreeGRPOProcesser
 
     config = ConfigLoader.load_training_free_grpo_config("math/math_dapo_100_aime24_smoke")
-    broken = config.evaluation.model_copy(update={"verify_filename": "missing_math_verifier.py"})
+    broken = EvalConfig(
+        exp_id=config.exp_id,
+        db_url=config.runtime.db_url,
+        data=config.runtime.data,
+        agent=config.runtime.agent,
+        concurrency=config.practice.rollout_concurrency,
+        pass_k=config.practice.grpo_n,
+        judge_model=config.runtime.judge_model,
+        judge_concurrency=config.runtime.judge_concurrency,
+        verify_filename="missing_math_verifier.py",
+        verify_func_name=config.runtime.verify_func_name,
+        korgym=config.runtime.korgym,
+        skillsbench=config.runtime.skillsbench,
+    )
 
     with pytest.raises(RuntimeError, match="refusing to fall back to LLM judging"):
         TrainingFreeGRPOProcesser(broken)

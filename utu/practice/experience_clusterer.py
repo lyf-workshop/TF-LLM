@@ -16,6 +16,7 @@ import math
 import random
 import re
 import sqlite3
+from collections import Counter
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
@@ -23,6 +24,13 @@ from pathlib import Path
 from typing import Protocol
 
 from .experience_models import ExperienceRecord
+from .strategy_canonicalization import (
+    CANONICAL_STRATEGY_VERSION,
+    CanonicalStrategyRepresentation,
+    StrategyCompatibilityDecision,
+    assess_strategy_compatibility,
+    canonicalize_l0_strategy,
+)
 
 TASK_FAMILY_PROXY_LABEL = "task_family"
 DEFAULT_HARD_CONSTRAINT_FIELDS = ("task_stage", "failure_mode")
@@ -141,8 +149,7 @@ class SentenceTransformerEmbeddingProvider:
         except Exception as error:  # noqa: BLE001
             mode = "local cache" if self.local_files_only else "configured model source"
             raise RuntimeError(
-                f"cannot load semantic embedding model {self.model_name}@{self.model_revision} "
-                f"from {mode}: {error}"
+                f"cannot load semantic embedding model {self.model_name}@{self.model_revision} from {mode}: {error}"
             ) from error
         dimensions = model.get_sentence_embedding_dimension()
         if dimensions != self.expected_dimensions:
@@ -197,8 +204,7 @@ class SentenceTransformerEmbeddingProvider:
                 text = raw_text or ""
                 cache_key, content_hash = self._cache_key(text)
                 row = connection.execute(
-                    "SELECT dimensions, vector_json FROM embedding_cache "
-                    "WHERE cache_key = ? AND model_signature = ?",
+                    "SELECT dimensions, vector_json FROM embedding_cache WHERE cache_key = ? AND model_signature = ?",
                     (cache_key, self.model_signature),
                 ).fetchone()
                 if row is None:
@@ -324,6 +330,8 @@ class ExperienceCluster:
     intra_cluster_similarity: float
     metadata_consistency: float
     metadata_completeness: float
+    source_task_ids: list[str] = field(default_factory=list)
+    distinct_source_task_count: int = 0
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -338,6 +346,10 @@ class ClusteringReport:
     clusters: list[ExperienceCluster]
     metadata_constraint_splits: list[dict] = field(default_factory=list)
     embedding_info: dict[str, object] = field(default_factory=dict)
+    canonical_representations: dict[str, dict[str, object]] = field(default_factory=dict)
+    strategy_compatibility_rejection_counts: dict[str, int] = field(default_factory=dict)
+    strategy_compatibility_rejection_examples: list[dict[str, object]] = field(default_factory=list)
+    canonical_strategy_version: str | None = None
 
     def as_dict(self) -> dict:
         return {
@@ -349,7 +361,21 @@ class ClusteringReport:
             "clusters": [cluster.as_dict() for cluster in self.clusters],
             "metadata_constraint_splits": self.metadata_constraint_splits,
             "embedding_info": self.embedding_info,
+            "canonical_representations": self.canonical_representations,
+            "strategy_compatibility_rejection_counts": self.strategy_compatibility_rejection_counts,
+            "strategy_compatibility_rejection_examples": self.strategy_compatibility_rejection_examples,
+            "canonical_strategy_version": self.canonical_strategy_version,
         }
+
+
+@dataclass(frozen=True)
+class _PreparedClustering:
+    records: list[ExperienceRecord]
+    vectors: dict[str, list[float]]
+    semantic_pairs: dict[tuple[str, str], float]
+    constraint_splits: list[dict]
+    canonical_representations: dict[str, CanonicalStrategyRepresentation]
+    strategy_pairs: dict[tuple[str, str], StrategyCompatibilityDecision]
 
 
 class ExperienceClusterer:
@@ -363,24 +389,35 @@ class ExperienceClusterer:
         self,
         embedding_provider: EmbeddingProvider,
         *,
-        method: str = "agglomerative",
         max_cluster_size: int = 20,
         use_metadata_constraints: bool = True,
         hard_constraint_fields: Sequence[str] = DEFAULT_HARD_CONSTRAINT_FIELDS,
         soft_constraint_fields: Sequence[str] = DEFAULT_CONFIGURED_SOFT_CONSTRAINT_FIELDS,
         random_seed: int = 42,
+        strategy_aware_l0_clustering: bool = False,
+        l0_strategy_compatibility_threshold: float = 0.60,
+        l0_strategy_fallback_threshold: float = 0.78,
+        l0_strategy_ignore_failure_mode: bool = True,
     ):
-        if method != "agglomerative":
-            raise ValueError(f"Unsupported clustering method: {method}")
         if max_cluster_size < 1:
             raise ValueError("max_cluster_size must be positive")
+        if not -1.0 <= l0_strategy_compatibility_threshold <= 1.0:
+            raise ValueError("l0_strategy_compatibility_threshold must be between -1 and 1")
+        if not -1.0 <= l0_strategy_fallback_threshold <= 1.0:
+            raise ValueError("l0_strategy_fallback_threshold must be between -1 and 1")
+        if l0_strategy_fallback_threshold < l0_strategy_compatibility_threshold:
+            raise ValueError("l0_strategy_fallback_threshold must be at least l0_strategy_compatibility_threshold")
         self.embedding_provider = embedding_provider
-        self.method = method
+        self.method = "agglomerative"
         self.max_cluster_size = max_cluster_size
         self.use_metadata_constraints = use_metadata_constraints
         self.hard_constraint_fields = tuple(hard_constraint_fields)
         self.soft_constraint_fields = tuple(soft_constraint_fields)
         self.random_seed = random_seed
+        self.strategy_aware_l0_clustering = strategy_aware_l0_clustering
+        self.l0_strategy_compatibility_threshold = l0_strategy_compatibility_threshold
+        self.l0_strategy_fallback_threshold = l0_strategy_fallback_threshold
+        self.l0_strategy_ignore_failure_mode = l0_strategy_ignore_failure_mode
 
     @staticmethod
     def _known(value: object) -> bool:
@@ -393,10 +430,23 @@ class ExperienceClusterer:
     def _metadata_text(value: object) -> str:
         return str(getattr(value, "value", value))
 
-    def _hard_compatible(self, left: ExperienceRecord, right: ExperienceRecord) -> tuple[bool, str | None]:
+    def _hard_compatible(
+        self,
+        left: ExperienceRecord,
+        right: ExperienceRecord,
+        *,
+        level: str | None = None,
+    ) -> tuple[bool, str | None]:
         if not self.use_metadata_constraints:
             return True, None
         for field_name in self.hard_constraint_fields:
+            if (
+                level == "L0"
+                and self.strategy_aware_l0_clustering
+                and self.l0_strategy_ignore_failure_mode
+                and field_name == "failure_mode"
+            ):
+                continue
             left_value = getattr(left, field_name, None)
             right_value = getattr(right, field_name, None)
             if self._known(left_value) and self._known(right_value) and left_value != right_value:
@@ -441,10 +491,11 @@ class ExperienceClusterer:
         right: ExperienceRecord,
         *,
         semantic_similarity: float,
+        level: str | None = None,
     ) -> ExperiencePairScore:
         """Score one pair with exactly the contract used by cluster merging."""
 
-        hard_compatible, hard_constraint_field = self._hard_compatible(left, right)
+        hard_compatible, hard_constraint_field = self._hard_compatible(left, right, level=level)
         return ExperiencePairScore(
             semantic_similarity=float(semantic_similarity),
             adjusted_similarity=self._adjusted_similarity(left, right, semantic_similarity),
@@ -466,6 +517,10 @@ class ExperienceClusterer:
             "soft_constraint_fields": list(self.soft_constraint_fields),
             "soft_match_bonus": self.SOFT_MATCH_BONUS,
             "soft_mismatch_penalty": self.SOFT_MISMATCH_PENALTY,
+            "strategy_aware_l0_clustering": self.strategy_aware_l0_clustering,
+            "l0_strategy_compatibility_threshold": self.l0_strategy_compatibility_threshold,
+            "l0_strategy_fallback_threshold": self.l0_strategy_fallback_threshold,
+            "l0_strategy_ignore_failure_mode": self.l0_strategy_ignore_failure_mode,
         }
 
     def _metadata_metrics(self, records: Sequence[ExperienceRecord]) -> tuple[float, float]:
@@ -522,6 +577,7 @@ class ExperienceClusterer:
             key=lambda record: (cosine_similarity(vectors[record.id], centroid), record.id),
         )
         consistency, completeness = self._metadata_metrics(ordered)
+        source_task_ids = sorted({task_id for record in ordered for task_id in record.source_task_ids})
         cluster_payload = f"{level}|{threshold:.8f}|{self.random_seed}|" + "|".join(ids)
         cluster_id = "cluster_" + hashlib.sha256(cluster_payload.encode("utf-8")).hexdigest()[:20]
         return ExperienceCluster(
@@ -533,20 +589,58 @@ class ExperienceClusterer:
             intra_cluster_similarity=intra_similarity,
             metadata_consistency=consistency,
             metadata_completeness=completeness,
+            source_task_ids=source_task_ids,
+            distinct_source_task_count=len(source_task_ids),
         )
 
-    def _prepare(
-        self, experiences: Sequence[ExperienceRecord]
+    def assess_l0_strategy_pairs(
+        self,
+        experiences: Sequence[ExperienceRecord],
     ) -> tuple[
-        list[ExperienceRecord],
-        dict[str, list[float]],
-        dict[tuple[str, str], float],
-        list[dict],
+        dict[str, CanonicalStrategyRepresentation],
+        dict[tuple[str, str], StrategyCompatibilityDecision],
     ]:
+        """Canonicalize and assess every L0 pair with one batched embedding call."""
+
+        records = sorted(experiences, key=lambda record: record.id)
+        representations = {record.id: canonicalize_l0_strategy(record) for record in records}
+        raw_vectors = self.embedding_provider.embed(
+            [representations[record.id].compatibility_text for record in records]
+        )
+        if len(raw_vectors) != len(records):
+            raise ValueError("Embedding provider returned a different number of vectors than inputs")
+        vectors = {record.id: vector for record, vector in zip(records, raw_vectors, strict=True)}
+        decisions: dict[tuple[str, str], StrategyCompatibilityDecision] = {}
+        for index, left in enumerate(records):
+            for right in records[index + 1 :]:
+                key = tuple(sorted((left.id, right.id)))
+                decisions[key] = assess_strategy_compatibility(
+                    representations[left.id],
+                    representations[right.id],
+                    core_similarity=cosine_similarity(vectors[left.id], vectors[right.id]),
+                    compatibility_threshold=self.l0_strategy_compatibility_threshold,
+                    fallback_threshold=self.l0_strategy_fallback_threshold,
+                )
+        return representations, decisions
+
+    def _prepare(
+        self,
+        experiences: Sequence[ExperienceRecord],
+        *,
+        level: str,
+        use_strategy_awareness: bool,
+    ) -> _PreparedClustering:
         records = sorted(experiences, key=lambda record: record.id)
         if len({record.id for record in records}) != len(records):
             raise ValueError("Experience IDs must be unique within a clustering input")
-        raw_vectors = self.embedding_provider.embed([record.content for record in records])
+        canonical_representations: dict[str, CanonicalStrategyRepresentation] = {}
+        strategy_pairs: dict[tuple[str, str], StrategyCompatibilityDecision] = {}
+        if use_strategy_awareness and level == "L0" and self.strategy_aware_l0_clustering:
+            canonical_representations, strategy_pairs = self.assess_l0_strategy_pairs(records)
+            embedding_texts = [canonical_representations[record.id].embedding_text for record in records]
+        else:
+            embedding_texts = [record.content for record in records]
+        raw_vectors = self.embedding_provider.embed(embedding_texts)
         if len(raw_vectors) != len(records):
             raise ValueError("Embedding provider returned a different number of vectors than inputs")
         vectors = {record.id: vector for record, vector in zip(records, raw_vectors, strict=True)}
@@ -556,7 +650,7 @@ class ExperienceClusterer:
             for right in records[index + 1 :]:
                 key = tuple(sorted((left.id, right.id)))
                 semantic_pairs[key] = cosine_similarity(vectors[left.id], vectors[right.id])
-                compatible, field_name = self._hard_compatible(left, right)
+                compatible, field_name = self._hard_compatible(left, right, level=level)
                 if not compatible:
                     constraint_splits.append(
                         {
@@ -568,7 +662,14 @@ class ExperienceClusterer:
                             ],
                         }
                     )
-        return records, vectors, semantic_pairs, constraint_splits
+        return _PreparedClustering(
+            records=records,
+            vectors=vectors,
+            semantic_pairs=semantic_pairs,
+            constraint_splits=constraint_splits,
+            canonical_representations=canonical_representations,
+            strategy_pairs=strategy_pairs,
+        )
 
     def cluster(
         self,
@@ -577,7 +678,12 @@ class ExperienceClusterer:
         level: str,
         similarity_threshold: float,
     ) -> ClusteringReport:
-        records, vectors, semantic_pairs, constraint_splits = self._prepare(experiences)
+        prepared = self._prepare(
+            experiences,
+            level=level,
+            use_strategy_awareness=True,
+        )
+        records = prepared.records
         clusters: list[list[ExperienceRecord]] = [[record] for record in records]
 
         while True:
@@ -591,11 +697,17 @@ class ExperienceClusterer:
                     compatible = True
                     for left in left_cluster:
                         for right in right_cluster:
-                            semantic = semantic_pairs[tuple(sorted((left.id, right.id)))]
+                            key = tuple(sorted((left.id, right.id)))
+                            strategy_decision = prepared.strategy_pairs.get(key)
+                            if strategy_decision is not None and not strategy_decision.compatible:
+                                compatible = False
+                                break
+                            semantic = prepared.semantic_pairs[key]
                             pair_score = self.score_pair(
                                 left,
                                 right,
                                 semantic_similarity=semantic,
+                                level=level,
                             )
                             if not pair_score.hard_compatible:
                                 compatible = False
@@ -626,24 +738,40 @@ class ExperienceClusterer:
         built = [
             self._build_cluster(
                 cluster,
-                vectors,
-                semantic_pairs,
+                prepared.vectors,
+                prepared.semantic_pairs,
                 level=level,
                 threshold=similarity_threshold,
             )
             for cluster in clusters
         ]
         built.sort(key=lambda cluster: cluster.experience_ids)
+        rejection_counts = Counter(
+            decision.reason for decision in prepared.strategy_pairs.values() if not decision.compatible
+        )
+        rejection_examples = [
+            {"experience_ids": list(pair), **decision.as_dict()}
+            for pair, decision in sorted(
+                prepared.strategy_pairs.items(),
+                key=lambda item: (-item[1].core_similarity, item[0]),
+            )
+            if not decision.compatible
+        ][:100]
         return ClusteringReport(
             level=level,
             input_count=len(records),
             threshold=similarity_threshold,
             method=self.method,
             clusters=built,
-            metadata_constraint_splits=constraint_splits,
-            embedding_info=(
-                self.embedding_provider.info() if hasattr(self.embedding_provider, "info") else {}
-            ),
+            metadata_constraint_splits=prepared.constraint_splits,
+            embedding_info=(self.embedding_provider.info() if hasattr(self.embedding_provider, "info") else {}),
+            canonical_representations={
+                record_id: representation.as_dict()
+                for record_id, representation in prepared.canonical_representations.items()
+            },
+            strategy_compatibility_rejection_counts=dict(sorted(rejection_counts.items())),
+            strategy_compatibility_rejection_examples=rejection_examples,
+            canonical_strategy_version=(CANONICAL_STRATEGY_VERSION if prepared.canonical_representations else None),
         )
 
     def sequential_groups(
@@ -656,13 +784,17 @@ class ExperienceClusterer:
         """Compatibility mode: group by creation order, leaving a short tail pending."""
 
         records = sorted(experiences, key=lambda record: (record.created_at, record.id))
-        _, vectors, semantic_pairs, constraint_splits = self._prepare(records)
+        prepared = self._prepare(
+            records,
+            level=level,
+            use_strategy_awareness=False,
+        )
         groups = [records[index : index + group_size] for index in range(0, len(records), group_size)]
         built = [
             self._build_cluster(
                 group,
-                vectors,
-                semantic_pairs,
+                prepared.vectors,
+                prepared.semantic_pairs,
                 level=level,
                 threshold=0.0,
             )
@@ -675,10 +807,8 @@ class ExperienceClusterer:
             threshold=0.0,
             method="sequential",
             clusters=built,
-            metadata_constraint_splits=constraint_splits,
-            embedding_info=(
-                self.embedding_provider.info() if hasattr(self.embedding_provider, "info") else {}
-            ),
+            metadata_constraint_splits=prepared.constraint_splits,
+            embedding_info=(self.embedding_provider.info() if hasattr(self.embedding_provider, "info") else {}),
         )
 
 

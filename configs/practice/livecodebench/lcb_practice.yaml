@@ -43,10 +43,10 @@ practice:
   # Cross-epoch refinement (updating/deleting stale entries) is handled by the merge.
   hierarchical_learning:
     enabled: true
-    l1_aggregation_threshold: 5   # min NEW L0 in an epoch before aggregating an L1
-    l2_aggregation_threshold: 3   # min L1 in the pool before aggregating an L2
-    include_l0_in_prompt: true    # also append recent L0 cases to the agent prompt
-    max_l0_recent: 20             # how many recent L0 to inject into the prompt
+    min_l0_per_l1: 5   # min NEW L0 in an epoch before aggregating an L1
+    min_l1_per_l2: 3   # min L1 in the pool before aggregating an L2
+    export_include_l0: true    # include L0 in the final exported Agent prompt
+    export_max_l0: 20          # final-export cap; unrelated to rollout retrieval
     experience_save_path: workspace/hierarchical_experiences/lcb_practice.json
 
 # Training dataset (30 problems)

@@ -42,18 +42,17 @@ practice:
     - General problem-solving patterns (L1 → L2)
     - Reward-based comparison of correct and incorrect solutions
   num_experiences_per_query: 1
-  verify_module: "utu.practice.verify.logic_error_extractor"  # Use error extractor for detailed analysis
   
   # Hierarchical Learning Specific Settings
   hierarchical_learning:
     enabled: true
-    l1_aggregation_threshold: 5      # Generate L1 after 5 L0 experiences
-    l2_aggregation_threshold: 3      # Generate L2 after 3 L1 experiences
+    min_l0_per_l1: 5      # Generate L1 after 5 L0 experiences
+    min_l1_per_l2: 3      # Generate L2 after 3 L1 experiences
     max_l0_per_problem: 1            # Keep top 1 L0 per problem (avoid overfitting)
     max_l1_total: 50                 # Max 50 L1 experiences
     max_l2_total: 10                 # Max 10 L2 experiences
-    include_l0_in_prompt: true       # Include recent L0 in prompt
-    max_l0_recent: 10                # Include only 10 most recent L0
+    export_include_l0: true       # Include L0 in the final exported Agent prompt
+    export_max_l0: 10             # Final-export cap; unrelated to rollout retrieval
     l1_confidence_threshold: 0.7     # Minimum confidence to add L1
     l2_confidence_threshold: 0.8     # Minimum confidence to add L2
     experience_save_path: "workspace/hierarchical_experiences/medium_reasoning_hierarchical_num6.json"

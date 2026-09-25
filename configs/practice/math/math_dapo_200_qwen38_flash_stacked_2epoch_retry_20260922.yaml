@@ -1,0 +1,76 @@
+# @package _global_
+# Fixed DAPO-200 subset, two full epochs, stacked experience pools.
+# AIME24 is used only to exclude overlapping training questions; no evaluation is run here.
+defaults:
+  - /eval/math/math_AIME24@runtime
+  - _self_
+
+exp_id: "math_dapo_200_qwen38_flash_stacked_2epoch_retry_20260922"
+
+practice:
+  epochs: 2
+  # The committed snapshot layout was produced with 25 tasks per batch:
+  # 200 tasks x 2 epochs = 16 global steps. Do not override this from CLI when
+  # resuming; a different layout must fail rather than reinterpret step 0..14.
+  batch_size: 25
+  grpo_n: 5
+  rollout_concurrency: 16
+  rollout_max_retries: 2
+  rollout_temperature: 0.7
+  rollout_data_truncate: 200
+  task_timeout: 600
+  shuffle_data: false
+  # Continue from the immutable L0 batch prefix in the hierarchy snapshot.
+  # For this run that prefix is step 0..14, so only step 15 is executed.
+  resume_from_hierarchy: true
+  do_eval: false
+  agent_objective: |
+    input: A mathematical problem from any supported area
+    output: A justified step-by-step solution and a clearly marked final answer
+  learning_objective: |
+    Extract evidence-backed mathematical techniques, failure boundaries, and
+    verification checks that can transfer to related competition problems.
+  given_ground_truth: true
+  num_experiences_per_query: 1
+
+  hierarchical_learning:
+    enabled: true
+    upper_pool_update_mode: stacked_pool
+    stacked_pool_source_batch_size: 1
+    candidate_review_scope: full_pool
+    experience_output_language: same_as_input
+    embedding_provider: hashing
+    l0_candidate_review_enabled: true
+    l1_candidate_review_enabled: true
+    l2_candidate_review_enabled: true
+    l1_validation_required: true
+    # With one incoming L0 per proposal, distinct strategies can exceed the
+    # default L1 capacity of 50 without implying any need to merge them.
+    max_l1_total: 400
+    max_l2_total: 100
+    l0_review_max_supporting_evidence_chars: 350000
+    l0_injection_top_k: 5
+    export_include_l0: true
+    export_max_l0: null
+    experience_save_path: workspace/hierarchical_experiences/math_dapo_200_qwen38_flash_stacked_2epoch_retry_20260922.json
+    clustering_audit_path: workspace/hierarchical_experiences/math_dapo_200_qwen38_flash_stacked_2epoch_retry_20260922.clusters.jsonl
+    embedding_cache_path: workspace/cache/experience_embeddings_math_dapo_200_qwen38_flash_stacked_2epoch_retry_20260922.sqlite3
+
+data:
+  practice_dataset_name: "DAPO-Math-17k-Random-200-Seed42-No-AIME24-v2"
+  # Exploratory only: the available DAPO-200 provenance is schema v2. Enabling
+  # the strict guard requires a real schema-v3 enriched manifest and matching
+  # database rows; it must not be synthesized from hashes alone.
+  require_practice_manifest: false
+
+runtime:
+  judge_concurrency: 16
+  agent:
+    model:
+      model_provider:
+        type: chat.completions
+        model: "qwen3.8-flash"
+  judge_model:
+    model_provider:
+      type: chat.completions
+      model: "qwen3.8-flash"

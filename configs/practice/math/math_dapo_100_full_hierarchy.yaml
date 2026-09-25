@@ -15,13 +15,20 @@ practice:
   batch_size: 100
   grpo_n: 5
   rollout_concurrency: 32
+  rollout_max_retries: 2
   rollout_data_truncate: 100
   shuffle_data: false
+  resume_from_hierarchy: false
   do_eval: false
   num_experiences_per_query: 1
 
   hierarchical_learning:
     enabled: true
+    # Each accepted L0 incrementally proposes an upper-layer update. Full-pool
+    # review prevents a proposal from bypassing an equivalent existing item.
+    upper_pool_update_mode: stacked_pool
+    stacked_pool_source_batch_size: 1
+    candidate_review_scope: full_pool
     experience_output_language: english
     clustering_enabled: true
     embedding_provider: sentence_transformer
@@ -41,6 +48,7 @@ practice:
     l1_similarity_threshold_provisional: true
     allow_provisional_aggregation: true
     min_l0_per_l1: 5
+    min_distinct_source_tasks_per_l1: 3
     min_l1_per_l2: 3
     max_cluster_size: 20
 
@@ -54,6 +62,10 @@ practice:
     l0_candidate_review_enabled: true
     l1_candidate_review_enabled: true
     l2_candidate_review_enabled: true
+    l1_validation_required: true
+    strategy_aware_l0_clustering: true
+    l0_strategy_compatibility_threshold: 0.60
+    l0_strategy_fallback_threshold: 0.78
     l0_review_temperature: 0.0
 
     experience_save_path: workspace/hierarchical_experiences/math_dapo_random_100_full_hierarchy_en_v1.json
@@ -63,9 +75,7 @@ data:
   practice_dataset_name: "DAPO-Math-17k-Random-100-Seed42-No-AIME24-v2"
   require_practice_manifest: false
 
-evaluation:
-  exp_id: "math_dapo_random_100_full_hierarchy_en_v1"
-  concurrency: 8
+runtime:
   agent:
     model:
       model_provider:

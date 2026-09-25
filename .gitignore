@@ -66,6 +66,15 @@ wheels/
 *.pkl
 *.whl
 
+# Configuration protocols and small test fixtures are source artifacts even
+# when they use formats that are large runtime outputs elsewhere.
+!/configs/**/*.jsonl
+!/configs/**/*.csv
+!/configs/**/*.tsv
+!/tests/**/*.jsonl
+!/tests/**/*.csv
+!/tests/**/*.tsv
+
 # Secrets and local environment overrides
 .env
 .env.*
@@ -91,3 +100,25 @@ CLAUDE.md
 .specify/
 alembic.ini
 alembic/
+# Generated agent configs (can be regenerated from training)
+/configs/agents/practice/*_agent.yaml
+
+# Local smoke-run configs (canonical templates and measured configs stay tracked)
+/configs/practice/**/*smoke*.yaml
+
+# Temporary repository-root test scripts. Never ignore the real tests/ tree.
+/test_*.py
+
+# Workspace (experiment results, not for version control). Keep only the
+# directory contract itself trackable.
+/workspace/*
+!/workspace/.gitkeep
+!/workspace/README.md
+
+# Temporary and backup files
+*~
+*.swp
+*.swo
+*.bak
+*.backup
+/backup/

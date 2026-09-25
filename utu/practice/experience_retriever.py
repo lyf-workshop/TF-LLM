@@ -1,5 +1,5 @@
 """
-Retrieval-style experience injection (interface only; not wired into training flow).
+Lightweight lexical retrieval for practice and evaluation experience injection.
 
 Motivation:
 - As the experience pool grows, concatenating everything into agent instructions
@@ -13,17 +13,29 @@ It uses a lightweight bag-of-words + IDF scoring.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 from typing import Any, Iterable
 
 
+_LEXICAL_RUN = re.compile(r"[a-z0-9_]+|[\u3400-\u4dbf\u4e00-\u9fff]+", re.IGNORECASE)
+
+
 def _tokenize(text: str) -> list[str]:
+    """Tokenize Latin text by word and CJK text into overlapping bigrams."""
+
     if not text:
         return []
-    cleaned = []
-    for ch in text.lower():
-        cleaned.append(ch if ch.isalnum() else " ")
-    return [w for w in "".join(cleaned).split() if w]
+    tokens: list[str] = []
+    for run in _LEXICAL_RUN.findall(text.lower()):
+        if "\u3400" <= run[0] <= "\u9fff":
+            if len(run) == 1:
+                tokens.append(run)
+            else:
+                tokens.extend(run[index : index + 2] for index in range(len(run) - 1))
+        else:
+            tokens.append(run)
+    return tokens
 
 
 @dataclass(frozen=True)
@@ -98,10 +110,13 @@ class ExperienceRetriever:
                 idf = math.log((self._n_docs + 1) / (df + 1)) + 1.0
                 score += idf * (1.0 + math.log(1 + d_tf[t])) * (1.0 + math.log(1 + q_cnt))
 
-            if score >= min_score:
+            # A zero-overlap document is not a retrieval result. In
+            # particular, ``min_score=0`` must not inject arbitrary documents
+            # merely because the requested top-k has spare capacity.
+            if score > 0.0 and score >= min_score:
                 results.append(RetrievedExperience(exp_id=exp_id, content=content, score=score, meta=meta))
 
-        results.sort(key=lambda r: r.score, reverse=True)
+        results.sort(key=lambda result: (-result.score, result.exp_id))
         return results[: max(0, top_k)]
 
     def render_for_injection(self, retrieved: list[RetrievedExperience]) -> str:

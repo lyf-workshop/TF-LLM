@@ -4,22 +4,17 @@ defaults:
   - _self_
 
 # ⚠️ IMPORTANT: 使用关键词检索时，必须用不含经验的基础 agent
-# 经验会从 JSON 文件加载并通过 BM25 检索筛选后注入
+# 经验会从 JSON 文件加载并通过配置的召回器筛选后注入
 
 exp_id: "alphabetical_sorting_practice_eval_llm_14"
 
 # Evaluation dataset configuration (same as baseline)
 data:
   dataset: "KORGym-AlphabeticalSorting-Eval-50"
-  type: "single"
 
 # Evaluation settings
 concurrency: 16
 pass_k: 1
-
-# Verification function settings
-verify_filename: "korgym.py"
-verify_func_name: "verify_func"
 
 # KORGym specific settings
 korgym:
@@ -44,14 +39,13 @@ experience_filter:
   
   # Stage 1: Recall candidates
   recall:
-    method: "static"  # static | bm25 | all
+    method: "static"  # static | tfidf | all
     max_l2: null      # Include all L2 (meta-strategy) experiences
     max_l1: null      # Include all L1 (pattern-level) experiences
     max_l0: 15        # Limit L0 (case-level) to 30 to reduce noise
   
   # Stage 2: LLM reranking
   llm_rerank:
-    enabled: true
     model: "qwen2.5-72b-instruct"           # LLM model for reranking
     temperature: 0.1              # Low temperature for stable scoring
     max_candidates: 20            # Maximum experiences to evaluate with LLM

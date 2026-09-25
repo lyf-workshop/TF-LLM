@@ -21,7 +21,7 @@ class AssignerAgent:
 
     def __init__(self, config: AgentConfig):
         self.config = config
-        self.llm = LLMAgent(model_config=config.workforce_planner_model)
+        self.llm = LLMAgent(model_config=config.workforce_assigner_model)
 
     async def assign_task(self, recorder: WorkspaceTaskRecorder) -> Subtask:
         """Assigns a task to a worker node with the best capability."""

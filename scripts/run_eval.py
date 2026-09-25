@@ -28,14 +28,20 @@ def get_eval_config(args: argparse.Namespace, config: EvalConfig | None = None) 
         config.agent.model.model_provider.model = args.agent_model
     if args.dataset:
         config.data.dataset = args.dataset
-    if args.dataset_type:
-        config.data.type = args.dataset_type
-    if args.concurrency:
+    if args.pass_k is not None:
+        config.pass_k = args.pass_k
+    if args.concurrency is not None:
         config.concurrency = args.concurrency
-    if args.judge_concurrency:
+    if args.judge_concurrency is not None:
         config.judge_concurrency = args.judge_concurrency
+    if args.korgym_timeout_per_game is not None:
+        config.korgym.timeout_per_game = args.korgym_timeout_per_game
+    if args.allow_legacy_cache_reuse:
+        config.allow_legacy_cache_reuse = True
     if args.experience_condition:
         config.skillsbench.experience_condition = args.experience_condition
+    if args.train_dataset:
+        config.skillsbench.train_dataset_for_overlap_check = args.train_dataset
     if args.injected_token_count is not None:
         config.skillsbench.declared_injected_token_count = args.injected_token_count
         config.skillsbench.injected_tokenizer = args.injected_tokenizer
@@ -227,9 +233,23 @@ async def main():
     parser.add_argument("--agent_model", type=str, default=None, help="Agent model.")
     parser.add_argument("--agent_config", type=str, default=None, help="Agent config under configs/agents/.")
     parser.add_argument("--dataset", type=str, default=None, help="Dataset.")
-    parser.add_argument("--dataset_type", type=str, default=None, help="Dataset type.")
+    parser.add_argument("--pass_k", type=int, default=None, help="Rollout trials per dataset sample.")
     parser.add_argument("--concurrency", type=int, default=None, help="Test concurrency.")
     parser.add_argument("--judge_concurrency", type=int, default=None, help="Judge concurrency.")
+    parser.add_argument(
+        "--korgym_timeout_per_game",
+        type=float,
+        default=None,
+        help="Wall-clock timeout in seconds for one KORGym game.",
+    )
+    parser.add_argument(
+        "--allow_legacy_cache_reuse",
+        action="store_true",
+        help=(
+            "Explicitly allow resuming pre-fingerprint evaluation rows. "
+            "Prefer a new exp_id for reproducible experiments."
+        ),
+    )
     parser.add_argument(
         "--train_dataset",
         type=str,
@@ -267,41 +287,29 @@ async def main():
     config = get_eval_config(args, base_config.model_copy(deep=True))
     validate_experiment_protocol_before_runner(args, base_config=base_config, config=config)
 
-    skillsbench = getattr(config, "skillsbench", None)
-    if skillsbench and skillsbench.enabled and skillsbench.require_disjoint_train_eval:
-        train_dataset = args.train_dataset or skillsbench.train_dataset_for_overlap_check
-        learned_condition = skillsbench.experience_condition in {"sequential", "clustered"}
-        if learned_condition and not train_dataset:
-            raise ValueError(
-                "SkillsBench learned-experience evaluation requires --train_dataset "
-                "or skillsbench.train_dataset_for_overlap_check"
-            )
-        if train_dataset:
-            evidence = assert_datasets_disjoint(
-                train_dataset,
-                config.data.dataset,
-                db_url=config.db_url,
-                split_manifest_path=skillsbench.task_split_manifest_path,
-                split_name=skillsbench.task_split_name,
-            )
-            print(f"SkillsBench overlap assertion passed: {evidence}")
-
     runner = BaseBenchmark(config)
-    match args.step:
-        case "all":
-            await runner.main()
-        case "rollout":
-            runner.preprocess()
-            await runner.rollout()
-        case "judge":
-            await runner.judge(stage="rollout")  # set stage=None to rejudge; rollout or judged incrementally
-            await runner.stat()
-        case "retry-infra":
-            await runner.retry_infra()
-            await runner.judge(stage="rollout")
-            await runner.stat()
-        case _:
-            raise ValueError(f"Unsupported stage: {args.step}")
+    if args.step == "all":
+        # BaseBenchmark.main owns its cleanup in a finally block.
+        await runner.main()
+        return
+
+    try:
+        match args.step:
+            case "rollout":
+                runner.preprocess()
+                await runner.rollout()
+            case "judge":
+                # Set stage=None to rejudge; rollout/judged are incremental.
+                await runner.judge(stage="rollout")
+                await runner.stat()
+            case "retry-infra":
+                await runner.retry_infra()
+                await runner.judge(stage="rollout")
+                await runner.stat()
+            case _:
+                raise ValueError(f"Unsupported stage: {args.step}")
+    finally:
+        await runner.cleanup()
 
 
 if __name__ == "__main__":

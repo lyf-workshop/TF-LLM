@@ -47,7 +47,7 @@ class ExperienceLoader:
         # the historical ``id -> content`` dictionary format are accepted.
         if "l2_experiences" in data:
             for exp_data in self._iter_experiences(data["l2_experiences"], "L2"):
-                if not self._is_injectable(exp_data):
+                if not self._is_injectable(exp_data, "L2"):
                     continue
                 experiences.append(self._parse_experience(exp_data, "L2", order))
                 order += 1
@@ -55,7 +55,7 @@ class ExperienceLoader:
         # Load L1 experiences (pattern level)
         if "l1_experiences" in data:
             for exp_data in self._iter_experiences(data["l1_experiences"], "L1"):
-                if not self._is_injectable(exp_data):
+                if not self._is_injectable(exp_data, "L1"):
                     continue
                 experiences.append(self._parse_experience(exp_data, "L1", order))
                 order += 1
@@ -63,7 +63,7 @@ class ExperienceLoader:
         # Load L0 experiences (case level)
         if "l0_experiences" in data:
             for exp_data in self._iter_experiences(data["l0_experiences"], "L0"):
-                if not self._is_injectable(exp_data):
+                if not self._is_injectable(exp_data, "L0"):
                     continue
                 experiences.append(self._parse_experience(exp_data, "L0", order))
                 order += 1
@@ -78,10 +78,21 @@ class ExperienceLoader:
         return experiences
 
     @staticmethod
-    def _is_injectable(exp_data: dict[str, Any]) -> bool:
-        """Legacy records default active; inactive/needs-review records fail closed."""
+    def _is_injectable(exp_data: dict[str, Any], level: str) -> bool:
+        """Mirror the hierarchy manager's persisted injection contract.
 
-        return str(exp_data.get("lifecycle_status", "active")).lower() == "active"
+        L0 is task evidence and only requires an active lifecycle. Abstract
+        L1/L2 records additionally require validation, so provisional upper
+        layers can be inspected and promoted without leaking into evaluation.
+        Snapshots predating ``validation_status`` retain the ExperienceRecord
+        schema's explicit compatibility default of ``validated``.
+        """
+
+        if str(exp_data.get("lifecycle_status", "active")).lower() != "active":
+            return False
+        if level == "L0":
+            return True
+        return str(exp_data.get("validation_status", "validated")).lower() == "validated"
 
     @staticmethod
     def _iter_experiences(raw: Any, level: str) -> list[dict[str, Any]]:

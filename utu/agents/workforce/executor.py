@@ -20,13 +20,20 @@ class ExecutorAgent:
     - TODO: self-reflection
     """
 
-    def __init__(self, config: AgentConfig, workforce_config: AgentConfig):
+    def __init__(
+        self,
+        config: AgentConfig,
+        workforce_config: AgentConfig,
+        *,
+        log_to_db: bool = True,
+    ):
         self.config = config
         self.executor_agent = SimpleAgent(config=config)
 
         executor_config = workforce_config.workforce_executor_config
         self.max_tries = executor_config.get("max_tries", 1)
         self.return_summary = executor_config.get("return_summary", False)
+        self.log_to_db = log_to_db
 
         self.reflection_history = []
 
@@ -61,7 +68,11 @@ class ExecutorAgent:
                         task_description=task.task_description,
                         previous_attempts=self.reflection_history[-1] if self.reflection_history else "",
                     )
-                executor_res = await self.executor_agent.run(user_prompt, save=True)  # save chat history!
+                executor_res = await self.executor_agent.run(
+                    user_prompt,
+                    save=True,
+                    log_to_db=self.log_to_db,
+                )  # save chat history!
                 final_result = executor_res.final_output
 
                 # * 2. Task check
@@ -69,7 +80,10 @@ class ExecutorAgent:
                     task_name=task.task_name,
                     task_description=task.task_description,
                 )
-                response_content = await self.executor_agent.run(task_check_prompt)  # do not save chat history!
+                response_content = await self.executor_agent.run(
+                    task_check_prompt,
+                    log_to_db=self.log_to_db,
+                )  # do not save chat history!
                 if self._parse_task_check_result(response_content.final_output):
                     logger.info(f"Task '{task.task_name}' completed successfully.")
                     break
@@ -79,7 +93,10 @@ class ExecutorAgent:
                     task_name=task.task_name,
                     task_description=task.task_description,
                 )
-                reflection_res = await self.executor_agent.run(reflection_prompt)  # do not save chat history!
+                reflection_res = await self.executor_agent.run(
+                    reflection_prompt,
+                    log_to_db=self.log_to_db,
+                )  # do not save chat history!
                 self.reflection_history.append(reflection_res.final_output)
                 logger.info(f"Task '{task.task_name}' reflection: {reflection_res.final_output}")
 
@@ -110,7 +127,10 @@ class ExecutorAgent:
                 task_name=task.task_name,
                 task_description=task.task_description,
             )
-            summary_response = await self.executor_agent.run(summary_prompt)
+            summary_response = await self.executor_agent.run(
+                summary_prompt,
+                log_to_db=self.log_to_db,
+            )
             recorder.add_run_result(summary_response.get_run_result(), "executor_summary")  # add executor trajectory
             task.task_result_detailed, task.task_result = summary_response.final_output, summary_response.final_output
             logger.info(f"Task result summarized: {task.task_result_detailed} -> {task.task_result}")

@@ -9,7 +9,7 @@ import os
 import yaml
 from agents import custom_span, function_span, gen_trace_id, trace
 
-from ..config import TrainingFreeGRPOConfig
+from ..config import EvalConfig, TrainingFreeGRPOConfig
 from ..config.eval_config import DataConfig
 from ..skillsbench_data import assert_datasets_disjoint
 from ..utils import DIR_ROOT, get_logger
@@ -50,6 +50,32 @@ class TrainingFreeGRPO:
             ),
         )
 
+    def _make_practice_eval_config(self):
+        """Build the evaluation adapter used by the practice rollout pipeline."""
+
+        runtime = self.config.runtime
+        agent = runtime.agent.model_copy(deep=True) if runtime.agent is not None else None
+        if agent is None:
+            raise ValueError("runtime.agent is required for practice rollouts")
+        self.original_temperature = agent.model.model_settings.temperature
+        agent.model.model_settings.temperature = self.config.practice.rollout_temperature
+        practice_eval_config = EvalConfig(
+            exp_id=self.config.exp_id,
+            db_url=runtime.db_url,
+            data=DataConfig(dataset=self.config.data.practice_dataset_name),
+            agent=agent,
+            concurrency=self.config.practice.rollout_concurrency,
+            pass_k=self.config.practice.grpo_n,
+            log_trajectory_to_db=False,
+            judge_model=runtime.judge_model.model_copy(deep=True),
+            judge_concurrency=runtime.judge_concurrency,
+            verify_filename=runtime.verify_filename,
+            verify_func_name=runtime.verify_func_name,
+            korgym=runtime.korgym.model_copy(deep=True),
+            skillsbench=runtime.skillsbench.model_copy(deep=True),
+        )
+        return practice_eval_config
+
     async def run(self) -> str:
         """Run the complete experience generation process.
 
@@ -78,6 +104,33 @@ class TrainingFreeGRPO:
         except Exception as e:
             logger.error(f"Error during experience generation: {e}", exc_info=True)
             raise
+        finally:
+            await self.cleanup()
+
+    async def cleanup(self) -> None:
+        """Release runtime resources so repeated experiments do not leak clients."""
+
+        components = (
+            self.practice_rollout_manager,
+            self.eval_rollout_manager,
+            self.experience_updater,
+            self.hierarchical_experience_manager,
+        )
+        for component in components:
+            cleanup = getattr(component, "cleanup", None)
+            if cleanup is None:
+                continue
+            try:
+                await cleanup()
+            except Exception as exc:  # pragma: no cover - external resources
+                logger.warning("Training-free GRPO component cleanup failed: %s", exc)
+
+        # A subsequent run rebuilds fresh HTTP clients and reloads hierarchy
+        # state from the durable snapshot.
+        self.practice_rollout_manager = None
+        self.eval_rollout_manager = None
+        self.experience_updater = None
+        self.hierarchical_experience_manager = None
 
     async def build(self):
         """Build all components needed for training-free GRPO."""
@@ -87,8 +140,8 @@ class TrainingFreeGRPO:
         # fail-closed: a renamed/mutated DB snapshot must never spend API calls.
         if self.config.data.require_practice_manifest:
             evaluation_dataset = (
-                self.config.evaluation.data.dataset
-                if self.config.evaluation.data is not None
+                self.config.runtime.data.dataset
+                if self.config.runtime.data is not None
                 else None
             )
             evidence = validate_practice_dataset_manifest(
@@ -97,13 +150,17 @@ class TrainingFreeGRPO:
                 split_name=self.config.data.practice_manifest_split,
                 expected_record_count=self.config.data.practice_manifest_expected_records,
                 evaluation_dataset=evaluation_dataset,
-                db_url=self.config.evaluation.db_url,
+                db_url=self.config.runtime.db_url,
             )
             logger.info("Strict practice dataset manifest assertion passed: %s", evidence)
 
         # 1. Load dataset
         # check if dataset exists
-        data_manager = TrainingFreeGRPODataManager(self.config.evaluation)
+        data_manager = TrainingFreeGRPODataManager(
+            self.config.runtime,
+            mistake_focus_ratio=self.config.practice.mistake_focus_ratio,
+            data_seed=self.config.practice.data_seed,
+        )
         # load practice dataset if not exists
         if not data_manager.check_dataset(self.config.data.practice_dataset_name):
             raise ValueError(
@@ -111,61 +168,85 @@ class TrainingFreeGRPO:
             )
         # load eval dataset if not exists
         if (
-            self.config.evaluation.data
-            and self.config.evaluation.data.dataset
-            and not data_manager.check_dataset(self.config.evaluation.data.dataset)
+            self.config.runtime.data
+            and self.config.runtime.data.dataset
+            and not data_manager.check_dataset(self.config.runtime.data.dataset)
         ):
             raise ValueError(
-                f"Evaluation dataset {self.config.evaluation.data.dataset} does not exist in db. Please load it first."
+                f"Evaluation dataset {self.config.runtime.data.dataset} does not exist in db. Please load it first."
             )
 
-        skillsbench = getattr(self.config.evaluation, "skillsbench", None)
+        skillsbench = getattr(self.config.runtime, "skillsbench", None)
         if (
             skillsbench
             and getattr(skillsbench, "enabled", False)
             and getattr(skillsbench, "require_disjoint_train_eval", True)
-            and self.config.evaluation.data
-            and self.config.evaluation.data.dataset
+            and self.config.runtime.data
+            and self.config.runtime.data.dataset
         ):
             evidence = assert_datasets_disjoint(
                 self.config.data.practice_dataset_name,
-                self.config.evaluation.data.dataset,
-                db_url=self.config.evaluation.db_url,
+                self.config.runtime.data.dataset,
+                db_url=self.config.runtime.db_url,
                 split_manifest_path=getattr(skillsbench, "task_split_manifest_path", None),
                 split_name=getattr(skillsbench, "task_split_name", None),
             )
             logger.info("SkillsBench train/eval overlap assertion passed: %s", evidence)
 
         # 2. Create practice rollout manager
-        practice_eval_config = self.config.evaluation.model_copy()
-        practice_eval_config.pass_k = self.config.practice.grpo_n
-        self.original_temperature = practice_eval_config.agent.model.model_settings.temperature
-        practice_eval_config.agent.model.model_settings.temperature = self.config.practice.rollout_temperature
-        practice_eval_config.data = DataConfig(dataset=self.config.data.practice_dataset_name)
-
-        # Pass KORGym configuration to practice eval config
-        logger.info(f"TrainingFreeGRPO build: hasattr(self.config, 'korgym')={hasattr(self.config, 'korgym')}")
-        if hasattr(self.config, "korgym"):
-            logger.info(f"TrainingFreeGRPO build: self.config.korgym={self.config.korgym}")
-            if self.config.korgym:
-                practice_eval_config.korgym = self.config.korgym
-                logger.info(f"✓ Passed korgym config to practice_eval_config: {self.config.korgym}")
+        practice_eval_config = self._make_practice_eval_config()
 
         self.practice_rollout_manager = RolloutManager(
             config=practice_eval_config,
             batch_size=self.config.practice.batch_size,
             task_timeout=self.config.practice.task_timeout,
+            max_retries=self.config.practice.rollout_max_retries,
+            mistake_focus_ratio=self.config.practice.mistake_focus_ratio,
+            data_seed=self.config.practice.data_seed,
+            data_layout_context={
+                "batch_size": self.config.practice.batch_size,
+                "require_practice_manifest": self.config.data.require_practice_manifest,
+                "practice_manifest_path": self.config.data.practice_manifest_path,
+                "practice_manifest_split": self.config.data.practice_manifest_split,
+                "practice_manifest_expected_records": (
+                    self.config.data.practice_manifest_expected_records
+                ),
+            },
+            allow_legacy_epoch_cache=self.config.practice.resume_from_hierarchy,
+        )
+        logger.info(
+            "Practice rollout controls: concurrency=%s max_retries=%s "
+            "task_timeout=%ss data_seed=%s mistake_focus_ratio=%.3f",
+            practice_eval_config.concurrency,
+            self.config.practice.rollout_max_retries,
+            self.config.practice.task_timeout,
+            self.config.practice.data_seed,
+            self.config.practice.mistake_focus_ratio,
         )
 
         # 3. Create eval rollout manager (if different from practice)
         self.eval_rollout_manager = None
         if self.config.practice.do_eval:
-            eval_eval_config = self.config.evaluation.model_copy()
-            eval_eval_config.exp_id = eval_eval_config.exp_id + "_eval"
-            # eval_eval_config.data = DataConfig(dataset=self.config.data.eval_dataset_name)
-            # Pass KORGym configuration to eval eval config
-            if hasattr(self.config, "korgym") and self.config.korgym:
-                eval_eval_config.korgym = self.config.korgym
+            runtime = self.config.runtime
+            if runtime.data is None or runtime.agent is None:
+                raise ValueError("runtime.data and runtime.agent are required for in-run evaluation")
+            eval_agent = runtime.agent.model_copy(deep=True)
+            eval_eval_config = EvalConfig(
+                exp_id=self.config.exp_id + "_eval",
+                db_url=runtime.db_url,
+                data=runtime.data.model_copy(deep=True),
+                agent=eval_agent,
+                concurrency=self.config.practice.eval_concurrency or self.config.practice.rollout_concurrency,
+                pass_k=self.config.practice.eval_pass_k or self.config.practice.grpo_n,
+                judge_model=runtime.judge_model.model_copy(deep=True),
+                judge_concurrency=(
+                    self.config.practice.eval_judge_concurrency or runtime.judge_concurrency
+                ),
+                verify_filename=runtime.verify_filename,
+                verify_func_name=runtime.verify_func_name,
+                korgym=runtime.korgym.model_copy(deep=True),
+                skillsbench=runtime.skillsbench.model_copy(deep=True),
+            )
             self.eval_rollout_manager = RolloutManager(
                 config=eval_eval_config,
                 batch_size=self.config.practice.batch_size,
@@ -180,7 +261,7 @@ class TrainingFreeGRPO:
             "same_as_input",
         )
         self.experience_updater = ExperienceUpdater(
-            self.config.evaluation.agent,
+            self.config.runtime.agent,
             self.config.practice.agent_objective,
             self.config.practice.learning_objective,
             experience_output_language=experience_output_language,
@@ -195,7 +276,7 @@ class TrainingFreeGRPO:
         if self.config.practice.hierarchical_learning.enabled:
             logger.info("Initializing hierarchical experience manager (L0/L1/L2)...")
             self.hierarchical_experience_manager = HierarchicalExperienceManager(
-                config=self.config.evaluation.agent,
+                config=self.config.runtime.agent,
                 hierarchical_config=self.config.practice.hierarchical_learning,
                 agent_objective=self.config.practice.agent_objective,
                 learning_objective=self.config.practice.learning_objective,
@@ -376,10 +457,270 @@ class TrainingFreeGRPO:
             )
         return None, True
 
+    def _hierarchy_resume_checkpoints(self) -> dict[tuple[int, int], dict]:
+        """Load the immutable contiguous-prefix evidence used by resume mode.
+
+        The hierarchy snapshot, rather than the derived numeric step or the
+        auxiliary experience cache, is authoritative.  Structural checks that
+        require the current epoch size are completed after epoch rows are
+        loaded, before any batch is preprocessed.
+        """
+
+        if not self.config.practice.resume_from_hierarchy:
+            return {}
+        if self.hierarchical_experience_manager is None:
+            raise RuntimeError(
+                "resume_from_hierarchy requires an initialized hierarchical experience manager"
+            )
+
+        checkpoints: dict[tuple[int, int], dict] = {}
+        for raw_checkpoint in self.hierarchical_experience_manager.get_l0_batch_checkpoints(
+            run_id=self.recorder.experiment_name
+        ):
+            try:
+                epoch = int(raw_checkpoint["epoch"])
+                batch = int(raw_checkpoint["batch"])
+                step = int(raw_checkpoint["step"])
+            except (KeyError, TypeError, ValueError) as error:
+                raise RuntimeError(
+                    f"Cannot resume from hierarchy: malformed batch checkpoint {raw_checkpoint!r}"
+                ) from error
+            if epoch < 0 or batch < 0 or step < 0:
+                raise RuntimeError(
+                    f"Cannot resume from hierarchy: negative batch checkpoint {raw_checkpoint!r}"
+                )
+            if epoch >= self.config.practice.epochs:
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: snapshot contains epoch "
+                    f"{epoch}, but the configured run has only {self.config.practice.epochs} epoch(s)"
+                )
+            key = (epoch, batch)
+            if key in checkpoints:
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: duplicate checkpoint for "
+                    f"epoch={epoch} batch={batch}"
+                )
+            checkpoints[key] = dict(raw_checkpoint)
+
+        logger.info(
+            "Hierarchy prefix resume enabled: loaded %d committed batch checkpoint(s)",
+            len(checkpoints),
+        )
+        return checkpoints
+
+    def _resolve_hierarchical_resume_step(
+        self,
+        num_batches: int,
+        *,
+        checkpoints: dict[tuple[int, int], dict] | None = None,
+    ) -> int:
+        """Validate snapshot checkpoints and return the first uncommitted step."""
+
+        if num_batches < 1:
+            raise ValueError("num_batches must be positive")
+        recorder = getattr(self, "recorder", None)
+        run_id = getattr(recorder, "experiment_name", None) or self.config.exp_id
+        if checkpoints is None:
+            if self.hierarchical_experience_manager is None:
+                raise RuntimeError("Cannot resolve hierarchy resume without a hierarchy manager")
+            checkpoints = {}
+            for checkpoint in self.hierarchical_experience_manager.get_l0_batch_checkpoints(
+                run_id=run_id
+            ):
+                key = (int(checkpoint["epoch"]), int(checkpoint["batch"]))
+                checkpoints[key] = dict(checkpoint)
+
+        ordered = sorted(checkpoints.values(), key=lambda item: int(item["step"]))
+        for expected_step, checkpoint in enumerate(ordered):
+            epoch = int(checkpoint["epoch"])
+            batch = int(checkpoint["batch"])
+            stored_step = int(checkpoint["step"])
+            expected_epoch = expected_step // num_batches
+            expected_batch = expected_step % num_batches
+            if (epoch, batch) != (expected_epoch, expected_batch):
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: checkpoints are not a contiguous prefix; "
+                    f"expected epoch={expected_epoch} batch={expected_batch}, "
+                    f"found epoch={epoch} batch={batch}"
+                )
+            layout_step = epoch * num_batches + batch
+            if stored_step != layout_step:
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: checkpoint step does not match the current "
+                    f"batch layout for epoch={epoch} batch={batch}: "
+                    f"stored={stored_step} expected={layout_step}"
+                )
+
+        resume_step = len(ordered)
+        # Epoch-boundary transitions are verified and, if missing, completed
+        # in `_finish_epoch_hierarchy`.  Checkpoints prove only the immutable
+        # rollout/candidate prefix and must not prevent that recovery path.
+        return resume_step
+
+    @staticmethod
+    def _validate_epoch_resume_checkpoints(
+        checkpoints: dict[tuple[int, int], dict],
+        *,
+        epoch: int,
+        num_batches: int,
+    ) -> None:
+        """Reject checkpoints produced with an incompatible batch layout."""
+
+        for (checkpoint_epoch, batch), checkpoint in checkpoints.items():
+            if checkpoint_epoch != epoch:
+                continue
+            if batch >= num_batches:
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: checkpoint batch "
+                    f"epoch={epoch} batch={batch} is outside the configured {num_batches} batches"
+                )
+            expected_step = epoch * num_batches + batch
+            if checkpoint["step"] != expected_step:
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: checkpoint step does not match the current "
+                    f"batch layout for epoch={epoch} batch={batch}: "
+                    f"stored={checkpoint['step']} expected={expected_step}. "
+                    "Keep epochs, batch_size, grpo_n, and truncation unchanged."
+                )
+
+    def _validate_resume_batch_fingerprints(
+        self,
+        checkpoints: dict[tuple[int, int], dict],
+        *,
+        epoch: int,
+    ) -> None:
+        """Bind every skipped hierarchy checkpoint to its exact judged DB batch."""
+
+        read_batch = getattr(self.practice_rollout_manager, "get_committed_batch_for_resume", None)
+        epoch_checkpoints = sorted(
+            (
+                (batch, checkpoint)
+                for (checkpoint_epoch, batch), checkpoint in checkpoints.items()
+                if checkpoint_epoch == epoch
+            ),
+            key=lambda item: item[0],
+        )
+        if epoch_checkpoints and read_batch is None:
+            raise RuntimeError(
+                "Cannot resume from hierarchy: rollout manager cannot validate committed DB batches"
+            )
+        for batch, checkpoint in epoch_checkpoints:
+            rollouts = read_batch(batch)
+            actual_fingerprint = self._candidate_generation_fingerprint(rollouts)
+            expected_fingerprint = checkpoint.get("batch_fingerprint")
+            if actual_fingerprint != expected_fingerprint:
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: judged DB batch does not match its hierarchy "
+                    f"checkpoint for epoch={epoch} batch={batch}: "
+                    f"stored={expected_fingerprint} current={actual_fingerprint}"
+                )
+
+    async def _finish_epoch_hierarchy(self, epoch: int, *, fully_skipped: bool) -> None:
+        """Complete only hierarchy work not already proven at an epoch boundary."""
+
+        manager = self.hierarchical_experience_manager
+        if manager is None:
+            return
+        recovered_l0_review_work = False
+        if self._uses_candidate_review():
+            # A hierarchy checkpoint proves candidate staging, not that the
+            # immediately following L0 review completed.  A crash in between
+            # must not turn the skipped batch into a permanently pending L0
+            # queue entry.
+            review_counts = await manager.review_pending_candidates(candidate_level="L0")
+            # ``skipped`` means no durable transition happened (for example an
+            # exhausted automatic retry budget), so it must not invalidate an
+            # otherwise sound epoch audit by itself.
+            recovered_l0_review_work = any(
+                review_counts.get(name, 0) > 0
+                for name in ("committed", "failed", "stale")
+            )
+            if recovered_l0_review_work:
+                logger.info(
+                    "Epoch %s recovered staged L0 candidate review work: %s",
+                    epoch,
+                    review_counts,
+                )
+
+        if (
+            not self.config.practice.resume_from_hierarchy
+            or not fully_skipped
+            or recovered_l0_review_work
+        ):
+            logger.info("Aggregating hierarchical experiences at end of epoch %s...", epoch)
+            await manager.aggregate_epoch(
+                epoch,
+                run_id=self.recorder.experiment_name,
+            )
+        else:
+            l0_to_l1_audited = manager.has_aggregation_audit(
+                epoch=epoch,
+                source_level="L0",
+                target_level="L1",
+                run_id=self.recorder.experiment_name,
+                allow_legacy=True,
+            )
+            if not l0_to_l1_audited:
+                logger.info(
+                    "Resuming missing epoch %s L0->L1 transition",
+                    epoch,
+                )
+                await manager.aggregate_levels(
+                    ("L1",),
+                    epoch=epoch,
+                    run_id=self.recorder.experiment_name,
+                )
+            else:
+                logger.info(
+                    "Skipping epoch %s L0->L1 transition; bound audit exists",
+                    epoch,
+                )
+
+            # L1->L2 is a separate durable transition.  In particular, a
+            # process can crash after writing the L0->L1 audit and before L2.
+            l1_to_l2_audited = manager.has_aggregation_audit(
+                epoch=epoch,
+                source_level="L1",
+                target_level="L2",
+                run_id=self.recorder.experiment_name,
+                allow_legacy=True,
+            )
+            if not l1_to_l2_audited:
+                logger.info(
+                    "Resuming missing epoch %s L1->L2 transition",
+                    epoch,
+                )
+                await manager.aggregate_levels(
+                    ("L2",),
+                    epoch=epoch,
+                    run_id=self.recorder.experiment_name,
+                )
+            else:
+                logger.info(
+                    "Skipping epoch %s L1->L2 transition; bound audit exists",
+                    epoch,
+                )
+
+        if self._uses_candidate_review():
+            self._sync_hierarchical_recorder()
+
     async def practice(self):
         """Run practice process."""
+        resume_checkpoints = self._hierarchy_resume_checkpoints()
+        resume_prefix_open = bool(self.config.practice.resume_from_hierarchy)
+        seen_resume_checkpoints: set[tuple[int, int]] = set()
         for epoch in range(self.config.practice.epochs):
             logger.info(f"Start Epoch {epoch}")
+
+            epoch_has_checkpoints = any(
+                checkpoint_epoch == epoch for checkpoint_epoch, _ in resume_checkpoints
+            )
+            has_epoch_data = getattr(self.practice_rollout_manager, "has_epoch_data", None)
+            if epoch_has_checkpoints and has_epoch_data is not None and not has_epoch_data(epoch):
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: committed hierarchy checkpoints exist for "
+                    f"epoch {epoch}, but its rollout rows are missing from the database"
+                )
 
             # Prepare epoch data
             epoch_data = self.practice_rollout_manager.load_epoch_data(
@@ -403,8 +744,45 @@ class TrainingFreeGRPO:
 
             # inner loop for each batch
             num_batches = len(epoch_data) // (self.config.practice.batch_size * self.config.practice.grpo_n)
+            self._validate_epoch_resume_checkpoints(
+                resume_checkpoints,
+                epoch=epoch,
+                num_batches=num_batches,
+            )
+            if self.config.practice.resume_from_hierarchy:
+                self._validate_resume_batch_fingerprints(
+                    resume_checkpoints,
+                    epoch=epoch,
+                )
+            if epoch == 0 and self.config.practice.resume_from_hierarchy:
+                self._resolve_hierarchical_resume_step(
+                    num_batches,
+                    checkpoints=resume_checkpoints,
+                )
+            skipped_batches = 0
             for batch_idx in range(num_batches):
                 step = epoch * num_batches + batch_idx
+                checkpoint_key = (epoch, batch_idx)
+                checkpoint = resume_checkpoints.get(checkpoint_key)
+                if self.config.practice.resume_from_hierarchy:
+                    if checkpoint is not None:
+                        if not resume_prefix_open:
+                            raise RuntimeError(
+                                "Cannot resume from hierarchy: checkpoints are not a contiguous "
+                                f"prefix; found committed epoch={epoch} batch={batch_idx} after a gap"
+                            )
+                        seen_resume_checkpoints.add(checkpoint_key)
+                        skipped_batches += 1
+                        logger.info(
+                            "Skipping committed hierarchy prefix step %s (epoch=%s batch=%s, "
+                            "candidates=%s); rollout and preprocessing will not run",
+                            step,
+                            epoch,
+                            batch_idx,
+                            checkpoint.get("candidate_count"),
+                        )
+                        continue
+                    resume_prefix_open = False
                 logger.info(f"Step {step} (Epoch {epoch}, Batch {batch_idx})")
                 # set tracing
                 step_trace_id = gen_trace_id()
@@ -603,6 +981,10 @@ class TrainingFreeGRPO:
                                 await self.hierarchical_experience_manager.process_step_experiences(
                                     l0_candidates=l0_candidates,
                                     step=step,
+                                    run_id=self.recorder.experiment_name,
+                                    epoch=epoch,
+                                    batch=batch_idx,
+                                    batch_fingerprint=batch_fingerprint,
                                 )
 
                         stats[f"step_{step}"]["complete"] = True
@@ -631,13 +1013,20 @@ class TrainingFreeGRPO:
                     with function_span("Record current experiences") as exp_span:
                         exp_span.span_data.output = new_experiences
 
-            # End of epoch: aggregate L1 (from new L0) and L2 (from L1), refining
-            # any stale entries across epochs via the shared LLM merge.
-            if self.hierarchical_experience_manager is not None:
-                logger.info(f"Aggregating hierarchical experiences at end of epoch {epoch}...")
-                await self.hierarchical_experience_manager.aggregate_epoch(epoch)
-                if self._uses_candidate_review():
-                    self._sync_hierarchical_recorder()
+            # End of epoch: aggregate L1 (from new L0) and L2 (from L1). A
+            # completely skipped prefix epoch resumes only a transition that
+            # was not durably audited before the crash.
+            await self._finish_epoch_hierarchy(
+                epoch,
+                fully_skipped=(skipped_batches == num_batches),
+            )
+
+        unseen_checkpoints = sorted(set(resume_checkpoints) - seen_resume_checkpoints)
+        if unseen_checkpoints:
+            raise RuntimeError(
+                "Cannot resume from hierarchy: configured run did not visit checkpoint(s) "
+                f"{unseen_checkpoints}"
+            )
 
     def _should_use_cache(self, step: int) -> bool:
         """Determine if cached results should be used for current step.
@@ -660,10 +1049,20 @@ class TrainingFreeGRPO:
             return total_steps % self.config.practice.eval_steps == 0
         return False
 
-    def _create_agent_config_with_experiences(self, experiences: dict[str, str]) -> str:
-        """Create agent configuration with experiences integrated into instructions."""
+    def _create_agent_config_with_experiences(
+        self,
+        experiences: dict[str, str],
+        *,
+        output_path: str | os.PathLike[str] | None = None,
+    ) -> str:
+        """Create an Agent configuration with experiences integrated into instructions.
+
+        ``output_path`` is an explicit artifact override for offline
+        regeneration. Normal training keeps the canonical path derived from
+        the root experiment ID.
+        """
         # Load the original agent config
-        base_config = self.config.evaluation.agent
+        base_config = self.config.runtime.agent
         # Convert to dict for manipulation
         config_dict = base_config.model_dump(exclude_none=True)
 
@@ -677,7 +1076,7 @@ class TrainingFreeGRPO:
         #
         #   ZONE 3 (appended after base instructions): L0 case lessons — the
         #           most specific layer.  Kept brief; the full case library is
-        #           available via max_l0_recent config.
+        #           controlled by the explicit export_max_l0 artifact limit.
         #
         # This layout exploits the U-shaped attention distribution in long
         # prompts: important meta-knowledge lands at the top, where attention
@@ -706,10 +1105,14 @@ class TrainingFreeGRPO:
                 current_instructions = current_instructions + l1_block
 
             # --- ZONE 3: L0 case lessons (optional, kept brief) ---
-            if self.config.practice.hierarchical_learning.include_l0_in_prompt:
-                recent_l0 = self.hierarchical_experience_manager.get_recent_injectable_l0_experiences(
-                    self.config.practice.hierarchical_learning.max_l0_recent
-                )
+            hierarchy_config = self.config.practice.hierarchical_learning
+            if hierarchy_config.export_include_l0 and hierarchy_config.export_max_l0 != 0:
+                if hierarchy_config.export_max_l0 is None:
+                    recent_l0 = self.hierarchical_experience_manager.get_injectable_l0_experiences()
+                else:
+                    recent_l0 = self.hierarchical_experience_manager.get_recent_injectable_l0_experiences(
+                        hierarchy_config.export_max_l0
+                    )
                 if recent_l0:
                     l0_bullets = "\n".join(f"• {exp['content']}" for exp in recent_l0)
                     l0_block = f"\n\nSpecific lessons from recent tasks:\n{l0_bullets}"
@@ -748,9 +1151,13 @@ class TrainingFreeGRPO:
         yaml_config = yaml.dump(config_dict, default_flow_style=False, allow_unicode=True, sort_keys=False)
         config_header = "# @package _global_\ndefaults:\n  - _self_\n\n"
         # save to file
-        config_filename = f"{self.config.evaluation.exp_id}_agent.yaml"
-        config_dir = str(DIR_ROOT / "configs" / "agents" / "practice")
-        full_path = os.path.join(config_dir, os.path.basename(config_filename))
+        if output_path is None:
+            config_filename = f"{self.config.exp_id}_agent.yaml"
+            config_dir = str(DIR_ROOT / "configs" / "agents" / "practice")
+            full_path = os.path.join(config_dir, os.path.basename(config_filename))
+        else:
+            full_path = os.path.abspath(os.fspath(output_path))
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
         with open(full_path, "w", encoding="utf-8") as f:
             f.write(config_header + yaml_config)
         return full_path

@@ -56,7 +56,7 @@ korgym:
   game_name: "33-wordle"
   game_host: "localhost"
   game_port: 8765
-  max_attempts: 10
+  max_rounds: 10
 
 
 

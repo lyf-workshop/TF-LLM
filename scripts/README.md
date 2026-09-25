@@ -36,11 +36,23 @@ uv run python scripts/run_training_free_GRPO.py \
 
 ```bash
 uv run python scripts/regen_practice_agent_yaml.py \
+  --config_name <configs/practice 下的相对名称>
+```
+
+用于按同一份严格 practice 配置从已有层级经验 snapshot 重新生成 Agent，不会重跑
+rollout，也不会请求模型或下载 embedding。脚本从配置读取基础 Agent、
+`experience_save_path`、`export_include_l0` 和 `export_max_l0`，因此重新导出与训练结束时
+使用完全相同的注入逻辑。其中 `export_max_l0: null` 导出全部可注入 L0，`0` 不导出
+L0，正整数 `N` 只导出最新的 `N` 条。
+
+仅在有意改用其他本地 snapshot 或输出位置时显式覆盖路径：
+
+```bash
+uv run python scripts/regen_practice_agent_yaml.py \
+  --config_name <configs/practice 下的相对名称> \
   --experiences <experience.json> \
   --output <agent.yaml>
 ```
-
-用于从已有经验 JSON 重新生成 Agent，不会重跑 rollout。
 
 ## 部署脚本
 

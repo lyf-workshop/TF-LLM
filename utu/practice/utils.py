@@ -61,10 +61,40 @@ def parse_training_free_grpo_config() -> TrainingFreeGRPOConfig:
     practice_group.add_argument("--grpo_n", type=int, default=None, help="Number of rollouts in a group of GRPO")
     practice_group.add_argument("--rollout_concurrency", type=int, default=None, help="Concurrency level for rollouts")
     practice_group.add_argument(
+        "--rollout_max_retries",
+        type=int,
+        default=None,
+        help="Total rollout attempts per sample, including the first attempt",
+    )
+    practice_group.add_argument(
         "--rollout_data_truncate", type=int, default=None, help="Truncate data to first N samples"
     )
     practice_group.add_argument(
+        "--mistake_focus_ratio",
+        type=float,
+        default=None,
+        help="Fraction of a truncated epoch reserved for mistake-bank samples",
+    )
+    practice_group.add_argument(
+        "--data_seed",
+        type=int,
+        default=None,
+        help="Base seed for deterministic epoch sampling",
+    )
+    practice_group.add_argument(
         "--eval_strategy", type=str, default=None, choices=["epoch", "steps"], help="Evaluation strategy"
+    )
+    practice_group.add_argument(
+        "--eval_pass_k", type=int, default=None, help="Pass-k for optional in-run evaluation"
+    )
+    practice_group.add_argument(
+        "--eval_concurrency", type=int, default=None, help="Concurrency for optional in-run evaluation"
+    )
+    practice_group.add_argument(
+        "--eval_judge_concurrency",
+        type=int,
+        default=None,
+        help="Judge concurrency for optional in-run evaluation",
     )
     practice_group.add_argument(
         "--eval_steps", type=int, default=None, help="Evaluation steps (when using 'steps' strategy)"
@@ -78,6 +108,15 @@ def parse_training_free_grpo_config() -> TrainingFreeGRPOConfig:
         default=None,
         help="Step number to restart from (None means use cache for all steps if available, "
         "0 means restart from beginning)",
+    )
+    practice_group.add_argument(
+        "--resume_from_hierarchy",
+        action="store_true",
+        default=None,
+        help=(
+            "Resume after the contiguous batch prefix committed in the hierarchical snapshot; "
+            "completed batches are not loaded into the rollout pipeline"
+        ),
     )
     practice_group.add_argument(
         "--agent_objective",
@@ -122,16 +161,30 @@ def parse_training_free_grpo_config() -> TrainingFreeGRPOConfig:
         config.practice.grpo_n = args.grpo_n
     if args.rollout_concurrency is not None:
         config.practice.rollout_concurrency = args.rollout_concurrency
+    if args.rollout_max_retries is not None:
+        config.practice.rollout_max_retries = args.rollout_max_retries
     if args.rollout_data_truncate is not None:
         config.practice.rollout_data_truncate = args.rollout_data_truncate
+    if args.mistake_focus_ratio is not None:
+        config.practice.mistake_focus_ratio = args.mistake_focus_ratio
+    if args.data_seed is not None:
+        config.practice.data_seed = args.data_seed
     if args.eval_strategy is not None:
         config.practice.eval_strategy = args.eval_strategy
+    if args.eval_pass_k is not None:
+        config.practice.eval_pass_k = args.eval_pass_k
+    if args.eval_concurrency is not None:
+        config.practice.eval_concurrency = args.eval_concurrency
+    if args.eval_judge_concurrency is not None:
+        config.practice.eval_judge_concurrency = args.eval_judge_concurrency
     if args.eval_steps is not None:
         config.practice.eval_steps = args.eval_steps
     if args.eval_data_truncate is not None:
         config.practice.eval_data_truncate = args.eval_data_truncate
     if args.restart_step is not None:
         config.practice.restart_step = args.restart_step
+    if args.resume_from_hierarchy is not None:
+        config.practice.resume_from_hierarchy = args.resume_from_hierarchy
     if args.agent_objective is not None:
         config.practice.agent_objective = args.agent_objective
     if args.learning_objective is not None:
@@ -144,15 +197,14 @@ def parse_training_free_grpo_config() -> TrainingFreeGRPOConfig:
         config.exp_id = args.experiment_name
     if args.agent_config is not None:
         agent_config = ConfigLoader.load_agent_config(args.agent_config)
-        config.evaluation.agent = agent_config
+        config.runtime.agent = agent_config
     if args.verify_filename is not None:
-        config.evaluation.verify_filename = args.verify_filename
+        config.runtime.verify_filename = args.verify_filename
     if args.verify_func_name is not None:
-        config.evaluation.verify_func_name = args.verify_func_name
+        config.runtime.verify_func_name = args.verify_func_name
     if args.pass_k is not None:
-        config.evaluation.pass_k = args.pass_k
+        # ``pass_k`` is a practice rollout control; keep the CLI override on
+        # the canonical GRPO setting rather than a nested evaluation block.
+        config.practice.grpo_n = args.pass_k
 
-    # Set evaluation exp_id to the same as the overall exp_id
-    if config.exp_id is not None:
-        config.evaluation.exp_id = config.exp_id
     return config

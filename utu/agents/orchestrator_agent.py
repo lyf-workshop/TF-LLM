@@ -52,22 +52,41 @@ class OrchestratorAgent:
             workers[name] = SimpleAgent(config=config)
         return workers
 
-    async def run(self, input: str, history: Recorder = None, trace_id: str = None) -> Recorder:
-        recorder = self.run_streamed(input, history, trace_id)
+    async def run(
+        self,
+        input: str,
+        history: Recorder = None,
+        trace_id: str = None,
+        log_to_db: bool = True,
+    ) -> Recorder:
+        recorder = self.run_streamed(
+            input,
+            history,
+            trace_id,
+            log_to_db=log_to_db,
+        )
         async for _ in recorder.stream_events():
             pass
         return recorder
 
-    def run_streamed(self, input: str, history: Recorder = None, trace_id: str = None) -> Recorder:
+    def run_streamed(
+        self,
+        input: str,
+        history: Recorder = None,
+        trace_id: str = None,
+        log_to_db: bool = True,
+    ) -> Recorder:
         trace_id = trace_id or AgentsUtils.gen_trace_id()
         if history:
             recorder = history.new(input=input, trace_id=trace_id)
         else:
             recorder = Recorder(input=input, trace_id=trace_id)
-        recorder._run_impl_task = asyncio.create_task(self._start_streaming(recorder))
+        recorder._run_impl_task = asyncio.create_task(
+            self._start_streaming(recorder, log_to_db=log_to_db)
+        )
         return recorder
 
-    async def _start_streaming(self, recorder: Recorder):
+    async def _start_streaming(self, recorder: Recorder, *, log_to_db: bool):
         with trace(workflow_name=self.name, trace_id=recorder.trace_id):
             try:
                 planner = await self.orchestrator.handle_input(recorder)
@@ -82,7 +101,8 @@ class OrchestratorAgent:
                             recorder.add_final_output(task.result)
                             break
                 # log to db
-                DBService.add(TrajectoryModel.from_task_recorder(recorder))
+                if log_to_db:
+                    DBService.add(TrajectoryModel.from_task_recorder(recorder))
             except Exception as e:
                 logger.error(f"Error processing task: {str(e)}")
                 recorder._event_queue.put_nowait(QueueCompleteSentinel())
@@ -106,10 +126,14 @@ class OrchestratorAgent:
         input = recorder.history_messages + [{"role": "user", "content": task_with_context}]
         # run the task
         recorder._event_queue.put_nowait(OrchestratorStreamEvent(name="task.start", item=task))
-        result = worker.run_streamed(input)
+        result = worker.run_streamed(input, log_to_db=False)
         async for event in result.stream_events():
             recorder._event_queue.put_nowait(event)
         task.result = result.final_output  # set result
         recorder._event_queue.put_nowait(OrchestratorStreamEvent(name="task.done", item=task))
         # record trajectory
         recorder.trajectories.append(AgentsUtils.get_trajectory_from_agent_result(result))
+
+    async def cleanup(self) -> None:
+        for worker in self.workers.values():
+            await worker.cleanup()

@@ -135,23 +135,19 @@ def _selected_targets(selection: AggregationSelection) -> list[str]:
 
 
 def _threshold_gate_view(hierarchical_config: Any) -> dict[str, Any]:
-    """Report canonical per-layer gates, falling back for legacy configs."""
+    """Report the canonical per-layer calibration gates."""
 
-    legacy = getattr(hierarchical_config, "similarity_thresholds_provisional", None)
     view: dict[str, Any] = {}
     for name in (
         "l0_similarity_threshold_provisional",
         "l1_similarity_threshold_provisional",
     ):
-        value = getattr(hierarchical_config, name, legacy)
-        view[name] = value
+        view[name] = getattr(hierarchical_config, name)
     view["allow_provisional_aggregation"] = getattr(
         hierarchical_config,
         "allow_provisional_aggregation",
         False,
     )
-    if legacy is not None:
-        view["legacy_similarity_thresholds_provisional"] = legacy
     return view
 
 
@@ -188,14 +184,14 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
         )
         manifest_guard.update(source_evidence)
         if args.execute:
-            evaluation_data = getattr(config.evaluation, "data", None)
+            evaluation_data = getattr(config.runtime, "data", None)
             manifest_guard["database_snapshot"] = validate_practice_dataset_manifest(
                 practice_dataset=data_config.practice_dataset_name,
                 manifest_path=data_config.practice_manifest_path,
                 split_name=data_config.practice_manifest_split,
                 expected_record_count=data_config.practice_manifest_expected_records,
                 evaluation_dataset=(evaluation_data.dataset if evaluation_data is not None else None),
-                db_url=getattr(config.evaluation, "db_url", None),
+                db_url=getattr(config.runtime, "db_url", None),
             )
         else:
             manifest_guard["database_snapshot"] = {
@@ -214,7 +210,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     elif hierarchical_config.clustering_audit_path:
         hierarchical_config.clustering_audit_path = str(_resolve_path(hierarchical_config.clustering_audit_path))
 
-    model_provider = config.evaluation.agent.model.model_provider
+    model_provider = config.runtime.agent.model.model_provider
     report: dict[str, Any] = {
         "mode": "execute" if args.execute else "plan_only",
         "config_name": args.config_name,
@@ -240,7 +236,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
 
     if args.execute:
         manager = HierarchicalExperienceManager(
-            config=config.evaluation.agent,
+            config=config.runtime.agent,
             hierarchical_config=hierarchical_config,
             agent_objective=config.practice.agent_objective,
             learning_objective=config.practice.learning_objective,

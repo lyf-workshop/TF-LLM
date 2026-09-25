@@ -7,6 +7,7 @@ import asyncio
 from agents import trace
 
 from ..config import AgentConfig, ConfigLoader
+from ..db import DBService, TrajectoryModel
 from ..utils import AgentsUtils, get_logger
 from .common import QueueCompleteSentinel
 from .orchestra import (
@@ -44,23 +45,40 @@ class OrchestraAgent:
             workers[name] = SimpleWorkerAgent(config=config)
         return workers
 
-    async def run(self, input: str, trace_id: str = None) -> OrchestraTaskRecorder:
-        task_recorder = self.run_streamed(input, trace_id)
+    async def run(
+        self,
+        input: str,
+        trace_id: str = None,
+        log_to_db: bool = True,
+    ) -> OrchestraTaskRecorder:
+        task_recorder = self.run_streamed(input, trace_id, log_to_db=log_to_db)
         async for _ in task_recorder.stream_events():
             pass
         return task_recorder
 
-    def run_streamed(self, input: str, trace_id: str = None) -> OrchestraTaskRecorder:
+    def run_streamed(
+        self,
+        input: str,
+        trace_id: str = None,
+        log_to_db: bool = True,
+    ) -> OrchestraTaskRecorder:
         # TODO: error_tracing
         trace_id = trace_id or AgentsUtils.gen_trace_id()
         logger.info(f"> trace_id: {trace_id}")
 
         task_recorder = OrchestraTaskRecorder(task=input, trace_id=trace_id)
         # Kick off the actual agent loop in the background and return the streamed result object.
-        task_recorder._run_impl_task = asyncio.create_task(self._start_streaming(task_recorder))
+        task_recorder._run_impl_task = asyncio.create_task(
+            self._start_streaming(task_recorder, log_to_db=log_to_db)
+        )
         return task_recorder
 
-    async def _start_streaming(self, task_recorder: OrchestraTaskRecorder):
+    async def _start_streaming(
+        self,
+        task_recorder: OrchestraTaskRecorder,
+        *,
+        log_to_db: bool,
+    ):
         with trace(workflow_name="orchestra_agent", trace_id=task_recorder.trace_id):
             try:
                 await self.plan(task_recorder)
@@ -69,7 +87,11 @@ class OrchestraAgent:
                     # print(f"> processing {task}")
                     worker_agent = self.worker_agents[task.agent_name]
                     await worker_agent.build()
-                    result_streaming = worker_agent.work_streamed(task_recorder, task)
+                    result_streaming = worker_agent.work_streamed(
+                        task_recorder,
+                        task,
+                        log_to_db=False,
+                    )
                     async for event in result_streaming.stream.stream_events():
                         task_recorder._event_queue.put_nowait(event)
                     result_streaming.output = result_streaming.stream.final_output
@@ -79,12 +101,19 @@ class OrchestraAgent:
 
                 await self.report(task_recorder)
 
+                if log_to_db:
+                    DBService.add(TrajectoryModel.from_task_recorder(task_recorder))
+
                 task_recorder._event_queue.put_nowait(QueueCompleteSentinel())
                 task_recorder._is_complete = True
             except Exception as e:
                 task_recorder._is_complete = True
                 task_recorder._event_queue.put_nowait(QueueCompleteSentinel())
                 raise e
+
+    async def cleanup(self) -> None:
+        for worker in self.worker_agents.values():
+            await worker.agent.cleanup()
 
     async def plan(self, task_recorder: OrchestraTaskRecorder) -> CreatePlanResult:
         """Step1: Plan"""

@@ -8,7 +8,6 @@ exp_id: "skillsbench_with_skills_eval_6_ds"
 
 data:
   dataset: "SkillsBench-Eval-77"
-  type: "single"
 
 concurrency: 1
 judge_concurrency: 4

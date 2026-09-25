@@ -7,9 +7,6 @@ exp_id: "gaia_test"
 
 data:
   dataset: "GAIA_validation"
-  # type: "single"
-  # question_field: "question"
-  # gt_field: "answer"
 
 concurrency: 5
 

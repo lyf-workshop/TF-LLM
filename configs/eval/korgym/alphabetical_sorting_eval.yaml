@@ -8,13 +8,11 @@ exp_id: "alphabetical_sorting_baseline_eval"
 # Evaluation dataset configuration
 data:
   dataset: "KORGym-AlphabeticalSorting-Eval-50"
-  type: "single"
 
 # Evaluation settings
 concurrency: 32
 pass_k: 1
 
-# Verification function settings
 verify_filename: "korgym.py"
 verify_func_name: "verify_func"
 
@@ -24,6 +22,7 @@ korgym:
   game_name: "22-alphabetical_sorting"
   game_host: "localhost"
   game_port: 8776
+  timeout_per_game: 600
   level: 3
   max_rounds: 1  # Single-turn game
 

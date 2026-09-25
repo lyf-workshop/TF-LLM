@@ -1,3 +1,7 @@
+import time
+
+import pytest
+
 from utu.config import ConfigLoader
 from utu.tools import PythonExecutorToolkit
 
@@ -35,3 +39,22 @@ print("Image generated")
     assert "Image generated" in result_plot["message"]
     assert len(result_plot["files"]) == 1
     assert "output_image.png" in result_plot["files"][0]
+
+
+@pytest.mark.asyncio
+async def test_python_executor_timeout_terminates_user_code(tmp_path):
+    isolated_toolkit = PythonExecutorToolkit(
+        {
+            "workspace_root": str(tmp_path),
+        }
+    )
+
+    started_at = time.monotonic()
+    result = await isolated_toolkit.execute_python_code(
+        code="while True:\n    pass",
+        timeout=1,
+    )
+
+    assert result["success"] is False
+    assert "timed out" in result["error"]
+    assert time.monotonic() - started_at < 5

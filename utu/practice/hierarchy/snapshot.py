@@ -179,6 +179,44 @@ def state_payload(
     l0_archive = manager._l0_archive if l0_archive is None else l0_archive
     l1_archive = manager._l1_archive if l1_archive is None else l1_archive
     l2_archive = manager._l2_archive if l2_archive is None else l2_archive
+
+    def level_stats(
+        records: dict[str, ExperienceRecord],
+        archive: dict[str, ExperienceRecord],
+        *,
+        level: ExperienceLevel,
+    ) -> dict[str, int]:
+        active = [record for record in records.values() if record.lifecycle_status == "active"]
+        needs_review = [
+            record for record in records.values() if record.lifecycle_status == "needs_review"
+        ]
+        archived = [
+            record for record in archive.values() if record.lifecycle_status == "inactive"
+        ]
+        provisional = [
+            record
+            for record in active
+            if level != "L0" and record.validation_status == "provisional"
+        ]
+        injectable = [
+            record
+            for record in active
+            if level == "L0" or record.validation_status == "validated"
+        ]
+        return {
+            "pool": len(records),
+            "active": len(active),
+            "needs_review": len(needs_review),
+            "archived": len(archived),
+            "archive_store": len(archive),
+            "total": len(records) + len(archive),
+            "injectable": len(injectable),
+            "provisional": len(provisional),
+        }
+
+    l0_stats = level_stats(l0_records, l0_archive, level="L0")
+    l1_stats = level_stats(l1_records, l1_archive, level="L1")
+    l2_stats = level_stats(l2_records, l2_archive, level="L2")
     return {
         "schema_version": SCHEMA_VERSION,
         "experience_output_language": manager.experience_output_language,
@@ -210,15 +248,33 @@ def state_payload(
                 candidate.status in {"pending", "review_failed"}
                 for candidate in candidate_records.values()
             ),
-            "active_l0": len(l0_records),
-            "archived_l0": len(l0_archive),
-            "active_l1": len(l1_records),
-            "archived_l1": len(l1_archive),
-            "active_l2": len(l2_records),
-            "archived_l2": len(l2_archive),
-            "total_l0": len(l0_records) + len(l0_archive),
-            "total_l1": len(l1_records) + len(l1_archive),
-            "total_l2": len(l2_records) + len(l2_archive),
+            # ``*_experiences`` stores may also contain quarantined
+            # ``needs_review`` records.  Keep pool size explicit and reserve
+            # "active" for the lifecycle state users expect it to mean.
+            "pool_l0": l0_stats["pool"],
+            "pool_l1": l1_stats["pool"],
+            "pool_l2": l2_stats["pool"],
+            "active_l0": l0_stats["active"],
+            "active_l1": l1_stats["active"],
+            "active_l2": l2_stats["active"],
+            "needs_review_l0": l0_stats["needs_review"],
+            "needs_review_l1": l1_stats["needs_review"],
+            "needs_review_l2": l2_stats["needs_review"],
+            "archived_l0": l0_stats["archived"],
+            "archived_l1": l1_stats["archived"],
+            "archived_l2": l2_stats["archived"],
+            "archive_store_l0": l0_stats["archive_store"],
+            "archive_store_l1": l1_stats["archive_store"],
+            "archive_store_l2": l2_stats["archive_store"],
+            "total_l0": l0_stats["total"],
+            "total_l1": l1_stats["total"],
+            "total_l2": l2_stats["total"],
+            "injectable_l0": l0_stats["injectable"],
+            "injectable_l1": l1_stats["injectable"],
+            "injectable_l2": l2_stats["injectable"],
+            "provisional_l0": l0_stats["provisional"],
+            "provisional_l1": l1_stats["provisional"],
+            "provisional_l2": l2_stats["provisional"],
             "pending_l0": sum(
                 record.lifecycle_status == "active" and record.aggregation_status == "pending"
                 for record in l0_records.values()

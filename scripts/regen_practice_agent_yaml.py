@@ -1,129 +1,127 @@
-"""
-Regenerate configs/agents/practice/skillsbench_practice_agent.yaml
-from the existing workspace/hierarchical_experiences/skillsbench_practice.json,
-using the current (zone-based) experience injection format.
+#!/usr/bin/env python3
+"""Rebuild a practice Agent YAML from a persisted hierarchy snapshot.
 
-Usage:
-    python scripts/regen_practice_agent_yaml.py
+The selected practice config is the single source of truth for the base Agent
+and export policy. This command only reads local configuration/snapshot files;
+it does not run rollouts, call an LLM, or load a sentence-transformer model.
 """
 
-import json
+from __future__ import annotations
+
+import argparse
 import sys
 from pathlib import Path
-
-import yaml
+from typing import NoReturn
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-EXPERIENCES_JSON = REPO_ROOT / "workspace" / "hierarchical_experiences" / "skillsbench_practice.json"
-BASE_AGENT_YAML = REPO_ROOT / "configs" / "agents" / "practice" / "skillsbench_agent.yaml"
-OUT_YAML = REPO_ROOT / "configs" / "agents" / "practice" / "skillsbench_practice_agent.yaml"
-MAX_L0_RECENT = 40  # keep in sync with skillsbench_practice.yaml → max_l0_recent
+from utu.config import ConfigLoader, TrainingFreeGRPOConfig  # noqa: E402
+from utu.practice.experience_clusterer import HashingEmbeddingProvider  # noqa: E402
+from utu.practice.hierarchical_experience_manager import (  # noqa: E402
+    HierarchicalExperienceManager,
+)
+from utu.practice.training_free_grpo import TrainingFreeGRPO  # noqa: E402
 
 
-def load_experiences(path: Path) -> tuple[list, list, list]:
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
+class _OfflineLLM:
+    """Fail closed if a read-only export unexpectedly attempts generation."""
 
-    def as_list(raw: object, level: str) -> list[dict]:
-        if isinstance(raw, list):
-            result = [
-                item if isinstance(item, dict) else {"id": f"{level}_{index}", "content": str(item)}
-                for index, item in enumerate(raw)
-            ]
-        elif isinstance(raw, dict):
-            result = []
-            for exp_id, value in raw.items():
-                item = dict(value) if isinstance(value, dict) else {"content": str(value)}
-                item.setdefault("id", str(exp_id))
-                result.append(item)
-        else:
-            result = []
-        # Old snapshots have no lifecycle field and remain compatible. New
-        # inactive or needs-review records must never reach generated prompts.
-        return [
-            item
-            for item in result
-            if str(item.get("lifecycle_status", "active")).lower() == "active"
-        ]
+    async def query_one(self, **_kwargs) -> NoReturn:
+        raise RuntimeError("Agent regeneration is offline and must not call an LLM")
 
-    return (
-        as_list(data.get("l2_experiences", []), "L2"),
-        as_list(data.get("l1_experiences", []), "L1"),
-        as_list(data.get("l0_experiences", []), "L0"),
+
+def _repo_path(path: str | Path) -> Path:
+    resolved = Path(path).expanduser()
+    if not resolved.is_absolute():
+        resolved = REPO_ROOT / resolved
+    return resolved.resolve()
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Rebuild an Agent YAML using a strict practice config and local hierarchy snapshot.",
+    )
+    parser.add_argument(
+        "--config_name",
+        required=True,
+        help="Practice config name relative to configs/practice (for example math/my_run).",
+    )
+    parser.add_argument(
+        "--experiences",
+        type=Path,
+        help="Optional hierarchy snapshot override; defaults to the config's experience_save_path.",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        help="Optional Agent YAML path override; defaults to configs/agents/practice/<exp_id>_agent.yaml.",
+    )
+    return parser
+
+
+def _load_manager(config: TrainingFreeGRPOConfig) -> HierarchicalExperienceManager:
+    hierarchy = config.practice.hierarchical_learning
+    if not hierarchy.enabled:
+        raise ValueError(
+            "regen_practice_agent_yaml requires hierarchical_learning.enabled=true "
+            "because experience_save_path is a hierarchy snapshot"
+        )
+
+    snapshot_path = _repo_path(hierarchy.experience_save_path)
+    if not snapshot_path.is_file():
+        raise FileNotFoundError(f"Hierarchy snapshot not found: {snapshot_path}")
+    hierarchy.experience_save_path = str(snapshot_path)
+
+    # Loading a snapshot needs neither semantic embeddings nor a model call.
+    # Supplying both dependencies explicitly keeps this maintenance command
+    # deterministic and prevents accidental downloads/network traffic.
+    return HierarchicalExperienceManager(
+        config=config.runtime.agent,
+        hierarchical_config=hierarchy,
+        agent_objective=config.practice.agent_objective or "",
+        learning_objective=config.practice.learning_objective or "",
+        llm=_OfflineLLM(),
+        embedding_provider=HashingEmbeddingProvider(seed=hierarchy.random_seed),
     )
 
 
-def build_instructions(base_instructions: str, l2: list, l1: list, l0: list) -> str:
-    """Apply three-zone injection (same logic as training_free_grpo.py)."""
-    instructions = base_instructions
+def regenerate_agent_config(
+    config_name: str,
+    *,
+    experiences_path: str | Path | None = None,
+    output_path: str | Path | None = None,
+) -> Path:
+    """Regenerate one Agent artifact using the normal runtime exporter."""
 
-    # ZONE 1 — L2 meta-strategies prepended (highest attention)
-    if l2:
-        bullets = "\n".join(f"• {e['content']}" for e in l2)
-        block = (
-            "You have developed the following principles through experience "
-            "completing similar tasks. Apply them proactively:\n"
-            f"{bullets}\n\n"
-        )
-        instructions = block + instructions
+    config = ConfigLoader.load_training_free_grpo_config(config_name)
+    hierarchy = config.practice.hierarchical_learning
+    if experiences_path is not None:
+        hierarchy.experience_save_path = str(_repo_path(experiences_path))
 
-    # ZONE 2 — L1 patterns appended as operational guidelines
-    if l1:
-        bullets = "\n".join(f"• {e['content']}" for e in l1)
-        block = f"\n\nProven patterns from past tasks:\n{bullets}"
-        instructions = instructions + block
+    manager = _load_manager(config)
+    runner = TrainingFreeGRPO(config)
+    runner.hierarchical_experience_manager = manager
+    runner.original_temperature = config.runtime.agent.model.model_settings.temperature
 
-    # ZONE 3 — recent L0 cases (most-recent MAX_L0_RECENT entries)
-    recent_l0 = l0[-MAX_L0_RECENT:] if len(l0) > MAX_L0_RECENT else l0
-    if recent_l0:
-        bullets = "\n".join(f"• {e['content']}" for e in recent_l0)
-        block = f"\n\nSpecific lessons from recent tasks:\n{bullets}"
-        instructions = instructions + block
-
-    return instructions
+    explicit_output = _repo_path(output_path) if output_path is not None else None
+    generated = runner._create_agent_config_with_experiences(
+        {},
+        output_path=explicit_output,
+    )
+    return Path(generated).resolve()
 
 
-def main() -> None:
-    if not EXPERIENCES_JSON.exists():
-        sys.exit(f"ERROR: experiences file not found: {EXPERIENCES_JSON}")
-    if not BASE_AGENT_YAML.exists():
-        sys.exit(f"ERROR: base agent yaml not found: {BASE_AGENT_YAML}")
-
-    l2, l1, l0 = load_experiences(EXPERIENCES_JSON)
-    print(f"Loaded  L2={len(l2)}  L1={len(l1)}  L0={len(l0)} experiences")
-
-    with open(BASE_AGENT_YAML, encoding="utf-8") as f:
-        base_cfg = yaml.safe_load(f)
-
-    base_instructions = base_cfg.get("agent", {}).get("instructions", "You are a helpful assistant.")
-
-    new_instructions = build_instructions(base_instructions, l2, l1, l0)
-
-    out_cfg = {
-        "agent": {
-            "name": base_cfg.get("agent", {}).get("name", "skillsbench_agent"),
-            "instructions": new_instructions,
-        }
-    }
-    # Carry over model / toolkits if present in the base yaml
-    for key in ("model", "toolkits"):
-        if key in base_cfg:
-            out_cfg[key] = base_cfg[key]
-
-    header = "# @package _global_\ndefaults:\n  - _self_\n\n"
-    yaml_text = yaml.dump(out_cfg, default_flow_style=False, allow_unicode=True, sort_keys=False)
-
-    OUT_YAML.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUT_YAML, "w", encoding="utf-8") as f:
-        f.write(header + yaml_text)
-
-    print(f"Written → {OUT_YAML}")
-    print(f"  Zone-1 L2 : {len(l2)} principles prepended")
-    print(f"  Zone-2 L1 : {len(l1)} patterns appended")
-    print(f"  Zone-3 L0 : {min(len(l0), MAX_L0_RECENT)} recent cases appended")
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    output_path = regenerate_agent_config(
+        args.config_name,
+        experiences_path=args.experiences,
+        output_path=args.output,
+    )
+    print(f"Agent configuration regenerated at: {output_path}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

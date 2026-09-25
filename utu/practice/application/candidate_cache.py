@@ -187,7 +187,7 @@ def candidate_generation_fingerprint(
 ) -> str:
     """Hash rollouts plus every configured input that changes L0 generation."""
 
-    model_config = config.evaluation.agent.model
+    model_config = config.runtime.agent.model
     provider = model_config.model_provider
     payload = {
         "rollout_sha256": rollout_batch_fingerprint(rollouts),

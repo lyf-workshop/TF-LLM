@@ -71,6 +71,9 @@ class ExperienceUpdater:
         self.last_generated_experience_groups: list[dict[str, Any]] = []
         self.last_l0_metadata_coverage: dict[str, dict[str, float | int]] = {}
 
+    async def cleanup(self) -> None:
+        await self.llm.close()
+
     async def _query_generation(self, *, stage: str, source_ids: list[str], messages: list[dict]) -> str:
         recovery = getattr(self, "generation_recovery", None)
         if recovery is None:
@@ -518,16 +521,22 @@ class ExperienceUpdater:
                     }
 
         # parallel running
-        tasks = [summarize_with_semaphore(item) for item in all_rollouts_to_process]
+        tasks = [asyncio.create_task(summarize_with_semaphore(item)) for item in all_rollouts_to_process]
         results = defaultdict(list)
         failures: list[dict[str, Any]] = []
-        for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Single rollout summary"):
-            result = await task
-            if result.get("_generation_error"):
-                failures.append(result)
-                continue
-            task_id = self._stable_task_id(result)
-            results[task_id].append(result)
+        try:
+            for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Single rollout summary"):
+                result = await task
+                if result.get("_generation_error"):
+                    failures.append(result)
+                    continue
+                task_id = self._stable_task_id(result)
+                results[task_id].append(result)
+        except BaseException:
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            raise
         if failures:
             raise L0CandidateGenerationError(
                 "single-rollout summary failed; refusing a partial candidate batch: "
@@ -614,13 +623,22 @@ class ExperienceUpdater:
         # parallel running
         results = []
         failures: list[dict[str, Any]] = []
-        tasks = [critique_with_semaphore(rollouts_per_problem) for rollouts_per_problem in all_rollouts]
-        for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Single query group advantage"):
-            result = await task
-            if result.get("_generation_error"):
-                failures.append(result)
-                continue
-            results.append(result)
+        tasks = [
+            asyncio.create_task(critique_with_semaphore(rollouts_per_problem))
+            for rollouts_per_problem in all_rollouts
+        ]
+        try:
+            for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Single query group advantage"):
+                result = await task
+                if result.get("_generation_error"):
+                    failures.append(result)
+                    continue
+                results.append(result)
+        except BaseException:
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            raise
 
         if failures:
             raise L0CandidateGenerationError(
@@ -710,11 +728,17 @@ class ExperienceUpdater:
 
         # parallel running
         results = []
-        tasks = [group_update_with_semaphore(new_experience) for new_experience in new_experiences]
-        for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Group update"):
-            result = await task
-            if result is not None:
-                results.append(result)
+        tasks = [asyncio.create_task(group_update_with_semaphore(item)) for item in new_experiences]
+        try:
+            for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Group update"):
+                result = await task
+                if result is not None:
+                    results.append(result)
+        except BaseException:
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            raise
         return results
 
     async def _batch_update(

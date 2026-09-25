@@ -1,4 +1,5 @@
 import pathlib
+import shutil
 import uuid
 from datetime import datetime
 
@@ -20,6 +21,7 @@ class PythonExecutorToolkit(AsyncBaseToolkit):
         super().__init__(config)
 
         if self.env_mode == "local":
+            self._owns_workspace = False
             self.setup_workspace(self.config.config.get("workspace_root", None))
         elif self.env_mode == "e2b":
             pass
@@ -30,6 +32,7 @@ class PythonExecutorToolkit(AsyncBaseToolkit):
         if self.env_mode != "local":
             logger.warning(f"PythonExecutorToolkit should not setup workspace in env_mode {self.env_mode}!")
             return
+        owns_workspace = workspace_root is None
         if workspace_root is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             unique_id = str(uuid.uuid4())[:8]
@@ -37,6 +40,13 @@ class PythonExecutorToolkit(AsyncBaseToolkit):
         workspace_dir = pathlib.Path(workspace_root)
         workspace_dir.mkdir(parents=True, exist_ok=True)
         self.workspace_root = str(workspace_root)
+        self._owns_workspace = owns_workspace
+
+    async def cleanup(self):
+        """Remove the temporary workspace created for this toolkit instance."""
+
+        if self.env_mode == "local" and getattr(self, "_owns_workspace", False):
+            shutil.rmtree(self.workspace_root, ignore_errors=True)
 
     @register_tool
     async def execute_python_code(self, code: str, timeout: int = 30) -> dict:

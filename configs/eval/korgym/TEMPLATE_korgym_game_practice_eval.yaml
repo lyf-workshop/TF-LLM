@@ -20,15 +20,10 @@ exp_id: "your_game_practice_eval"
 # Evaluation dataset configuration (使用与baseline相同的数据集)
 data:
   dataset: "KORGym-YourGame-Eval-50"  # [MODIFY] 与baseline_eval使用相同的数据集名称
-  type: "single"
 
 # Evaluation settings
 concurrency: 32  # 并发数（多轮游戏建议用4-8）
 pass_k: 1
-
-# Verification function settings
-verify_filename: "korgym.py"
-verify_func_name: "verify_func"
 
 # KORGym specific settings (应该与baseline_eval完全一致)
 korgym:

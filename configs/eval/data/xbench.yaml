@@ -1,4 +1,1 @@
 dataset: "XBench"
-type: "single"
-question_field: "question"
-gt_field: "answer"

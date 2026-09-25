@@ -1,4 +1,1 @@
 dataset: "BrowseComp_ZH"
-type: "single"
-question_field: "question"
-gt_field: "answer"

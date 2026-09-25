@@ -54,3 +54,8 @@ class LLMAgent:
             trace_id = trace_id or AgentsUtils.gen_trace_id()
             with trace(workflow_name="llm_agent", trace_id=trace_id):
                 return Runner.run_streamed(self.agent, input)
+
+    async def cleanup(self) -> None:
+        """Close the HTTP client created for this lightweight agent."""
+
+        await AgentsUtils.close_agents_model(self.agent.model)

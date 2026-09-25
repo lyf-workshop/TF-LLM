@@ -1,7 +1,7 @@
 # @package _global_
 # Validated template for DAPO-Math-17k -> AIME24 experience learning.
 defaults:
-  - /eval/math/math_AIME24@evaluation
+  - /eval/math/math_AIME24@runtime
   - _self_
 
 # Change both exp_id and the two output paths before a measured run.
@@ -12,10 +12,12 @@ practice:
   batch_size: 50
   grpo_n: 5
   rollout_concurrency: 8
+  rollout_max_retries: 2
   rollout_temperature: 0.7
   rollout_data_truncate: 100
   task_timeout: 1800
   shuffle_data: true
+  resume_from_hierarchy: false
   do_eval: false
   eval_strategy: "epoch"
   agent_objective: |
@@ -29,11 +31,12 @@ practice:
 
   hierarchical_learning:
     enabled: true
+    upper_pool_update_mode: clustered
+    candidate_review_scope: retrieval
     # Override per experiment when a fixed language is required. Keeping the
     # template compatible avoids reinterpreting existing snapshots.
     experience_output_language: same_as_input
     clustering_enabled: true
-    clustering_method: agglomerative
     embedding_provider: sentence_transformer
     embedding_model_name: sentence-transformers/all-MiniLM-L6-v2
     embedding_model_revision: c9745ed1d9f207416be6d2e6f8de32d1f16199bf
@@ -62,15 +65,10 @@ practice:
     l0_review_retrieval: semantic
     max_l0_per_problem: 0
     l0_injection_top_k: 5
-    include_l0_in_prompt: true
-    max_l0_recent: 20
+    export_include_l0: true
+    export_max_l0: null
     experience_save_path: workspace/hierarchical_experiences/template_math_dapo_aime24.json
     clustering_audit_path: workspace/hierarchical_experiences/template_math_dapo_aime24.clusters.jsonl
 
 data:
   practice_dataset_name: "DAPO-Math-17k"
-
-# Training rollouts use evaluation.concurrency internally; keep this explicit
-# instead of inheriting the historical 128-worker evaluation setting.
-evaluation:
-  concurrency: 8

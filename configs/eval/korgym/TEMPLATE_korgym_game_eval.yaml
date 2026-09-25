@@ -20,15 +20,10 @@ exp_id: "your_game_baseline_eval"
 # Evaluation dataset configuration
 data:
   dataset: "KORGym-YourGame-Eval-50"  # [MODIFY] 数据集名称（需与prepare_korgym_data.py生成的一致）
-  type: "single"  # 固定为 "single"
 
 # Evaluation settings
 concurrency: 32  # 并发数（单轮游戏用32，多轮游戏建议用4-8避免速率限制）
 pass_k: 1  # Pass@K评估指标（通常为1）
-
-# Verification function settings
-verify_filename: "korgym.py"  # 验证函数文件名（通常固定）
-verify_func_name: "verify_func"  # 验证函数名（通常固定）
 
 # KORGym specific settings
 korgym:

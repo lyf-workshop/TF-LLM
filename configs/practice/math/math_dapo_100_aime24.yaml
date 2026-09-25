@@ -30,11 +30,7 @@ data:
   practice_manifest_split: "training_calibration_v1"
   practice_manifest_expected_records: 100
 
-evaluation:
-  # TrainingFreeGRPO persists rollout rows and names the generated Agent YAML
-  # from this nested ID, so keep it aligned with the top-level experiment ID.
-  exp_id: "math_dapo_random_100_aime24_deepseek_v4_flash_seed42_v3"
-  concurrency: 8
+runtime:
   agent:
     model:
       model_provider:

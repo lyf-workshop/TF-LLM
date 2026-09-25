@@ -25,7 +25,6 @@ practice:
     Help the agent improve logical reasoning by learning from correct and incorrect solutions.
     Extract general problem-solving strategies through reward-based comparison.
   num_experiences_per_query: 1
-  verify_module: "utu.practice.verify.logic"  # Use standard logic verifier (no error extraction)
 
 # Data Arguments
 data:

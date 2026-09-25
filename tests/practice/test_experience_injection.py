@@ -76,6 +76,23 @@ def test_no_lexical_match_does_not_inject_arbitrary_l0():
     assert sample.meta[INJECTED_EXPERIENCE_IDS_META_KEY] == []
 
 
+def test_chinese_query_retrieves_matching_experience_without_zero_score_fillers():
+    recorder = TaskRecorder(
+        experiences={
+            "L0_geometry": "处理三角形角度问题时，优先检查圆周角关系。",
+            "L0_number_theory": "处理质数整除问题时，使用模运算。",
+        },
+        l0_injection_top_k=2,
+    )
+    sample = _sample("求这个三角形中的圆周角。")
+
+    _processor().preprocess_one(sample, recorder)
+
+    assert "圆周角关系" in sample.augmented_question
+    assert "质数整除" not in sample.augmented_question
+    assert sample.meta[INJECTED_EXPERIENCE_IDS_META_KEY] == ["L0_geometry"]
+
+
 def test_dapo_config_enables_top_k_injection_on_training_recorder():
     config = ConfigLoader.load_training_free_grpo_config(
         "math/math_dapo_100_full_hierarchy"

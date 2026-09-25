@@ -1,0 +1,21 @@
+# TrainingFreeGRPO entry points covered by strict configuration tests.
+# Paths are relative to configs/practice and omit the .yaml suffix.
+# "Supported" means schema-valid and maintained; it does not by itself make an
+# exploratory run eligible for a formal result.
+
+# Canonical templates
+math/TEMPLATE_math_practice
+web/TEMPLATE_webwalkerqa_practice
+logic/TEMPLATE_zebralogic_practice
+livecodebench/TEMPLATE_livecodebench_practice
+skillsbench/TEMPLATE_skillsbench_practice
+korgym/TEMPLATE_word_puzzle_practice
+korgym/TEMPLATE_alphabetical_sorting_practice
+korgym/TEMPLATE_wordle_practice
+
+# Maintained exploratory runs
+math/math_dapo_100_full_hierarchy
+math/math_dapo_100_full_hierarchy_wsl
+math/math_dapo_100_provisional_l1_qwen3_30b_a3b
+math/math_dapo_200_qwen38_flash_stacked_2epoch
+math/math_dapo_200_qwen38_flash_stacked_2epoch_retry_20260922

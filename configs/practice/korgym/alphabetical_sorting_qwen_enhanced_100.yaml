@@ -92,13 +92,12 @@ practice:
   # Hierarchical learning settings
   hierarchical_learning:
     enabled: true
-    l1_aggregation_threshold: 5
-    l2_aggregation_threshold: 3
-    max_l0_per_game: 1
-    max_l0_recent: 30
-    include_l0_in_prompt: true
+    min_l0_per_l1: 5
+    min_l1_per_l2: 3
+    max_l0_per_problem: 1
+    export_max_l0: 30
+    export_include_l0: true
     experience_save_path: workspace/hierarchical_experiences/alphabetical_sorting_enhanced_100.json
-    agent_save_path: workspace/agents/alphabetical_sorting_enhanced_100_agent.yaml
 
 # KORGym Game Settings
 korgym:
@@ -107,7 +106,6 @@ korgym:
   game_host: "localhost"
   game_port: 8775
   level: 4
-  num_seeds: 100
   max_rounds: 100
 
 # Data configuration

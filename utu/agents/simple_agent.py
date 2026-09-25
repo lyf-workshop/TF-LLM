@@ -55,6 +55,9 @@ class SimpleAgent:
             self.config.agent.name = name
         if instructions:
             self.config.agent.instructions = instructions
+        self._model_input = model
+        self._owns_model = not isinstance(model, Model)
+        self._owned_model_closed = False
         self.model = self._get_model(self.config, model)
         self.model_settings = self._get_model_settings(self.config, model_settings)
         self.tools: list[Tool] = tools or []
@@ -103,6 +106,9 @@ class SimpleAgent:
         if self._initialized:
             logger.info("Agent already initialized! Skipping build.")
             return
+        if self._owns_model and self._owned_model_closed:
+            self.model = self._get_model(self.config, self._model_input)
+            self._owned_model_closed = False
         self.env = await get_env(self.config, trace_id or AgentsUtils.gen_trace_id())  # Pass trace_id
         await self.env.build()
         self.current_agent = Agent(
@@ -119,14 +125,37 @@ class SimpleAgent:
         self._initialized = True
 
     async def cleanup(self):
-        """Cleanup"""
+        """Release all owned resources without one failure hiding the rest."""
         logger.info("Cleaning up MCP servers...")
-        await self._mcps_exit_stack.aclose()
+        try:
+            await self._mcps_exit_stack.aclose()
+        except Exception as exc:  # pragma: no cover - depends on external MCP servers
+            logger.warning("MCP cleanup failed: %s", exc)
         self._mcp_servers = []
         logger.info("Cleaning up tools...")
+        for toolkit in self._toolkits.values():
+            cleanup = getattr(toolkit, "cleanup", None)
+            if cleanup is not None:
+                try:
+                    result = cleanup()
+                    if hasattr(result, "__await__"):
+                        await result
+                except Exception as exc:  # pragma: no cover - cleanup is best effort
+                    logger.warning("Toolkit cleanup failed: %s", exc)
         self._toolkits = {}
         logger.info("Cleaning up env...")
-        await self.env.cleanup()
+        if self.env is not None:
+            try:
+                await self.env.cleanup()
+            except Exception as exc:  # pragma: no cover - depends on external envs
+                logger.warning("Environment cleanup failed: %s", exc)
+        self.env = None
+        self.current_agent = None
+        if self._owns_model and not self._owned_model_closed:
+            try:
+                self._owned_model_closed = await AgentsUtils.close_agents_model(self.model)
+            except Exception as exc:  # pragma: no cover - close is best effort
+                logger.warning("Model client cleanup failed: %s", exc)
         self._initialized = False
 
     def setup_workspace(self, workspace_dir: str | pathlib.Path):

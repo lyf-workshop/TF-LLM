@@ -8,7 +8,6 @@ exp_id: "skillsbench_family_holdout_no_experience"
 
 data:
   dataset: "SkillsBench-v1.1-FamilyHoldout-SelfContained-Eval"
-  type: "single"
 
 concurrency: 2
 judge_concurrency: 4

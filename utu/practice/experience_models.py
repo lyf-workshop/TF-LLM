@@ -9,6 +9,7 @@ particular persistence backend.
 
 from __future__ import annotations
 
+import math
 from datetime import UTC, datetime
 from typing import Any, Literal
 
@@ -22,7 +23,9 @@ from .domain.contracts import (
     ExperienceLevel,
     ExperienceLifecycleStatus,
     ExperienceOutputLanguage,
+    ExperienceValidationStatus,
     FailureMode,
+    PairedValidationOutcome,
     TaskStage,
 )
 from .domain.identity import (
@@ -59,6 +62,21 @@ class L0ReviewDecision(BaseModel):
     new_structured_content: dict[str, Any] | None = None
     reason: str = Field(min_length=1)
     evidence_ids: list[str] = Field(default_factory=list)
+
+    @field_validator("new_content", mode="before")
+    @classmethod
+    def unwrap_versioned_content(cls, value: Any) -> Any:
+        """Accept the narrow versioned wrapper emitted by some chat models."""
+
+        if not isinstance(value, dict):
+            return value
+        unexpected = sorted(set(value) - {"content", "version"})
+        content = value.get("content")
+        if unexpected or not isinstance(content, str):
+            raise ValueError(
+                "new_content object must contain string content and only optional version metadata"
+            )
+        return content.strip()
 
     @field_validator("candidate_id", "target_id", "new_content", "reason", mode="before")
     @classmethod
@@ -298,6 +316,82 @@ class AggregationConflict(BaseModel):
         return self
 
 
+class PairedValidationResult(BaseModel):
+    """One held-out, same-task baseline/treatment comparison for an L1."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    trial_id: str = Field(min_length=1)
+    task_id: str = Field(min_length=1)
+    task_question_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    dataset: str = Field(min_length=1)
+    dataset_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    dataset_role: Literal["calibration", "heldout_validation"]
+    repeat: int = Field(ge=0)
+    model: str = Field(min_length=1)
+    protocol_version: str = Field(min_length=1)
+    generation_config_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    experience_version_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    baseline_prompt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    treatment_prompt_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    baseline_score: float
+    treatment_score: float
+    outcome: PairedValidationOutcome
+    note: str | None = None
+    recorded_at: str = Field(default_factory=_utc_now)
+
+    @field_validator(
+        "trial_id",
+        "task_id",
+        "task_question_sha256",
+        "dataset",
+        "dataset_manifest_sha256",
+        "model",
+        "protocol_version",
+        "generation_config_sha256",
+        "experience_version_fingerprint",
+        "baseline_prompt_sha256",
+        "treatment_prompt_sha256",
+        "note",
+        mode="before",
+    )
+    @classmethod
+    def strip_validation_text(cls, value: Any) -> Any:
+        if not isinstance(value, str):
+            return value
+        return value.strip()
+
+    @field_validator(
+        "task_question_sha256",
+        "dataset_manifest_sha256",
+        "generation_config_sha256",
+        "experience_version_fingerprint",
+        "baseline_prompt_sha256",
+        "treatment_prompt_sha256",
+        mode="before",
+    )
+    @classmethod
+    def normalise_sha256(cls, value: Any) -> Any:
+        return value.strip().lower() if isinstance(value, str) else value
+
+    @model_validator(mode="after")
+    def validate_outcome(self):
+        if not math.isfinite(self.baseline_score) or not math.isfinite(self.treatment_score):
+            raise ValueError("paired validation scores must be finite")
+        expected: PairedValidationOutcome
+        if self.treatment_score > self.baseline_score:
+            expected = "help"
+        elif self.treatment_score < self.baseline_score:
+            expected = "harm"
+        else:
+            expected = "neutral"
+        if self.outcome != expected:
+            raise ValueError(
+                "paired validation outcome must be derived from treatment_score versus baseline_score"
+            )
+        return self
+
+
 class ExperienceRecord(BaseModel):
     """Versioned, backwards-compatible hierarchical experience record."""
 
@@ -322,6 +416,9 @@ class ExperienceRecord(BaseModel):
     aggregated_into_experience_id: str | None = None
     aggregation_status: AggregationStatus = "pending"
     lifecycle_status: ExperienceLifecycleStatus = "active"
+    validation_status: ExperienceValidationStatus = "validated"
+    validation_results: dict[str, PairedValidationResult] = Field(default_factory=dict)
+    validated_at: str | None = None
     revision_number: int = Field(default=1, ge=1)
     lineage_root_id: str | None = None
     supersedes_id: str | None = None
@@ -375,6 +472,15 @@ class ExperienceRecord(BaseModel):
         except ValueError:
             return aliases.get(text, FailureMode.UNKNOWN)
 
+    @model_validator(mode="after")
+    def validate_paired_results(self):
+        mismatched_keys = sorted(
+            trial_id for trial_id, result in self.validation_results.items() if trial_id != result.trial_id
+        )
+        if mismatched_keys:
+            raise ValueError(f"validation_results keys must match result trial_id: {mismatched_keys}")
+        return self
+
     @classmethod
     def from_legacy(
         cls,
@@ -427,6 +533,7 @@ __all__ = [
     "CandidateStatus",
     "ExperienceCandidateRecord",
     "ExperienceLifecycleStatus",
+    "ExperienceValidationStatus",
     "ExperienceLevel",
     "ExperienceOutputLanguage",
     "ExperienceRecord",
@@ -435,6 +542,8 @@ __all__ = [
     "L0CandidateEvidence",
     "L0CandidateRecord",
     "L0ReviewDecision",
+    "PairedValidationOutcome",
+    "PairedValidationResult",
     "TaskStage",
     "experience_output_language_instruction",
     "stable_experience_candidate_id",

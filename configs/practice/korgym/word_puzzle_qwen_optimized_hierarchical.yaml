@@ -15,7 +15,6 @@ korgym:
   game_host: "localhost"
   game_port: 8775
   level: 4  # 论文默认 level 4
-  num_seeds: 50  # 论文使用 50 个不同的游戏实例
   max_rounds: 50  # 单回合游戏，此参数不影响
 
 # Data configuration
@@ -37,11 +36,11 @@ evaluation:
 practice:
   hierarchical_learning:
     enabled: true
-    l1_aggregation_threshold: 5   # 每 5 个 L0 → 1 个 L1
-    l2_aggregation_threshold: 3   # 每 3 个 L1 → 1 个 L2
-    max_l0_per_game: 1            # 每个游戏最多 1 个 L0
-    max_l0_recent: 30             # Prompt 中保留最近 30 个 L0
-    include_l0_in_prompt: true    # 在 Prompt 中包含 L0
+    min_l0_per_l1: 5   # 每 5 个 L0 → 1 个 L1
+    min_l1_per_l2: 3   # 每 3 个 L1 → 1 个 L2
+    max_l0_per_problem: 1         # 每个游戏最多 1 个 L0
+    export_max_l0: 30             # Prompt 中保留最近 30 个 L0
+    export_include_l0: true    # 在 Prompt 中包含 L0
     
     experience_save_path: workspace/hierarchical_experiences/word_puzzle_qwen_optimized.json
     agent_save_path: workspace/agents/word_puzzle_qwen_optimized_enhanced.yaml

@@ -1,32 +1,45 @@
-# 经验选择与检索
+# Experience Selection
 
-当经验池增长后，将全部经验注入每个任务会增加 token、干扰和错误迁移。`utu/eval/experience_filter.py` 提供三种选择策略。
+`utu/eval/experience_filter.py` supports three experience-selection modes:
 
-## 策略
-
-| 策略 | 行为 | 额外成本 |
+| Strategy | Behavior | Extra model call |
 | --- | --- | --- |
-| `static` | 按 L0/L1/L2 数量上限截取 | 无 |
-| `retrieval` | 使用 BM25 按当前 query 召回 | 低 |
-| `llm_rerank` | 先召回候选，再由 LLM 按相关性等标准排序 | 一次额外模型调用 |
+| `static` | Apply per-level limits without semantic retrieval. | No |
+| `retrieval` | Retrieve task-relevant experiences with the local TF-IDF retriever. | No |
+| `llm_rerank` | Recall candidates, then rank them with a separate LLM. | Yes |
 
-示例 eval 配置：
+## Canonical configuration
+
+Use a clean base agent and declare the snapshot once:
 
 ```yaml
 experience_filter:
   enabled: true
-  experience_source: workspace/hierarchical_experiences/skillsbench_practice.json
   strategy: retrieval
+  experience_source: workspace/hierarchical_experiences/skillsbench_practice.json
   retrieval_top_k: 8
   retrieval_min_score: 0.0
 ```
 
-LLM rerank 支持 `static`、`bm25` 或 `all` 召回，并可配置 `max_candidates`、`final_top_k`、temperature 与 timeout。
+Per-level limits have one canonical location: `experience_filter.recall`.
+The same limits are used by `static` filtering and by `llm_rerank` when
+`recall.method: static` is selected.
 
-## 实验设计
+```yaml
+experience_filter:
+  enabled: true
+  strategy: llm_rerank
+  experience_source: workspace/hierarchical_experiences/skillsbench_practice.json
+  recall:
+    method: static       # static | tfidf | all
+    max_l2: null         # null means no limit
+    max_l1: null
+    max_l0: 50
+  llm_rerank:
+    model: qwen3-32b
+    max_candidates: 20
+    final_top_k: 8
+```
 
-选择器本身会改变提示词，应作为独立变量。推荐比较：全部经验、固定数量、BM25 与 BM25 加 rerank；各组控制总经验条数和近似 token 长度。
-
-## 质量跟踪
-
-`ExperienceQualityTracker` 可以记录经验注入次数、成功率、最近使用时间和质量分数。但质量记录与自动删除尚未形成经过验证的端到端闭环。现阶段应先离线审计低分经验，再决定是否删除，避免因相关性误判产生自我强化。
+There are no top-level `max_l0`, `max_l1`, or `max_l2` fields. The old
+`bm25` name is not accepted; use `tfidf`, which matches the implementation.

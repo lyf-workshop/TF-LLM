@@ -1,15 +1,11 @@
 from collections.abc import Iterable
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
-from ..utils.security import is_sensitive_key, redact_sensitive_data
+from ..utils.security import redact_sensitive_data
 
 ReprArgs: type = Iterable[tuple[str | None, Any]]
-
-
-def if_need_secure(key: str) -> bool:
-    return is_sensitive_key(key)
 
 
 def secure_repr(obj: ReprArgs) -> ReprArgs:
@@ -19,6 +15,14 @@ def secure_repr(obj: ReprArgs) -> ReprArgs:
 
 class ConfigBaseModel(BaseModel):
     """Base model for config, with secure repr"""
+
+    # Configuration files are part of the experiment contract.  Silently
+    # discarding a misspelled or stale option makes the resolved YAML diverge
+    # from the runtime behaviour, so all typed config models are strict by
+    # default.  Fields intentionally designed as extension points (for
+    # example ``ToolkitConfig.config``) remain ordinary dictionaries and may
+    # contain arbitrary provider-specific keys.
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     def __str__(self) -> str:
         return self.__repr__()

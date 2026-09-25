@@ -1,3 +1,4 @@
+import inspect
 import json
 import logging
 import os
@@ -141,6 +142,24 @@ class AgentsUtils:
             return OpenAIResponsesModel(model=model, openai_client=openai_client)
         else:
             raise ValueError("Invalid type: " + type)
+
+    @staticmethod
+    async def close_agents_model(model: Model) -> bool:
+        """Close the private HTTP client owned by an Agents SDK model.
+
+        Returns whether a close hook was found.  Callers remain responsible
+        for tracking ownership; an externally supplied model must not be
+        closed by a wrapper that merely borrows it.
+        """
+
+        client = getattr(model, "_client", None)
+        close = getattr(client, "close", None)
+        if close is None:
+            return False
+        result = close()
+        if inspect.isawaitable(result):
+            await result
+        return True
 
     @staticmethod
     def get_trajectory_from_agent_result(agent_result: RunResult, agent_name: str = None) -> dict:

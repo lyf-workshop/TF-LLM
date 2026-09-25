@@ -15,7 +15,9 @@ from ...skillsbench_reliability import (
     FatalSkillsBenchError,
     FixedCooldownCircuitBreaker,
 )
+from ...skillsbench_data import assert_datasets_disjoint
 from ...utils import AgentsUtils, get_logger, redact_sensitive_data
+from ...utils.experience_injection import INJECTED_EXPERIENCE_IDS_META_KEY
 from ..data import DBDataManager, EvaluationSample
 from ..experience_filter import ExperienceFilter
 from ..processer import PROCESSER_FACTORY, BaseProcesser
@@ -40,21 +42,29 @@ class BaseBenchmark:
         # config
         if isinstance(config, str):
             config = ConfigLoader.load_eval_config(name=config)
-        self.config = config
+        # A benchmark may create one agent per sample concurrently. Keep a
+        # private immutable baseline so per-query prompt injection cannot
+        # mutate the caller's config or leak one sample's experiences into
+        # another sample.
+        self.config = config.model_copy(deep=True)
+        config = self.config
         self._source_to_processer = {}
         config_json = json.dumps(config.model_dump(), sort_keys=True, default=str)
         self._config_fingerprint = hashlib.sha256(config_json.encode("utf-8")).hexdigest()[:16]
 
-        # dataset
-        self.dataset = DBDataManager(config)
-        _samples = self.dataset.load()
-        if len(_samples) == 0:
-            raise ValueError(f"No samples found for data config '{self.config.data}'! Please check the data config.")
-        
         # Initialize experience filter
         self.experience_filter = None
-        self._experience_filter_applied = False
-        if hasattr(self.config, 'experience_filter') and self.config.experience_filter.enabled:
+        instructions = ""
+        if self.config.agent and self.config.agent.agent:
+            instructions = self.config.agent.agent.instructions or ""
+        if not isinstance(instructions, str):
+            if self.config.experience_filter.enabled:
+                raise TypeError("Experience filtering requires string agent instructions")
+            instructions = ""
+        self._base_agent_instructions = instructions
+        if self.config.experience_filter.enabled:
+            if self.config.agent is None:
+                raise ValueError("Experience filtering requires an agent config")
             logger.info(f"Experience filtering enabled: strategy={self.config.experience_filter.strategy}")
             if self.config.experience_filter.experience_source:
                 logger.info(f"  Experience source: {self.config.experience_filter.experience_source}")
@@ -62,8 +72,16 @@ class BaseBenchmark:
                 logger.info(f"  LLM reranking: model={self.config.experience_filter.llm_rerank.model}, "
                            f"top_k={self.config.experience_filter.llm_rerank.final_top_k}")
             self.experience_filter = ExperienceFilter(self.config.experience_filter)
+            self.experience_filter.validate_base_instructions(self._base_agent_instructions)
         else:
             logger.info("Experience filtering disabled or not configured")
+
+        # Validate the declared experience treatment before creating DB rows.
+        self._validate_skillsbench_data_isolation()
+        self.dataset = DBDataManager(config)
+        _samples = self.dataset.load()
+        if len(_samples) == 0:
+            raise ValueError(f"No samples found for data config '{self.config.data}'! Please check the data config.")
 
         self._skillsbench_adapter = None
         self._skillsbench_circuit_breaker = None
@@ -83,23 +101,43 @@ class BaseBenchmark:
                     recovery_probe=self._probe_skillsbench_once,
                 )
 
+    def _validate_skillsbench_data_isolation(self) -> None:
+        skillsbench = self.config.skillsbench
+        if not (skillsbench.enabled and skillsbench.require_disjoint_train_eval):
+            return
+        train_dataset = skillsbench.train_dataset_for_overlap_check
+        learned_condition = skillsbench.experience_condition in {"sequential", "clustered"}
+        if learned_condition and not train_dataset:
+            raise ValueError(
+                "SkillsBench learned-experience evaluation requires "
+                "skillsbench.train_dataset_for_overlap_check"
+            )
+        if train_dataset:
+            evidence = assert_datasets_disjoint(
+                train_dataset,
+                self.config.data.dataset,
+                db_url=self.config.db_url,
+                split_manifest_path=skillsbench.task_split_manifest_path,
+                split_name=skillsbench.task_split_name,
+            )
+            logger.info("SkillsBench train/eval overlap assertion passed: %s", evidence)
+
     async def main(self):
         with trace(f"[{self.config.exp_id}] Evaluation", trace_id=gen_trace_id()):
-            logger.info(
-                "> Running with config: \n%s",
-                json.dumps(redact_sensitive_data(self.config.model_dump()), indent=2, ensure_ascii=False),
-            )
-            
-            # Apply experience filtering (async)
-            await self._apply_experience_filter()
-            
-            self.preprocess()
-            await self.rollout()
-            await self.judge()
-            logger.info("> Running stat...")
-            await self.stat()
-            logger.info("> Cleaning up...")
-            await self.cleanup()
+            try:
+                logger.info(
+                    "> Running with config: \n%s",
+                    json.dumps(redact_sensitive_data(self.config.model_dump()), indent=2, ensure_ascii=False),
+                )
+
+                self.preprocess()
+                await self.rollout()
+                await self.judge()
+                logger.info("> Running stat...")
+                await self.stat()
+            finally:
+                logger.info("> Cleaning up...")
+                await self.cleanup()
 
     def _skillsbench_model_name(self) -> str:
         agent_config = getattr(self.config, "agent", None)
@@ -114,10 +152,9 @@ class BaseBenchmark:
         value = getattr(settings, "temperature", None)
         return float(value) if value is not None else 0.0
 
-    def _skillsbench_runtime_metadata(self) -> dict:
-        instructions = ""
-        if self.config.agent and self.config.agent.agent:
-            instructions = self.config.agent.agent.instructions or ""
+    def _skillsbench_runtime_metadata(self, *, instructions: str | None = None) -> dict:
+        if instructions is None:
+            instructions = self._base_agent_instructions
         model_payload = (
             redact_sensitive_data(self.config.agent.model.model_dump(mode="json")) if self.config.agent else {}
         )
@@ -181,58 +218,83 @@ class BaseBenchmark:
             raise RuntimeError(message) from exc
         self._skillsbench_health_models = sorted(set(models))
         self._skillsbench_healthchecked = True
-    
-    async def _apply_experience_filter(self):
-        """Apply experience filtering to agent instructions (async operation)."""
-        if self.experience_filter and not self._experience_filter_applied:
-            if self.config.agent and self.config.agent.agent and self.config.agent.agent.instructions:
-                logger.info("Applying experience filtering to agent instructions...")
-                original_instructions = self.config.agent.agent.instructions
-                original_length = len(original_instructions)
-                
-                # Determine task context for LLM reranking
-                task_context = self._get_task_context()
-                
-                # Apply filtering (async)
-                start_time = time.time()
-                self.config.agent.agent.instructions = await self.experience_filter.apply(
-                    original_instructions,
-                    query=task_context
-                )
-                elapsed = time.time() - start_time
-                
-                filtered_length = len(self.config.agent.agent.instructions)
-                logger.info(f"Experience filtering completed in {elapsed:.2f}s: "
-                           f"{original_length} → {filtered_length} chars "
-                           f"(reduced by {original_length - filtered_length} chars)")
-                
-                self._experience_filter_applied = True
-    
-    def _get_task_context(self) -> str:
-        """Get task context description for LLM-based experience filtering.
-        
-        Returns:
-            Task context string
-        """
-        # For KORGym games, build context from game config
-        if hasattr(self.config, 'korgym') and self.config.korgym.enabled:
+
+    @staticmethod
+    def _sample_meta(sample: EvaluationSample) -> dict:
+        meta = sample.meta
+        if isinstance(meta, dict):
+            return dict(meta)
+        if isinstance(meta, str):
+            try:
+                parsed = json.loads(meta)
+            except json.JSONDecodeError:
+                return {"source_meta": meta}
+            if isinstance(parsed, dict):
+                return parsed
+        return {} if meta is None else {"source_meta": meta}
+
+    def _get_task_context(self, sample: EvaluationSample) -> str:
+        """Build a retrieval query from this sample plus stable domain context."""
+
+        task_text = (sample.raw_question or sample.augmented_question or "").strip()
+        domain_context = ""
+        if self.config.korgym.enabled:
             game_name = self.config.korgym.game_name
             level = self.config.korgym.level
             max_rounds = self.config.korgym.max_rounds
-            
             if "wordle" in game_name.lower():
-                return (f"Wordle game: Guess a {level}-letter hidden word within {max_rounds} attempts. "
-                       f"Use feedback (GREEN=correct position, YELLOW=wrong position, GRAY=not in word) "
-                       f"to refine guesses through constraint satisfaction and information gain.")
+                domain_context = (
+                    f"Wordle game: Guess a {level}-letter hidden word within {max_rounds} attempts. "
+                    "Use GREEN/YELLOW/GRAY feedback for constraint satisfaction."
+                )
             elif "2048" in game_name:
-                return f"2048 game: Combine tiles to reach 2048 on a {level}x{level} grid."
+                domain_context = f"2048 game on a {level}x{level} grid."
             elif "puzzle" in game_name.lower():
-                return f"Word puzzle game: Solve word-based puzzles at level {level}."
+                domain_context = f"Word puzzle game at level {level}."
             else:
-                return f"{game_name} game at level {level} with max {max_rounds} rounds."
-        
-        # Default context
-        return "General problem-solving task requiring strategic decision-making and constraint satisfaction."
+                domain_context = f"{game_name} game at level {level}, maximum {max_rounds} rounds."
+        return "\n\n".join(part for part in (domain_context, task_text) if part)
+
+    async def _filtered_instructions_for_sample(
+        self,
+        sample: EvaluationSample,
+        *,
+        base_instructions: str | None = None,
+    ) -> str:
+        """Select and audit experiences independently for one sample."""
+
+        instructions = self._base_agent_instructions if base_instructions is None else base_instructions
+        if self.experience_filter is None:
+            return instructions
+
+        query = self._get_task_context(sample)
+        start_time = time.time()
+        filtered, selected = await self.experience_filter.apply_with_metadata(
+            instructions,
+            query=query,
+        )
+        meta = self._sample_meta(sample)
+        meta[INJECTED_EXPERIENCE_IDS_META_KEY] = [item.id for item in selected]
+        meta["experience_retrieval_query_sha256"] = hashlib.sha256(query.encode("utf-8")).hexdigest()
+        meta["experience_injected_prompt_sha256"] = hashlib.sha256(
+            filtered.encode("utf-8")
+        ).hexdigest()
+        sample.update(meta=meta)
+        logger.info(
+            "Per-sample experience filtering selected %s records in %.2fs for dataset_index=%s",
+            len(selected),
+            time.time() - start_time,
+            sample.dataset_index,
+        )
+        return filtered
+
+    async def _agent_config_for_sample(self, sample: EvaluationSample):
+        if self.config.agent is None:
+            raise ValueError("Rollout requires an agent config")
+        agent_config = self.config.agent.model_copy(deep=True)
+        if self.experience_filter is not None:
+            agent_config.agent.instructions = await self._filtered_instructions_for_sample(sample)
+        return agent_config
 
     def preprocess(self) -> None:
         """Preprocess the dataset before rollout."""
@@ -285,7 +347,7 @@ class BaseBenchmark:
                 result = await task
                 if result is not None:
                     results.append(result)
-        except FatalSkillsBenchError:
+        except BaseException:
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -328,7 +390,6 @@ class BaseBenchmark:
     async def retry_infra(self) -> list[EvaluationSample]:
         """Reset and rerun only trials previously marked as infrastructure errors."""
 
-        await self._apply_experience_filter()
         samples = self.reset_infra()
         if not samples:
             return []
@@ -342,78 +403,100 @@ class BaseBenchmark:
         if self._should_use_skillsbench_harbor(sample):
             return await self._rollout_skillsbench_harbor(sample)
 
-        agent = get_agent(self.config.agent)
-        if hasattr(agent, "build"):  # hack, should be removed!
-            await agent.build()
-        
-        # Check if this is a KORGym multi-round game
-        if self._should_use_korgym_multiround(sample):
-            return await self._rollout_korgym_multiround(agent, sample)
-        
-        # Original logic: single-turn rollout
-        trace_id = AgentsUtils.gen_trace_id()
-        start_time = time.time()
-        result = await agent.run(sample.augmented_question, trace_id=trace_id)
-        end_time = time.time()
+        # Retrieval/reranking is performed for this exact task. The deep-copied
+        # AgentConfig prevents concurrent samples from overwriting each
+        # other's system prompt.
+        agent = get_agent(await self._agent_config_for_sample(sample))
+        try:
+            if hasattr(agent, "build"):  # hack, should be removed!
+                await agent.build()
 
-        # Update the sample with the predicted answer and trajectory
-        sample.update(
-            trace_id=trace_id,
-            response=result.final_output,
-            time_cost=end_time - start_time,
-            trajectories=json.dumps(result.trajectories, ensure_ascii=False),
-            stage="rollout",  # update stage to rollout!
-        )
-        
-        self.dataset.save(sample)
-        return sample
+            # Check if this is a KORGym multi-round game
+            if self._should_use_korgym_multiround(sample):
+                return await self._rollout_korgym_multiround(agent, sample)
+
+            # Original logic: single-turn rollout
+            trace_id = AgentsUtils.gen_trace_id()
+            start_time = time.time()
+            run_coro = agent.run(
+                sample.augmented_question,
+                trace_id=trace_id,
+                log_to_db=self.config.log_trajectory_to_db,
+            )
+            if self.config.korgym.enabled:
+                result = await asyncio.wait_for(
+                    run_coro,
+                    timeout=self.config.korgym.timeout_per_game,
+                )
+            else:
+                result = await run_coro
+            end_time = time.time()
+
+            # Update the sample with the predicted answer and trajectory
+            sample.update(
+                trace_id=trace_id,
+                response=result.final_output,
+                time_cost=end_time - start_time,
+                trajectories=json.dumps(result.trajectories, ensure_ascii=False),
+                stage="rollout",  # update stage to rollout!
+            )
+
+            self.dataset.save(sample)
+            return sample
+        finally:
+            cleanup = getattr(agent, "cleanup", None)
+            if cleanup is not None:
+                try:
+                    await cleanup()
+                except Exception as exc:  # pragma: no cover - cleanup is best effort
+                    logger.warning("Agent cleanup failed after rollout: %s", exc)
 
     def _should_use_korgym_multiround(self, sample: EvaluationSample) -> bool:
         """Check if this sample requires KORGym multi-round game handling.
-        
+
         Args:
             sample: The evaluation sample
-            
+
         Returns:
             True if this is a KORGym multi-round game, False otherwise
         """
         # Check if KORGym config exists and is enabled
         if not hasattr(self.config, 'korgym') or not self.config.korgym:
             return False
-        
+
         if not self.config.korgym.enabled:
             return False
-        
+
         # Check game type
         try:
             from ...practice.korgym_adapter import KORGymGameClassifier
             game_type = KORGymGameClassifier.get_game_type(self.config.korgym.game_name)
             is_multiround = (game_type == 'multiple')
-            
+
             if is_multiround:
                 logger.info(f"Detected KORGym multi-round game: {self.config.korgym.game_name}")
-            
+
             return is_multiround
         except Exception as e:
             logger.warning(f"Failed to check KORGym game type: {e}")
             return False
-    
+
     async def _rollout_korgym_multiround(self, agent, sample: EvaluationSample) -> EvaluationSample:
         """Execute complete multi-round KORGym game rollout.
-        
+
         This method is used for multi-turn games like Wordle, 2048, etc.
         It uses the KORGymAdapter to handle multiple rounds of interaction.
-        
+
         Args:
             agent: The agent to play the game
             sample: The evaluation sample
-            
+
         Returns:
             Updated sample with complete game results
         """
         try:
             from ...practice.korgym_adapter import KORGymAdapter
-            
+
             # Initialize adapter from config
             korgym_config = self.config.korgym
             adapter = KORGymAdapter(
@@ -423,28 +506,31 @@ class BaseBenchmark:
                 level=korgym_config.level,
                 max_rounds=korgym_config.max_rounds
             )
-            
+
             # Get seed from meta
             meta = sample.meta or {}
             seed = meta.get('seed') or meta.get('game_seed', 0)
-            
+
             # Execute complete multi-round game
             logger.info(f"Starting multi-round game for seed {seed}")
             start_time = time.time()
-            game_result = await adapter.play_game(agent, seed)
+            game_result = await asyncio.wait_for(
+                adapter.play_game(agent, seed),
+                timeout=korgym_config.timeout_per_game,
+            )
             end_time = time.time()
-            
+
             logger.info(
                 f"Multi-round game completed: seed={seed}, "
                 f"rounds={game_result.get('rounds', 0)}, "
                 f"score={game_result.get('final_score', 0)}, "
                 f"success={game_result.get('success', False)}"
             )
-            
+
             # Get all responses (for multi-round, we have multiple responses)
             responses = game_result.get('responses', [])
             final_response = responses[-1] if responses else ''
-            
+
             # Update sample with complete game results
             sample.update(
                 trace_id=game_result.get('round_id', ''),
@@ -461,20 +547,17 @@ class BaseBenchmark:
                 },
                 stage="rollout"
             )
-            
+
             self.dataset.save(sample)
             return sample
-            
-        except Exception as e:
-            logger.error(f"Failed to execute multi-round game: {e}", exc_info=True)
-            # Fallback: mark as failed
-            sample.update(
-                response=f"Multi-round game failed: {str(e)}",
-                stage="rollout"
-            )
-            self.dataset.save(sample)
-            return sample
-    
+
+        except Exception as exc:
+            # Infrastructure failures are not task failures.  Propagate them
+            # to the outer bounded retry loop and leave the DB row uncommitted
+            # instead of silently scoring a network timeout as a wrong answer.
+            logger.error("Failed to execute multi-round game: %s", exc, exc_info=True)
+            raise
+
     # ------------------------------------------------------------------
     # SkillsBench harbor execution
     # ------------------------------------------------------------------
@@ -537,12 +620,24 @@ class BaseBenchmark:
         if recorder and recorder.experiences:
             experiences = {**dict(recorder.experiences), **experiences}
 
-        # In eval mode the trained experiences arrive baked into the agent YAML's
-        # instructions (carried via agent_instructions), not the experiences dict.
-        # Prefer the live config value when available so experience filtering
-        # (which rewrites config.agent.agent.instructions) is respected.
-        if self.config.agent and self.config.agent.agent and self.config.agent.agent.instructions:
-            agent_instructions = self.config.agent.agent.instructions
+        if self.experience_filter is not None and experiences:
+            raise ValueError(
+                "SkillsBench received experiences through both the recorder/payload channel "
+                "and evaluation.experience_filter. Refusing ambiguous double injection; "
+                "configure exactly one experience channel."
+            )
+
+        # Apply the same per-task retrieval contract as ordinary rollouts.
+        # This remains local to the Harbor call and never rewrites the shared
+        # EvalConfig used by concurrently executing tasks.
+        if self.experience_filter is not None:
+            agent_instructions = await self._filtered_instructions_for_sample(
+                sample,
+                base_instructions=self._base_agent_instructions,
+            )
+            meta = self._sample_meta(sample)
+        elif self._base_agent_instructions:
+            agent_instructions = self._base_agent_instructions
 
         skills_text = meta.get("skills_text", "")
 
@@ -586,7 +681,7 @@ class BaseBenchmark:
         if not sample.correct_answer:
             sample.update(correct_answer="[Verified by harbor verifier script]")
 
-        runtime_meta = self._skillsbench_runtime_metadata()
+        runtime_meta = self._skillsbench_runtime_metadata(instructions=agent_instructions)
         runtime_meta.update(result.metadata)
         history = list(meta.get("infra_attempt_history") or [])
         if result.outcome in {OUTCOME_INFRA_ERROR, OUTCOME_FATAL_ERROR}:
@@ -677,12 +772,18 @@ class BaseBenchmark:
                     logger.error(f">>>>>>>>>>>>>\nError judging sample '{item}': {e}\n<<<<<<<<<<<<<", exc_info=True)
                     return None
 
-        tasks = [judge_with_semaphore(item) for item in samples]
+        tasks = [asyncio.create_task(judge_with_semaphore(item)) for item in samples]
         results = []
-        for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Judging"):
-            result = await task
-            if result is not None:
-                results.append(result)
+        try:
+            for task in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Judging"):
+                result = await task
+                if result is not None:
+                    results.append(result)
+        except BaseException:
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            raise
         logger.info(f"Successfully judged {len(results)} samples. Updated to db.")
         return results
 
@@ -730,4 +831,18 @@ class BaseBenchmark:
         return data_by_benchmark
 
     async def cleanup(self):
-        pass
+        for source, processer in list(self._source_to_processer.items()):
+            cleanup = getattr(processer, "cleanup", None)
+            if cleanup is None:
+                continue
+            try:
+                await cleanup()
+            except Exception as exc:  # pragma: no cover - external clients
+                logger.warning("Processor cleanup failed for %s: %s", source, exc)
+        self._source_to_processer.clear()
+
+        if self.experience_filter is not None:
+            try:
+                await self.experience_filter.cleanup()
+            except Exception as exc:  # pragma: no cover - external clients
+                logger.warning("Experience-filter cleanup failed: %s", exc)

@@ -28,7 +28,6 @@ practice:
     Help the agent to improve logical reasoning capability by extracting general problem-solving strategies,
     identifying common reasoning errors, and learning from constraint violations and logical inconsistencies.
   num_experiences_per_query: 1
-  verify_module: "utu.practice.verify.logic_with_error_analysis_v2"  # Use official ZebraLogic verification
 
 # Data Arguments  utu\practice\verify\logic_with_error_analysis_v2.py
 data:

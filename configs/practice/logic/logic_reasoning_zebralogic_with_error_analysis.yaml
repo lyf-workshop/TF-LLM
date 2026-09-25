@@ -29,7 +29,6 @@ practice:
     Help the agent to improve logical reasoning capability by extracting general problem-solving strategies,
     identifying common reasoning errors, and learning from constraint violations and logical inconsistencies.
   num_experiences_per_query: 1
-  verify_module: "utu.practice.verify.logic_with_error_analysis"  # Use enhanced verifier with error analysis
 
 # Data Arguments  
 data:

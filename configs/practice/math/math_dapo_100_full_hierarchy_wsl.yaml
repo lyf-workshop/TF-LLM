@@ -24,9 +24,3 @@ practice:
     embedding_cache_path: workspace/cache/experience_embeddings_math_dapo_random_100_full_hierarchy_en_v1_wsl_20260915.sqlite3
     experience_save_path: workspace/hierarchical_experiences/math_dapo_random_100_full_hierarchy_en_v1_wsl_20260915.json
     clustering_audit_path: workspace/hierarchical_experiences/math_dapo_random_100_full_hierarchy_en_v1_wsl_20260915.clusters.jsonl
-
-evaluation:
-  exp_id: "math_dapo_random_100_full_hierarchy_en_v1_wsl_20260915"
-  # RolloutManager reads the evaluation semaphore, so keep it aligned with
-  # practice.rollout_concurrency for this run.
-  concurrency: 32

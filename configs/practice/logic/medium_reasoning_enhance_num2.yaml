@@ -30,7 +30,6 @@ practice:
     - Unused clues and incomplete verification
     - Reward-based comparison of correct and incorrect solutions
   num_experiences_per_query: 2
-  verify_module: "utu.practice.verify.logic_error_extractor"  # Use error extractor for detailed analysis
 
 # Data Arguments
 data:

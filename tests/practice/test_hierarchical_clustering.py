@@ -69,7 +69,6 @@ def hierarchy_config(tmp_path, **overrides):
         "experience_save_path": str(tmp_path / "experiences.json"),
         "clustering_audit_path": str(tmp_path / "clusters.jsonl"),
         "clustering_enabled": True,
-        "clustering_method": "agglomerative",
         "embedding_provider": "hashing",
         "l0_similarity_threshold": 0.8,
         "l1_similarity_threshold": 0.75,
@@ -84,8 +83,8 @@ def hierarchy_config(tmp_path, **overrides):
         "max_l0_per_problem": 10,
         "max_l1_total": 50,
         "max_l2_total": 10,
-        "include_l0_in_prompt": True,
-        "max_l0_recent": 10,
+        "export_include_l0": True,
+        "export_max_l0": 10,
         "l1_confidence_threshold": 0.7,
         "l2_confidence_threshold": 0.8,
         "l0_candidate_review_enabled": False,
@@ -267,9 +266,9 @@ def test_unrecognised_hard_metadata_is_normalised_to_unknown_and_does_not_split(
     right = record("alpha same procedure", failure_mode="another guess", task_stage="somewhere")
     assert left.failure_mode.value == right.failure_mode.value == "unknown"
     assert left.task_stage.value == right.task_stage.value == "unknown"
-    report = ExperienceClusterer(
-        KeywordEmbedding(), hard_constraint_fields=["task_stage", "failure_mode"]
-    ).cluster([left, right], level="L0", similarity_threshold=0.8)
+    report = ExperienceClusterer(KeywordEmbedding(), hard_constraint_fields=["task_stage", "failure_mode"]).cluster(
+        [left, right], level="L0", similarity_threshold=0.8
+    )
     assert len(report.clusters) == 1
     assert report.metadata_constraint_splits == []
 
@@ -425,6 +424,34 @@ async def test_five_plus_one_creates_only_valid_cluster_and_leaves_tail_pending(
 
 
 @pytest.mark.asyncio
+async def test_l1_requires_distinct_source_task_support(tmp_path):
+    instance, llm = manager(
+        tmp_path,
+        [],
+        min_l0_per_l1=2,
+        min_distinct_source_tasks_per_l1=2,
+    )
+    await instance.process_step_experiences(
+        [
+            {"content": "alpha first lesson", "source_task_ids": ["same-task"]},
+            {"content": "alpha second lesson", "source_task_ids": ["same-task"]},
+        ],
+        step=0,
+    )
+
+    await instance._aggregate_l1(epoch=0)
+
+    assert llm.calls == 0
+    assert not instance.l1_experiences
+    assert all(item["aggregation_status"] == "pending" for item in instance.l0_experiences)
+    audit = json.loads((tmp_path / "clusters.jsonl").read_text().splitlines()[-1])
+    attempt = audit["aggregation_attempts"][0]
+    assert attempt["status"] == "pending_below_source_task_diversity"
+    assert attempt["distinct_source_task_count"] == 1
+    assert attempt["minimum_distinct_source_tasks"] == 2
+
+
+@pytest.mark.asyncio
 async def test_failed_cluster_remains_retryable_while_success_cluster_commits(tmp_path):
     instance, llm = manager(
         tmp_path,
@@ -509,7 +536,8 @@ async def test_provisional_threshold_blocks_clustered_aggregation(tmp_path):
         tmp_path,
         [],
         min_l0_per_l1=2,
-        similarity_thresholds_provisional=True,
+        l0_similarity_threshold_provisional=True,
+        l1_similarity_threshold_provisional=True,
         allow_provisional_aggregation=False,
     )
     await instance.process_step_experiences(["alpha one", "alpha two"], step=0)

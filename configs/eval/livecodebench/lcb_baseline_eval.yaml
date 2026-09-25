@@ -8,7 +8,6 @@ exp_id: "lcb_baseline_eval_2"
 
 data:
   dataset: "LiveCodeBench-Eval-50"
-  type: "single"
 
 # Each problem is fully self-contained (no external server).
 # Keep concurrency moderate; code execution uses subprocess.

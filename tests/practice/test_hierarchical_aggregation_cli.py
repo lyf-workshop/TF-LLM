@@ -32,7 +32,6 @@ def _config(snapshot: Path):
         l2_candidate_review_enabled=True,
         l0_similarity_threshold_provisional=True,
         l1_similarity_threshold_provisional=False,
-        similarity_thresholds_provisional=None,
         allow_provisional_aggregation=False,
     )
     provider = SimpleNamespace(type="chat.completions", model="offline-test-model")
@@ -43,7 +42,7 @@ def _config(snapshot: Path):
             agent_objective="solve tasks",
             learning_objective="learn reusable evidence-backed strategies",
         ),
-        evaluation=SimpleNamespace(agent=agent),
+        runtime=SimpleNamespace(agent=agent),
         data=SimpleNamespace(require_practice_manifest=False),
     )
 
@@ -137,14 +136,14 @@ def test_parse_args_is_plan_only_unless_execute_is_explicit():
     assert executed.execute is True
     assert cli._threshold_gate_view(
         SimpleNamespace(
-            similarity_thresholds_provisional=True,
+            l0_similarity_threshold_provisional=True,
+            l1_similarity_threshold_provisional=True,
             allow_provisional_aggregation=False,
         )
     ) == {
         "l0_similarity_threshold_provisional": True,
         "l1_similarity_threshold_provisional": True,
         "allow_provisional_aggregation": False,
-        "legacy_similarity_thresholds_provisional": True,
     }
 
 
@@ -264,8 +263,8 @@ async def test_strict_execute_runs_static_and_database_guards_before_manager(
         practice_manifest_split="training_calibration_v1",
         practice_manifest_expected_records=100,
     )
-    config.evaluation.data = SimpleNamespace(dataset="AIME24")
-    config.evaluation.db_url = "sqlite:///read-only-fixture.db"
+    config.runtime.data = SimpleNamespace(dataset="AIME24")
+    config.runtime.db_url = "sqlite:///read-only-fixture.db"
     order: list[str] = []
     monkeypatch.setattr(cli.ConfigLoader, "load_training_free_grpo_config", lambda _name: config)
 
@@ -314,8 +313,8 @@ async def test_strict_execute_database_guard_failure_prevents_manager(
         practice_manifest_split="training_calibration_v1",
         practice_manifest_expected_records=100,
     )
-    config.evaluation.data = SimpleNamespace(dataset="AIME24")
-    config.evaluation.db_url = "sqlite:///read-only-fixture.db"
+    config.runtime.data = SimpleNamespace(dataset="AIME24")
+    config.runtime.db_url = "sqlite:///read-only-fixture.db"
     monkeypatch.setattr(cli.ConfigLoader, "load_training_free_grpo_config", lambda _name: config)
     monkeypatch.setattr(
         cli,
@@ -370,7 +369,7 @@ async def test_execute_dispatches_only_selected_levels(
 
     assert calls == expected_calls
     assert len(constructed) == 1
-    assert constructed[0]["config"] is config.evaluation.agent
+    assert constructed[0]["config"] is config.runtime.agent
     assert constructed[0]["agent_objective"] == "solve tasks"
     assert report["targets"] == [level for level, _epoch in expected_calls]
     assert report["threshold_gates"]["l0_similarity_threshold_provisional"] is True

@@ -69,13 +69,12 @@ def _write_agent_yaml(
 ) -> str:
     copied = config.model_copy(deep=True)
     copied.exp_id = f"{config.exp_id}_{suffix}_{run_name}"
-    copied.evaluation.exp_id = copied.exp_id
     target = DIR_ROOT / "configs" / "agents" / "practice" / f"{copied.exp_id}_agent.yaml"
     if target.exists():
         raise FileExistsError(f"Refusing to overwrite generated agent config: {target}")
     runner = TrainingFreeGRPO(copied)
     runner.hierarchical_experience_manager = manager
-    runner.original_temperature = copied.evaluation.agent.model.model_settings.temperature
+    runner.original_temperature = copied.runtime.agent.model.model_settings.temperature
     generated = Path(runner._create_agent_config_with_experiences({}))
     return generated.relative_to(DIR_ROOT / "configs" / "agents").with_suffix("").as_posix()
 
@@ -109,7 +108,7 @@ def _static_training_contract(config) -> tuple[dict[str, Any], dict[str, Any]]:
         if len(task_ids) != expected_count:
             raise ValueError("Strict practice manifest record count differs from configuration")
         exclusion = manifest.get("evaluation_exclusion") or {}
-        eval_dataset = config.evaluation.data.dataset
+        eval_dataset = config.runtime.data.dataset
         if exclusion.get("dataset") != eval_dataset:
             raise ValueError("Strict manifest evaluation exclusion differs from configured evaluation dataset")
         namespaced_train_ids = [f"{namespace}:{task_id}" for task_id in task_ids]
@@ -144,7 +143,7 @@ def _static_training_contract(config) -> tuple[dict[str, Any], dict[str, Any]]:
         }
         return training, evaluation
 
-    skillsbench = config.evaluation.skillsbench
+    skillsbench = config.runtime.skillsbench
     if not skillsbench.task_split_manifest_path or not skillsbench.task_split_name:
         raise ValueError(
             "Non-strict ablation configs must declare a versioned SkillsBench split manifest"
@@ -152,7 +151,7 @@ def _static_training_contract(config) -> tuple[dict[str, Any], dict[str, Any]]:
     manifest_path, manifest = _load_manifest(skillsbench.task_split_manifest_path)
     split = manifest["splits"][skillsbench.task_split_name]
     task_by_id = {str(task["task_id"]): task for task in manifest["tasks"]}
-    eval_dataset = config.evaluation.data.dataset
+    eval_dataset = config.runtime.data.dataset
     eval_ids = list(split["eval_task_ids"])
     tasks = []
     for task_id in eval_ids:
@@ -207,8 +206,8 @@ def _verified_evaluation_inventory(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Validate DB snapshots and construct the exact order shared by all groups."""
 
-    dataset = config.evaluation.data.dataset
-    db_url = config.evaluation.db_url
+    dataset = config.runtime.data.dataset
+    db_url = config.runtime.db_url
     if training["validation_mode"] == "strict_practice_manifest":
         evidence = validate_practice_dataset_manifest(
             practice_dataset=training["dataset"],
@@ -274,7 +273,7 @@ def _agent_without_prompt(agent) -> dict[str, Any]:
 
 
 def _condition_agent_contracts(agents: dict[str, str], config) -> dict[str, Any]:
-    base_agent = config.evaluation.agent
+    base_agent = config.runtime.agent
     baseline = ConfigLoader.load_agent_config(agents["no_experience"])
     if config_sha256(baseline) != config_sha256(base_agent):
         raise ValueError("no_experience agent is not the exact practice base agent")
@@ -342,9 +341,9 @@ async def main() -> None:
 
     source_fingerprint = source_l0_fingerprint(args.source_experiences)
     shared_parameters = {
-        "model": redact_sensitive_data(config.evaluation.agent.model.model_dump(mode="json")),
-        "model_config_sha256": config_sha256(config.evaluation.agent.model),
-        "base_agent_sha256": config_sha256(config.evaluation.agent),
+        "model": redact_sensitive_data(config.runtime.agent.model.model_dump(mode="json")),
+        "model_config_sha256": config_sha256(config.runtime.agent.model),
+        "base_agent_sha256": config_sha256(config.runtime.agent),
         "evaluation_config": eval_config_name,
         "evaluation_config_sha256": evaluation["resolved_config_sha256"],
         "evaluation_dataset": evaluation["dataset"],
@@ -458,7 +457,7 @@ async def main() -> None:
         deep=True,
     )
     common = {
-        "config": config.evaluation.agent,
+        "config": config.runtime.agent,
         "agent_objective": config.practice.agent_objective,
         "learning_objective": config.practice.learning_objective,
     }
@@ -473,7 +472,7 @@ async def main() -> None:
         "clustered": _write_agent_yaml(clustered_manager, config, "clustered", run_name),
     }
     condition_configs = _condition_agent_contracts(agents, config)
-    base_instruction_tokens = TokenUtils.count_tokens(config.evaluation.agent.agent.instructions or "")
+    base_instruction_tokens = TokenUtils.count_tokens(config.runtime.agent.agent.instructions or "")
     injected_tokens = {"no_experience": 0}
     for condition in ("sequential", "clustered"):
         learned_agent = ConfigLoader.load_agent_config(agents[condition])
@@ -518,7 +517,7 @@ async def main() -> None:
     protocol = sign_experiment_protocol(protocol_payload)
     protocol_path.write_text(json.dumps(protocol, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    model_name = str(config.evaluation.agent.model.model_provider.model)
+    model_name = str(config.runtime.agent.model.model_provider.model)
     base_command = [
         "python",
         "scripts/run_eval.py",

@@ -39,8 +39,8 @@ async def test_hierarchical_experience(tmp_path):
         l1_confidence_threshold=0.7,
         l2_confidence_threshold=0.8,
         aggregation_temperature=0.0,
-        include_l0_in_prompt=True,
-        max_l0_recent=10,
+        export_include_l0=True,
+        export_max_l0=10,
         random_seed=42,
     )
     manager = HierarchicalExperienceManager(

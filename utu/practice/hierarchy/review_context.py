@@ -25,30 +25,23 @@ def related_active(
     full_pool_limit: int,
     top_k: int,
     retrieval_method: str,
+    review_scope: str = "retrieval",
 ) -> tuple[list[ExperienceRecord], str]:
     active = sorted(
-        (
-            record
-            for record in target_store.values()
-            if record.lifecycle_status == "active"
-        ),
+        (record for record in target_store.values() if record.lifecycle_status == "active"),
         key=lambda record: record.id,
     )
-    if len(active) <= full_pool_limit:
+    if review_scope == "full_pool" or len(active) <= full_pool_limit:
         return active, "full_active_pool"
 
     if retrieval_method == "semantic":
-        vectors = embedding_provider.embed(
-            [candidate.content, *[record.content for record in active]]
-        )
+        vectors = embedding_provider.embed([candidate.content, *[record.content for record in active]])
         query_vector = vectors[0]
         ranked = sorted(
             zip(active, vectors[1:], strict=True),
             key=lambda item: (-cosine_similarity(query_vector, item[1]), item[0].id),
         )
-        return [record for record, _vector in ranked[:top_k]], (
-            f"semantic_top_{top_k}_of_{len(active)}"
-        )
+        return [record for record, _vector in ranked[:top_k]], (f"semantic_top_{top_k}_of_{len(active)}")
 
     query_tokens = lexical_tokens(candidate.content)
 
@@ -59,6 +52,98 @@ def related_active(
         return (-score, record.id)
 
     return sorted(active, key=rank)[:top_k], f"lexical_top_{top_k}_of_{len(active)}"
+
+
+def full_pool_review_views(
+    records: Sequence[ExperienceRecord],
+    *,
+    max_chars: int,
+    source_id_limit: int,
+    content_limit: int,
+) -> tuple[list[dict[str, Any]], set[str], list[ExperienceRecord]]:
+    """Represent every active same-level record under one deterministic budget.
+
+    Full-pool maintenance follows the original Training-Free GRPO contract: no
+    active record may disappear merely because an embedding retriever ranked it
+    below top-k. Historical supporting-candidate evidence is intentionally left
+    out of this comparison view; the current candidate keeps its detailed source
+    evidence, while existing pool entries contribute their complete identity,
+    current content, metadata, and direct lineage.
+    """
+
+    ordered = sorted(records, key=lambda record: record.id)
+    payloads: list[dict[str, Any]] = []
+    displayed_ids: set[str] = set()
+    for record in ordered:
+        public = record.public_dict()
+        source_task_ids = bounded_source_ids(record.source_task_ids, source_id_limit)
+        source_rollout_ids = bounded_source_ids(record.source_rollout_ids, source_id_limit)
+        parent_ids = bounded_source_ids(record.parent_ids, source_id_limit)
+        source_l0_ids = bounded_source_ids(record.source_l0_ids, source_id_limit)
+        source_l1_ids = bounded_source_ids(record.source_l1_ids, source_id_limit)
+        payloads.append(
+            {
+                "id": record.id,
+                "level": record.level,
+                "content": record.content[:content_limit],
+                "content_truncated": len(record.content) > content_limit,
+                "source_task_ids": source_task_ids,
+                "source_rollout_ids": source_rollout_ids,
+                "domain": public.get("domain"),
+                "task_family": public.get("task_family"),
+                "failure_mode": public.get("failure_mode"),
+                "strategy_type": public.get("strategy_type"),
+                "tool_type": public.get("tool_type"),
+                "task_stage": public.get("task_stage"),
+                "parent_ids": parent_ids,
+                "source_l0_ids": source_l0_ids,
+                "source_l1_ids": source_l1_ids,
+                "validation_status": record.validation_status,
+                "version": record.version,
+            }
+        )
+        displayed_ids.add(record.id)
+        displayed_ids.update(source_task_ids)
+        displayed_ids.update(source_rollout_ids)
+        displayed_ids.update(parent_ids)
+        displayed_ids.update(source_l0_ids)
+        displayed_ids.update(source_l1_ids)
+
+    if not payloads:
+        return [], displayed_ids, ordered
+
+    rendered = json.dumps(payloads, ensure_ascii=False, sort_keys=True)
+    if len(rendered) <= max_chars:
+        return payloads, displayed_ids, ordered
+
+    fixed_payloads = [{**payload, "content": "", "content_truncated": True} for payload in payloads]
+    fixed_size = len(json.dumps(fixed_payloads, ensure_ascii=False, sort_keys=True))
+    if fixed_size > max_chars:
+        raise ValueError(
+            "full-pool review metadata exceeds l0_review_max_supporting_evidence_chars; "
+            "increase the budget instead of silently omitting active experiences"
+        )
+
+    per_record_chars = max(0, (max_chars - fixed_size) // len(payloads) - 8)
+    compact = [
+        {
+            **payload,
+            "content": record.content[: min(content_limit, per_record_chars)],
+            "content_truncated": len(record.content) > min(content_limit, per_record_chars),
+        }
+        for payload, record in zip(payloads, ordered, strict=True)
+    ]
+    while len(json.dumps(compact, ensure_ascii=False, sort_keys=True)) > max_chars and per_record_chars:
+        per_record_chars = max(0, per_record_chars - 32)
+        compact = [
+            {
+                **payload,
+                "content": record.content[: min(content_limit, per_record_chars)],
+                "content_truncated": len(record.content) > min(content_limit, per_record_chars),
+            }
+            for payload, record in zip(payloads, ordered, strict=True)
+        ]
+    return compact, displayed_ids, ordered
 
 
 def bounded_source_ids(
@@ -124,9 +209,7 @@ def supporting_candidate_views(
 
     supporting: list[dict[str, Any]] = []
     for candidate in candidates:
-        displayed_rollouts = sorted(candidate.source_evidence, key=lambda item: item.id)[
-            :rollout_limit
-        ]
+        displayed_rollouts = sorted(candidate.source_evidence, key=lambda item: item.id)[:rollout_limit]
         preferred_rollout_ids = [item.id for item in displayed_rollouts]
         preferred_task_ids = [item.task_id for item in displayed_rollouts if item.task_id]
         supporting.append(
@@ -144,15 +227,9 @@ def supporting_candidate_views(
                     source_id_limit,
                     preferred_rollout_ids,
                 ),
-                "source_evidence": [
-                    evidence.model_dump(mode="json") for evidence in displayed_rollouts
-                ],
-                "review_action": (
-                    candidate.review_decision.action if candidate.review_decision else None
-                ),
-                "review_reason": (
-                    candidate.review_decision.reason if candidate.review_decision else None
-                ),
+                "source_evidence": [evidence.model_dump(mode="json") for evidence in displayed_rollouts],
+                "review_action": (candidate.review_decision.action if candidate.review_decision else None),
+                "review_reason": (candidate.review_decision.reason if candidate.review_decision else None),
             }
         )
     return supporting
@@ -255,14 +332,11 @@ def upper_candidate_review_view(
     )
     displayed = {parent.id for parent in parents}
     if candidate.level == "L2":
-        reachable_l0_ids = sorted(
-            {source_id for parent in parents for source_id in parent.source_l0_ids}
-        )
+        reachable_l0_ids = sorted({source_id for parent in parents for source_id in parent.source_l0_ids})
         payload["reachable_l0_evidence"] = [
             l0_records[source_id].public_dict()
             for source_id in reachable_l0_ids
-            if source_id in l0_records
-            and l0_records[source_id].lifecycle_status == "active"
+            if source_id in l0_records and l0_records[source_id].lifecycle_status == "active"
         ]
     return payload, displayed
 
@@ -278,14 +352,11 @@ def upper_related_review_views(
     displayed_ids: set[str] = set()
     displayed_records: list[ExperienceRecord] = []
     for record in records:
-        source_ids = record.parent_ids or (
-            record.source_l0_ids if candidate.level == "L1" else record.source_l1_ids
-        )
+        source_ids = record.parent_ids or (record.source_l0_ids if candidate.level == "L1" else record.source_l1_ids)
         sources = [
             source_store[source_id].public_dict()
             for source_id in source_ids
-            if source_id in source_store
-            and source_store[source_id].lifecycle_status == "active"
+            if source_id in source_store and source_store[source_id].lifecycle_status == "active"
         ]
         payload = record.public_dict()
         payload["direct_source_experiences"] = sources
@@ -306,6 +377,7 @@ def upper_related_review_views(
 __all__ = [
     "bounded_source_ids",
     "candidate_l0_review_view",
+    "full_pool_review_views",
     "lexical_tokens",
     "related_active",
     "related_l0_review_views",

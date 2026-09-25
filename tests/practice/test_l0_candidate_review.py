@@ -153,6 +153,78 @@ def aggregation_decision(title: str = "Replacement pattern") -> str:
     )
 
 
+def test_review_decision_accepts_narrow_versioned_new_content_wrapper():
+    parsed = ExperienceReviewDecision.model_validate(
+        {
+            "action": "ADD",
+            "candidate_id": "candidate-1",
+            "new_content": {"content": "  Verify the result.  ", "version": "3.0"},
+            "reason": "supported by the current candidate",
+            "evidence_ids": ["candidate-1"],
+        }
+    )
+
+    assert parsed.new_content == "Verify the result."
+
+
+@pytest.mark.parametrize(
+    "new_content",
+    [
+        {"content": {"nested": "invalid"}, "version": "3.0"},
+        {"content": "valid text", "unexpected": "field"},
+    ],
+)
+def test_review_decision_rejects_ambiguous_new_content_objects(new_content):
+    with pytest.raises(ValueError, match="new_content object"):
+        ExperienceReviewDecision.model_validate(
+            {
+                "action": "ADD",
+                "candidate_id": "candidate-1",
+                "new_content": new_content,
+                "reason": "unsupported wrapper",
+                "evidence_ids": ["candidate-1"],
+            }
+        )
+
+
+@pytest.mark.parametrize(
+    ("ignore_failure_mode", "expected_ids"),
+    [
+        (True, ["L0_existing"]),
+        (False, []),
+    ],
+)
+def test_l0_review_pool_respects_failure_mode_compatibility_policy(
+    tmp_path,
+    ignore_failure_mode,
+    expected_ids,
+):
+    instance, _ = make_manager(
+        tmp_path,
+        l0_strategy_ignore_failure_mode=ignore_failure_mode,
+        candidate_review_scope="full_pool",
+    )
+    instance._l0_records = {
+        "L0_existing": ExperienceRecord(
+            id="L0_existing",
+            level="L0",
+            content="Existing verifier lesson.",
+            failure_mode="none",
+        )
+    }
+    candidate = ExperienceCandidateRecord(
+        id="C0_candidate",
+        level="L0",
+        content="Lesson derived from mixed outcomes.",
+        source_task_ids=["task-a"],
+        failure_mode="mixed_outcome",
+    )
+
+    related, _ = instance._related_active_l0(candidate)
+
+    assert [record.id for record in related] == expected_ids
+
+
 @pytest.mark.asyncio
 async def test_duplicate_candidates_are_reviewed_in_stable_order_against_fresh_pool(tmp_path):
     raw_a = "Inspect the generated artifact before submission."
@@ -990,7 +1062,7 @@ def test_candidate_generation_fingerprint_changes_with_generation_config():
     )
     runner.config = SimpleNamespace(
         practice=practice,
-        evaluation=SimpleNamespace(agent=SimpleNamespace(model=model)),
+        runtime=SimpleNamespace(agent=SimpleNamespace(model=model)),
     )
     runner.experience_updater = SimpleNamespace(prompts={"summary": "prompt-v1"})
     rollouts = [{"trace_id": "trace-a", "response": "result", "reward": 1.0}]
@@ -1617,13 +1689,13 @@ async def test_upper_level_four_actions_are_atomic_and_same_level(
         assert reviewed.result_experience_id is None
         assert target.id not in store and target.id in archive
         assert lower_store[lower_old.id].aggregation_status == "pending"
-        assert all(lower_store[parent_id].aggregation_status == "pending" for parent_id in candidate.parent_ids)
+        assert all(lower_store[parent_id].aggregation_status == "terminal" for parent_id in candidate.parent_ids)
     else:
         assert reviewed.resolution == "not_adopted"
         assert reviewed.result_experience_id is None
         assert target.id in store and target.id not in archive
         assert lower_store[lower_old.id].aggregated_into_experience_id == target.id
-        assert all(lower_store[parent_id].aggregation_status == "pending" for parent_id in candidate.parent_ids)
+        assert all(lower_store[parent_id].aggregation_status == "terminal" for parent_id in candidate.parent_ids)
 
 
 @pytest.mark.asyncio
@@ -1720,7 +1792,7 @@ async def test_staged_l1_candidate_is_not_active_or_consumed_before_review(tmp_p
 
 
 @pytest.mark.asyncio
-async def test_keep_is_terminal_for_unchanged_generation_but_leaves_parents_pending(tmp_path):
+async def test_keep_is_terminal_for_unchanged_generation_and_terminalizes_parents(tmp_path):
     instance, llm = make_manager(tmp_path, l1_candidate_review_enabled=True)
     parents = [make_l0("L0_keep_a"), make_l0("L0_keep_b")]
     instance._l0_records = {parent.id: parent for parent in parents}
@@ -1752,15 +1824,11 @@ async def test_keep_is_terminal_for_unchanged_generation_but_leaves_parents_pend
 
     assert llm.calls == []
     assert instance._candidate_records[candidate.id].resolution == "not_adopted"
-    assert all(parent.aggregation_status == "pending" for parent in instance._l0_records.values())
+    assert all(parent.aggregation_status == "terminal" for parent in instance._l0_records.values())
     audit = json.loads((tmp_path / "clusters.jsonl").read_text().splitlines()[-1])
-    assert audit["aggregation_summary"] == {
-        "direct_success": 0,
-        "adopted": 0,
-        "not_adopted": 1,
-        "generation_failed": 0,
-        "review_failed": 0,
-    }
+    assert audit["status"] == "completed"
+    assert audit["outcome"] == "no_work"
+    assert audit["pending_experience_ids"] == []
 
 
 @pytest.mark.asyncio
@@ -1976,7 +2044,8 @@ async def test_full_epoch_routes_effective_l0_through_reviewed_l1_and_l2_candida
             tmp_path,
             l1_candidate_review_enabled=True,
             l2_candidate_review_enabled=True,
-            similarity_thresholds_provisional=False,
+            l0_similarity_threshold_provisional=False,
+            l1_similarity_threshold_provisional=False,
             min_l0_per_l1=2,
             min_l1_per_l2=2,
             experience_output_language="english",

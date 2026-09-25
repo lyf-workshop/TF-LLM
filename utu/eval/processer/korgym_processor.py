@@ -1,5 +1,7 @@
 """KORGym game processer for evaluation and training."""
 
+import asyncio
+
 from typing import TYPE_CHECKING
 
 from ...config import EvalConfig
@@ -94,10 +96,7 @@ class KORGymProcesser(BaseMatchProcesser):
             
         except Exception as e:
             logger.error(f"Failed to generate KORGym game with seed {seed}: {e}")
-            sample.update(
-                augmented_question="Game generation failed",
-                meta=meta
-            )
+            raise
         
         return sample
     
@@ -170,7 +169,7 @@ class KORGymProcesser(BaseMatchProcesser):
         
         try:
             # 用 seed 重新生成游戏（避免序列化问题）
-            game_state = self.adapter.generate_game_instance(game_seed)
+            game_state = await asyncio.to_thread(self.adapter.generate_game_instance, game_seed)
             
             # 从 agent 响应中提取动作
             action = self.adapter._extract_action(data.response)
@@ -180,7 +179,7 @@ class KORGymProcesser(BaseMatchProcesser):
             game_state['response'] = [data.response]
             
             # 验证动作并获取分数
-            verified_state = self.adapter.verify_action(game_state)
+            verified_state = await asyncio.to_thread(self.adapter.verify_action, game_state)
             
             score = verified_state.get('score', 0.0)
             success = score > 0
@@ -203,12 +202,7 @@ class KORGymProcesser(BaseMatchProcesser):
             
         except Exception as e:
             logger.error(f"Failed to judge KORGym game: {e}")
-            data.update(
-                correct=False,
-                reward=0.0,
-                judged_response=f"Judging failed: {str(e)}",
-                meta=meta
-            )
-        
+            raise
+
         return data
 

@@ -39,7 +39,6 @@ practice:
     # task, five examples provide enough repeated evidence for L1 while three
     # independent L1 patterns are required before attempting L2.
     clustering_enabled: true
-    clustering_method: agglomerative
     # Formal default. The package/model must be installed and cached explicitly;
     # training never downloads it implicitly.
     embedding_provider: sentence_transformer
@@ -54,7 +53,8 @@ practice:
     # training-only calibration report is accepted and these flags are changed.
     l0_similarity_threshold: 0.60
     l1_similarity_threshold: 0.55
-    similarity_thresholds_provisional: true
+    l0_similarity_threshold_provisional: true
+    l1_similarity_threshold_provisional: true
     allow_provisional_aggregation: false
     min_l0_per_l1: 5
     min_l1_per_l2: 3
@@ -89,8 +89,8 @@ practice:
     l0_review_max_supporting_evidence_chars: 40000
     l0_review_max_attempts: 3
     max_l0_per_problem: 0
-    include_l0_in_prompt: true    # also append recent L0 cases to the agent prompt
-    max_l0_recent: 40             # how many recent L0 to inject into the prompt
+    export_include_l0: true    # include L0 in the final exported Agent prompt
+    export_max_l0: 40          # final-export cap; unrelated to rollout retrieval
     experience_save_path: workspace/hierarchical_experiences/skillsbench_practice.json
     clustering_audit_path: workspace/hierarchical_experiences/skillsbench_practice.clusters.jsonl
 
@@ -102,18 +102,15 @@ evaluation:
   data:
     dataset: "SkillsBench-v1.1-FamilyHoldout-SelfContained-Eval"
   skillsbench:
+    enabled: true
+    inject_curated_skills: false
+    task_timeout_sec: 900
+    max_agent_iterations: 30
+    env_build_timeout_multiplier: 3.0
+    docker_cleanup_after_task: true
+    docker_cleanup_builder_every_n: 10
     experience_condition: clustered
     train_dataset_for_overlap_check: "SkillsBench-v1.1-FamilyHoldout-SelfContained-Train"
     require_disjoint_train_eval: true
     task_split_manifest_path: configs/data/skillsbench/skillsbench_v1_1_task_splits.json
     task_split_name: family_holdout_self_contained_v1
-
-# SkillsBench harbor settings (inherited by evaluation sub-config but can override here)
-skillsbench:
-  enabled: true
-  inject_curated_skills: false
-  task_timeout_sec: 900
-  max_agent_iterations: 30
-  env_build_timeout_multiplier: 3.0
-  docker_cleanup_after_task: true
-  docker_cleanup_builder_every_n: 10

@@ -73,6 +73,9 @@ class BaseLLMJudgeProcesser(BaseProcesser):
             **MetricsUtils.calculate_level_pass_at_k_metrics(samples, k=self.config.pass_k),
         }
 
+    async def cleanup(self) -> None:
+        await self.judge_client.close()
+
     def _get_judge_messages(self, question: str, response: str, correct_answer: str) -> list:
         if self.name not in JUDGE_PROMPT_MAP:
             logger.warning(f"Judge prompt for {self.name} is not implemented! Using default judge prompt.")

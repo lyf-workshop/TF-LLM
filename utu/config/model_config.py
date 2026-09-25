@@ -24,7 +24,13 @@ class ModelProviderConfig(ConfigBaseModel):
 class ModelSettingsConfig(ConfigBaseModel, ModelSettings):
     """ModelSettings in openai-agents"""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    # ModelSettings has its own pydantic configuration, therefore repeat the
+    # strict ConfigBaseModel contract instead of accidentally overriding it.
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        extra="forbid",
+        validate_assignment=True,
+    )
 
 
 class ModelParamsConfig(ConfigBaseModel):

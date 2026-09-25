@@ -6,7 +6,7 @@
 
 ## 数据与状态
 
-经验文件使用 `schema_version: 2`，每条记录至少包含稳定 `id`、`level`、`content`、
+经验文件使用当前 `schema_version: 4`，每条记录至少包含稳定 `id`、`level`、`content`、
 来源任务与 rollout、可用的分类元数据、真实 `parent_ids`、`cluster_id`、
 `aggregation_status`、创建时间和版本。L1 的 `source_l0_ids` 是直接 L0 父级；L2 的
 `source_l1_ids` 是直接 L1 父级，同时保存可传递追踪的 `source_l0_ids`。
@@ -38,9 +38,10 @@ pending L0/L1
   -> 原子保存子记录和父级状态
 ```
 
-仓库没有既有 embedding 依赖，因此默认 `hashing` provider 是本地、无密钥、确定性的
-哈希文本向量。它适合复现和离线运行，但语义能力有限。`ExperienceClusterer` 接受实现
-`embed(texts)` 的 provider，可在不改聚类算法的情况下换成本地向量模型或托管 embedding。
+正式配置默认使用固定 revision 的 `sentence_transformer` provider；`hashing` 仅作为本地、
+无密钥、确定性的词法测试基线保留。它适合复现和离线运行，但语义能力有限。
+`ExperienceClusterer` 接受实现 `embed(texts)` 的 provider，可在不改聚类算法的情况下换成本地
+向量模型或托管 embedding。
 
 硬约束字段在双方都有值且不同的情况下禁止合并；字段缺失时回退到语义聚类，并在审计记录
 中写入元数据完整度。软约束一致会小幅提高得分，不一致会更明显地降低得分。
@@ -52,8 +53,7 @@ practice:
   hierarchical_learning:
     enabled: true
     clustering_enabled: true
-    clustering_method: agglomerative
-    embedding_provider: hashing
+    embedding_provider: sentence_transformer
     l0_similarity_threshold: 0.80
     l1_similarity_threshold: 0.75
     min_l0_per_l1: 5
@@ -63,7 +63,7 @@ practice:
     hard_constraint_fields: [task_stage, failure_mode]
     soft_constraint_fields: [domain, task_family, tool_type, strategy_type]
     random_seed: 42
-    aggregation_temperature: 0.2
+    aggregation_temperature: 0.0
     experience_save_path: workspace/hierarchical_experiences/example.json
     clustering_audit_path: workspace/hierarchical_experiences/example.clusters.jsonl
 ```
@@ -73,9 +73,9 @@ practice:
 最多约 20 个任务，因此 `max_cluster_size: 20` 可避免一次聚合超过整轮规模。这些值是初始
 假设，必须结合审计分布和下游成功率调整。
 
-旧配置名 `l1_aggregation_threshold`、`l2_aggregation_threshold` 仍可读取，分别映射到新的
-最小簇规模。设置 `clustering_enabled: false` 后使用原有的生成顺序分组，供消融实验使用；
-不足最小规模的尾部仍保持 pending，不会生成无效单条经验。
+配置只保留当前运行时实际消费的字段；旧的层级阈值别名和旧的聚类方法字段不再属于配置
+契约。设置 `clustering_enabled: false` 后使用原有的生成顺序分组，供消融实验使用；不足
+最小规模的尾部仍保持 pending，不会生成无效单条经验。
 
 ## 审计与 A/B 消融
 

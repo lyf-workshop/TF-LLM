@@ -7,8 +7,10 @@ import base64
 import contextlib
 import glob
 import io
+import multiprocessing
 import os
 import re
+import time
 import traceback
 from typing import TYPE_CHECKING
 
@@ -32,13 +34,16 @@ if TYPE_CHECKING:
 
 # Used to clean ANSI escape sequences
 ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
-MAX_MEMORY_GB = 16
-CODE_HEADER = f"""
-import resource
 try:
+    MAX_MEMORY_GB = max(1, min(8, int(os.getenv("UTU_PYTHON_TOOL_MEMORY_GB", "2"))))
+except ValueError:
+    MAX_MEMORY_GB = 2
+CODE_HEADER = f"""
+try:
+    import resource
     memory_limit_bytes = {MAX_MEMORY_GB * 1024 * 1024 * 1024}
     resource.setrlimit(resource.RLIMIT_AS, (memory_limit_bytes, memory_limit_bytes))
-except (ValueError, resource.error):
+except (ImportError, ValueError, OSError):
     pass
 """
 
@@ -79,7 +84,18 @@ def execute_python_code_sync(code: str, workdir: str):
         error_output = io.StringIO()
 
         with contextlib.redirect_stdout(output), contextlib.redirect_stderr(error_output):
-            shell.run_cell(code_clean)
+            execution_result = shell.run_cell(code_clean)
+
+            execution_error = getattr(execution_result, "error_in_exec", None)
+            if execution_error is None:
+                execution_error = getattr(execution_result, "error_before_exec", None)
+            if execution_error is not None:
+                traceback.print_exception(
+                    type(execution_error),
+                    execution_error,
+                    execution_error.__traceback__,
+                    file=error_output,
+                )
 
             if plt.get_fignums():
                 img_buffer = io.BytesIO()
@@ -115,7 +131,7 @@ def execute_python_code_sync(code: str, workdir: str):
         except Exception:  # pylint: disable=broad-except
             pass
 
-        success = True
+        success = execution_error is None
         if "Error" in stderr_result or ("Error" in stdout_result and "Traceback" in stdout_result):
             success = False
         message = "Code execution completed, no output"
@@ -143,25 +159,94 @@ def execute_python_code_sync(code: str, workdir: str):
         os.chdir(original_dir)
 
 
-async def execute_python_code_async(code: str, workdir: str, timeout: int = 30) -> dict:
-    loop = asyncio.get_running_loop()
+def _execute_python_code_worker(code: str, workdir: str, connection) -> None:
+    """Run user code in a child process and return a serializable result."""
+
     try:
-        return await asyncio.wait_for(
-            loop.run_in_executor(
-                None,  # Use the default thread pool executor
-                execute_python_code_sync,
-                code,
-                str(workdir),
-            ),
-            timeout=timeout,
+        connection.send(execute_python_code_sync(code, workdir))
+    except BaseException as exc:  # pragma: no cover - exercised through process failures
+        connection.send(
+            {
+                "success": False,
+                "message": f"Code execution failed: {exc}",
+                "status": False,
+                "files": [],
+                "error": repr(exc),
+            }
         )
-    except TimeoutError:
+    finally:
+        connection.close()
+
+
+async def execute_python_code_async(code: str, workdir: str, timeout: int = 30) -> dict:
+    """Execute code in an isolated process so timeout can terminate user code.
+
+    Cancelling a coroutine backed by ``run_in_executor`` does not stop the
+    worker thread.  A user program that loops or blocks would therefore keep
+    consuming memory and executor capacity after its timeout.  A process can
+    be terminated and reaped reliably on both Linux and Windows.
+    """
+
+    context = multiprocessing.get_context("spawn")
+    parent_connection, child_connection = context.Pipe(duplex=False)
+    process = context.Process(
+        target=_execute_python_code_worker,
+        args=(code, str(workdir), child_connection),
+        daemon=True,
+    )
+
+    started = False
+    try:
+        process.start()
+        started = True
+        child_connection.close()
+        deadline = time.monotonic() + max(0.0, float(timeout))
+
+        while True:
+            if parent_connection.poll():
+                result = parent_connection.recv()
+                process.join(timeout=1)
+                return result
+            if not process.is_alive():
+                process.join(timeout=1)
+                return {
+                    "success": False,
+                    "message": "Code execution process exited without a result",
+                    "status": False,
+                    "files": [],
+                    "error": f"child process exit code: {process.exitcode}",
+                }
+            if time.monotonic() >= deadline:
+                process.terminate()
+                process.join(timeout=1)
+                if process.is_alive():
+                    process.kill()
+                    process.join(timeout=1)
+                return {
+                    "success": False,
+                    "stdout": "",
+                    "stderr": "",
+                    "status": False,
+                    "output": "",
+                    "files": [],
+                    "error": f"Code execution timed out ({timeout} seconds)",
+                }
+            await asyncio.sleep(0.02)
+    except Exception as exc:
+        if started and process.is_alive():
+            process.terminate()
+        if started:
+            process.join(timeout=1)
         return {
             "success": False,
-            "stdout": "",
-            "stderr": "",
+            "message": f"Code execution process failed: {exc}",
             "status": False,
-            "output": "",
             "files": [],
-            "error": f"Code execution timed out ({timeout} seconds)",
+            "error": repr(exc),
         }
+    finally:
+        child_connection.close()
+        parent_connection.close()
+        if started and process.is_alive():
+            process.terminate()
+            process.join(timeout=1)

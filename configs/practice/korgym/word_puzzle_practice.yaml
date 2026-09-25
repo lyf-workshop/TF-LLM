@@ -31,13 +31,12 @@ practice:
   # Hierarchical learning settings (must be under practice!)
   hierarchical_learning:
     enabled: true
-    l1_aggregation_threshold: 5
-    l2_aggregation_threshold: 3
-    max_l0_per_game: 1
-    max_l0_recent: 50
-    include_l0_in_prompt: true
+    min_l0_per_l1: 5
+    min_l1_per_l2: 3
+    max_l0_per_problem: 1
+    export_max_l0: 50
+    export_include_l0: true
     experience_save_path: workspace/hierarchical_experiences/word_puzzle_practice.json
-    agent_save_path: configs/agents/practice/word_puzzle_practice_agent.yaml
 
 # Data Arguments  
 data:
@@ -50,10 +49,5 @@ korgym:
   game_host: "localhost"
   game_port: 8775
   level: 3
-  num_train_seeds: 100
-  eval_seeds_start: 1
-  eval_seeds_end: 50
-  train_seeds_start: 51
-  train_seeds_end: 150
   max_rounds: 1
 

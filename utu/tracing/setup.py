@@ -40,7 +40,10 @@ def setup_otel_tracing(
     endpoint = endpoint or EnvUtils.get_env("PHOENIX_ENDPOINT", "")
     project_name = project_name or EnvUtils.get_env("PHOENIX_PROJECT_NAME", "")
     if not endpoint or not project_name:
-        logger.warning("PHOENIX_ENDPOINT or PHOENIX_PROJECT_NAME is not set! Skipping OpenTelemetry tracing.")
+        # Phoenix is optional for local and reproducibility-focused runs.  Its
+        # absence changes observability only, so do not report it as a runtime
+        # warning that can be mistaken for a rollout or learning failure.
+        logger.info("Phoenix tracing is not configured; continuing without OpenTelemetry export.")
         set_tracing_disabled(True)  # we disable the openai's default tracing
         return
 

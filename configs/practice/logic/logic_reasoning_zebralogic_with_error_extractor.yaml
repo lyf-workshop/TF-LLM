@@ -25,7 +25,6 @@ practice:
     identifying common reasoning errors (contradictions, constraint violations, reasoning gaps),
     and learning from concrete error examples extracted from structured reasoning processes.
   num_experiences_per_query: 1
-  verify_module: "utu.practice.verify.logic_error_extractor"  # Use new error extractor
 
 # Data Arguments
 data:

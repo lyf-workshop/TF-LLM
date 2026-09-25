@@ -1,7 +1,7 @@
 # @package _global_
 # Validated template for AFM_web_RL -> WebWalkerQA experience learning.
 defaults:
-  - /eval/web/web@evaluation
+  - /eval/web/web@runtime
   - _self_
 
 exp_id: "template_webwalkerqa_afm"
@@ -11,10 +11,12 @@ practice:
   batch_size: 20
   grpo_n: 3
   rollout_concurrency: 8
+  rollout_max_retries: 2
   rollout_temperature: 0.7
   rollout_data_truncate: 100
   task_timeout: 1800
   shuffle_data: true
+  resume_from_hierarchy: false
   do_eval: false
   eval_strategy: "epoch"
   agent_objective: |
@@ -28,8 +30,9 @@ practice:
 
   hierarchical_learning:
     enabled: true
+    upper_pool_update_mode: clustered
+    candidate_review_scope: retrieval
     clustering_enabled: true
-    clustering_method: agglomerative
     embedding_provider: sentence_transformer
     embedding_model_name: sentence-transformers/all-MiniLM-L6-v2
     embedding_model_revision: c9745ed1d9f207416be6d2e6f8de32d1f16199bf
@@ -40,7 +43,8 @@ practice:
     embedding_local_files_only: true
     l0_similarity_threshold: 0.60
     l1_similarity_threshold: 0.55
-    similarity_thresholds_provisional: true
+    l0_similarity_threshold_provisional: true
+    l1_similarity_threshold_provisional: true
     allow_provisional_aggregation: false
     min_l0_per_l1: 5
     min_l1_per_l2: 3
@@ -56,14 +60,10 @@ practice:
     l0_review_temperature: 0.0
     l0_review_retrieval: semantic
     max_l0_per_problem: 0
-    include_l0_in_prompt: true
-    max_l0_recent: 20
+    export_include_l0: true
+    export_max_l0: null
     experience_save_path: workspace/hierarchical_experiences/template_webwalkerqa_afm.json
     clustering_audit_path: workspace/hierarchical_experiences/template_webwalkerqa_afm.clusters.jsonl
 
 data:
   practice_dataset_name: "AFM_web_RL"
-
-evaluation:
-  concurrency: 8
-  judge_concurrency: 8

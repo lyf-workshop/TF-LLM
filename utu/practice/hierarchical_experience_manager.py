@@ -1,10 +1,12 @@
-"""Restart-safe L0/L1/L2 experience aggregation with deterministic clustering."""
+"""Restart-safe L0/L1/L2 experience pool maintenance."""
 
 from __future__ import annotations
 
 import asyncio
 import hashlib
 import json
+import math
+import os
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
@@ -34,6 +36,7 @@ from .experience_models import (
     ExperienceRecord,
     ExperienceReviewDecision,
     L0CandidateRecord,
+    PairedValidationResult,
     experience_output_language_instruction,
     stable_experience_id,
     stable_l0_candidate_id,
@@ -47,6 +50,7 @@ logger = get_logger(__name__)
 SCHEMA_VERSION = snapshot.SCHEMA_VERSION
 STRICT_SNAPSHOT_VERSION = snapshot.STRICT_SNAPSHOT_VERSION
 UPPER_CANDIDATE_GENERATOR_VERSION = "hierarchical-aggregate-candidate-v2"
+STACKED_POOL_CANDIDATE_GENERATOR_VERSION = "stacked-pool-candidate-v1"
 METADATA_FIELDS = (
     "domain",
     "task_family",
@@ -94,13 +98,12 @@ class HierarchicalExperienceManager:
         self.h_config = hierarchical_config
         self.agent_objective = agent_objective
         self.learning_objective = learning_objective
-        self.experience_output_language = self._cfg(
-            "experience_output_language", "same_as_input"
-        )
+        self.experience_output_language = self._cfg("experience_output_language", "same_as_input")
         self.experience_output_language_instruction = experience_output_language_instruction(
             self.experience_output_language
         )
 
+        self._owns_llm = llm is None
         if llm is None:
             self.llm = SimplifiedAsyncOpenAI(**config.model.model_provider.model_dump())
             self.model_params = config.model.model_params.model_dump()
@@ -141,17 +144,18 @@ class HierarchicalExperienceManager:
                 )
         self.clusterer = ExperienceClusterer(
             embedding_provider,
-            method=self._cfg("clustering_method", "agglomerative"),
             max_cluster_size=self._cfg("max_cluster_size", 20),
             use_metadata_constraints=self._cfg("use_metadata_constraints", True),
-            hard_constraint_fields=self._cfg(
-                "hard_constraint_fields", list(DEFAULT_HARD_CONSTRAINT_FIELDS)
-            ),
+            hard_constraint_fields=self._cfg("hard_constraint_fields", list(DEFAULT_HARD_CONSTRAINT_FIELDS)),
             soft_constraint_fields=self._cfg(
                 "soft_constraint_fields",
                 list(DEFAULT_CONFIGURED_SOFT_CONSTRAINT_FIELDS),
             ),
             random_seed=self._cfg("random_seed", 42),
+            strategy_aware_l0_clustering=bool(self._cfg("strategy_aware_l0_clustering", False)),
+            l0_strategy_compatibility_threshold=float(self._cfg("l0_strategy_compatibility_threshold", 0.60)),
+            l0_strategy_fallback_threshold=float(self._cfg("l0_strategy_fallback_threshold", 0.78)),
+            l0_strategy_ignore_failure_mode=bool(self._cfg("l0_strategy_ignore_failure_mode", True)),
         )
 
         self._l0_records: dict[str, ExperienceRecord] = {}
@@ -165,15 +169,43 @@ class HierarchicalExperienceManager:
         self._review_lock = asyncio.Lock()
         self._load_experiences()
 
+    async def cleanup(self) -> None:
+        """Release model resources owned by this manager."""
+
+        if self._owns_llm:
+            close = getattr(self.llm, "close", None)
+            if close is not None:
+                await close()
+        provider = getattr(self.clusterer, "embedding_provider", None)
+        if hasattr(provider, "_model"):
+            provider._model = None
+
     def _cfg(self, name: str, default: Any) -> Any:
         return getattr(self.h_config, name, default)
 
+    def _uses_stacked_upper_pools(self) -> bool:
+        return self._cfg("upper_pool_update_mode", "clustered") == "stacked_pool"
+
+    def _hierarchy_model_params(self, *, include_aggregation_max_tokens: bool = False) -> dict[str, Any]:
+        """Return provider parameters shared by generation and candidate review."""
+
+        params = dict(self.model_params)
+        if include_aggregation_max_tokens:
+            max_tokens = self._cfg("aggregation_max_tokens", None)
+            if max_tokens is not None:
+                params["max_tokens"] = int(max_tokens)
+        if bool(self._cfg("aggregation_disable_thinking", False)):
+            existing_extra_body = params.get("extra_body") or {}
+            if not isinstance(existing_extra_body, dict):
+                raise ValueError("hierarchy model extra_body must be a mapping")
+            params["extra_body"] = {
+                **existing_extra_body,
+                "enable_thinking": False,
+            }
+        return params
+
     def _similarity_threshold_is_provisional(self, source_level: ExperienceLevel) -> bool:
         """Return the calibration gate for the level being clustered.
-
-        ``similarity_thresholds_provisional`` predates per-layer calibration.
-        Keep it as a fallback for lightweight/legacy config objects which have
-        not passed through ``HierarchicalLearningConfig`` validation.
         """
 
         field_by_level = {
@@ -184,21 +216,22 @@ class HierarchicalExperienceManager:
         if field_name is None:
             return False
         layer_value = self._cfg(field_name, None)
-        if layer_value is not None:
-            return bool(layer_value)
-        return bool(self._cfg("similarity_thresholds_provisional", False))
+        return bool(layer_value)
 
     def _candidate_review_threshold_is_gated(
         self,
-        candidate_level: ExperienceLevel,
+        candidate: ExperienceCandidateRecord,
     ) -> bool:
         """Prevent every upper-candidate review path from bypassing calibration."""
+
+        if candidate.generator_version == STACKED_POOL_CANDIDATE_GENERATOR_VERSION:
+            return False
 
         source_level_by_candidate: dict[ExperienceLevel, ExperienceLevel] = {
             "L1": "L0",
             "L2": "L1",
         }
-        source_level = source_level_by_candidate.get(candidate_level)
+        source_level = source_level_by_candidate.get(candidate.level)
         return bool(
             source_level is not None
             and self._cfg("clustering_enabled", True)
@@ -208,21 +241,37 @@ class HierarchicalExperienceManager:
 
     @property
     def _min_l0_per_l1(self) -> int:
-        return int(
-            self._cfg(
-                "min_l0_per_l1",
-                self._cfg("l1_aggregation_threshold", 5),
-            )
-        )
+        return int(self._cfg("min_l0_per_l1", 5))
+
+    @property
+    def _min_l0_per_l1_candidate(self) -> int:
+        configured = self._cfg("min_l0_per_l1_candidate", None)
+        return int(configured if configured is not None else self._min_l0_per_l1)
 
     @property
     def _min_l1_per_l2(self) -> int:
-        return int(
-            self._cfg(
-                "min_l1_per_l2",
-                self._cfg("l2_aggregation_threshold", 3),
-            )
-        )
+        return int(self._cfg("min_l1_per_l2", 3))
+
+    @property
+    def _min_distinct_source_tasks_per_l1(self) -> int:
+        return int(self._cfg("min_distinct_source_tasks_per_l1", 1))
+
+    @property
+    def _min_distinct_source_tasks_per_l1_candidate(self) -> int:
+        configured = self._cfg("min_distinct_source_tasks_per_l1_candidate", None)
+        return int(configured if configured is not None else self._min_distinct_source_tasks_per_l1)
+
+    def _new_upper_validation_status(
+        self,
+        level: ExperienceLevel,
+        *,
+        parent_count: int,
+    ) -> str:
+        if level == "L1" and bool(self._cfg("l1_validation_required", False)):
+            return "provisional"
+        if level == "L2" and self._uses_stacked_upper_pools() and parent_count < self._min_l1_per_l2:
+            return "provisional"
+        return "validated"
 
     # ------------------------------------------------------------------
     # Persistence and migration
@@ -288,9 +337,7 @@ class HierarchicalExperienceManager:
                         records[record_id] = record.model_copy(
                             update={
                                 "lifecycle_status": "needs_review",
-                                "needs_review_reason": (
-                                    f"loaded {level} has no traceable direct parents"
-                                ),
+                                "needs_review_reason": (f"loaded {level} has no traceable direct parents"),
                             }
                         )
                     continue
@@ -307,8 +354,7 @@ class HierarchicalExperienceManager:
                     invalid_reasons.append(f"inactive parents={inactive}")
                 if not (missing or inactive):
                     current_versions = {
-                        parent_id: self._record_version_fingerprint(lower[parent_id])
-                        for parent_id in parent_ids
+                        parent_id: self._record_version_fingerprint(lower[parent_id]) for parent_id in parent_ids
                     }
                     current_source_fingerprint = self._source_fingerprint(level, current_versions)
                     if schema_version < SCHEMA_VERSION:
@@ -323,8 +369,7 @@ class HierarchicalExperienceManager:
                             invalid_reasons.append("parent version fingerprint changed")
                         if (
                             record.source_version_fingerprint
-                            and record.source_version_fingerprint
-                            != current_source_fingerprint
+                            and record.source_version_fingerprint != current_source_fingerprint
                         ):
                             invalid_reasons.append("source version fingerprint changed")
                         if not invalid_reasons:
@@ -337,9 +382,7 @@ class HierarchicalExperienceManager:
                             records[record_id] = record
                     else:
                         if set(record.parent_version_fingerprints) != set(parent_ids):
-                            invalid_reasons.append(
-                                "parent version fingerprint keys do not match parent_ids"
-                            )
+                            invalid_reasons.append("parent version fingerprint keys do not match parent_ids")
                         elif current_versions != record.parent_version_fingerprints:
                             invalid_reasons.append("parent version fingerprint changed")
                         if record.source_version_fingerprint != current_source_fingerprint:
@@ -349,8 +392,7 @@ class HierarchicalExperienceManager:
                         update={
                             "lifecycle_status": "needs_review",
                             "needs_review_reason": (
-                                f"loaded {level} has invalid current sources: "
-                                + "; ".join(invalid_reasons)
+                                f"loaded {level} has invalid current sources: " + "; ".join(invalid_reasons)
                             ),
                         }
                     )
@@ -383,7 +425,11 @@ class HierarchicalExperienceManager:
 
         if schema_version >= SCHEMA_VERSION:
             return
-        stores = {"L0": self._l0_records, "L1": self._l1_records, "L2": self._l2_records}
+        stores = {
+            "L0": self._l0_records,
+            "L1": self._l1_records,
+            "L2": self._l2_records,
+        }
         archives = {
             "L0": self._l0_archive,
             "L1": self._l1_archive,
@@ -393,38 +439,32 @@ class HierarchicalExperienceManager:
             if candidate.status != "committed":
                 if candidate.resolution is not None or candidate.result_experience_id is not None:
                     raise ValueError(
-                        f"cannot migrate uncommitted {candidate.level} candidate {candidate.id} "
-                        "with a committed result"
+                        f"cannot migrate uncommitted {candidate.level} candidate {candidate.id} with a committed result"
                     )
                 continue
             decision = candidate.review_decision
             if decision is None:
                 raise ValueError(
-                    f"cannot migrate committed {candidate.level} candidate {candidate.id} "
-                    "without its review decision"
+                    f"cannot migrate committed {candidate.level} candidate {candidate.id} without its review decision"
                 )
             adopted = decision.action in {"ADD", "UPDATE"}
             result_id = candidate.result_experience_id
             if not adopted and result_id is not None:
-                raise ValueError(
-                    f"cannot migrate non-adopted {candidate.level} candidate {candidate.id} "
-                    "with a result"
-                )
+                raise ValueError(f"cannot migrate non-adopted {candidate.level} candidate {candidate.id} with a result")
             if adopted and result_id is None:
                 reverse_matches = [
                     record
-                    for record in (*stores[candidate.level].values(), *archives[candidate.level].values())
+                    for record in (
+                        *stores[candidate.level].values(),
+                        *archives[candidate.level].values(),
+                    )
                     if candidate.id in record.review_candidate_ids
                 ]
                 if decision.action == "ADD":
-                    reverse_matches = [
-                        record for record in reverse_matches if record.supersedes_id is None
-                    ]
+                    reverse_matches = [record for record in reverse_matches if record.supersedes_id is None]
                 else:
                     reverse_matches = [
-                        record
-                        for record in reverse_matches
-                        if record.supersedes_id == decision.target_id
+                        record for record in reverse_matches if record.supersedes_id == decision.target_id
                     ]
                 if len(reverse_matches) != 1:
                     raise ValueError(
@@ -442,7 +482,11 @@ class HierarchicalExperienceManager:
     def _validate_loaded_candidate_results(self, _schema_version: int) -> None:
         """Reject v4 review state that could otherwise suppress work forever."""
 
-        stores = {"L0": self._l0_records, "L1": self._l1_records, "L2": self._l2_records}
+        stores = {
+            "L0": self._l0_records,
+            "L1": self._l1_records,
+            "L2": self._l2_records,
+        }
         archives = {
             "L0": self._l0_archive,
             "L1": self._l1_archive,
@@ -455,68 +499,44 @@ class HierarchicalExperienceManager:
                     or candidate.resolution is not None
                     or candidate.result_experience_id is not None
                 ):
-                    raise ValueError(
-                        f"uncommitted {candidate.level} candidate {candidate.id} has a committed result"
-                    )
+                    raise ValueError(f"uncommitted {candidate.level} candidate {candidate.id} has a committed result")
                 continue
             decision = candidate.review_decision
             if decision is None:
                 raise ValueError(f"committed {candidate.level} candidate {candidate.id} has no decision")
             if decision.candidate_id != candidate.id:
                 raise ValueError(
-                    f"committed {candidate.level} candidate {candidate.id} has a decision for "
-                    f"{decision.candidate_id}"
+                    f"committed {candidate.level} candidate {candidate.id} has a decision for {decision.candidate_id}"
                 )
             if decision.level is not None and decision.level != candidate.level:
                 raise ValueError(
-                    f"committed {candidate.level} candidate {candidate.id} has decision "
-                    f"level={decision.level}"
+                    f"committed {candidate.level} candidate {candidate.id} has decision level={decision.level}"
                 )
             adopted = decision.action in {"ADD", "UPDATE"}
             expected_resolution = "adopted" if adopted else "not_adopted"
             if candidate.resolution != expected_resolution:
-                raise ValueError(
-                    f"committed {candidate.level} candidate {candidate.id} has inconsistent resolution"
-                )
+                raise ValueError(f"committed {candidate.level} candidate {candidate.id} has inconsistent resolution")
             if not adopted:
                 if candidate.result_experience_id is not None:
-                    raise ValueError(
-                        f"non-adopted {candidate.level} candidate {candidate.id} has a result"
-                    )
+                    raise ValueError(f"non-adopted {candidate.level} candidate {candidate.id} has a result")
                 continue
             result_id = candidate.result_experience_id
-            result = stores[candidate.level].get(str(result_id)) or archives[candidate.level].get(
-                str(result_id)
-            )
+            result = stores[candidate.level].get(str(result_id)) or archives[candidate.level].get(str(result_id))
             if result is None:
                 raise ValueError(
                     f"adopted {candidate.level} candidate {candidate.id} references missing result {result_id}"
                 )
             if candidate.id not in result.review_candidate_ids:
-                raise ValueError(
-                    f"result {result.id} does not reference adopted candidate {candidate.id}"
-                )
+                raise ValueError(f"result {result.id} does not reference adopted candidate {candidate.id}")
             if decision.action == "ADD" and result.supersedes_id is not None:
-                raise ValueError(
-                    f"ADD candidate {candidate.id} result {result.id} is not a lineage root"
-                )
+                raise ValueError(f"ADD candidate {candidate.id} result {result.id} is not a lineage root")
             if decision.action == "UPDATE":
                 target_id = str(decision.target_id)
                 target = archives[candidate.level].get(target_id)
-                if (
-                    result.supersedes_id != target_id
-                    or target is None
-                    or target.superseded_by_id != result.id
-                ):
-                    raise ValueError(
-                        f"UPDATE candidate {candidate.id} has inconsistent supersession lineage"
-                    )
-            if candidate.level != "L0" and not set(candidate.parent_ids).issubset(
-                set(result.parent_ids)
-            ):
-                raise ValueError(
-                    f"result {result.id} dropped candidate parents for {candidate.id}"
-                )
+                if result.supersedes_id != target_id or target is None or target.superseded_by_id != result.id:
+                    raise ValueError(f"UPDATE candidate {candidate.id} has inconsistent supersession lineage")
+            if candidate.level != "L0" and not set(candidate.parent_ids).issubset(set(result.parent_ids)):
+                raise ValueError(f"result {result.id} dropped candidate parents for {candidate.id}")
 
     def _load_experiences(self) -> None:
         save_path = Path(self.h_config.experience_save_path)
@@ -527,9 +547,7 @@ class HierarchicalExperienceManager:
                 data = json.load(file)
             schema_version = int(data.get("schema_version", 1))
             if schema_version > SCHEMA_VERSION:
-                raise ValueError(
-                    f"snapshot schema {schema_version} is newer than supported schema {SCHEMA_VERSION}"
-                )
+                raise ValueError(f"snapshot schema {schema_version} is newer than supported schema {SCHEMA_VERSION}")
             strict_snapshot = schema_version >= STRICT_SNAPSHOT_VERSION
             snapshot_language = data.get("experience_output_language")
             has_experience_state = any(
@@ -559,18 +577,12 @@ class HierarchicalExperienceManager:
                     f"current={self.experience_output_language!r}"
                 )
             self._snapshot_provenance = {
-                key: str(data[key])
-                for key in ("source_snapshot_file_sha256", "source_l0_sha256")
-                if data.get(key)
+                key: str(data[key]) for key in ("source_snapshot_file_sha256", "source_l0_sha256") if data.get(key)
             }
             l0_done = set(self._normalise_ids(data.get("l0_aggregated_ids")))
             l1_done = set(self._normalise_ids(data.get("l1_aggregated_ids")))
-            self._l0_records = self._load_level(
-                data.get("l0_experiences", {}), "L0", l0_done, strict=strict_snapshot
-            )
-            self._l0_archive = self._load_level(
-                data.get("l0_archive", {}), "L0", set(), strict=strict_snapshot
-            )
+            self._l0_records = self._load_level(data.get("l0_experiences", {}), "L0", l0_done, strict=strict_snapshot)
+            self._l0_archive = self._load_level(data.get("l0_archive", {}), "L0", set(), strict=strict_snapshot)
             candidate_groups = (
                 ("L0", data.get("l0_candidates", [])),
                 ("L1", data.get("l1_candidates", [])),
@@ -588,18 +600,10 @@ class HierarchicalExperienceManager:
                         raise ValueError(f"conflicting duplicate candidate ID: {candidate_id}")
                     loaded_candidates[candidate_id] = candidate
             self._candidate_records = loaded_candidates
-            self._l1_records = self._load_level(
-                data.get("l1_experiences", {}), "L1", l1_done, strict=strict_snapshot
-            )
-            self._l1_archive = self._load_level(
-                data.get("l1_archive", {}), "L1", set(), strict=strict_snapshot
-            )
-            self._l2_records = self._load_level(
-                data.get("l2_experiences", {}), "L2", set(), strict=strict_snapshot
-            )
-            self._l2_archive = self._load_level(
-                data.get("l2_archive", {}), "L2", set(), strict=strict_snapshot
-            )
+            self._l1_records = self._load_level(data.get("l1_experiences", {}), "L1", l1_done, strict=strict_snapshot)
+            self._l1_archive = self._load_level(data.get("l1_archive", {}), "L1", set(), strict=strict_snapshot)
+            self._l2_records = self._load_level(data.get("l2_experiences", {}), "L2", set(), strict=strict_snapshot)
+            self._l2_archive = self._load_level(data.get("l2_archive", {}), "L2", set(), strict=strict_snapshot)
 
             if self.experience_output_language == "english":
                 for record in (
@@ -636,12 +640,12 @@ class HierarchicalExperienceManager:
                 "Loaded hierarchical experiences: candidates=%d active_L0=%d archived_L0=%d "
                 "active_L1=%d archived_L1=%d active_L2=%d archived_L2=%d",
                 len(self._candidate_records),
-                len(self._l0_records),
-                len(self._l0_archive),
-                len(self._l1_records),
-                len(self._l1_archive),
-                len(self._l2_records),
-                len(self._l2_archive),
+                sum(record.lifecycle_status == "active" for record in self._l0_records.values()),
+                sum(record.lifecycle_status == "inactive" for record in self._l0_archive.values()),
+                sum(record.lifecycle_status == "active" for record in self._l1_records.values()),
+                sum(record.lifecycle_status == "inactive" for record in self._l1_archive.values()),
+                sum(record.lifecycle_status == "active" for record in self._l2_records.values()),
+                sum(record.lifecycle_status == "inactive" for record in self._l2_archive.values()),
             )
         except Exception as error:  # noqa: BLE001
             # Existing state is authoritative.  Failing closed prevents a
@@ -653,7 +657,9 @@ class HierarchicalExperienceManager:
         return snapshot.ordered_records(records)
 
     @staticmethod
-    def _ordered_candidates(records: dict[str, ExperienceCandidateRecord]) -> list[dict[str, Any]]:
+    def _ordered_candidates(
+        records: dict[str, ExperienceCandidateRecord],
+    ) -> list[dict[str, Any]]:
         return snapshot.ordered_candidates(records)
 
     def _state_payload(
@@ -760,9 +766,7 @@ class HierarchicalExperienceManager:
             "review_candidate_ids",
         )
         canonical = {field_name: payload.get(field_name) for field_name in stable_fields}
-        return hashlib.sha256(
-            json.dumps(canonical, ensure_ascii=False, sort_keys=True).encode("utf-8")
-        ).hexdigest()
+        return hashlib.sha256(json.dumps(canonical, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
 
     @staticmethod
     def _source_fingerprint(
@@ -773,15 +777,15 @@ class HierarchicalExperienceManager:
             "target_level": target_level,
             "source_versions": dict(sorted(source_versions.items())),
         }
-        return hashlib.sha256(
-            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        ).hexdigest()
+        return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
     def _generation_fingerprint(
         self,
         target_level: ExperienceLevel,
         source_fingerprint: str,
         cluster_id: str,
+        *,
+        generator_version: str = UPPER_CANDIDATE_GENERATOR_VERSION,
     ) -> str:
         prompt_name = "L1_AGGREGATION_PROMPT" if target_level == "L1" else "L2_AGGREGATION_PROMPT"
         review_prompt_name = self._review_prompt_name(target_level)
@@ -790,16 +794,13 @@ class HierarchicalExperienceManager:
         safe_model_params = {
             key: value
             for key, value in sorted(self.model_params.items())
-            if not any(
-                marker in key.lower()
-                for marker in ("key", "token", "secret", "password", "authorization")
-            )
+            if not any(marker in key.lower() for marker in ("key", "token", "secret", "password", "authorization"))
         }
         payload = {
             "target_level": target_level,
             "source_fingerprint": source_fingerprint,
             "cluster_id": cluster_id,
-            "generator_version": UPPER_CANDIDATE_GENERATOR_VERSION,
+            "generator_version": generator_version,
             "schema_version": SCHEMA_VERSION,
             "aggregation_prompt": self.prompts.get(prompt_name),
             "review_prompt": self.prompts.get(review_prompt_name),
@@ -811,6 +812,8 @@ class HierarchicalExperienceManager:
             "model_provider_base_url": getattr(provider_config, "base_url", None),
             "model_params": safe_model_params,
             "aggregation_temperature": float(self._cfg("aggregation_temperature", 0.0)),
+            "aggregation_disable_thinking": bool(self._cfg("aggregation_disable_thinking", False)),
+            "aggregation_max_tokens": self._cfg("aggregation_max_tokens", None),
         }
         return hashlib.sha256(
             json.dumps(
@@ -904,9 +907,7 @@ class HierarchicalExperienceManager:
             "epoch": epoch if epoch is not None else payload.get("epoch"),
             "batch": batch if batch is not None else payload.get("batch"),
             "batch_fingerprint": (
-                batch_fingerprint
-                if batch_fingerprint is not None
-                else payload.get("batch_fingerprint")
+                batch_fingerprint if batch_fingerprint is not None else payload.get("batch_fingerprint")
             ),
             "generator_version": generator_version,
         }
@@ -921,7 +922,9 @@ class HierarchicalExperienceManager:
         return record.model_copy(update={"id": candidate_id})
 
     @staticmethod
-    def _metadata_coverage(records: Sequence[ExperienceRecord]) -> dict[str, dict[str, float | int]]:
+    def _metadata_coverage(
+        records: Sequence[ExperienceRecord],
+    ) -> dict[str, dict[str, float | int]]:
         total = len(records)
         coverage: dict[str, dict[str, float | int]] = {}
         for field_name in METADATA_FIELDS:
@@ -954,11 +957,7 @@ class HierarchicalExperienceManager:
     ) -> dict[str, int]:
         """Compatibility ingestion used only when candidate review is disabled."""
 
-        candidates = [
-            record
-            for item in (l0_candidates or [])
-            if (record := self._legacy_candidate_to_record(item))
-        ]
+        candidates = [record for item in (l0_candidates or []) if (record := self._legacy_candidate_to_record(item))]
         if not candidates:
             logger.info("L0 step %s: no candidates", step)
             return {"candidates": 0, "added": 0, "merged": 0, "skipped": 0}
@@ -994,7 +993,12 @@ class HierarchicalExperienceManager:
             skipped,
             len(self._l0_records),
         )
-        return {"candidates": len(candidates), "added": added, "merged": merged, "skipped": skipped}
+        return {
+            "candidates": len(candidates),
+            "added": added,
+            "merged": merged,
+            "skipped": skipped,
+        }
 
     @staticmethod
     def _review_sort_key(candidate: ExperienceCandidateRecord) -> tuple[Any, ...]:
@@ -1007,7 +1011,9 @@ class HierarchicalExperienceManager:
         )
 
     @staticmethod
-    def _candidate_identity_payload(candidate: ExperienceCandidateRecord) -> dict[str, Any]:
+    def _candidate_identity_payload(
+        candidate: ExperienceCandidateRecord,
+    ) -> dict[str, Any]:
         """Compatibility wrapper for the stable candidate identity payload."""
 
         return candidate_state.identity_payload(candidate)
@@ -1020,14 +1026,38 @@ class HierarchicalExperienceManager:
         self,
         candidate: ExperienceCandidateRecord,
     ) -> tuple[list[ExperienceRecord], str]:
-        return review_context.related_active(
+        related, scope = review_context.related_active(
             candidate,
             self._store(candidate.level),
             embedding_provider=self.clusterer.embedding_provider,
             full_pool_limit=int(self._cfg("l0_review_full_pool_limit", 50)),
             top_k=int(self._cfg("l0_review_top_k", 12)),
             retrieval_method=self._cfg("l0_review_retrieval", "semantic"),
+            review_scope=self._cfg("candidate_review_scope", "retrieval"),
         )
+        if candidate.level != "L0":
+            return related, scope
+
+        ignore_failure_mode = bool(self._cfg("l0_strategy_ignore_failure_mode", True))
+        compatible: list[ExperienceRecord] = []
+        for record in related:
+            candidate_stage = self._known_metadata(candidate.task_stage)
+            record_stage = self._known_metadata(record.task_stage)
+            if candidate_stage and record_stage and candidate_stage != record_stage:
+                continue
+            candidate_failure = self._known_metadata(candidate.failure_mode)
+            record_failure = self._known_metadata(record.failure_mode)
+            if (
+                not ignore_failure_mode
+                and candidate_failure
+                and record_failure
+                and candidate_failure != record_failure
+            ):
+                continue
+            compatible.append(record)
+        if len(compatible) != len(related):
+            scope = f"{scope};hard_metadata_compatible={len(compatible)}_of_{len(related)}"
+        return compatible, scope
 
     def _candidate_l0_review_view(
         self,
@@ -1121,9 +1151,7 @@ class HierarchicalExperienceManager:
         inactive = [parent.id for parent in parents if parent.lifecycle_status != "active"]
         if inactive:
             raise StaleCandidateError(f"candidate source records are no longer active: {inactive}")
-        current_versions = {
-            parent.id: self._record_version_fingerprint(parent) for parent in parents
-        }
+        current_versions = {parent.id: self._record_version_fingerprint(parent) for parent in parents}
         if current_versions != candidate.source_versions:
             raise StaleCandidateError("candidate source version fingerprint changed")
         current_source_fingerprint = self._source_fingerprint(candidate.level, current_versions)
@@ -1135,6 +1163,7 @@ class HierarchicalExperienceManager:
             candidate.level,
             current_source_fingerprint,
             candidate.cluster_id,
+            generator_version=candidate.generator_version,
         )
         if candidate.generation_fingerprint != expected_generation_fingerprint:
             raise StaleCandidateError(
@@ -1165,6 +1194,13 @@ class HierarchicalExperienceManager:
         candidate: ExperienceCandidateRecord,
         records: Sequence[ExperienceRecord],
     ) -> tuple[list[dict[str, Any]], set[str], list[ExperienceRecord]]:
+        if self._cfg("candidate_review_scope", "retrieval") == "full_pool":
+            return review_context.full_pool_review_views(
+                records,
+                max_chars=int(self._cfg("l0_review_max_supporting_evidence_chars", 40000)),
+                source_id_limit=int(self._cfg("l0_review_source_ids_per_item", 32)),
+                content_limit=int(self._cfg("l0_review_content_chars", 8000)),
+            )
         if candidate.level == "L0":
             return self._related_l0_review_views(records)
         return review_context.upper_related_review_views(
@@ -1183,13 +1219,9 @@ class HierarchicalExperienceManager:
         displayed_candidate_source_ids: set[str],
     ) -> ExperienceReviewDecision:
         if decision.candidate_id != candidate.id:
-            raise CandidateDecisionError(
-                f"candidate_id mismatch: expected {candidate.id}, got {decision.candidate_id}"
-            )
+            raise CandidateDecisionError(f"candidate_id mismatch: expected {candidate.id}, got {decision.candidate_id}")
         if decision.level is not None and decision.level != candidate.level:
-            raise CandidateDecisionError(
-                f"candidate level mismatch: expected {candidate.level}, got {decision.level}"
-            )
+            raise CandidateDecisionError(f"candidate level mismatch: expected {candidate.level}, got {decision.level}")
         if candidate.level != "L0" and decision.level != candidate.level:
             raise CandidateDecisionError(f"{candidate.level} review must declare its level")
         unexpected_evidence = sorted(set(decision.evidence_ids) - allowed_evidence_ids)
@@ -1205,12 +1237,8 @@ class HierarchicalExperienceManager:
             *candidate.source_l0_ids,
             *candidate.source_l1_ids,
         }
-        if decision.action in {"ADD", "UPDATE", "DELETE"} and not (
-            set(decision.evidence_ids) & candidate_evidence_ids
-        ):
-            raise CandidateDecisionError(
-                f"{decision.action} must cite the current candidate or one of its source IDs"
-            )
+        if decision.action in {"ADD", "UPDATE", "DELETE"} and not (set(decision.evidence_ids) & candidate_evidence_ids):
+            raise CandidateDecisionError(f"{decision.action} must cite the current candidate or one of its source IDs")
         if (
             decision.action in {"ADD", "UPDATE", "DELETE"}
             and displayed_candidate_source_ids
@@ -1226,24 +1254,21 @@ class HierarchicalExperienceManager:
         if decision.action in {"UPDATE", "DELETE"}:
             if decision.target_id not in related_ids:
                 raise CandidateDecisionError("target_id was not included in the review comparison set")
-            displayed_target = next(
-                record for record in related if record.id == decision.target_id
-            )
+            displayed_target = next(record for record in related if record.id == decision.target_id)
             target = self._store(candidate.level).get(str(decision.target_id))
             if target is None or target.lifecycle_status != "active":
-                raise CandidateDecisionError(
-                    f"target_id is not a current active {candidate.level} experience"
-                )
-            if self._record_version_fingerprint(target) != self._record_version_fingerprint(
-                displayed_target
-            ):
+                raise CandidateDecisionError(f"target_id is not a current active {candidate.level} experience")
+            if self._record_version_fingerprint(target) != self._record_version_fingerprint(displayed_target):
                 raise StaleCandidateError("review target version changed during decision")
             target_version_fingerprint = self._record_version_fingerprint(displayed_target)
             if candidate.level != "L0" and target.id not in set(decision.evidence_ids):
-                raise CandidateDecisionError(
-                    f"{decision.action} must cite the displayed target experience"
-                )
-            for field_name in ("failure_mode", "task_stage"):
+                raise CandidateDecisionError(f"{decision.action} must cite the displayed target experience")
+            hard_metadata_fields = ["task_stage"]
+            if candidate.level != "L0" or not bool(
+                self._cfg("l0_strategy_ignore_failure_mode", True)
+            ):
+                hard_metadata_fields.append("failure_mode")
+            for field_name in hard_metadata_fields:
                 candidate_value = self._known_metadata(getattr(candidate, field_name))
                 target_value = self._known_metadata(getattr(target, field_name))
                 if candidate_value and target_value and candidate_value != target_value:
@@ -1262,14 +1287,10 @@ class HierarchicalExperienceManager:
                     )
                 except ValueError as error:
                     raise CandidateDecisionError(str(error)) from error
-            return decision.model_copy(
-                update={"target_version_fingerprint": target_version_fingerprint}
-            )
+            return decision.model_copy(update={"target_version_fingerprint": target_version_fingerprint})
         if decision.action in {"ADD", "UPDATE"}:
             try:
-                structured = AggregatedExperienceContent.model_validate(
-                    decision.new_structured_content
-                )
+                structured = AggregatedExperienceContent.model_validate(decision.new_structured_content)
             except ValidationError as error:
                 raise CandidateDecisionError(
                     f"{candidate.level} ADD/UPDATE requires valid structured content: {error}"
@@ -1292,9 +1313,7 @@ class HierarchicalExperienceManager:
                     "new_structured_content": structured.model_dump(mode="json"),
                 }
             )
-        return decision.model_copy(
-            update={"target_version_fingerprint": target_version_fingerprint}
-        )
+        return decision.model_copy(update={"target_version_fingerprint": target_version_fingerprint})
 
     def _experience_from_candidate(
         self,
@@ -1320,21 +1339,15 @@ class HierarchicalExperienceManager:
                 # A revised experience now has evidence from both records. A
                 # conflicting soft label is no longer a valid single label.
                 metadata[field_name] = None
-        source_task_ids = sorted(
-            set(candidate.source_task_ids) | set(base.source_task_ids if base else [])
-        )
-        source_rollout_ids = sorted(
-            set(candidate.source_rollout_ids) | set(base.source_rollout_ids if base else [])
-        )
+        source_task_ids = sorted(set(candidate.source_task_ids) | set(base.source_task_ids if base else []))
+        source_rollout_ids = sorted(set(candidate.source_rollout_ids) | set(base.source_rollout_ids if base else []))
         provisional = ExperienceRecord(
             id="L0_pending_normalisation",
             level="L0",
             content=content,
             source_task_ids=source_task_ids,
             source_rollout_ids=source_rollout_ids,
-            review_candidate_ids=sorted(
-                set(base.review_candidate_ids if base else []) | {candidate.id}
-            ),
+            review_candidate_ids=sorted(set(base.review_candidate_ids if base else []) | {candidate.id}),
             aggregation_status="pending",
             lifecycle_status="active",
             **metadata,
@@ -1345,9 +1358,7 @@ class HierarchicalExperienceManager:
             identity_context=self._identity_context(provisional),
         )
         if base is None:
-            return provisional.model_copy(
-                update={"id": experience_id, "lineage_root_id": experience_id}
-            )
+            return provisional.model_copy(update={"id": experience_id, "lineage_root_id": experience_id})
         return provisional.model_copy(
             update={
                 "id": experience_id,
@@ -1366,9 +1377,7 @@ class HierarchicalExperienceManager:
     ) -> ExperienceRecord:
         if candidate.level == "L0":
             raise CandidateDecisionError("upper experience builder received an L0 candidate")
-        structured = AggregatedExperienceContent.model_validate(
-            decision.new_structured_content
-        )
+        structured = AggregatedExperienceContent.model_validate(decision.new_structured_content)
         lower_level = self._lower_level(candidate.level)
         source_store = self._store(lower_level)
         requested_ids = set(candidate.parent_ids)
@@ -1383,13 +1392,9 @@ class HierarchicalExperienceManager:
         missing_or_inactive = sorted(requested_ids - active_parent_ids)
         if missing_or_inactive:
             source_kind = "candidate or target" if base is not None else "candidate"
-            raise StaleCandidateError(
-                f"{source_kind} parents are missing or inactive: {missing_or_inactive}"
-            )
+            raise StaleCandidateError(f"{source_kind} parents are missing or inactive: {missing_or_inactive}")
         parent_ids = sorted(parent.id for parent in parents)
-        source_versions = {
-            parent.id: self._record_version_fingerprint(parent) for parent in parents
-        }
+        source_versions = {parent.id: self._record_version_fingerprint(parent) for parent in parents}
         source_fingerprint = self._source_fingerprint(candidate.level, source_versions)
         source_l0_ids: list[str]
         source_l1_ids: list[str]
@@ -1403,25 +1408,18 @@ class HierarchicalExperienceManager:
                     source_id
                     for parent in parents
                     for source_id in (parent.source_l0_ids or parent.parent_ids)
-                    if source_id in self._l0_records
-                    and self._l0_records[source_id].lifecycle_status == "active"
+                    if source_id in self._l0_records and self._l0_records[source_id].lifecycle_status == "active"
                 }
             )
         content = structured.render()
-        metadata = {
-            field_name: self._consensus(parents, field_name) for field_name in METADATA_FIELDS
-        }
+        metadata = {field_name: self._consensus(parents, field_name) for field_name in METADATA_FIELDS}
         provisional = ExperienceRecord(
             id=f"{candidate.level}_pending_normalisation",
             level=candidate.level,
             content=content,
             structured_content=structured,
-            source_task_ids=sorted(
-                {task_id for parent in parents for task_id in parent.source_task_ids}
-            ),
-            source_rollout_ids=sorted(
-                {rollout_id for parent in parents for rollout_id in parent.source_rollout_ids}
-            ),
+            source_task_ids=sorted({task_id for parent in parents for task_id in parent.source_task_ids}),
+            source_rollout_ids=sorted({rollout_id for parent in parents for rollout_id in parent.source_rollout_ids}),
             parent_ids=parent_ids,
             source_l0_ids=source_l0_ids,
             source_l1_ids=source_l1_ids,
@@ -1430,9 +1428,11 @@ class HierarchicalExperienceManager:
             cluster_id=candidate.cluster_id,
             aggregation_status="terminal" if candidate.level == "L2" else "pending",
             lifecycle_status="active",
-            review_candidate_ids=sorted(
-                set(base.review_candidate_ids if base else []) | {candidate.id}
+            validation_status=self._new_upper_validation_status(
+                candidate.level,
+                parent_count=len(parent_ids),
             ),
+            review_candidate_ids=sorted(set(base.review_candidate_ids if base else []) | {candidate.id}),
             **metadata,
         )
         experience_id = stable_experience_id(
@@ -1442,9 +1442,7 @@ class HierarchicalExperienceManager:
             identity_context=[f"source_version_fingerprint={source_fingerprint}"],
         )
         if base is None:
-            return provisional.model_copy(
-                update={"id": experience_id, "lineage_root_id": experience_id}
-            )
+            return provisional.model_copy(update={"id": experience_id, "lineage_root_id": experience_id})
         return provisional.model_copy(
             update={
                 "id": experience_id,
@@ -1461,9 +1459,7 @@ class HierarchicalExperienceManager:
         l2: dict[str, ExperienceRecord],
     ) -> list[str]:
         affected = sorted(
-            exp_id
-            for exp_id, record in l2.items()
-            if target_id in set(record.parent_ids) | set(record.source_l1_ids)
+            exp_id for exp_id, record in l2.items() if target_id in set(record.parent_ids) | set(record.source_l1_ids)
         )
         for exp_id in affected:
             record = l2[exp_id]
@@ -1471,9 +1467,7 @@ class HierarchicalExperienceManager:
                 update={
                     "lifecycle_status": "needs_review",
                     "needs_review_reason": f"source L1 {target_id} was revised or deactivated",
-                    "invalidated_by_ids": sorted(
-                        set(record.invalidated_by_ids) | {target_id, candidate_id}
-                    ),
+                    "invalidated_by_ids": sorted(set(record.invalidated_by_ids) | {target_id, candidate_id}),
                 }
             )
         return affected
@@ -1498,8 +1492,7 @@ class HierarchicalExperienceManager:
                     for child in upper.values()
                     if child.lifecycle_status == "active"
                     and parent_id
-                    in set(child.parent_ids)
-                    | set(child.source_l0_ids if lower_level == "L0" else child.source_l1_ids)
+                    in set(child.parent_ids) | set(child.source_l0_ids if lower_level == "L0" else child.source_l1_ids)
                 ),
                 key=lambda child: child.id,
             )
@@ -1517,6 +1510,12 @@ class HierarchicalExperienceManager:
                         "aggregated_into_experience_id": child.id,
                     }
                 )
+            elif parent.aggregation_status == "terminal":
+                # A terminal lower record has already received a committed
+                # negative upper-candidate decision.  Snapshot normalization
+                # must not silently make that exact source version pending and
+                # recreate the permanent candidate-fingerprint loop.
+                continue
             else:
                 lower[parent_id] = parent.model_copy(
                     update={
@@ -1535,9 +1534,7 @@ class HierarchicalExperienceManager:
         l2: dict[str, ExperienceRecord],
     ) -> tuple[list[str], list[str]]:
         affected_l1 = sorted(
-            exp_id
-            for exp_id, record in l1.items()
-            if target_id in set(record.parent_ids) | set(record.source_l0_ids)
+            exp_id for exp_id, record in l1.items() if target_id in set(record.parent_ids) | set(record.source_l0_ids)
         )
         invalidators = [target_id, candidate_id]
         for exp_id in affected_l1:
@@ -1602,13 +1599,10 @@ class HierarchicalExperienceManager:
         if replaced is not None:
             for task_id in replaced.source_task_ids:
                 counts[task_id] = max(0, counts.get(task_id, 0) - 1)
-        exceeded = sorted(
-            task_id for task_id in record.source_task_ids if counts.get(task_id, 0) >= limit
-        )
+        exceeded = sorted(task_id for task_id in record.source_task_ids if counts.get(task_id, 0) >= limit)
         if exceeded:
             raise CandidateDecisionError(
-                f"action would exceed max_l0_per_problem={limit} for {exceeded}; "
-                "candidate remains retryable"
+                f"action would exceed max_l0_per_problem={limit} for {exceeded}; candidate remains retryable"
             )
 
     def _commit_review_decision(
@@ -1619,9 +1613,7 @@ class HierarchicalExperienceManager:
         if candidate.level != "L0":
             self._commit_upper_review_decision(candidate, decision)
             return
-        candidates = {
-            key: value.model_copy(deep=True) for key, value in self._candidate_records.items()
-        }
+        candidates = {key: value.model_copy(deep=True) for key, value in self._candidate_records.items()}
         l0 = {key: value.model_copy(deep=True) for key, value in self._l0_records.items()}
         archive = {key: value.model_copy(deep=True) for key, value in self._l0_archive.items()}
         l1 = {key: value.model_copy(deep=True) for key, value in self._l1_records.items()}
@@ -1646,8 +1638,7 @@ class HierarchicalExperienceManager:
                 raise CandidateDecisionError("review target is no longer active")
             if (
                 not decision.target_version_fingerprint
-                or self._record_version_fingerprint(target)
-                != decision.target_version_fingerprint
+                or self._record_version_fingerprint(target) != decision.target_version_fingerprint
             ):
                 raise StaleCandidateError("review target version changed before commit")
             archived = target.model_copy(
@@ -1655,9 +1646,7 @@ class HierarchicalExperienceManager:
                     "lifecycle_status": "inactive",
                     "archived_at": self._utc_now(),
                     "archive_reason": decision.reason,
-                    "invalidated_by_ids": sorted(
-                        set(target.invalidated_by_ids) | {candidate.id}
-                    ),
+                    "invalidated_by_ids": sorted(set(target.invalidated_by_ids) | {candidate.id}),
                 }
             )
             if decision.action == "UPDATE":
@@ -1676,31 +1665,17 @@ class HierarchicalExperienceManager:
                 result_id = replacement.id
             del l0[target_id]
             archive[target_id] = archived
-            affected_l1, affected_l2 = self._invalidate_descendants(
-                target_id, candidate.id, l0, l1, l2
-            )
+            affected_l1, affected_l2 = self._invalidate_descendants(target_id, candidate.id, l0, l1, l2)
             self._reconcile_parent_statuses(
                 "L0",
-                sorted(
-                    {
-                        parent_id
-                        for l1_id in affected_l1
-                        for parent_id in l1[l1_id].parent_ids
-                    }
-                ),
+                sorted({parent_id for l1_id in affected_l1 for parent_id in l1[l1_id].parent_ids}),
                 l0,
                 l1,
                 l2,
             )
             self._reconcile_parent_statuses(
                 "L1",
-                sorted(
-                    {
-                        parent_id
-                        for l2_id in affected_l2
-                        for parent_id in l2[l2_id].parent_ids
-                    }
-                ),
+                sorted({parent_id for l2_id in affected_l2 for parent_id in l2[l2_id].parent_ids}),
                 l0,
                 l1,
                 l2,
@@ -1712,9 +1687,7 @@ class HierarchicalExperienceManager:
                 "attempt_count": candidate.attempt_count + 1,
                 "last_error": None,
                 "review_decision": decision,
-                "resolution": (
-                    "adopted" if decision.action in {"ADD", "UPDATE"} else "not_adopted"
-                ),
+                "resolution": ("adopted" if decision.action in {"ADD", "UPDATE"} else "not_adopted"),
                 "result_experience_id": result_id,
                 "reviewed_at": self._utc_now(),
             }
@@ -1740,9 +1713,7 @@ class HierarchicalExperienceManager:
         decision: ExperienceReviewDecision,
     ) -> None:
         self._validate_candidate_sources_current(candidate)
-        candidates = {
-            key: value.model_copy(deep=True) for key, value in self._candidate_records.items()
-        }
+        candidates = {key: value.model_copy(deep=True) for key, value in self._candidate_records.items()}
         l0 = {key: value.model_copy(deep=True) for key, value in self._l0_records.items()}
         l1 = {key: value.model_copy(deep=True) for key, value in self._l1_records.items()}
         l2 = {key: value.model_copy(deep=True) for key, value in self._l2_records.items()}
@@ -1771,32 +1742,22 @@ class HierarchicalExperienceManager:
                 and not (
                     permitted_consumer is not None
                     and lower_store[parent_id].aggregation_status == "aggregated"
-                    and lower_store[parent_id].aggregated_into_experience_id
-                    == permitted_consumer
+                    and lower_store[parent_id].aggregated_into_experience_id == permitted_consumer
                 )
             ]
             if consumed_elsewhere:
                 raise CandidateDecisionError(
-                    "candidate parents are not unconsumed or owned by the UPDATE target: "
-                    f"{consumed_elsewhere}"
+                    f"candidate parents are not unconsumed or owned by the UPDATE target: {consumed_elsewhere}"
                 )
 
         if decision.action == "ADD":
             new_record = self._upper_experience_from_candidate(candidate, decision)
-            max_total = int(
-                self._cfg("max_l1_total", 50)
-                if candidate.level == "L1"
-                else self._cfg("max_l2_total", 10)
-            )
-            active_total = sum(
-                record.lifecycle_status == "active" for record in target_store.values()
-            )
+            max_total = int(self._cfg("max_l1_total", 50) if candidate.level == "L1" else self._cfg("max_l2_total", 10))
+            active_total = sum(record.lifecycle_status == "active" for record in target_store.values())
             if max_total > 0 and active_total >= max_total:
                 raise CandidateDecisionError(f"{candidate.level} capacity {max_total} reached")
             if new_record.id in target_store or new_record.id in target_archive:
-                raise CandidateDecisionError(
-                    "ADD content/source version already exists; return KEEP or UPDATE"
-                )
+                raise CandidateDecisionError("ADD content/source version already exists; return KEEP or UPDATE")
             target_store[new_record.id] = new_record
             affected_parent_ids.update(new_record.parent_ids)
             result_id = new_record.id
@@ -1807,8 +1768,7 @@ class HierarchicalExperienceManager:
                 raise CandidateDecisionError("review target is no longer active")
             if (
                 not decision.target_version_fingerprint
-                or self._record_version_fingerprint(target)
-                != decision.target_version_fingerprint
+                or self._record_version_fingerprint(target) != decision.target_version_fingerprint
             ):
                 raise StaleCandidateError("review target version changed before commit")
             affected_parent_ids.update(target.parent_ids)
@@ -1817,9 +1777,7 @@ class HierarchicalExperienceManager:
                     "lifecycle_status": "inactive",
                     "archived_at": self._utc_now(),
                     "archive_reason": decision.reason,
-                    "invalidated_by_ids": sorted(
-                        set(target.invalidated_by_ids) | {candidate.id}
-                    ),
+                    "invalidated_by_ids": sorted(set(target.invalidated_by_ids) | {candidate.id}),
                 }
             )
             if decision.action == "UPDATE":
@@ -1862,11 +1820,7 @@ class HierarchicalExperienceManager:
                 l2,
             )
         if affected_l2_ids:
-            invalidated_l2_parent_ids = {
-                parent_id
-                for l2_id in affected_l2_ids
-                for parent_id in l2[l2_id].parent_ids
-            }
+            invalidated_l2_parent_ids = {parent_id for l2_id in affected_l2_ids for parent_id in l2[l2_id].parent_ids}
             self._reconcile_parent_statuses(
                 "L1",
                 sorted(invalidated_l2_parent_ids),
@@ -1875,15 +1829,30 @@ class HierarchicalExperienceManager:
                 l2,
             )
 
+        if decision.action in {"KEEP", "DELETE"}:
+            # A committed negative review is a terminal decision for this exact
+            # immutable source version.  Leaving these records ``pending``
+            # would be unrecoverable: generation-fingerprint idempotency finds
+            # the already committed candidate and deliberately refuses to
+            # regenerate it on every later epoch.  Updated/replaced source
+            # records receive a new version/identity and can be proposed again.
+            for parent_id in candidate.parent_ids:
+                parent = lower_store[parent_id]
+                lower_store[parent_id] = parent.model_copy(
+                    update={
+                        "aggregation_status": "terminal",
+                        "aggregated_into_cluster_id": None,
+                        "aggregated_into_experience_id": None,
+                    }
+                )
+
         candidates[candidate.id] = candidate.model_copy(
             update={
                 "status": "committed",
                 "attempt_count": candidate.attempt_count + 1,
                 "last_error": None,
                 "review_decision": decision,
-                "resolution": (
-                    "adopted" if decision.action in {"ADD", "UPDATE"} else "not_adopted"
-                ),
+                "resolution": ("adopted" if decision.action in {"ADD", "UPDATE"} else "not_adopted"),
                 "result_experience_id": result_id,
                 "reviewed_at": self._utc_now(),
             }
@@ -1912,9 +1881,7 @@ class HierarchicalExperienceManager:
         *,
         stale: bool = False,
     ) -> None:
-        candidates = {
-            key: value.model_copy(deep=True) for key, value in self._candidate_records.items()
-        }
+        candidates = {key: value.model_copy(deep=True) for key, value in self._candidate_records.items()}
         current = candidates.get(candidate.id)
         if current is None or current.status == "committed":
             return
@@ -1974,28 +1941,21 @@ class HierarchicalExperienceManager:
                 if candidate is None or candidate.status == "committed":
                     counts["skipped"] += 1
                     continue
-                if self._candidate_review_threshold_is_gated(candidate.level):
+                if self._candidate_review_threshold_is_gated(candidate):
                     counts["skipped"] += 1
                     logger.warning(
-                        "%s candidate %s review skipped: its source-level similarity "
-                        "threshold is provisional",
+                        "%s candidate %s review skipped: its source-level similarity threshold is provisional",
                         candidate.level,
                         candidate.id,
                     )
                     continue
-                if (
-                    candidate.id not in forced
-                    and max_attempts > 0
-                    and candidate.attempt_count >= max_attempts
-                ):
+                if candidate.id not in forced and max_attempts > 0 and candidate.attempt_count >= max_attempts:
                     counts["skipped"] += 1
                     continue
                 try:
                     self._validate_candidate_sources_current(candidate)
                     related, comparison_scope = self._related_active_l0(candidate)
-                    candidate_view, displayed_candidate_source_ids = self._candidate_review_view(
-                        candidate
-                    )
+                    candidate_view, displayed_candidate_source_ids = self._candidate_review_view(candidate)
                     (
                         related_views,
                         related_evidence_ids,
@@ -2003,8 +1963,7 @@ class HierarchicalExperienceManager:
                     ) = self._related_review_views(candidate, related)
                     if len(displayed_related) < len(related):
                         comparison_scope = (
-                            f"{comparison_scope};prompt_budget_displayed="
-                            f"{len(displayed_related)}_of_{len(related)}"
+                            f"{comparison_scope};prompt_budget_displayed={len(displayed_related)}_of_{len(related)}"
                         )
                     allowed_evidence_ids = {
                         candidate.id,
@@ -2019,11 +1978,9 @@ class HierarchicalExperienceManager:
                         "candidate_view": candidate_view,
                         "allowed_evidence_ids": sorted(allowed_evidence_ids),
                         "comparison_scope": comparison_scope,
-                        "model_params": self.model_params,
+                        "model_params": self._hierarchy_model_params(include_aggregation_max_tokens=True),
                         "temperature": float(self._cfg("l0_review_temperature", 0.0)),
-                        "experience_output_language_instruction": (
-                            self.experience_output_language_instruction
-                        ),
+                        "experience_output_language_instruction": (self.experience_output_language_instruction),
                     }
                     if candidate.level == "L0":
                         decision = await review_l0_candidate(
@@ -2066,7 +2023,12 @@ class HierarchicalExperienceManager:
                 except StaleCandidateError as error:
                     self._record_candidate_failure(candidate, error, stale=True)
                     counts["stale"] += 1
-                    logger.warning("%s candidate %s is stale: %s", candidate.level, candidate.id, error)
+                    logger.warning(
+                        "%s candidate %s is stale: %s",
+                        candidate.level,
+                        candidate.id,
+                        error,
+                    )
                 except Exception as error:  # noqa: BLE001
                     self._record_candidate_failure(candidate, error)
                     counts["failed"] += 1
@@ -2121,10 +2083,7 @@ class HierarchicalExperienceManager:
         staged = 0
         duplicate = 0
         if candidates:
-            updated_candidates = {
-                key: value.model_copy(deep=True)
-                for key, value in self._candidate_records.items()
-            }
+            updated_candidates = {key: value.model_copy(deep=True) for key, value in self._candidate_records.items()}
             for candidate in sorted(candidates, key=self._review_sort_key):
                 existing = updated_candidates.get(candidate.id)
                 if existing is not None:
@@ -2178,7 +2137,9 @@ class HierarchicalExperienceManager:
         return [
             record
             for record in self._store(level).values()
-            if record.lifecycle_status == "active" and record.aggregation_status == "pending"
+            if record.lifecycle_status == "active"
+            and record.aggregation_status == "pending"
+            and (level != "L1" or record.validation_status == "validated")
         ]
 
     def _store(self, level: ExperienceLevel) -> dict[str, ExperienceRecord]:
@@ -2216,7 +2177,7 @@ class HierarchicalExperienceManager:
         cluster: ExperienceCluster,
         result: AggregatedExperienceContent,
     ) -> ExperienceRecord:
-        return aggregation.make_child(
+        child = aggregation.make_child(
             target_level,
             parents,
             cluster,
@@ -2225,6 +2186,14 @@ class HierarchicalExperienceManager:
             record_version_fingerprint=self._record_version_fingerprint,
             source_fingerprint=self._source_fingerprint,
         )
+        return child.model_copy(
+            update={
+                "validation_status": self._new_upper_validation_status(
+                    target_level,
+                    parent_count=len(parents),
+                )
+            }
+        )
 
     def _make_upper_candidate(
         self,
@@ -2232,13 +2201,21 @@ class HierarchicalExperienceManager:
         cluster: ExperienceCluster,
         *,
         epoch: int,
+        generator_version: str = UPPER_CANDIDATE_GENERATOR_VERSION,
     ) -> ExperienceCandidateRecord:
         return aggregation.make_upper_candidate(
             child,
             cluster,
             epoch=epoch,
-            generator_version=UPPER_CANDIDATE_GENERATOR_VERSION,
-            generation_fingerprint=self._generation_fingerprint,
+            generator_version=generator_version,
+            generation_fingerprint=lambda target_level, source_fingerprint, cluster_id: (
+                self._generation_fingerprint(
+                    target_level,
+                    source_fingerprint,
+                    cluster_id,
+                    generator_version=generator_version,
+                )
+            ),
             source_fingerprint=self._source_fingerprint,
             identity_context=self._identity_context,
         )
@@ -2270,18 +2247,14 @@ class HierarchicalExperienceManager:
             if not candidate_state.same_identity(existing_by_generation, candidate):
                 # The same deterministic aggregation input must never silently
                 # acquire a second model output.
-                raise AggregationError(
-                    "generation fingerprint already exists with a different candidate payload"
-                )
+                raise AggregationError("generation fingerprint already exists with a different candidate payload")
             return existing_by_generation, False
         existing = self._candidate_records.get(candidate.id)
         if existing is not None:
             if not candidate_state.same_identity(existing, candidate):
                 raise AggregationError(f"conflicting duplicate candidate ID: {candidate.id}")
             return existing, False
-        candidates = {
-            key: value.model_copy(deep=True) for key, value in self._candidate_records.items()
-        }
+        candidates = {key: value.model_copy(deep=True) for key, value in self._candidate_records.items()}
         candidates[candidate.id] = candidate
         self._write_state(
             self._l0_records,
@@ -2336,18 +2309,428 @@ class HierarchicalExperienceManager:
         save_path = Path(self.h_config.experience_save_path)
         return save_path.with_suffix(save_path.suffix + ".clusters.jsonl")
 
+    def _aggregation_audit_contract_fingerprint(self) -> str:
+        """Fingerprint the resolved hierarchy/runtime contract for resume proof."""
+
+        if hasattr(self.h_config, "model_dump"):
+            hierarchy_config = self.h_config.model_dump(mode="json")
+        else:
+            hierarchy_config = {
+                key: value
+                for key, value in vars(self.h_config).items()
+                if not key.startswith("_")
+            }
+        model_config = getattr(self.config, "model", None)
+        provider_config = getattr(model_config, "model_provider", None)
+        safe_model_params = {
+            key: value
+            for key, value in sorted(self.model_params.items())
+            if not any(
+                marker in key.lower()
+                for marker in ("key", "token", "secret", "password", "authorization")
+            )
+        }
+        payload = {
+            "schema_version": SCHEMA_VERSION,
+            "hierarchical_config": hierarchy_config,
+            "model": getattr(provider_config, "model", None),
+            "model_provider_type": getattr(provider_config, "type", None),
+            "model_provider_base_url": getattr(provider_config, "base_url", None),
+            "model_params": safe_model_params,
+            "prompts_sha256": hashlib.sha256(
+                json.dumps(
+                    self.prompts,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    default=str,
+                ).encode("utf-8")
+            ).hexdigest(),
+            "agent_objective": self.agent_objective,
+            "learning_objective": self.learning_objective,
+            "experience_output_language": self.experience_output_language,
+        }
+        return hashlib.sha256(
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+                default=str,
+            ).encode("utf-8")
+        ).hexdigest()
+
+    def _aggregation_audit_source_versions(
+        self,
+        source_level: ExperienceLevel,
+    ) -> dict[str, str]:
+        """Pin every active source record visible when a transition starts."""
+
+        return {
+            record.id: self._record_version_fingerprint(record)
+            for record in self._store(source_level).values()
+            if record.lifecycle_status == "active"
+        }
+
+    def _aggregation_audit_boundary_source_versions(
+        self,
+        *,
+        source_level: ExperienceLevel,
+        epoch: int,
+        run_id: str | None,
+        recorded_source_ids: set[str],
+    ) -> dict[str, str]:
+        """Reconstruct the exact source set visible at an audited epoch.
+
+        Later epochs may already have appended sources when a prefix resume
+        validates an earlier boundary.  Candidate provenance separates those
+        later versions; manual/unprovenanced records are conservatively treated
+        as boundary-visible so an unexplained extra record invalidates proof.
+        """
+
+        archive = (
+            self._l0_archive
+            if source_level == "L0"
+            else self._l1_archive
+            if source_level == "L1"
+            else self._l2_archive
+        )
+        records = {**archive, **self._store(source_level)}
+        result: dict[str, str] = {}
+        for record_id, record in records.items():
+            referenced_candidates = [
+                self._candidate_records[candidate_id]
+                for candidate_id in record.review_candidate_ids
+                if candidate_id in self._candidate_records
+                and self._candidate_records[candidate_id].level == source_level
+            ]
+            if source_level == "L0" and run_id is not None:
+                run_candidates = [
+                    candidate
+                    for candidate in referenced_candidates
+                    if candidate.run_id == run_id
+                ]
+            else:
+                run_candidates = referenced_candidates
+            candidate_epochs = [
+                candidate.epoch
+                for candidate in run_candidates
+                if candidate.epoch is not None
+            ]
+            boundary_visible = (
+                record_id in recorded_source_ids
+                or not referenced_candidates
+                or not candidate_epochs
+                or max(candidate_epochs) <= epoch
+            )
+            if boundary_visible:
+                result[record_id] = self._record_version_fingerprint(record)
+        return dict(sorted(result.items()))
+
+    def _aggregation_audit_context(
+        self,
+        *,
+        epoch: int,
+        source_level: ExperienceLevel,
+        target_level: ExperienceLevel,
+        run_id: str | None,
+    ) -> dict[str, Any]:
+        source_versions = self._aggregation_audit_source_versions(source_level)
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "epoch": epoch,
+            "source_level": source_level,
+            "target_level": target_level,
+            "run_id": run_id,
+            "snapshot_path": str(Path(self.h_config.experience_save_path).resolve()),
+            "snapshot_provenance": dict(sorted(self._snapshot_provenance.items())),
+            "aggregation_config_sha256": self._aggregation_audit_contract_fingerprint(),
+            "source_record_versions": dict(sorted(source_versions.items())),
+            "source_state_sha256": self._source_fingerprint(target_level, source_versions),
+        }
+
     def _append_audit(self, payload: dict[str, Any]) -> None:
+        payload = dict(payload)
+        payload.setdefault("recorded_at", self._utc_now())
+        event_identity = {
+            key: value
+            for key, value in payload.items()
+            if key not in {"recorded_at", "audit_event_id"}
+        }
+        payload.setdefault(
+            "audit_event_id",
+            hashlib.sha256(
+                json.dumps(
+                    event_identity,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                    default=str,
+                ).encode("utf-8")
+            ).hexdigest(),
+        )
         audit_path = self._audit_path()
         try:
             audit_path.parent.mkdir(parents=True, exist_ok=True)
             with audit_path.open("a", encoding="utf-8") as file:
                 file.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
+                file.flush()
+                os.fsync(file.fileno())
         except Exception as error:  # noqa: BLE001
-            logger.error("Failed to write clustering audit %s: %s", audit_path, error)
+            raise RuntimeError(
+                f"Failed to durably write clustering audit {audit_path}: {error}"
+            ) from error
 
     @staticmethod
-    def _aggregation_attempt_summary(attempts: Sequence[dict[str, Any]]) -> dict[str, int]:
+    def _aggregation_attempt_summary(
+        attempts: Sequence[dict[str, Any]],
+    ) -> dict[str, int]:
         return aggregation.aggregation_attempt_summary(attempts)
+
+    def _stacked_source_groups(
+        self,
+        pending: Sequence[ExperienceRecord],
+    ) -> list[list[ExperienceRecord]]:
+        batch_size = int(self._cfg("stacked_pool_source_batch_size", 1))
+        ordered = sorted(pending, key=lambda record: record.id)
+        return [ordered[index : index + batch_size] for index in range(0, len(ordered), batch_size)]
+
+    def _stacked_event_cluster(
+        self,
+        source_level: ExperienceLevel,
+        target_level: ExperienceLevel,
+        parents: Sequence[ExperienceRecord],
+    ) -> ExperienceCluster:
+        parent_ids = sorted(parent.id for parent in parents)
+        source_versions = {parent.id: self._record_version_fingerprint(parent) for parent in parents}
+        event_payload = {
+            "mode": "stacked_pool",
+            "source_level": source_level,
+            "target_level": target_level,
+            "source_versions": source_versions,
+        }
+        event_digest = hashlib.sha256(
+            json.dumps(event_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()[:20]
+        source_task_ids = sorted({task_id for parent in parents for task_id in parent.source_task_ids})
+        representative = min(parents, key=lambda record: record.id)
+        return ExperienceCluster(
+            cluster_id=f"stacked-{source_level.lower()}-{target_level.lower()}-{event_digest}",
+            experience_ids=parent_ids,
+            centroid=[],
+            representative_id=representative.id,
+            representative_content=representative.content,
+            intra_cluster_similarity=1.0 if len(parents) == 1 else 0.0,
+            metadata_consistency=1.0,
+            metadata_completeness=0.0,
+            source_task_ids=source_task_ids,
+            distinct_source_task_count=len(source_task_ids),
+        )
+
+    async def _update_stacked_pool(
+        self,
+        *,
+        epoch: int,
+        source_level: ExperienceLevel,
+        target_level: ExperienceLevel,
+        confidence_threshold: float,
+        run_id: str | None = None,
+    ) -> None:
+        if not self._upper_review_enabled(target_level):
+            raise ValueError(
+                f"upper_pool_update_mode='stacked_pool' requires {target_level.lower()}_candidate_review_enabled=true"
+            )
+
+        audit_context = self._aggregation_audit_context(
+            epoch=epoch,
+            source_level=source_level,
+            target_level=target_level,
+            run_id=run_id,
+        )
+        pending = self._pending(source_level)
+        retryable_candidate_ids = sorted(
+            candidate.id
+            for candidate in self._candidate_records.values()
+            if candidate.level == target_level and candidate.status in {"pending", "review_failed"}
+        )
+        if not pending and not retryable_candidate_ids:
+            logger.info(
+                "%s->%s stacked-pool epoch %s: no pending experiences",
+                source_level,
+                target_level,
+                epoch,
+            )
+            self._append_audit(
+                {
+                    **audit_context,
+                    "status": "completed",
+                    "outcome": "no_work",
+                    "upper_pool_update_mode": "stacked_pool",
+                    "clustering_used": False,
+                    "admission_mode": "candidate_review",
+                    "pending_experience_ids": [],
+                }
+            )
+            return
+
+        attempts: list[dict[str, Any]] = []
+        preexisting_review_counts = await self.review_pending_candidates(candidate_level=target_level)
+        for candidate_id in retryable_candidate_ids:
+            reviewed = self._candidate_records.get(candidate_id)
+            if reviewed is None:
+                continue
+            attempts.append(
+                {
+                    "status": "preexisting_candidate_review",
+                    "candidate_id": reviewed.id,
+                    "candidate_status": reviewed.status,
+                    "candidate_resolution": reviewed.resolution,
+                    "review_action": (reviewed.review_decision.action if reviewed.review_decision else None),
+                    "result_experience_id": reviewed.result_experience_id,
+                    "experience_ids": reviewed.parent_ids,
+                }
+            )
+
+        pending = self._pending(source_level)
+        groups = self._stacked_source_groups(pending)
+        staged_candidate_ids: list[str] = []
+        for parents in groups:
+            event = self._stacked_event_cluster(
+                source_level,
+                target_level,
+                parents,
+            )
+            source_versions = {parent.id: self._record_version_fingerprint(parent) for parent in parents}
+            source_fingerprint = self._source_fingerprint(target_level, source_versions)
+            generation_fingerprint = self._generation_fingerprint(
+                target_level,
+                source_fingerprint,
+                event.cluster_id,
+                generator_version=STACKED_POOL_CANDIDATE_GENERATOR_VERSION,
+            )
+            existing_candidate = self._candidate_for_generation(
+                target_level,
+                generation_fingerprint,
+            )
+            if existing_candidate is not None:
+                attempts.append(
+                    {
+                        "event_id": event.cluster_id,
+                        "experience_ids": event.experience_ids,
+                        "status": "candidate_already_recorded",
+                        "candidate_id": existing_candidate.id,
+                        "candidate_status": existing_candidate.status,
+                        "candidate_resolution": existing_candidate.resolution,
+                    }
+                )
+                continue
+
+            conflicts = (
+                detect_strategy_conflicts(
+                    parents,
+                    lexical_overlap_threshold=float(self._cfg("strategy_conflict_lexical_overlap", 0.65)),
+                )
+                if len(parents) > 1 and self._cfg("strategy_conflict_check_enabled", True)
+                else []
+            )
+            if conflicts:
+                attempts.append(
+                    {
+                        "event_id": event.cluster_id,
+                        "experience_ids": event.experience_ids,
+                        "status": "pending_conflict",
+                        "conflicts": conflicts,
+                    }
+                )
+                continue
+
+            try:
+                if target_level == "L1":
+                    result = await self._generate_l1_from_l0([parent.public_dict() for parent in parents])
+                else:
+                    result = await self._generate_l2_from_l1([parent.public_dict() for parent in parents])
+                if result.confidence < confidence_threshold:
+                    raise AggregationError(f"confidence {result.confidence:.3f} below {confidence_threshold:.3f}")
+                child = self._make_child(target_level, parents, event, result)
+                candidate, staged = self._stage_upper_candidate(
+                    self._make_upper_candidate(
+                        child,
+                        event,
+                        epoch=epoch,
+                        generator_version=STACKED_POOL_CANDIDATE_GENERATOR_VERSION,
+                    )
+                )
+                if staged:
+                    staged_candidate_ids.append(candidate.id)
+                attempts.append(
+                    {
+                        "event_id": event.cluster_id,
+                        "experience_ids": event.experience_ids,
+                        "status": "candidate_staged" if staged else "candidate_already_recorded",
+                        "candidate_id": candidate.id,
+                        "parent_ids": candidate.parent_ids,
+                    }
+                )
+            except Exception as error:  # noqa: BLE001
+                attempts.append(
+                    {
+                        "event_id": event.cluster_id,
+                        "experience_ids": event.experience_ids,
+                        "status": "failed",
+                        "reason": str(error),
+                    }
+                )
+                logger.error(
+                    "Stacked-pool proposal failed for %s event %s; sources remain pending: %s",
+                    target_level,
+                    event.cluster_id,
+                    error,
+                )
+
+        post_generation_review_counts: dict[str, int] | None = None
+        if staged_candidate_ids:
+            post_generation_review_counts = await self.review_pending_candidates(
+                force_candidate_ids=staged_candidate_ids,
+                candidate_level=target_level,
+            )
+        for attempt in attempts:
+            candidate_id = attempt.get("candidate_id")
+            if not candidate_id or candidate_id not in self._candidate_records:
+                continue
+            reviewed = self._candidate_records[candidate_id]
+            attempt["candidate_status"] = reviewed.status
+            attempt["candidate_resolution"] = reviewed.resolution
+            attempt["review_action"] = reviewed.review_decision.action if reviewed.review_decision else None
+            attempt["result_experience_id"] = reviewed.result_experience_id
+
+        remaining_pending = sorted(record.id for record in self._pending(source_level))
+        summary = self._aggregation_attempt_summary(attempts)
+        self._append_audit(
+            {
+                **audit_context,
+                "status": "completed",
+                "upper_pool_update_mode": "stacked_pool",
+                "clustering_used": False,
+                "admission_mode": "candidate_review",
+                "source_batch_size": int(self._cfg("stacked_pool_source_batch_size", 1)),
+                "source_group_count": len(groups),
+                "aggregation_attempts": attempts,
+                "preexisting_candidate_review": preexisting_review_counts,
+                "post_generation_candidate_review": post_generation_review_counts,
+                "aggregation_summary": summary,
+                "pending_experience_ids": remaining_pending,
+            }
+        )
+        logger.info(
+            "%s->%s stacked-pool epoch %s: adopted=%d not_adopted=%d generation_failed=%d review_failed=%d pending=%d",
+            source_level,
+            target_level,
+            epoch,
+            summary["adopted"],
+            summary["not_adopted"],
+            summary["generation_failed"],
+            summary["review_failed"],
+            len(remaining_pending),
+        )
 
     async def _aggregate_level(
         self,
@@ -2358,23 +2741,41 @@ class HierarchicalExperienceManager:
         minimum_size: int,
         similarity_threshold: float,
         confidence_threshold: float,
+        run_id: str | None = None,
     ) -> None:
-        admission_mode = (
-            "candidate_review" if self._upper_review_enabled(target_level) else "direct_legacy"
+        audit_context = self._aggregation_audit_context(
+            epoch=epoch,
+            source_level=source_level,
+            target_level=target_level,
+            run_id=run_id,
         )
+        admission_mode = "candidate_review" if self._upper_review_enabled(target_level) else "direct_legacy"
         pending = self._pending(source_level)
         retryable_candidate_ids = (
             sorted(
                 candidate.id
                 for candidate in self._candidate_records.values()
-                if candidate.level == target_level
-                and candidate.status in {"pending", "review_failed"}
+                if candidate.level == target_level and candidate.status in {"pending", "review_failed"}
             )
             if admission_mode == "candidate_review"
             else []
         )
         if not pending and not retryable_candidate_ids:
-            logger.info("%s->%s epoch %s: no pending experiences", source_level, target_level, epoch)
+            logger.info(
+                "%s->%s epoch %s: no pending experiences",
+                source_level,
+                target_level,
+                epoch,
+            )
+            self._append_audit(
+                {
+                    **audit_context,
+                    "status": "completed",
+                    "outcome": "no_work",
+                    "admission_mode": admission_mode,
+                    "pending_experience_ids": [],
+                }
+            )
             return
         # A candidate persisted during an explicitly allowed dry run must not
         # bypass a restored calibration gate after restart. Gate the complete
@@ -2386,8 +2787,7 @@ class HierarchicalExperienceManager:
         ):
             threshold_field = f"{source_level.lower()}_similarity_threshold"
             logger.warning(
-                "%s->%s aggregation skipped: %s is provisional; "
-                "collect training %s and run calibration first",
+                "%s->%s aggregation skipped: %s is provisional; collect training %s and run calibration first",
                 source_level,
                 target_level,
                 threshold_field,
@@ -2395,10 +2795,7 @@ class HierarchicalExperienceManager:
             )
             self._append_audit(
                 {
-                    "schema_version": SCHEMA_VERSION,
-                    "epoch": epoch,
-                    "source_level": source_level,
-                    "target_level": target_level,
+                    **audit_context,
                     "admission_mode": admission_mode,
                     "status": "waiting_for_threshold_calibration",
                     "calibration_level": source_level,
@@ -2413,9 +2810,7 @@ class HierarchicalExperienceManager:
         preexisting_candidate_ids = set(retryable_candidate_ids)
         preexisting_review_counts: dict[str, int] | None = None
         if admission_mode == "candidate_review":
-            preexisting_review_counts = await self.review_pending_candidates(
-                candidate_level=target_level
-            )
+            preexisting_review_counts = await self.review_pending_candidates(candidate_level=target_level)
             for candidate_id in retryable_candidate_ids:
                 reviewed = self._candidate_records.get(candidate_id)
                 if reviewed is None:
@@ -2426,11 +2821,7 @@ class HierarchicalExperienceManager:
                         "candidate_id": reviewed.id,
                         "candidate_status": reviewed.status,
                         "candidate_resolution": reviewed.resolution,
-                        "review_action": (
-                            reviewed.review_decision.action
-                            if reviewed.review_decision
-                            else None
-                        ),
+                        "review_action": (reviewed.review_decision.action if reviewed.review_decision else None),
                         "result_experience_id": reviewed.result_experience_id,
                         "experience_ids": reviewed.parent_ids,
                     }
@@ -2462,9 +2853,10 @@ class HierarchicalExperienceManager:
         )
         for cluster in report.clusters:
             logger.info(
-                "Cluster %s ids=%s similarity=%.4f metadata_consistency=%.4f completeness=%.4f",
+                "Cluster %s ids=%s tasks=%d similarity=%.4f metadata_consistency=%.4f completeness=%.4f",
                 cluster.cluster_id,
                 cluster.experience_ids,
+                cluster.distinct_source_task_count,
                 cluster.intra_cluster_similarity,
                 cluster.metadata_consistency,
                 cluster.metadata_completeness,
@@ -2479,11 +2871,26 @@ class HierarchicalExperienceManager:
                     }
                 )
                 continue
+            if (
+                source_level == "L0"
+                and target_level == "L1"
+                and self._min_distinct_source_tasks_per_l1_candidate > 1
+                and cluster.distinct_source_task_count < self._min_distinct_source_tasks_per_l1_candidate
+            ):
+                attempts.append(
+                    {
+                        "cluster_id": cluster.cluster_id,
+                        "experience_ids": cluster.experience_ids,
+                        "source_task_ids": cluster.source_task_ids,
+                        "distinct_source_task_count": cluster.distinct_source_task_count,
+                        "status": "pending_below_source_task_diversity",
+                        "minimum_distinct_source_tasks": (self._min_distinct_source_tasks_per_l1_candidate),
+                    }
+                )
+                continue
             current_source = self._store(source_level)
             parents = [current_source[parent_id] for parent_id in cluster.experience_ids]
-            source_versions = {
-                parent.id: self._record_version_fingerprint(parent) for parent in parents
-            }
+            source_versions = {parent.id: self._record_version_fingerprint(parent) for parent in parents}
             source_fingerprint = self._source_fingerprint(target_level, source_versions)
             generation_fingerprint = self._generation_fingerprint(
                 target_level,
@@ -2511,9 +2918,7 @@ class HierarchicalExperienceManager:
             conflicts = (
                 detect_strategy_conflicts(
                     parents,
-                    lexical_overlap_threshold=float(
-                        self._cfg("strategy_conflict_lexical_overlap", 0.65)
-                    ),
+                    lexical_overlap_threshold=float(self._cfg("strategy_conflict_lexical_overlap", 0.65)),
                 )
                 if self._cfg("strategy_conflict_check_enabled", True)
                 else []
@@ -2602,9 +3007,7 @@ class HierarchicalExperienceManager:
 
         post_generation_review_counts: dict[str, int] | None = None
         if admission_mode == "candidate_review":
-            post_generation_review_counts = await self.review_pending_candidates(
-                candidate_level=target_level
-            )
+            post_generation_review_counts = await self.review_pending_candidates(candidate_level=target_level)
             for attempt in attempts:
                 candidate_id = attempt.get("candidate_id")
                 if not candidate_id or candidate_id not in self._candidate_records:
@@ -2612,22 +3015,23 @@ class HierarchicalExperienceManager:
                 reviewed = self._candidate_records[candidate_id]
                 attempt["candidate_status"] = reviewed.status
                 attempt["candidate_resolution"] = reviewed.resolution
-                attempt["review_action"] = (
-                    reviewed.review_decision.action if reviewed.review_decision else None
-                )
+                attempt["review_action"] = reviewed.review_decision.action if reviewed.review_decision else None
                 attempt["result_experience_id"] = reviewed.result_experience_id
 
         remaining_pending = sorted(record.id for record in self._pending(source_level))
         summary = self._aggregation_attempt_summary(attempts)
         self._append_audit(
             {
-                "schema_version": SCHEMA_VERSION,
-                "epoch": epoch,
-                "source_level": source_level,
-                "target_level": target_level,
+                **audit_context,
+                "status": "completed",
                 "clustering_enabled": self._cfg("clustering_enabled", True),
                 "admission_mode": admission_mode,
                 "minimum_size": minimum_size,
+                "minimum_distinct_source_tasks": (
+                    self._min_distinct_source_tasks_per_l1_candidate
+                    if source_level == "L0" and target_level == "L1"
+                    else 1
+                ),
                 "report": report.as_dict(),
                 "aggregation_attempts": attempts,
                 "preexisting_candidate_review": preexisting_review_counts,
@@ -2652,14 +3056,14 @@ class HierarchicalExperienceManager:
             len(remaining_pending),
         )
 
-    async def aggregate_epoch(self, epoch: int) -> None:
-        await self.aggregate_levels(("L1", "L2"), epoch=epoch)
+    async def aggregate_epoch(self, epoch: int, *, run_id: str | None = None) -> None:
+        await self.aggregate_levels(("L1", "L2"), epoch=epoch, run_id=run_id)
         logger.info(
             "Epoch %s hierarchy: L0=%d L1=%d L2=%d",
             epoch,
-            len(self._l0_records),
-            len(self._l1_records),
-            len(self._l2_records),
+            sum(record.lifecycle_status == "active" for record in self._l0_records.values()),
+            sum(record.lifecycle_status == "active" for record in self._l1_records.values()),
+            sum(record.lifecycle_status == "active" for record in self._l2_records.values()),
         )
 
     async def aggregate_levels(
@@ -2667,13 +3071,15 @@ class HierarchicalExperienceManager:
         targets: Sequence[AggregationTarget],
         *,
         epoch: int,
+        run_id: str | None = None,
     ) -> None:
         """Aggregate only the requested upper levels, in hierarchy order.
 
         This is the public continuation API for an already persisted hierarchy.
         Selecting ``L2`` alone never creates L1 first; selecting both always
         processes and reviews L1 before inspecting the resulting active L1 pool.
-        Threshold gates remain enforced by each underlying level operation.
+        Clustered mode enforces calibrated similarity thresholds. Stacked-pool
+        mode does not use embedding thresholds and relies on full-pool review.
         """
 
         requested = list(targets)
@@ -2682,22 +3088,44 @@ class HierarchicalExperienceManager:
             raise ValueError(f"Unsupported aggregation target(s): {', '.join(invalid)}")
         if len(requested) != len(set(requested)):
             raise ValueError("Aggregation targets must not contain duplicates")
+        aggregation_kwargs: dict[str, Any] = {"epoch": epoch}
+        if run_id is not None:
+            aggregation_kwargs["run_id"] = run_id
         if "L1" in requested:
-            await self._aggregate_l1(epoch=epoch)
+            await self._aggregate_l1(**aggregation_kwargs)
         if "L2" in requested:
-            await self._aggregate_l2(epoch=epoch)
+            await self._aggregate_l2(**aggregation_kwargs)
 
-    async def _aggregate_l1(self, epoch: int) -> None:
+    async def _aggregate_l1(self, epoch: int, *, run_id: str | None = None) -> None:
+        if self._uses_stacked_upper_pools():
+            await self._update_stacked_pool(
+                epoch=epoch,
+                source_level="L0",
+                target_level="L1",
+                confidence_threshold=float(self._cfg("l1_confidence_threshold", 0.70)),
+                run_id=run_id,
+            )
+            return
         await self._aggregate_level(
             epoch=epoch,
             source_level="L0",
             target_level="L1",
-            minimum_size=self._min_l0_per_l1,
+            minimum_size=self._min_l0_per_l1_candidate,
             similarity_threshold=float(self._cfg("l0_similarity_threshold", 0.60)),
             confidence_threshold=float(self._cfg("l1_confidence_threshold", 0.70)),
+            run_id=run_id,
         )
 
-    async def _aggregate_l2(self, epoch: int) -> None:
+    async def _aggregate_l2(self, epoch: int, *, run_id: str | None = None) -> None:
+        if self._uses_stacked_upper_pools():
+            await self._update_stacked_pool(
+                epoch=epoch,
+                source_level="L1",
+                target_level="L2",
+                confidence_threshold=float(self._cfg("l2_confidence_threshold", 0.80)),
+                run_id=run_id,
+            )
+            return
         await self._aggregate_level(
             epoch=epoch,
             source_level="L1",
@@ -2705,11 +3133,52 @@ class HierarchicalExperienceManager:
             minimum_size=self._min_l1_per_l2,
             similarity_threshold=float(self._cfg("l1_similarity_threshold", 0.55)),
             confidence_threshold=float(self._cfg("l2_confidence_threshold", 0.80)),
+            run_id=run_id,
         )
 
     # ------------------------------------------------------------------
     # LLM generation and validation
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _repair_invalid_json_string_escapes(text: str) -> str:
+        r"""Escape only invalid backslashes inside JSON strings.
+
+        Math models often emit otherwise valid JSON containing raw LaTeX such
+        as ``\(x\)`` or ``\mod``.  Those backslashes are invalid JSON escapes.
+        Keep strict parsing for every other syntax error and only double the
+        offending slash characters inside quoted strings.
+        """
+
+        result: list[str] = []
+        in_string = False
+        index = 0
+        valid_escapes = {'"', "\\", "/", "b", "f", "n", "r", "t", "u"}
+        while index < len(text):
+            character = text[index]
+            if not in_string:
+                result.append(character)
+                if character == '"':
+                    in_string = True
+                index += 1
+                continue
+            if character == '"':
+                result.append(character)
+                in_string = False
+                index += 1
+                continue
+            if character != "\\":
+                result.append(character)
+                index += 1
+                continue
+            following = text[index + 1] if index + 1 < len(text) else ""
+            if following in valid_escapes:
+                result.extend((character, following))
+                index += 2
+            else:
+                result.append("\\\\")
+                index += 1
+        return "".join(result)
 
     @staticmethod
     def _parse_aggregation_response(response: str) -> AggregatedExperienceContent:
@@ -2722,7 +3191,15 @@ class HierarchicalExperienceManager:
         try:
             payload = json.loads(text.strip())
         except json.JSONDecodeError as error:
-            raise AggregationError(f"invalid aggregation JSON: {error}") from error
+            if error.msg != "Invalid \\escape":
+                raise AggregationError(f"invalid aggregation JSON: {error}") from error
+            repaired = HierarchicalExperienceManager._repair_invalid_json_string_escapes(text.strip())
+            try:
+                payload = json.loads(repaired)
+            except json.JSONDecodeError as repaired_error:
+                raise AggregationError(
+                    f"invalid aggregation JSON after LaTeX escape repair: {repaired_error}"
+                ) from repaired_error
         if not isinstance(payload, dict):
             raise AggregationError("aggregation output must be a JSON object")
         if payload.get("status") == "cannot_aggregate":
@@ -2747,12 +3224,10 @@ class HierarchicalExperienceManager:
         system_prompt = Template(prompt["system"]).render(
             agent_objective=self.agent_objective,
             learning_objective=self.learning_objective,
-            experience_output_language_instruction=(
-                self.experience_output_language_instruction
-            ),
+            experience_output_language_instruction=(self.experience_output_language_instruction),
         )
         user_prompt = Template(prompt["user"]).render(**template_values)
-        params = dict(self.model_params)
+        params = self._hierarchy_model_params(include_aggregation_max_tokens=True)
         params["temperature"] = float(self._cfg("aggregation_temperature", 0.0))
         response = await self.llm.query_one(
             messages=[
@@ -2792,15 +3267,260 @@ class HierarchicalExperienceManager:
         )
 
     # ------------------------------------------------------------------
+    # Provisional L1 validation and promotion
+    # ------------------------------------------------------------------
+
+    def _l1_promotion_readiness(self, record: ExperienceRecord) -> dict[str, Any]:
+        if record.level != "L1":
+            raise ValueError("L1 promotion readiness requires an L1 experience")
+        results = list(record.validation_results.values())
+        deltas_by_question: dict[str, list[float]] = {}
+        for result in results:
+            deltas_by_question.setdefault(result.task_question_sha256, []).append(
+                result.treatment_score - result.baseline_score
+            )
+        question_deltas = {
+            question_hash: sum(deltas) / len(deltas) for question_hash, deltas in deltas_by_question.items()
+        }
+        helps = sum(delta > 0 for delta in question_deltas.values())
+        harms = sum(delta < 0 for delta in question_deltas.values())
+        neutrals = sum(delta == 0 for delta in question_deltas.values())
+        trials = len(results)
+        distinct_validation_tasks = len(question_deltas)
+        source_tasks = len(set(record.source_task_ids))
+        current_fingerprint = self._record_version_fingerprint(record)
+        cohorts = {
+            (
+                result.dataset,
+                result.dataset_manifest_sha256,
+                result.dataset_role,
+                result.model,
+                result.protocol_version,
+                result.generation_config_sha256,
+                result.experience_version_fingerprint,
+            )
+            for result in results
+        }
+        cohort_consistent = len(cohorts) <= 1 and all(
+            result.experience_version_fingerprint == current_fingerprint for result in results
+        )
+        requirements = {
+            "min_distinct_source_tasks": int(self._cfg("min_distinct_source_tasks_per_l1_promotion", 3)),
+            "min_validation_trials": int(self._cfg("min_validation_trials_per_l1", 5)),
+            "min_distinct_validation_tasks": int(self._cfg("min_distinct_validation_tasks_per_l1", 5)),
+            "min_net_help": int(self._cfg("min_l1_validation_net_help", 1)),
+            "max_harms": int(self._cfg("max_l1_validation_harms", 1)),
+        }
+        checks = {
+            "distinct_source_tasks": source_tasks >= requirements["min_distinct_source_tasks"],
+            "validation_trials": trials >= requirements["min_validation_trials"],
+            "distinct_validation_tasks": (distinct_validation_tasks >= requirements["min_distinct_validation_tasks"]),
+            "net_help": helps - harms >= requirements["min_net_help"],
+            "harms": harms <= requirements["max_harms"],
+            "cohort_consistent": cohort_consistent,
+        }
+        return {
+            "experience_id": record.id,
+            "validation_status": record.validation_status,
+            "promoted": record.validation_status == "validated",
+            "criteria_met": all(checks.values()),
+            "counts": {
+                "distinct_source_tasks": source_tasks,
+                "trials": trials,
+                "distinct_validation_tasks": distinct_validation_tasks,
+                "helps": helps,
+                "harms": harms,
+                "neutrals": neutrals,
+                "net_help": helps - harms,
+            },
+            "requirements": requirements,
+            "checks": checks,
+            "unmet": sorted(name for name, passed in checks.items() if not passed),
+        }
+
+    def get_l1_promotion_readiness(self, experience_id: str) -> dict[str, Any]:
+        """Return auditable promotion counts and unmet requirements for one L1."""
+
+        record = self._l1_records.get(str(experience_id))
+        if record is None:
+            raise KeyError(f"unknown L1 experience: {experience_id}")
+        return self._l1_promotion_readiness(record)
+
+    def record_l1_paired_validation(
+        self,
+        experience_id: str,
+        task_id: str,
+        *,
+        trial_id: str,
+        task_question_sha256: str,
+        dataset: str,
+        dataset_manifest_sha256: str,
+        dataset_role: Literal["calibration", "heldout_validation"],
+        repeat: int,
+        model: str,
+        protocol_version: str,
+        generation_config_sha256: str,
+        experience_version_fingerprint: str,
+        baseline_prompt_sha256: str,
+        treatment_prompt_sha256: str,
+        baseline_score: float | int | bool,
+        treatment_score: float | int | bool,
+        note: str | None = None,
+    ) -> dict[str, Any]:
+        """Persist one same-task comparison and promote an eligible provisional L1.
+
+        ``help`` and ``harm`` are never accepted from a caller: they are derived
+        from treatment versus baseline scores. Replaying the same task and score
+        pair is idempotent; conflicting evidence for a task fails closed.
+        """
+
+        experience_id = str(experience_id).strip()
+        task_id = str(task_id).strip()
+        trial_id = str(trial_id).strip()
+        if not task_id:
+            raise ValueError("paired validation task_id must be non-empty")
+        if not trial_id:
+            raise ValueError("paired validation trial_id must be non-empty")
+        record = self._l1_records.get(experience_id)
+        if record is None:
+            raise KeyError(f"unknown L1 experience: {experience_id}")
+        if record.lifecycle_status != "active":
+            raise ValueError(f"cannot validate non-active L1 experience: {experience_id}")
+        source_task_ids = set(record.source_task_ids)
+        normalised_question_hash = str(task_question_sha256).strip().lower()
+        if task_id in source_task_ids or normalised_question_hash in source_task_ids:
+            raise ValueError("paired validation must use a held-out task/question, not an L1 source")
+        try:
+            baseline = float(baseline_score)
+            treatment = float(treatment_score)
+        except (TypeError, ValueError) as error:
+            raise ValueError("paired validation scores must be numeric") from error
+        if not math.isfinite(baseline) or not math.isfinite(treatment):
+            raise ValueError("paired validation scores must be finite")
+        outcome: Literal["help", "harm", "neutral"]
+        if treatment > baseline:
+            outcome = "help"
+        elif treatment < baseline:
+            outcome = "harm"
+        else:
+            outcome = "neutral"
+        result = PairedValidationResult(
+            trial_id=trial_id,
+            task_id=task_id,
+            task_question_sha256=normalised_question_hash,
+            dataset=dataset,
+            dataset_manifest_sha256=dataset_manifest_sha256,
+            dataset_role=dataset_role,
+            repeat=repeat,
+            model=model,
+            protocol_version=protocol_version,
+            generation_config_sha256=generation_config_sha256,
+            experience_version_fingerprint=experience_version_fingerprint,
+            baseline_prompt_sha256=baseline_prompt_sha256,
+            treatment_prompt_sha256=treatment_prompt_sha256,
+            baseline_score=baseline,
+            treatment_score=treatment,
+            outcome=outcome,
+            note=note,
+        )
+        current_fingerprint = self._record_version_fingerprint(record)
+        if result.experience_version_fingerprint != current_fingerprint:
+            raise ValueError("paired validation is not bound to the current L1 version fingerprint")
+        existing = record.validation_results.get(trial_id)
+        if existing is not None:
+            existing_payload = existing.model_dump(exclude={"note", "recorded_at"})
+            result_payload = result.model_dump(exclude={"note", "recorded_at"})
+            if existing_payload == result_payload:
+                return record.public_dict()
+            raise ValueError(f"conflicting paired validation already exists for trial {trial_id}")
+        if record.validation_status != "provisional":
+            raise ValueError(f"L1 experience {experience_id} is already validated")
+
+        result_cohort = (
+            result.dataset,
+            result.dataset_manifest_sha256,
+            result.dataset_role,
+            result.model,
+            result.protocol_version,
+            result.generation_config_sha256,
+            result.experience_version_fingerprint,
+        )
+        existing_cohorts = {
+            (
+                item.dataset,
+                item.dataset_manifest_sha256,
+                item.dataset_role,
+                item.model,
+                item.protocol_version,
+                item.generation_config_sha256,
+                item.experience_version_fingerprint,
+            )
+            for item in record.validation_results.values()
+        }
+        if existing_cohorts and existing_cohorts != {result_cohort}:
+            raise ValueError("paired validation result belongs to a different promotion cohort")
+        result_dedup_key = (
+            result.task_question_sha256,
+            result.repeat,
+            result.model,
+            result.protocol_version,
+            result.generation_config_sha256,
+            result.experience_version_fingerprint,
+        )
+        existing_dedup_keys = {
+            (
+                item.task_question_sha256,
+                item.repeat,
+                item.model,
+                item.protocol_version,
+                item.generation_config_sha256,
+                item.experience_version_fingerprint,
+            )
+            for item in record.validation_results.values()
+        }
+        if result_dedup_key in existing_dedup_keys:
+            raise ValueError("paired validation duplicates an existing question/repeat/protocol trial")
+
+        validation_results = dict(record.validation_results)
+        validation_results[trial_id] = result
+        updated = record.model_copy(update={"validation_results": validation_results})
+        readiness = self._l1_promotion_readiness(updated)
+        if readiness["criteria_met"]:
+            updated = updated.model_copy(
+                update={
+                    "validation_status": "validated",
+                    "validated_at": self._utc_now(),
+                }
+            )
+        l1 = {key: value.model_copy(deep=True) for key, value in self._l1_records.items()}
+        l1[experience_id] = updated
+        self._write_state(
+            self._l0_records,
+            l1,
+            self._l2_records,
+            self._candidate_records,
+            self._l0_archive,
+            self._l1_archive,
+            self._l2_archive,
+        )
+        self._l1_records = l1
+        logger.info(
+            "Recorded paired validation for L1=%s task=%s outcome=%s status=%s",
+            experience_id,
+            task_id,
+            outcome,
+            updated.validation_status,
+        )
+        return updated.public_dict()
+
+    # ------------------------------------------------------------------
     # Accessors and ancestry
     # ------------------------------------------------------------------
 
     @property
     def l0(self) -> dict[str, str]:
         return {
-            exp_id: record.content
-            for exp_id, record in self._l0_records.items()
-            if record.lifecycle_status == "active"
+            exp_id: record.content for exp_id, record in self._l0_records.items() if record.lifecycle_status == "active"
         }
 
     @property
@@ -2808,7 +3528,7 @@ class HierarchicalExperienceManager:
         return {
             exp_id: record.content
             for exp_id, record in self._l1_records.items()
-            if record.lifecycle_status == "active"
+            if record.lifecycle_status == "active" and record.validation_status == "validated"
         }
 
     @property
@@ -2816,7 +3536,7 @@ class HierarchicalExperienceManager:
         return {
             exp_id: record.content
             for exp_id, record in self._l2_records.items()
-            if record.lifecycle_status == "active"
+            if record.lifecycle_status == "active" and record.validation_status == "validated"
         }
 
     def get_all_l0_experiences(self) -> list[dict[str, Any]]:
@@ -2837,7 +3557,7 @@ class HierarchicalExperienceManager:
         active = {
             exp_id: record
             for exp_id, record in records.items()
-            if record.lifecycle_status == "active"
+            if record.lifecycle_status == "active" and (record.level == "L0" or record.validation_status == "validated")
         }
         return HierarchicalExperienceManager._ordered_records(active)
 
@@ -2917,27 +3637,18 @@ class HierarchicalExperienceManager:
             "batch",
             "batch_fingerprint",
         )
-        complete_context = all(
-            value is not None for value in (run_id, epoch, batch, batch_fingerprint)
-        )
+        complete_context = all(value is not None for value in (run_id, epoch, batch, batch_fingerprint))
 
         def matches(candidate: ExperienceCandidateRecord) -> bool:
             context_matches = (
                 (run_id is None or candidate.run_id == run_id)
                 and (epoch is None or candidate.epoch == epoch)
                 and (batch is None or candidate.batch == batch)
-                and (
-                    batch_fingerprint is None
-                    or candidate.batch_fingerprint == batch_fingerprint
-                )
+                and (batch_fingerprint is None or candidate.batch_fingerprint == batch_fingerprint)
             )
             # epoch/batch/fingerprint identify the real batch. ``step`` is a
             # derived loop index and may change when num_batches changes.
-            return (
-                candidate.level == "L0"
-                and context_matches
-                and (complete_context or candidate.step == step)
-            )
+            return candidate.level == "L0" and context_matches and (complete_context or candidate.step == step)
 
         candidates = sorted(
             (candidate for candidate in self._candidate_records.values() if matches(candidate)),
@@ -2970,6 +3681,218 @@ class HierarchicalExperienceManager:
             and candidate.epoch == epoch
             and candidate.batch == batch
         }
+
+    def get_l0_batch_checkpoints(self, *, run_id: str) -> list[dict[str, Any]]:
+        """Return immutable L0 batch checkpoints for one practice run.
+
+        A batch becomes resumable as soon as its candidates are atomically staged
+        in the hierarchy snapshot.  Candidate review may still be retryable; a
+        later, genuinely new batch will retry that shared queue.  Multiple
+        fingerprints or step numbers for one epoch/batch mean the snapshot cannot
+        prove which batch was committed, so prefix resume fails closed.
+        """
+
+        grouped: dict[tuple[int, int], list[ExperienceCandidateRecord]] = {}
+        for candidate in self._candidate_records.values():
+            if candidate.level != "L0" or candidate.run_id != run_id:
+                continue
+            if candidate.epoch is None or candidate.batch is None:
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: an L0 candidate for run "
+                    f"{run_id!r} is missing epoch/batch context ({candidate.id})."
+                )
+            grouped.setdefault((candidate.epoch, candidate.batch), []).append(candidate)
+
+        checkpoints: list[dict[str, Any]] = []
+        for (epoch, batch), candidates in sorted(grouped.items()):
+            fingerprints = {candidate.batch_fingerprint for candidate in candidates}
+            steps = {candidate.step for candidate in candidates}
+            if None in fingerprints or "" in fingerprints or len(fingerprints) != 1:
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: batch "
+                    f"epoch={epoch} batch={batch} has ambiguous fingerprints "
+                    f"{sorted(str(value) for value in fingerprints)}."
+                )
+            if len(steps) != 1:
+                raise RuntimeError(
+                    "Cannot resume from hierarchy: batch "
+                    f"epoch={epoch} batch={batch} has ambiguous steps "
+                    f"{sorted(str(value) for value in steps)}."
+                )
+            checkpoints.append(
+                {
+                    "epoch": epoch,
+                    "batch": batch,
+                    "step": next(iter(steps)),
+                    "batch_fingerprint": next(iter(fingerprints)),
+                    "candidate_count": len(candidates),
+                }
+            )
+        return checkpoints
+
+    def has_aggregation_audit(
+        self,
+        *,
+        epoch: int,
+        source_level: ExperienceLevel = "L0",
+        target_level: ExperienceLevel = "L1",
+        run_id: str | None = None,
+        allow_legacy: bool = False,
+    ) -> bool:
+        """Return whether an audit entry proves this exact transition completed.
+
+        New entries are bound to the run, resolved aggregation config, snapshot
+        path/provenance, and immutable source-record versions.  A narrowly
+        checked legacy fallback exists only so an explicitly requested prefix
+        recovery can finish snapshots produced before those fields existed.
+        """
+
+        audit_path = self._audit_path()
+        if not audit_path.exists():
+            return False
+        try:
+            payloads: list[dict[str, Any]] = []
+            with audit_path.open("r", encoding="utf-8") as file:
+                for line in file:
+                    if not line.strip():
+                        continue
+                    payload = json.loads(line)
+                    if (
+                        payload.get("epoch") == epoch
+                        and payload.get("source_level") == source_level
+                        and payload.get("target_level") == target_level
+                    ):
+                        payloads.append(payload)
+        except (OSError, json.JSONDecodeError) as error:
+            raise RuntimeError(
+                f"Cannot verify hierarchy aggregation audit {audit_path}: {error}"
+            ) from error
+
+        accepted_statuses = {"completed", "waiting_for_threshold_calibration"}
+        current_path = str(Path(self.h_config.experience_save_path).resolve())
+        current_config = self._aggregation_audit_contract_fingerprint()
+        current_provenance = dict(sorted(self._snapshot_provenance.items()))
+        source_records = {
+            **(
+                self._l0_archive
+                if source_level == "L0"
+                else self._l1_archive
+                if source_level == "L1"
+                else self._l2_archive
+            ),
+            **self._store(source_level),
+        }
+
+        for payload in reversed(payloads):
+            source_versions = payload.get("source_record_versions")
+            has_bound_schema = all(
+                key in payload
+                for key in (
+                    "run_id",
+                    "snapshot_path",
+                    "aggregation_config_sha256",
+                    "source_record_versions",
+                    "source_state_sha256",
+                    "status",
+                )
+            )
+            if has_bound_schema:
+                if payload.get("status") not in accepted_statuses:
+                    continue
+                if run_id is not None and payload.get("run_id") != run_id:
+                    continue
+                if payload.get("snapshot_path") != current_path:
+                    continue
+                if payload.get("snapshot_provenance", {}) != current_provenance:
+                    continue
+                if payload.get("aggregation_config_sha256") != current_config:
+                    continue
+                if not isinstance(source_versions, dict) or not all(
+                    isinstance(key, str) and isinstance(value, str)
+                    for key, value in source_versions.items()
+                ):
+                    continue
+                if payload.get("source_state_sha256") != self._source_fingerprint(
+                    target_level,
+                    source_versions,
+                ):
+                    continue
+                boundary_versions = self._aggregation_audit_boundary_source_versions(
+                    source_level=source_level,
+                    epoch=epoch,
+                    run_id=run_id,
+                    recorded_source_ids=set(source_versions),
+                )
+                if dict(sorted(source_versions.items())) != boundary_versions:
+                    continue
+                return True
+
+            if not allow_legacy:
+                continue
+            # Legacy audits had no run/config/source-version envelope.  Accept
+            # only a structurally complete event whose cited source records
+            # still exist and whose L0 review provenance binds at least one
+            # source to the requested run and epoch.  Never accept an arbitrary
+            # epoch/level JSON object merely because it shares the audit file.
+            if payload.get("status") not in {None, *accepted_statuses}:
+                continue
+            if not (
+                isinstance(payload.get("aggregation_summary"), dict)
+                or isinstance(payload.get("report"), dict)
+                or payload.get("status") == "waiting_for_threshold_calibration"
+            ):
+                continue
+            cited_source_ids: set[str] = set()
+            for attempt in payload.get("aggregation_attempts") or []:
+                if not isinstance(attempt, dict):
+                    continue
+                for field_name in ("experience_ids", "parent_ids"):
+                    raw_ids = attempt.get(field_name) or []
+                    if isinstance(raw_ids, (list, tuple, set)):
+                        cited_source_ids.update(str(item) for item in raw_ids)
+            pending_ids = payload.get("pending_experience_ids") or []
+            if isinstance(pending_ids, (list, tuple, set)):
+                cited_source_ids.update(str(item) for item in pending_ids)
+            report = payload.get("report")
+            if isinstance(report, dict):
+                for cluster in report.get("clusters") or []:
+                    if isinstance(cluster, dict):
+                        cited_source_ids.update(
+                            str(item) for item in cluster.get("experience_ids") or []
+                        )
+            if not cited_source_ids or any(
+                source_id not in source_records for source_id in cited_source_ids
+            ):
+                continue
+            if run_id is not None:
+                run_bound = False
+                for source_id in cited_source_ids:
+                    record = source_records[source_id]
+                    for candidate_id in record.review_candidate_ids:
+                        candidate = self._candidate_records.get(candidate_id)
+                        if (
+                            candidate is not None
+                            and candidate.level == "L0"
+                            and candidate.run_id == run_id
+                            and candidate.epoch is not None
+                            and candidate.epoch <= epoch
+                        ):
+                            run_bound = True
+                            break
+                    if run_bound:
+                        break
+                if not run_bound:
+                    continue
+            logger.warning(
+                "Accepted legacy aggregation audit for run=%s epoch=%s %s->%s "
+                "after source/provenance checks; future audits are fully fingerprinted",
+                run_id,
+                epoch,
+                source_level,
+                target_level,
+            )
+            return True
+        return False
 
     def assert_restart_step_safe(self, restart_step: int) -> None:
         """Reject any rewind of a populated hierarchy.

@@ -15,7 +15,6 @@ korgym:
   game_host: "localhost"
   game_port: 8775
   level: 4  # Difficulty level (1-5)
-  num_seeds: 10  # Number of different game instances
   max_rounds: 100  # Max rounds for multi-turn games
 
 # Data configuration
@@ -34,10 +33,10 @@ evaluation:
 # Hierarchical learning settings
 hierarchical_learning:
   enabled: true
-  l1_aggregation_threshold: 5  # Every 5 L0 → 1 L1
-  l2_aggregation_threshold: 3   # Every 3 L1 → 1 L2
-  max_l0_per_game: 3          # Max L0 per game instance
-  max_l0_recent: 30           # Keep most recent 30 L0s
+  min_l0_per_l1: 5  # Every 5 L0 → 1 L1
+  min_l1_per_l2: 3   # Every 3 L1 → 1 L2
+  max_l0_per_problem: 3       # Max L0 per game instance
+  export_max_l0: 30           # Keep most recent 30 L0s
   
   experience_save_path: workspace/hierarchical_experiences/korgym_2048_test.json
   agent_save_path: configs/agents/practice/korgym_2048_test_agent.yaml

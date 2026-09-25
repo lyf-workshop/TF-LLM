@@ -92,16 +92,10 @@ class AgentConfig(ConfigBaseModel):
     # workforce agent config
     workforce_planner_model: ModelConfigs = Field(default_factory=ModelConfigs)
     """Workforce planner model config"""
-    workforce_planner_config: dict = Field(default_factory=dict)
-    """Workforce planner config (dict)"""
     workforce_assigner_model: ModelConfigs = Field(default_factory=ModelConfigs)
     """Workforce assigner model config"""
-    workforce_assigner_config: dict = Field(default_factory=dict)
-    """Workforce assigner config (dict)"""
     workforce_answerer_model: ModelConfigs = Field(default_factory=ModelConfigs)
     """Workforce answerer model config"""
-    workforce_answerer_config: dict = Field(default_factory=dict)
-    """Workforce answerer config (dict)"""
     workforce_executor_agents: dict[str, "AgentConfig"] = Field(default_factory=dict)
     """Workforce executor agents config"""
     workforce_executor_config: dict = Field(default_factory=dict)
@@ -110,7 +104,7 @@ class AgentConfig(ConfigBaseModel):
     """Workforce executor infos, list of {name, desc, strengths, weaknesses}"""
 
     # orchestrator agent config
-    orchestrator_router: "AgentConfig" = None
+    orchestrator_router: "AgentConfig | None" = None
     """Orchestrator router agent config"""
     orchestrator_config: dict = Field(default_factory=dict)
     """Orchestrator config (dict)\n

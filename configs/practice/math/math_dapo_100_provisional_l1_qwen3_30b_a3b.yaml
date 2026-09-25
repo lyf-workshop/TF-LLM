@@ -1,0 +1,57 @@
+# @package _global_
+# Isolated pilot: build provisional L1 candidates from the frozen DAPO-100 L0
+# snapshot, then validate them on disjoint held-out tasks before retrieval use.
+defaults:
+  - /practice/math/math_dapo_100_full_hierarchy_wsl
+  - _self_
+
+exp_id: "math_dapo_random_100_provisional_l1_qwen3_30b_a3b_20260920"
+
+practice:
+  hierarchical_learning:
+    # The current sparse L0 pool contains only two cross-task strategy pairs.
+    # This lowers the proposal gate without weakening the production threshold.
+    min_l0_per_l1: 5
+    min_l0_per_l1_candidate: 2
+    min_distinct_source_tasks_per_l1: 2
+    min_distinct_source_tasks_per_l1_candidate: 2
+
+    # New L1 records are quarantined from retrieval and L2 aggregation until a
+    # paired held-out validation cohort satisfies every promotion requirement.
+    l1_validation_required: true
+    min_distinct_source_tasks_per_l1_promotion: 2
+    min_validation_trials_per_l1: 20
+    min_distinct_validation_tasks_per_l1: 20
+    min_l1_validation_net_help: 1
+    max_l1_validation_harms: 0
+
+    strategy_aware_l0_clustering: true
+    l0_strategy_compatibility_threshold: 0.60
+    l0_strategy_fallback_threshold: 0.78
+    l0_strategy_ignore_failure_mode: true
+
+    aggregation_disable_thinking: true
+    aggregation_max_tokens: 2048
+    experience_output_language: same_as_input
+    embedding_cache_path: workspace/cache/experience_embeddings_math_dapo_random_100_provisional_l1_qwen3_30b_a3b_20260920.sqlite3
+    experience_save_path: workspace/hierarchical_experiences/math_dapo_random_100_provisional_l1_qwen3_30b_a3b_20260920.json
+    clustering_audit_path: workspace/hierarchical_experiences/math_dapo_random_100_provisional_l1_qwen3_30b_a3b_20260920.clusters.jsonl
+
+data:
+  # This pilot inherits the frozen DAPO-100 v2 sample. It remains exploratory
+  # until a matching schema-v3 enriched manifest and database snapshot exist.
+  require_practice_manifest: false
+
+runtime:
+  agent:
+    model:
+      model_provider:
+        type: chat.completions
+        model: "qwen3-30b-a3b"
+      model_params:
+        temperature: 0.0
+        top_p: 1.0
+  judge_model:
+    model_provider:
+      type: chat.completions
+      model: "qwen3-30b-a3b"

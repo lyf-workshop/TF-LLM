@@ -8,7 +8,6 @@ exp_id: "skillsbench_paper_curated_eval"
 
 data:
   dataset: "SkillsBench-Paper-87"
-  type: "single"
 
 concurrency: 1
 judge_concurrency: 4

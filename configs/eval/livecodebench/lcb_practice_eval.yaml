@@ -10,7 +10,6 @@ exp_id: "lcb_practice_eval_2"
 
 data:
   dataset: "LiveCodeBench-Eval-50"
-  type: "single"
 
 concurrency: 8
 judge_concurrency: 8

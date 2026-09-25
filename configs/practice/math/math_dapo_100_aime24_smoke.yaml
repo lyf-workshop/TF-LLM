@@ -31,6 +31,9 @@ data:
   # and is not a measured/calibration run.
   require_practice_manifest: false
 
-evaluation:
-  exp_id: "math_dapo_random_100_aime24_deepseek_v4_flash_seed42_smoke_v2"
-  concurrency: 1
+runtime:
+  agent:
+    model:
+      model_provider:
+        type: chat.completions
+        model: "deepseek-v4-flash"
